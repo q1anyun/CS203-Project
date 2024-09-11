@@ -18,15 +18,15 @@ function AppContent() {
     <>
       {!hideNavBarPaths.includes(location.pathname) && <NavBar />}
       <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home />} />
         <Route path="/player/tournaments" element={<PlayerTournamentView />} />
         <Route path="/admin/tournaments" element={<AdminTournamentView />} />
         <Route path="/player/profile" element={<PlayerProfile />} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/login" element={<LoginPage />} /> 
+        <Route path="/signup" element={<SignUpPage />} /> 
       </Routes>
     </>
   );

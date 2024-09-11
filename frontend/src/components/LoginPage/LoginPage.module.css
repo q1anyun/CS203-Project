@@ -1,0 +1,21 @@
+.loginContainer {
+  background-image: url('../../assets/login_bg.jpeg');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+  width: 100vw;
+  position: fixed; 
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.gradientButton {
+  background: linear-gradient(to right, #000000, #434343, #000000);
+  color: #fff;
+  border: none; /* Remove default border */
+}
+
+.gradientButton:hover {
+  background: linear-gradient(to right, #434343, #000000, #434343);
+}
