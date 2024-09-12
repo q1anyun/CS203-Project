@@ -1,9 +1,11 @@
 import { React, useState } from 'react';
-import { Container, Typography, TextField, Button, Card, Link, Grid2 } from '@mui/material';
+import { Container, Typography, TextField, Button, Card, Link, Grid2, InputAdornment } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
 import axios from 'axios';
 import logoImage from '../../assets/chess_logo.png';
+import PersonIcon from '@mui/icons-material/Person';
+import LockIcon from '@mui/icons-material/Lock';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -18,6 +20,7 @@ function LoginPage() {
       localStorage.setItem('token', token);
       navigate('/home');
     } catch (err) {
+      console.log("ERROR");
       setError('Invalid username or password');
       console.error(err);
     }
@@ -76,6 +79,13 @@ function LoginPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 sx={{ marginBottom: 2 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid2>
             <Grid2 size={12}>
@@ -89,6 +99,13 @@ function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid2>
             {error && (
