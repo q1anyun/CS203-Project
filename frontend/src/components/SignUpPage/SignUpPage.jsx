@@ -1,5 +1,5 @@
 import { React, useState } from 'react';
-import { Container, TextField, Button, Grid2, Typography, Card, Link, InputAdornment } from '@mui/material';
+import { Container, TextField, Button, Grid2, Typography, Card, Link, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 // import axios from 'axios';
 import styles from './SignUpPage.module.css';
@@ -8,9 +8,17 @@ import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import BadgeIcon from '@mui/icons-material/Badge';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 function SignUpPage() {
     const navigate = useNavigate();
+
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleClickShowPassword = () => {
+        setShowPassword((prev) => !prev);
+    };
 
     const [formData, setFormData] = useState({
         username: '',
@@ -40,7 +48,7 @@ function SignUpPage() {
         if (!formData.email) {
             formErrors.email = 'Email is required';
         } else if (!emailRegex.test(formData.email)) {
-            formErrors.email = 'Invalid email address';
+            formErrors.email = 'Please enter a valid email address';
         }
 
         setErrors(formErrors);
@@ -79,7 +87,6 @@ function SignUpPage() {
                             variant="h4"
                             sx={{ textAlign: 'center', fontFamily: 'PT Sans, sans-serif', padding: 3, color: '#fff' }}
                         >
-                            {/* Add your desired text here */}
                             <Typography variant="h2" sx={{ fontWeight: 'bold', fontFamily: 'PT Serif, serif' }}>
                                 Welcome to <span style={{ color: '#c1a01e' }}>CHESS
                                     <img
@@ -214,7 +221,7 @@ function SignUpPage() {
                                     <TextField
                                         fullWidth
                                         label="Password"
-                                        type="password"
+                                        type={showPassword ? 'text' : 'password'}
                                         variant="outlined"
                                         placeholder="********"
                                         required
@@ -229,6 +236,16 @@ function SignUpPage() {
                                                     <LockIcon />
                                                 </InputAdornment>
                                             ),
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                  <IconButton
+                                                    onClick={handleClickShowPassword}
+                                                    edge="end"
+                                                  >
+                                                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon /> }
+                                                  </IconButton>
+                                                </InputAdornment>
+                                              ),
                                         }}
                                     />
                                 </Grid2>

@@ -13,7 +13,7 @@
 .gradientButton {
   background: linear-gradient(to right, #000000, #434343, #000000);
   color: #fff;
-  border: none; /* Remove default border */
+  border: none; 
 }
 
 .gradientButton:hover {
@@ -21,8 +21,8 @@
 }
 
 .profilePic {
-  width: 20px; /* Adjust size as needed */
+  width: 20px; 
   height: 20px;
-  border-radius: 50%; /* Makes the image circular */
-  object-fit: cover; /* Ensures the image covers the circle */
+  border-radius: 50%; 
+  object-fit: cover; 
 }
