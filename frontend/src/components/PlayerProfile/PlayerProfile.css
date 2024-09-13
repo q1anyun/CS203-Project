@@ -58,3 +58,50 @@
     cursor: pointer; /* Makes the label act like a button */
   }
   
+  .profile-details-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: 30px;
+  }
+  
+  .profile-title {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .stat-section {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .stat-label {
+    font-weight: 500;
+    color: #555;
+  }
+  
+  .stat-value {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+  }
+  
+  .edit-container {
+    display: flex;
+    align-items: right;
+  }
+  
+  .name-input {
+    margin-left: 10px; /* Add some spacing from the edit icon */
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }

@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
 import './PlayerProfile.css';
+import IconButton from '@mui/material/IconButton';
+import EditIcon from '@mui/icons-material/Edit';
 
 
 
 function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [localProfilePic, setLocalProfilePic] = useState(profilePic);
+  const [playerName, setPlayerName] = useState('Magnus Carlsen');
+  const [isEditing, setIsEditing] = useState(false); 
+  const wins = 8;
+  const losses = 8;
+  const totalGames = wins + losses;
+  const winrate = (wins / totalGames) * 100;
+
+
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -13,6 +23,12 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
       setLocalProfilePic(imageUrl);
       onProfilePicUpdate(imageUrl);  // Pass updated image to the parent (AppContent)
     }
+  };
+  const handleNameChange = (event) => {
+    setPlayerName(event.target.value);
+  };
+  const handleEditClick = () => {
+    setIsEditing(!isEditing); // Toggle editing mode
   };
 
   return (
@@ -32,15 +48,40 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             style={{ display: 'none' }} 
           />
         </div>
-        <div className="profile-title">
-          <h3>Magnus Carlsen</h3>
-        </div>
-        <div className="profile-Description">
-          Wins: 8 <br />
-          Loss: 8 <br />
-          Winrate = 50%
+        <div className="profile-section">
+          <div className="profile-name">
+          <h1>{playerName}</h1> {/* Display dynamic player name */}
+          <IconButton aria-label="edit" color="secondary" onClick={handleEditClick}>
+                <EditIcon />
+              </IconButton>
+              {isEditing && (
+            <input
+              type="text"
+              value={playerName}
+              onChange={handleNameChange}
+              className="name-input"
+              placeholder="Enter player name"
+            />
+          )}
+            <div className="stats">
+            <div className="stat-item">
+                <span className="stat-label">Wins</span>
+                <span className="stat-value">{wins}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Losses</span>
+                <span className="stat-value">{losses}</span>
+              </div>
+              <div className="stat-item">
+                <span className="stat-label">Winrate</span>
+                <span className="stat-value">{winrate.toFixed(2)}%</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+     
+
     </div>
     
   );
