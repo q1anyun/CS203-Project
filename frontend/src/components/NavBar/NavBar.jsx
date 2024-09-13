@@ -6,10 +6,9 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import styles from './NavBar.module.css';
 import logoImage from '../../assets/chess_logo.png';
-import profilePic from '../../assets/default_user.png';
 import Image from 'react-bootstrap/Image'
 
-function NavBar() {
+function NavBar( {profilePic }) {
   return (
     <Navbar expand="lg" className={styles.navbar}>
       <Container>

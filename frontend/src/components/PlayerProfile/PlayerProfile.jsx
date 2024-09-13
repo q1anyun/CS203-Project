@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import './PlayerProfile.css';
-import defaultPlayerIcon from '../../assets/playericon.jpg';
 
 
-function PlayerProfile() {
-  const [profileImage, setProfileImage] = useState(defaultPlayerIcon);
+
+function PlayerProfile({ profilePic, onProfilePicUpdate }) {
+  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);  // Create a URL for the uploaded image
-      setProfileImage(imageUrl);  // Update the profile image with the uploaded image
+      const imageUrl = URL.createObjectURL(file);
+      setLocalProfilePic(imageUrl);
+      onProfilePicUpdate(imageUrl);  // Pass updated image to the parent (AppContent)
     }
   };
 
@@ -18,7 +19,7 @@ function PlayerProfile() {
     <div className="playerprofile">
       <div className="bg">
         <div className="profile-down">
-          <img src={profileImage} alt="Player Profile"
+          <img src = {localProfilePic}  alt="Player Profile"
             style={{ width: '200px', height: '200px', borderRadius: '100px' }} />
         </div>
         <div className="profile-button">
@@ -41,6 +42,7 @@ function PlayerProfile() {
         </div>
       </div>
     </div>
+    
   );
 }
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Home from './components/Home/Home';
@@ -9,20 +9,28 @@ import AdminProfile from './components/AdminProfile/AdminProfile';
 import PlayerTournamentView from './components/PlayerTournamentView/PlayerTournamentView';
 import AdminTournamentView from './components/AdminTournamentView/AdminTournamentView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
+import defaultProfilePic from './assets/default_user.png';
 
 function AppContent() {
   const location = useLocation();
   const hideNavBarPaths = ['/login', '/signup'];
+    // State to store the current profile picture, initialized with the default image
+    const [profilePic, setProfilePic] = useState(defaultProfilePic);
+
+    // Callback to update the profile image from PlayerProfile
+    const handleProfilePicUpdate = (newImage) => {
+      setProfilePic(newImage); // Update profile pic state
+    };
 
   return (
     <>
-      {!hideNavBarPaths.includes(location.pathname) && <NavBar />}
+      {!hideNavBarPaths.includes(location.pathname) && <NavBar profilePic={profilePic} />}
       <Routes>
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="/home" element={<Home />} />
         <Route path="/player/tournaments" element={<PlayerTournamentView />} />
         <Route path="/admin/tournaments" element={<AdminTournamentView />} />
-        <Route path="/player/profile" element={<PlayerProfile />} />
+        <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate}/>} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<LoginPage />} /> 

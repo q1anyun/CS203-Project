@@ -1,7 +1,7 @@
 import { React, useState } from 'react';
 import { Container, TextField, Button, Grid2, Typography, Card, Link, InputAdornment } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+// import axios from 'axios';
 import styles from './SignUpPage.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import EmailIcon from '@mui/icons-material/Email';
