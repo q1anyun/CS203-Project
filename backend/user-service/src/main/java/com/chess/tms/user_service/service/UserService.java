@@ -1,107 +1,123 @@
 package com.chess.tms.user_service.service;
 
-import com.chess.tms.user_service.dto.UserRegistrationRequestDTO;
+import org.springframework.web.client.RestTemplate;
+
 import com.chess.tms.user_service.dto.AdminRegistrationRequestDTO;
-import com.chess.tms.user_service.dto.UserDetailsDTO;
-import com.chess.tms.user_service.dto.UserRegistrationResponseDTO;
+import com.chess.tms.user_service.dto.PlayerRegistrationDTO;
+import com.chess.tms.user_service.dto.PlayerRegistrationRequestDTO;
+import com.chess.tms.user_service.dto.PlayerRegistrationResponseDTO;
+import com.chess.tms.user_service.enums.UserRole;
 import com.chess.tms.user_service.exception.UserAlreadyExistsException;
-import com.chess.tms.user_service.exception.UserNotFoundException;
-import com.chess.tms.user_service.model.UserCredentials;
-import com.chess.tms.user_service.model.UserDetails;
-import com.chess.tms.user_service.repository.UserCredentialsRepository;
-import com.chess.tms.user_service.repository.UserDetailsRepository;
+import com.chess.tms.user_service.model.Users;
+import com.chess.tms.user_service.repository.UsersRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class UserService {
 
     @Autowired
-    private UserCredentialsRepository userCredentialsRepository;
+    private UsersRepository usersRepository;
+    private final RestTemplate restTemplate;
 
-    @Autowired
-    private UserDetailsRepository userDetailsRepository;
+    @Value("${player.service.url}")
+    private String playerServiceUrl;
 
-    public static final int DEFAULT_ELO_RATING = 0;
+    public UserService(RestTemplate restTemplate, UsersRepository userCredentialsRepository) {
+        this.restTemplate = restTemplate;
+        this.usersRepository = userCredentialsRepository;
+    }
 
-    public UserRegistrationResponseDTO registerUser(UserRegistrationRequestDTO user) {
+    // @Autowired
+    // private PlayerDetailsRepository userDetailsRepository;
+
+    // @Override
+    // public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    //     // Fetch user credentials from database
+    //     UserCredentials userCredentials = userCredentialsRepository.findByUsername(username)
+    //             .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+    //     // Map UserCredentials to Spring Security's UserDetails
+    //     return User.builder()
+    //             .username(userCredentials.getUsername())
+    //             .password(userCredentials.getPassword())  // Ensure password is already encoded (e.g., BCrypt)
+    //             .roles(userCredentials.getRole().toString())  // Map roles (USER, ADMIN, etc.)
+    //             .build();
+    // }
+
+    public PlayerRegistrationResponseDTO registerUser(PlayerRegistrationRequestDTO user) {
 
         // Check if username or email already exists
-        if (userCredentialsRepository.findByUsername(user.getUsername()).isPresent()) {
+        if (usersRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException("Username already exists.");
         }
-        if (userCredentialsRepository.findByEmail(user.getEmail()).isPresent()) {
+        if (usersRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists.");
         }
 
         // Map DTOs to entities
-        UserCredentials userCredentials = new UserCredentials();
-        userCredentials.setUsername(user.getUsername());
-        userCredentials.setEmail(user.getEmail());
-        userCredentials.setPassword(user.getPassword());
-        userCredentials.setRole(user.getRole());
+        Users newUser = new Users();
+        newUser.setUsername(user.getUsername());
+        newUser.setEmail(user.getEmail());
+        newUser.setPassword(user.getPassword());
+        newUser.setRole(UserRole.PLAYER);
 
-        // Save UserCredentials
-        UserCredentials savedCredentials = userCredentialsRepository.save(userCredentials);
+        // Save User
+        Users savedUser = usersRepository.save(newUser);
 
-        // Map and Save UserDetails
-        UserDetails userDetails = new UserDetails();
-        userDetails.setUserCredentials(savedCredentials);
-        userDetails.setFirstName(user.getFirstName());
-        userDetails.setLastName(user.getLastName());
-        userDetails.setEloRating(DEFAULT_ELO_RATING);
-        userDetails.setProfilePicture(user.getProfilePicture());
+        // Create PlayerDetails in Player Service
+        PlayerRegistrationDTO playerRegistrationDTO = new PlayerRegistrationDTO();
+        playerRegistrationDTO.setUserId(savedUser.getId());
+        playerRegistrationDTO.setFirstName(user.getFirstName());
+        playerRegistrationDTO.setLastName(user.getLastName());
+        playerRegistrationDTO.setProfilePicture(user.getProfilePicture());
 
-        UserDetails savedDetails = userDetailsRepository.save(userDetails);
+        String registerEndpoint = playerServiceUrl + "/register";
 
-        // Map saved entity to DTO and return
-        UserRegistrationResponseDTO savedDetailsDTO = new UserRegistrationResponseDTO();
-        savedDetailsDTO.setFirstName(savedDetails.getFirstName());
-        savedDetailsDTO.setLastName(savedDetails.getLastName());
-
-        return savedDetailsDTO;
+        return restTemplate.postForObject(registerEndpoint, playerRegistrationDTO, PlayerRegistrationResponseDTO.class);
     }
 
     public void registerAdmin(AdminRegistrationRequestDTO admin) {
 
         // Check if username or email already exists
-        if (userCredentialsRepository.findByUsername(admin.getUsername()).isPresent()) {
+        if (usersRepository.findByUsername(admin.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException("Username already exists.");
         }
-        if (userCredentialsRepository.findByEmail(admin.getEmail()).isPresent()) {
+        if (usersRepository.findByEmail(admin.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists.");
         }
 
         // Map DTOs to entities
-        UserCredentials userCredentials = new UserCredentials();
+        Users userCredentials = new Users();
         userCredentials.setUsername(admin.getUsername());
         userCredentials.setEmail(admin.getEmail());
         userCredentials.setPassword(admin.getPassword());
         userCredentials.setRole(admin.getRole());
 
         // Save new Admin
-        userCredentialsRepository.save(userCredentials);
+        usersRepository.save(userCredentials);
     }
 
-    public Optional<UserDetailsDTO> getUserDetailsByUserId(Long userId) {
-        Optional<UserDetails> userDetails = userDetailsRepository.findByUserCredentialsId(userId);
+    // public Optional<PlayerDetailsDTO> getUserDetailsByUserId(Long userId) {
+    //     Optional<PlayerDetails> userDetails = userDetailsRepository.findByUserCredentialsId(userId);
 
-        if (userDetails.isEmpty()) {
-            throw new UserNotFoundException("User with ID " + userId + " not found.");
-        }
+    //     if (userDetails.isEmpty()) {
+    //         throw new UserNotFoundException("User with ID " + userId + " not found.");
+    //     }
 
-        if (userDetails.isPresent()) {
-            UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
-            userDetailsDTO.setId(userDetails.get().getId());
-            userDetailsDTO.setUserId(userDetails.get().getUserCredentials().getId());
-            userDetailsDTO.setFirstName(userDetails.get().getFirstName());
-            userDetailsDTO.setLastName(userDetails.get().getLastName());
-            userDetailsDTO.setEloRating(userDetails.get().getEloRating());
-            userDetailsDTO.setProfilePicture(userDetails.get().getProfilePicture());
-            return Optional.of(userDetailsDTO);
-        }
-        return Optional.empty();
-    }
+    //     if (userDetails.isPresent()) {
+    //         PlayerDetailsDTO userDetailsDTO = new PlayerDetailsDTO();
+    //         userDetailsDTO.setId(userDetails.get().getId());
+    //         userDetailsDTO.setUserId(userDetails.get().getUserCredentials().getId());
+    //         userDetailsDTO.setFirstName(userDetails.get().getFirstName());
+    //         userDetailsDTO.setLastName(userDetails.get().getLastName());
+    //         userDetailsDTO.setEloRating(userDetails.get().getEloRating());
+    //         userDetailsDTO.setProfilePicture(userDetails.get().getProfilePicture());
+    //         return Optional.of(userDetailsDTO);
+    //     }
+    //     return Optional.empty();
+    // }
 }
