@@ -18,35 +18,35 @@ public class PlayerService {
 
     public static final int DEFAULT_ELO_RATING = 500;
 
-        public Optional<PlayerDetailsDTO> getPlayerDetailsById(Long id) {
-            Optional<PlayerDetails> playerDetails = playerDetailsRepository.findById(id);
+    public Optional<PlayerDetailsDTO> getPlayerDetailsById(Long id) {
+        Optional<PlayerDetails> playerDetails = playerDetailsRepository.findById(id);
 
-            // if (userDetails.isEmpty()) {
-            //     throw new UserNotFoundException("User with ID " + userId + " not found.");
-            // }
+        // if (userDetails.isEmpty()) {
+        // throw new UserNotFoundException("User with ID " + userId + " not found.");
+        // }
 
-            if (playerDetails.isPresent()) {
-                PlayerDetailsDTO playerDetailsDTO = new PlayerDetailsDTO();
-                playerDetailsDTO.setId(playerDetails.get().getId());
-                playerDetailsDTO.setUserId(playerDetails.get().getUserId());
-                playerDetailsDTO.setFirstName(playerDetails.get().getFirstName());
-                playerDetailsDTO.setLastName(playerDetails.get().getLastName());
-                playerDetailsDTO.setEloRating(playerDetails.get().getEloRating());
-                playerDetailsDTO.setProfilePicture(playerDetails.get().getProfilePicture());
-                return Optional.of(playerDetailsDTO);
-            }
-            return Optional.empty();
+        if (playerDetails.isPresent()) {
+            PlayerDetailsDTO playerDetailsDTO = new PlayerDetailsDTO();
+            playerDetailsDTO.setId(playerDetails.get().getId());
+            playerDetailsDTO.setUserId(playerDetails.get().getUserId());
+            playerDetailsDTO.setFirstName(playerDetails.get().getFirstName());
+            playerDetailsDTO.setLastName(playerDetails.get().getLastName());
+            playerDetailsDTO.setEloRating(playerDetails.get().getEloRating());
+            playerDetailsDTO.setProfilePicture(playerDetails.get().getProfilePicture());
+            return Optional.of(playerDetailsDTO);
+        }
+        return Optional.empty();
     }
 
-    public PlayerDetails createPlayer(PlayerRegistrationDTO playerRegistrationDTO) {
+    public String createPlayer(PlayerRegistrationDTO playerRegistrationDTO) {
         PlayerDetails playerDetails = new PlayerDetails();
         playerDetails.setUserId(playerRegistrationDTO.getUserId());
         playerDetails.setFirstName(playerRegistrationDTO.getFirstName());
         playerDetails.setLastName(playerRegistrationDTO.getLastName());
         playerDetails.setEloRating(DEFAULT_ELO_RATING);
         playerDetails.setProfilePicture(playerRegistrationDTO.getProfilePicture());
-
-        return playerDetailsRepository.save(playerDetails);
+        playerDetailsRepository.save(playerDetails);
+        return "Player created successfully";
     }
-    
+
 }

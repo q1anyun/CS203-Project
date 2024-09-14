@@ -21,9 +21,8 @@ public class PlayerController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<PlayerDetails> registerPlayer(@RequestBody PlayerRegistrationDTO playerRegistrationDTO) {
-        PlayerDetails playerDetails = playerService.createPlayer(playerRegistrationDTO);
-        return ResponseEntity.ok(playerDetails);
+    public ResponseEntity<String> registerPlayer(@RequestBody PlayerRegistrationDTO playerRegistrationDTO) {
+        return ResponseEntity.ok(playerService.createPlayer(playerRegistrationDTO));
     }
 
         @GetMapping("/{id}/details")
