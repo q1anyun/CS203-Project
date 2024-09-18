@@ -1,5 +1,7 @@
 import * as React from 'react';
+import { useState } from 'react';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
@@ -7,14 +9,15 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Chip, IconButton } from '@mui/material';
+import { Chip, IconButton, Fab, TextField } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import styles from './AdminTournamentTable.module.css';
-// import axios from 'axios';
 
-const tournaments = [
+const tournamentsData = [
     {
         tournamentId: 100823,
         tournamentName: "Chess Masters",
@@ -50,7 +53,6 @@ const statusColorMap = {
     Expired: 'default',
 };
 
-
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
         backgroundColor: theme.palette.common.black,
@@ -73,69 +75,156 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function AdminTournamentTable() {
+    const navigate = useNavigate();
+    const [tournaments, setTournaments] = useState(tournamentsData);
+    const [editableRow, setEditableRow] = useState(null);
 
-    // const [tournaments, setTournaments] = useState([]);
-    // const [loading, setLoading] = useState(true);
-    // const [error, setError] = useState(null);
+    const handleView = (tournamentId) => {
+        navigate(`/standings/${tournamentId}`);
+    };
 
-    // useEffect(() => {
-    //     // Replace with your Spring Boot API URL
-    //     axios.get('http://localhost:8080/api/tournaments')
-    //         .then(response => {
-    //             setTournaments(response.data);
-    //             setLoading(false);
-    //         })
-    //         .catch(error => {
-    //             setError(error);
-    //             setLoading(false);
-    //         });
-    // }, []);
+    const handleEdit = (rowIndex) => {
+        setEditableRow(rowIndex);
+    };
 
-    // if (loading) return <CircularProgress />;
-    // if (error) return <Typography color="error">Error loading data</Typography>;
+    const handleSave = (rowIndex) => {
+        setEditableRow(null);
+        // Implement save logic here, e.g., API call
+    };
+
+    const handleChange = (e, rowIndex, field) => {
+        const newTournaments = [...tournaments];
+        newTournaments[rowIndex][field] = e.target.value;
+        setTournaments(newTournaments);
+    };
+
+    const handleDelete = (tournamentId) => {
+        console.log(`Delete tournament with ID: ${tournamentId}`);
+        // Implement delete logic here
+    };
+
+    const handleCreate = () => {
+        console.log('Create new tournament');
+        // Implement logic to open a form/modal for creating a new tournament
+    };
 
     return (
-        <TableContainer component={Paper} className={styles.tableContainer}>
-            <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                <TableHead>
-                    <TableRow>
-                        <StyledTableCell>Tournament ID</StyledTableCell>
-                        <StyledTableCell>Tournament Name</StyledTableCell>
-                        <StyledTableCell>Start Date</StyledTableCell>
-                        <StyledTableCell>End Date</StyledTableCell>
-                        <StyledTableCell>Time Control</StyledTableCell>
-                        <StyledTableCell>Number of Players</StyledTableCell>
-                        <StyledTableCell>Status</StyledTableCell>
-                        <StyledTableCell>Actions</StyledTableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {tournaments.map((tournament) => (
-                        <StyledTableRow key={tournament.tournamentId}>
-                            <StyledTableCell>{tournament.tournamentId}</StyledTableCell>
-                            <StyledTableCell>{tournament.tournamentName}</StyledTableCell>
-                            <StyledTableCell>{tournament.startDate}</StyledTableCell>
-                            <StyledTableCell>{tournament.endDate}</StyledTableCell>
-                            <StyledTableCell>{tournament.timeControl}</StyledTableCell>
-                            <StyledTableCell>{tournament.numberOfPlayers}</StyledTableCell>
-                            <StyledTableCell>
-                                <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
-                            </StyledTableCell>
-                            <StyledTableCell>
-                                <IconButton aria-label="view" color="primary">
-                                    <VisibilityIcon />
-                                </IconButton>
-                                <IconButton aria-label="edit" color="secondary">
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton aria-label="delete" color="error">
-                                    <DeleteIcon />
-                                </IconButton>
-                            </StyledTableCell>
-                        </StyledTableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+        <div>
+            <Fab 
+                color="success" 
+                onClick={handleCreate} 
+                aria-label="add"
+                style={{ marginBottom: '16px' }}
+            >
+                <AddIcon />
+            </Fab>
+
+            <TableContainer component={Paper} className={styles.tableContainer}>
+                <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Tournament ID</StyledTableCell>
+                            <StyledTableCell>Tournament Name</StyledTableCell>
+                            <StyledTableCell>Start Date</StyledTableCell>
+                            <StyledTableCell>End Date</StyledTableCell>
+                            <StyledTableCell>Time Control</StyledTableCell>
+                            <StyledTableCell>Number of Players</StyledTableCell>
+                            <StyledTableCell>Status</StyledTableCell>
+                            <StyledTableCell>Actions</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {tournaments.map((tournament, rowIndex) => (
+                            <StyledTableRow key={tournament.tournamentId}>
+                                <StyledTableCell>{tournament.tournamentId}</StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            value={tournament.tournamentName}
+                                            onChange={(e) => handleChange(e, rowIndex, 'tournamentName')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        tournament.tournamentName
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            type="date"
+                                            value={tournament.startDate}
+                                            onChange={(e) => handleChange(e, rowIndex, 'startDate')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        tournament.startDate
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            type="date"
+                                            value={tournament.endDate}
+                                            onChange={(e) => handleChange(e, rowIndex, 'endDate')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        tournament.endDate
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            value={tournament.timeControl}
+                                            onChange={(e) => handleChange(e, rowIndex, 'timeControl')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        tournament.timeControl
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            type="number"
+                                            value={tournament.numberOfPlayers}
+                                            onChange={(e) => handleChange(e, rowIndex, 'numberOfPlayers')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        tournament.numberOfPlayers
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <IconButton aria-label="save" color="primary" onClick={() => handleSave(rowIndex)}>
+                                            <SaveIcon />
+                                        </IconButton>
+                                    ) : (
+                                        <IconButton aria-label="edit" color="secondary" onClick={() => handleEdit(rowIndex)}>
+                                            <EditIcon />
+                                        </IconButton>
+                                    )}
+                                    <IconButton aria-label="view" color="primary" onClick={() => handleView(tournament.tournamentId)}>
+                                        <VisibilityIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="delete" color="error" onClick={() => handleDelete(tournament.tournamentId)}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </StyledTableCell>
+                            </StyledTableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </div>
     );
 }
