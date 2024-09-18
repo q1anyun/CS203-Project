@@ -9,13 +9,14 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Chip, IconButton, Fab, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
+import { Typography, Grid2, Chip, IconButton, Fab, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import styles from './AdminTournamentTable.module.css';
+
 
 const tournamentsData = [
     {
@@ -80,6 +81,16 @@ export default function AdminTournamentTable() {
     const [editableRow, setEditableRow] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
+    const [newTournament, setNewTournament] = useState({
+        tournamentId: '',
+        tournamentName: '',
+        startDate: '',
+        endDate: '',
+        timeControl: '',
+        numberOfPlayers: '',
+        status: 'Upcoming', // Default status
+    });
+    const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
     const handleView = (tournamentId) => {
         navigate(`/standings/${tournamentId}`);
@@ -110,8 +121,6 @@ export default function AdminTournamentTable() {
         setTournaments(updatedTournaments);
         setDeleteDialogOpen(false);
         setTournamentToDelete(null);
-        console.log(`Deleted tournament with ID: ${tournamentToDelete}`);
-        // Implement additional delete logic if necessary (e.g., API call)
     };
 
     const handleDeleteCancel = () => {
@@ -120,8 +129,37 @@ export default function AdminTournamentTable() {
     };
 
     const handleCreate = () => {
-        console.log('Create new tournament');
-        // Implement logic to open a form/modal for creating a new tournament
+        setCreateDialogOpen(true);
+    };
+
+    const handleCreateDialogClose = () => {
+        setCreateDialogOpen(false);
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewTournament({
+            ...newTournament,
+            [name]: value,
+        });
+    };
+
+    const handleCreateSubmit = () => {
+        const newTournamentData = {
+            ...newTournament,
+            tournamentId: Math.floor(Math.random() * 100000), // Simple ID generation
+        };
+        setTournaments([newTournamentData, ...tournaments]);
+        setNewTournament({
+            tournamentId: '',
+            tournamentName: '',
+            startDate: '',
+            endDate: '',
+            timeControl: '',
+            numberOfPlayers: '',
+            status: 'Upcoming',
+        });
+        setCreateDialogOpen(false);
     };
 
     return (
@@ -241,6 +279,44 @@ export default function AdminTournamentTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
+                <DialogTitle>Create New Tournament</DialogTitle>
+                <DialogContent>
+                    <Grid2 container spacing={2}>
+                        {[
+                            { label: "Tournament Name", name: "tournamentName", type: "text" },
+                            { label: "Start Date", name: "startDate", type: "date" },
+                            { label: "End Date", name: "endDate", type: "date" },
+                            { label: "Time Control", name: "timeControl", type: "text" },
+                            { label: "Number of Players", name: "numberOfPlayers", type: "number" },
+                        ].map(({ label, name, type }) => (
+                            <Grid2 container item xs={12} spacing={2} key={name} alignItems="center">
+                                <Grid2 item xs={4}>
+                                    <Typography variant="subtitle1">{label}</Typography>
+                                </Grid2>
+                                <Grid2 item xs={8} display="flex" justifyContent="flex-end">
+                                    <TextField
+                                        type={type}
+                                        name={name}
+                                        value={newTournament[name]}
+                                        onChange={handleInputChange}
+                                        fullWidth
+                                    />
+                                </Grid2>
+                            </Grid2>
+                        ))}
+                    </Grid2>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCreateDialogClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleCreateSubmit} color="primary">
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
                 <DialogTitle>Confirm Deletion</DialogTitle>
