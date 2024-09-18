@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'; 
 import { useState } from 'react';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -9,7 +9,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Chip, IconButton, Fab, TextField } from '@mui/material';
+import { Chip, IconButton, Fab, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
@@ -78,6 +78,8 @@ export default function AdminTournamentTable() {
     const navigate = useNavigate();
     const [tournaments, setTournaments] = useState(tournamentsData);
     const [editableRow, setEditableRow] = useState(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [tournamentToDelete, setTournamentToDelete] = useState(null);
 
     const handleView = (tournamentId) => {
         navigate(`/standings/${tournamentId}`);
@@ -98,9 +100,23 @@ export default function AdminTournamentTable() {
         setTournaments(newTournaments);
     };
 
-    const handleDelete = (tournamentId) => {
-        console.log(`Delete tournament with ID: ${tournamentId}`);
-        // Implement delete logic here
+    const handleDeleteClick = (tournamentId) => {
+        setTournamentToDelete(tournamentId);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirm = () => {
+        const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
+        setTournaments(updatedTournaments);
+        setDeleteDialogOpen(false);
+        setTournamentToDelete(null);
+        console.log(`Deleted tournament with ID: ${tournamentToDelete}`);
+        // Implement additional delete logic if necessary (e.g., API call)
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteDialogOpen(false);
+        setTournamentToDelete(null);
     };
 
     const handleCreate = () => {
@@ -216,7 +232,7 @@ export default function AdminTournamentTable() {
                                     <IconButton aria-label="view" color="primary" onClick={() => handleView(tournament.tournamentId)}>
                                         <VisibilityIcon />
                                     </IconButton>
-                                    <IconButton aria-label="delete" color="error" onClick={() => handleDelete(tournament.tournamentId)}>
+                                    <IconButton aria-label="delete" color="error" onClick={() => handleDeleteClick(tournament.tournamentId)}>
                                         <DeleteIcon />
                                     </IconButton>
                                 </StyledTableCell>
@@ -225,6 +241,21 @@ export default function AdminTournamentTable() {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogContent>
+                    Are you sure you want to delete this tournament?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancel} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="error">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
