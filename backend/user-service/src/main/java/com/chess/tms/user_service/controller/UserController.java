@@ -31,8 +31,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws Exception {
-        User authenticatedUser = userService.authenticate(jwtRequest);
+        AuthenticatedUserDTO authenticatedUser = userService.authenticate(jwtRequest);
         String jwtToken = jwtUtil.generateToken(authenticatedUser);
+        System.out.println(jwtUtil.extractPlayerId(jwtToken));
         JwtResponse jwtResponse = new JwtResponse();
         jwtResponse.setToken(jwtToken);
         jwtResponse.setExpiresIn(jwtUtil.getExpirationTime());
