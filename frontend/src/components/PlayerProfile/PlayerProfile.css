@@ -1,107 +1,37 @@
-.playerprofile{
-    width: 1100px; 
-    height: 500px;
-    margin-top: 0px;
+/* PlayerProfile.css */
 
-    border-radius: 4px;
-
-    background: white;
-
-
-}
-.bg{
-    background-image: url('../../assets/playerbg.jpg');
-    height:150px; 
-    width: 1440px;
-    border-radius: 4px 4px 4px 4px ;
-    background-size: cover; /* Ensure the background covers the entire element */
-    background-position: center; /* Center the background image */
-  
+.player-profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Full viewport height */
+  background-color: #f0f0f0; /* Optional: background color for the page */
 }
 
-.profile-down img{
-    height: 200 px;
-    border-radius: 100px; 
-    border-color: #202020;
-    margin-top: 50px;
-    
-    
-    padding: 5px; 
-    background: white;
+.player-card {
+  width: 80%; /* Increase the card width */
+  height: 600px; /* Increase the card height */
+  padding: 16px; 
+  border: 8px/* Padding inside the card */
 }
-.profile-title{
-    font-size: 36 px;
-    font-weight: 600; 
-    margin-top: 50px;
-    
-}
-.profile-button {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #000000; /* Green button */
-    color: white;
-    font-size: 16px;
 
-    font-weight: bold;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    transition: background-color 0.3s ease;
-  }
-  
-  .profile-button:hover {
-    background-color: grey; /* Darker green on hover */
-  }
-  
-  .upload-label {
-    cursor: pointer; /* Makes the label act like a button */
-  }
-  
-  .profile-details-section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    padding-left: 30px;
-  }
-  
-  .profile-title {
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 20px;
-  }
-  
-  .stat-section {
-    display: flex;
-    gap: 20px;
-  }
-  
-  .stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .stat-label {
-    font-weight: 500;
-    color: #555;
-  }
-  
-  .stat-value {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-  }
-  
-  .edit-container {
-    display: flex;
-    align-items: right;
-  }
-  
-  .name-input {
-    margin-left: 10px; /* Add some spacing from the edit icon */
-    padding: 5px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
+.avatar {
+  width: 200px; /* Larger Avatar */
+  height: 200px;
+  margin-bottom: px; /* Spacing below the Avatar */
+}
+
+.button {
+  margin-bottom: 16px; /* Spacing below the button */
+}
+
+.stat-box {
+  background-color: #f5f5f5;
+  padding: 16px;
+  text-align: center;
+  border-radius: 8px;
+}
+
+.divider {
+  margin: 16px 0; /* Divider spacing */
+}
