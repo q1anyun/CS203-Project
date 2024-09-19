@@ -1,7 +1,21 @@
 import React, { useState } from 'react';
 import './PlayerProfile.css';
-import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab } from '@mui/material';
+import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import { styled } from '@mui/material/styles';
+
+const VisuallyHiddenInput = styled('input')({
+  clip: 'rect(0 0 0 0)',
+  clipPath: 'inset(50%)',
+  height: 1,
+  overflow: 'hidden',
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  whiteSpace: 'nowrap',
+  width: 1,
+});
 
 const data = [
   { id: 0, value: 8, label: 'Wins', color: 'orange' },
@@ -20,16 +34,74 @@ const xLabels = [
 
 
 
-function PlayerProfile({ profilePic }) {
-  const [localProfilePic] = useState(profilePic);
-  const [playerName] = useState('Magnus Carlsen');
-  const wins = 8;
-  const losses = 8;
-  const totalGames = wins + losses;
-  const winrate = (wins / totalGames) * 100;
+function PlayerProfile({ profilePic , onProfilePicUpdate}) {
+
   const [value, setValue] = useState(0); // State for managing tab selection
+  const [openEdit, setOpenEdit] = useState(false);
+  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
+  const [playerName, setPlayerName] = useState('Magnus Carlsen');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedFile, setSelectedFile] = useState(null);
+  
+
+
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
+  };
+
+  const handleOpenEdit = () => setOpenEdit(true);
+  const handleCloseEdit = () => setOpenEdit(false);
+
+  const handleNameChange = (event) => setPlayerName(event.target.value);
+  const handleFirstNameChange = (event) => setFirstName(event.target.value);
+  const handleLastNameChange = (event) => setLastName(event.target.value);
+  const handleEmailChange = (event) => setEmail(event.target.value);
+  const handlePasswordChange = (event) => setPassword(event.target.value);
+
+  const handleFileAndImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      const imageUrl = URL.createObjectURL(file);
+      setLocalProfilePic(imageUrl);
+      onProfilePicUpdate(imageUrl);
+    }
+  };
+  
+
+  const handleSave = async () => {
+    const formData = new FormData();
+    formData.append('playerName', playerName);
+    formData.append('firstName', firstName);
+    formData.append('lastName', lastName);
+    formData.append('email', email);
+    formData.append('password', password);
+
+    if (selectedFile) {
+      formData.append('profilePic', selectedFile);
+    }
+
+    try {
+      const response = await fetch('/api/update-profile', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log('Profile updated successfully');
+        // Optionally, refresh the UI with the new data
+      } else {
+        console.error('Error updating profile');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+
+    handleCloseEdit();
   };
 
 
@@ -59,6 +131,7 @@ function PlayerProfile({ profilePic }) {
             className="button"
             variant="contained"
             color="primary"
+            onClick={handleOpenEdit}
           >
             Edit Profile
           </Button>
@@ -133,22 +206,24 @@ function PlayerProfile({ profilePic }) {
                 <Typography variant="body1">Content for Tab 1</Typography>
                 {/* Add more content for Tab 1 here */}
                 {/* Pie Chart Section */}
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px', marginleft: '10%' }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
                   <PieChart
                     series={[
                       { data: data },
                     ]}
                     width={400}
                     height={200}
+                    justifyContent='center'
+                    alignItems='center'
                   />
                   <LineChart
                     width={500}
                     height={300}
                     series={[
-                  
+
                       { data: uData, label: 'Elo Rating' },
                     ]}
-                    xAxis={[{ scaleType: 'point', data: xLabels, ticks: false}]}
+                    xAxis={[{ scaleType: 'point', data: xLabels, ticks: false }]}
                   />
                 </Box>
                 {/* Add more content for Tab 1 here */}
@@ -201,7 +276,88 @@ function PlayerProfile({ profilePic }) {
           </CardContent>
         </Card>
       </Box>
+      {/*dialog to edit the profile*/}
+      <Dialog open={openEdit} onClose={handleCloseEdit}
+       sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
+        <DialogTitle>Edit Profile</DialogTitle>
+        <DialogContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            
+          }}>
+          
+          {/* Display Existing Profile Picture */}
 
+          <Avatar
+            sx={{ width: 200, height: 200, marginTop: 1 }}
+            alt={playerName}
+            src={localProfilePic}  // Use current profile picture
+          />
+
+
+        
+
+        {/* Label to Trigger File Input */}
+        <Button
+      component="label"
+      variant="contained"
+      tabIndex={-1}
+      startIcon={<CloudUploadIcon />}
+    >
+      Upload files
+      <VisuallyHiddenInput
+        type="file"
+        onChange={handleFileAndImageUpload}
+      
+      />
+    </Button>
+
+          <TextField
+            margin="dense"
+            label="Username"
+            fullWidth
+            value={playerName}
+            onChange={handleNameChange}
+          />
+          <TextField
+            margin="dense"
+            label="First Name"
+            fullWidth
+            value={firstName}
+            onChange={handleFirstNameChange}
+          />
+          <TextField
+            margin="dense"
+            label="Last Name"
+            fullWidth
+            value={lastName}
+            onChange={handleLastNameChange}
+          />
+          <TextField
+            margin="dense"
+            label="Email"
+            fullWidth
+            value={email}
+            onChange={handleEmailChange}
+          />
+          <TextField
+            margin="dense"
+            label="Password"
+            fullWidth
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+          />
+
+
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogContent>
+      </Dialog>
 
     </Box>
 
