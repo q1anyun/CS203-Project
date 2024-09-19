@@ -1,0 +1,37 @@
+.welcomeContainer {
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 2em rgb(69, 69, 69);
+    color: white;
+    
+}
+
+.bgContainer {
+    background-image: url('../../assets/home_bg.jpeg');
+    background-size: cover;
+    background-position: center;
+    min-height: 100vh;
+    top: 0;
+    left: 0;
+    overflow: auto;
+    padding-bottom: 40px;
+}
+
+.greetings {
+    font-size: 2.2em;
+    text-shadow: 0 0 0.8em rgb(255, 255, 255);
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.description {
+    font-size: 1.1em;
+    line-height: 1.4em;
+    text-align: justify;
+    margin-top: 1em;
+}
+
+.cardActions {
+    display: flex;
+    justify-content: center;
+}
+

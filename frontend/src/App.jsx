@@ -10,10 +10,11 @@ import PlayerTournamentView from './components/PlayerTournamentView/PlayerTourna
 import AdminTournamentView from './components/AdminTournamentView/AdminTournamentView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
+import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 
 function AppContent() {
   const location = useLocation();
-  const hideNavBarPaths = ['/login', '/signup'];
+  const hideNavBarPaths = ['/login', '/signup', '/error'];
     // State to store the current profile picture, initialized with the default image
     const [profilePic, setProfilePic] = useState(defaultProfilePic);
 
@@ -35,6 +36,7 @@ function AppContent() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<LoginPage />} /> 
         <Route path="/signup" element={<SignUpPage />} /> 
+        <Route path="/error" element={<DefaultErrorPage />} /> 
       </Routes>
     </>
   );

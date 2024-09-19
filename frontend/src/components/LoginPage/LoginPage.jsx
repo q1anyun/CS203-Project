@@ -2,7 +2,7 @@ import { React, useState } from 'react';
 import { Container, Typography, TextField, Button, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import styles from './LoginPage.module.css';
-// import axios from 'axios';
+import axios from 'axios';
 import logoImage from '../../assets/chess_logo.png';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -32,7 +32,7 @@ function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('/api/login', { username, password });
+      const response = await axios.post('http://localhost:8080/api/users/login', { username, password });
       const { token } = response.data;
       localStorage.setItem('token', token);
       navigate('/home');

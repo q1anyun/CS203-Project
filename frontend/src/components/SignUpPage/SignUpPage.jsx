@@ -1,9 +1,9 @@
 import { React, useState } from 'react';
-import { Container, TextField, Button, Grid2, Typography, Card, Link, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-// import axios from 'axios';
-import styles from './SignUpPage.module.css';
-import logoImage from '../../assets/chess_logo.png';
+
+import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle } from '@mui/material';
+
+// Icons
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -11,278 +11,212 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
+// Local assets and styles
+import styles from './SignUpPage.module.css';
+import logoImage from '../../assets/chess_logo.png';
+import profilePic from '../../assets/default_user.png';
+
+// js
+import { handleClickShowPassword, handleChange, handleLoginClick, handleSubmit } from './SignUpFunctions';
+
 function SignUpPage() {
-    const navigate = useNavigate();
-
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleClickShowPassword = () => {
-        setShowPassword((prev) => !prev);
-    };
-
-    const [formData, setFormData] = useState({
+    const [showPassword, setShowPassword] = useState(false); // password toggle visibility
+    const [errors, setErrors] = useState({}); // display error messages
+    const [showAlert, setShowAlert] = useState(false); // successful sign up
+    const [formData, setFormData] = useState({ // sign up form
         username: '',
         firstName: '',
         lastName: '',
         email: '',
-        password: ''
+        password: '',
+        profilePicture: profilePic
     });
 
-    const [errors, setErrors] = useState({});
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        let formErrors = {};
-        if (!formData.username) formErrors.username = 'Username is required';
-        if (!formData.firstName) formErrors.firstName = 'First name is required';
-        if (!formData.lastName) formErrors.lastName = 'Last name is required';
-        if (!formData.password) formErrors.password = 'Password is required';
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!formData.email) {
-            formErrors.email = 'Email is required';
-        } else if (!emailRegex.test(formData.email)) {
-            formErrors.email = 'Please enter a valid email address';
-        }
-
-        setErrors(formErrors);
-
-        if (Object.keys(formErrors).length > 0) return;
-
-        try {
-            const response = await axios.post('/api/signup', formData);
-            // Handle success
-            navigate('/login');
-        } catch (error) {
-            if (error.response && error.response.data) {
-                const backendErrors = error.response.data.errors || {};
-                setErrors({
-                    ...formErrors,
-                    ...backendErrors,
-                    general: 'Failed to sign up. Please try again.'
-                });
-            } else {
-                setErrors({ ...formErrors, general: 'Failed to sign up. Please try again.' });
-            }
-        }
-    };
+    const navigate = useNavigate(); // to navigate to other pages
 
     return (
-        <div className={styles.signUpContainer}>
-            <Container
-                component="main"
-                maxWidth="lg"
-                sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', height: '100vh' }}
-
-            >
-                <Grid2 container spacing={8}>
-                    <Grid2 size={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography
-                            variant="h4"
-                            sx={{ textAlign: 'center', fontFamily: 'PT Sans, sans-serif', padding: 3, color: '#fff' }}
-                        >
-                            <Typography variant="h2" sx={{ fontWeight: 'bold', fontFamily: 'PT Serif, serif' }}>
-                                Welcome to <span style={{ color: '#c1a01e' }}>CHESS
-                                    <img
-                                        src={logoImage}
-                                        alt="logo"
-                                        style={{ margin: '0 10px', height: '40px' }}
-                                    />MVP</span>
-                            </Typography>
-                            <Typography variant="body1" sx={{ marginTop: 2, fontFamily: 'PT sans, sans-serif', fontSize: 18 }}>
-                                Join our community of chess enthusiasts. Create your account to start playing and competing.
-                            </Typography>
-                        </Typography>
+        <div className={styles.signUpBgContainer}>
+            <Container maxWidth="xl" className={styles.signUpContainer}>
+                <Grid2 container spacing={10}>
+                    <Grid2 size={6} className={styles.container}>
+                        <Container maxWidth="sm" className={styles.welcomeContainer}>
+                            <h1 className={styles.greetings}>
+                                Welcome to <span className={styles.brand}>CHESS
+                                    <img src={logoImage} alt="logo" className={styles.logoImage} />MVP</span>
+                            </h1>
+                            <p className={styles.description}>
+                                Join our community of chess enthusiasts.<br></br>Create your account to start playing and competing.
+                            </p>
+                        </Container>
                     </Grid2>
 
-                    <Grid2 size={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Card variant="outlined" sx={{ padding: 3, width: '100%', borderRadius: '16px', backgroundColor: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(8px)' }}>
-                            <Grid2>
-                                <Typography
-                                    variant="h3"
-                                    component="div"
-                                    sx={{ fontFamily: 'PT Serif, serif', color: '#c1a01e' }}
-                                >
-                                    <span style={{ fontWeight: 'bold' }}>CHESS</span>
-                                    <img
-                                        src={logoImage}
-                                        alt="logo"
-                                        style={{ margin: '0 10px', height: '40px' }}
-                                    />
-                                    <span style={{ fontWeight: 'normal' }}>MVP</span>
-                                </Typography>
-                            </Grid2>
+                    <Grid2 size={6} className={styles.container}>
+                        <Container maxWidth="sm" className={styles.cardContainer}>
+                            <Card variant="outlined" className={styles.card}>
+                                <img src={logoImage} alt="logo" className={styles.logoImage} />
+                                <h1 className={styles.signUpText}>SIGN UP</h1>
 
-                            <Typography
-                                component="h1"
-                                variant="h4"
-                                sx={{ textAlign: 'center', marginBottom: 2, marginTop: 4, fontFamily: 'PT Sans, sans-serif' }}
-                            >
-                                SIGN UP
-                            </Typography>
-                            <Grid2 container spacing={3}>
+                                <Grid2 container spacing={3}>
+                                    {showAlert && ( // successful login alert
+                                        <Grid2 size={12} className={styles.alertContainer}>
+                                            <Alert severity="success">
+                                                <AlertTitle>Account Created</AlertTitle>
+                                                Thank you for signing up! Please proceed to{' '}
+                                                <Link
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        handleLoginClick(navigate); // Navigate to the login page
+                                                    }}
+                                                    className={styles.loginLink}
+                                                >
+                                                    login
+                                                </Link>.
+                                            </Alert>
+                                        </Grid2>
+                                    )}
 
-                                <Grid2 size={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Username"
-                                        variant="outlined"
-                                        placeholder="chesspro321"
-                                        required
-                                        name="username"
-                                        value={formData.username}
-                                        onChange={handleChange}
-                                        error={Boolean(errors.username)}
-                                        helperText={errors.username}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <PersonIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
+                                    {/*Username field*/}
+                                    <Grid2 size={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Username"
+                                            variant="outlined"
+                                            placeholder="chesspro321"
+                                            required
+                                            name="username"
+                                            value={formData.username}
+                                            onChange={(e) => handleChange(e, setFormData)}
+                                            error={Boolean(errors.username)}
+                                            helperText={errors.username}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <PersonIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid2>
+
+                                    {/*First Name field*/}
+                                    <Grid2 size={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="First Name"
+                                            variant="outlined"
+                                            placeholder="Bob"
+                                            required
+                                            name="firstName"
+                                            value={formData.firstName}
+                                            onChange={(e) => handleChange(e, setFormData)}
+                                            error={Boolean(errors.firstName)}
+                                            helperText={errors.firstName}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <BadgeIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid2>
+
+                                    {/*Last Name field*/}
+                                    <Grid2 size={6}>
+                                        <TextField
+                                            fullWidth
+                                            label="Last Name"
+                                            variant="outlined"
+                                            placeholder="Tan"
+                                            required
+                                            name="lastName"
+                                            value={formData.lastName}
+                                            onChange={(e) => handleChange(e, setFormData)}
+                                            error={Boolean(errors.lastName)}
+                                            helperText={errors.lastName}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <BadgeIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid2>
+
+                                    {/*Email field*/}
+                                    <Grid2 size={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Email"
+                                            type="email"
+                                            variant="outlined"
+                                            placeholder="example@gmail.com"
+                                            required
+                                            name="email"
+                                            value={formData.email}
+                                            onChange={(e) => handleChange(e, setFormData)}
+                                            error={Boolean(errors.email)}
+                                            helperText={errors.email}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <EmailIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid2>
+
+                                    {/*Password field*/}
+                                    <Grid2 size={12}>
+                                        <TextField
+                                            fullWidth
+                                            label="Password"
+                                            type={showPassword ? 'text' : 'password'}
+                                            variant="outlined"
+                                            placeholder="********"
+                                            required
+                                            name="password"
+                                            value={formData.password}
+                                            onChange={(e) => handleChange(e, setFormData)}
+                                            error={Boolean(errors.password)}
+                                            helperText={errors.password}
+                                            InputProps={{
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <LockIcon />
+                                                    </InputAdornment>
+                                                ),
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        <IconButton
+                                                            onClick={() => handleClickShowPassword(setShowPassword)}
+                                                            edge="end"
+                                                        >
+                                                            {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                                                        </IconButton>
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    </Grid2>
+
+                                    <Grid2 size={12} className={styles.toLoginLink}>
+                                        <Link onClick={() => navigate('/login')} className={styles.link}>
+                                            Already have an account? Sign In
+                                        </Link>
+                                    </Grid2>
+
+                                    <Grid2 size={12}>
+                                        <button type="submit" className={styles.gradientButton}
+                                            onClick={(e) => handleSubmit(e, formData, setFormData, setErrors, setShowAlert, navigate)}>
+                                            Sign Up
+                                        </button>
+                                    </Grid2>
                                 </Grid2>
-
-                                <Grid2 size={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="First Name"
-                                        variant="outlined"
-                                        placeholder="Bob"
-                                        required
-                                        name="firstName"
-                                        value={formData.firstName}
-                                        onChange={handleChange}
-                                        error={Boolean(errors.firstName)}
-                                        helperText={errors.firstName}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <BadgeIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Grid2>
-
-                                <Grid2 size={6}>
-                                    <TextField
-                                        fullWidth
-                                        label="Last Name"
-                                        variant="outlined"
-                                        placeholder="Tan"
-                                        required
-                                        name="lastName"
-                                        value={formData.lastName}
-                                        onChange={handleChange}
-                                        error={Boolean(errors.lastName)}
-                                        helperText={errors.lastName}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <BadgeIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Grid2>
-
-                                <Grid2 size={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Email"
-                                        type="email"
-                                        variant="outlined"
-                                        placeholder="example@gmail.com"
-                                        required
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleChange}
-                                        error={Boolean(errors.email)}
-                                        helperText={errors.email}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <EmailIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                </Grid2>
-
-                                <Grid2 size={12}>
-                                    <TextField
-                                        fullWidth
-                                        label="Password"
-                                        type={showPassword ? 'text' : 'password'}
-                                        variant="outlined"
-                                        placeholder="********"
-                                        required
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleChange}
-                                        error={Boolean(errors.password)}
-                                        helperText={errors.password}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <LockIcon />
-                                                </InputAdornment>
-                                            ),
-                                            endAdornment: (
-                                                <InputAdornment position="end">
-                                                  <IconButton
-                                                    onClick={handleClickShowPassword}
-                                                    edge="end"
-                                                  >
-                                                    {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon /> }
-                                                  </IconButton>
-                                                </InputAdornment>
-                                              ),
-                                        }}
-                                    />
-                                </Grid2>
-
-                                {errors.general && (
-                                    <Grid size={12}>
-                                        <Typography color="error" variant="body2" align="center">
-                                            {errors.general}
-                                        </Typography>
-                                    </Grid>
-                                )}
-
-                                <Grid2 size={12} sx={{ textAlign: 'right' }}>
-                                    <Link
-                                        variant="body2"
-                                        sx={{ fontFamily: 'PT Sans, sans-serif', fontSize: 16 }}
-                                        onClick={() => navigate('/login')}
-                                        style={{ cursor: 'pointer' }}
-                                    >
-                                        Already have an account? Sign In
-                                    </Link>
-                                </Grid2>
-
-                                <Grid2 size={12}>
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        className={styles.gradientButton}
-                                        fullWidth
-                                        sx={{ fontFamily: 'PT Sans, sans-serif', fontSize: 20 }}
-                                        onClick={handleSubmit}
-                                    >
-                                        Sign Up
-                                    </Button>
-                                </Grid2>
-                            </Grid2>
-                        </Card>
+                            </Card>
+                        </Container>
                     </Grid2>
                 </Grid2>
             </Container>
