@@ -33,8 +33,8 @@ public class JwtUtility {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Long extractPlayerId(String token) {
-        return extractClaim(token, claims -> claims.get("playerId", Long.class)); 
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class)); 
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -62,7 +62,6 @@ public class JwtUtility {
     public String generateToken(AuthenticatedUserDTO userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userDetails.getUserId());
-        claims.put("playerId", userDetails.getPlayerId());
         return createToken(claims, userDetails.getUsername());
     }
 

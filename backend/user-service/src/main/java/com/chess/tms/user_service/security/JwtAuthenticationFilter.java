@@ -61,6 +61,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                }else {
+                    // Invalid JWT token - handle as you see fit, or return 404 if appropriate
+                    response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid JWT token");
+                    return;
                 }
             }
 

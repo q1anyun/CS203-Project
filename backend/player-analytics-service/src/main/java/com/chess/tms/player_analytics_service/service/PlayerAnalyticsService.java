@@ -1,19 +1,17 @@
-package com.chess.tms.player_service.service;
+package com.chess.tms.player_analytics_service.service;
 
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.chess.tms.player_service.dto.PlayerDetailsDTO;
-import com.chess.tms.player_service.dto.PlayerRegistrationDTO;
-import com.chess.tms.player_service.model.PlayerDetails;
-import com.chess.tms.player_service.repository.PlayerDetailsRepository;
-
-import jakarta.persistence.Column;
+import com.chess.tms.player_analytics_service.dto.PlayerDetailsDTO;
+import com.chess.tms.player_analytics_service.dto.PlayerRegistrationDTO;
+import com.chess.tms.player_analytics_service.model.PlayerDetails;
+import com.chess.tms.player_analytics_service.repository.PlayerDetailsRepository;
 
 @Service
-public class PlayerService {
+public class PlayerAnalyticsService {
 
     @Autowired
     private PlayerDetailsRepository playerDetailsRepository;
@@ -31,11 +29,6 @@ public class PlayerService {
             playerDetailsDTO.setLastName(playerDetails.get().getLastName());
             playerDetailsDTO.setEloRating(playerDetails.get().getEloRating());
             playerDetailsDTO.setProfilePicture(playerDetails.get().getProfilePicture());
-            playerDetailsDTO.setLowestElo(playerDetails.get().getLowestElo());
-            playerDetailsDTO.setHighestElo(playerDetails.get().getHighestElo());
-            playerDetailsDTO.setTotalMatches(playerDetails.get().getTotalMatches());
-            playerDetailsDTO.setTotalLosses(playerDetails.get().getTotalLosses());
-            playerDetailsDTO.setTotalWins(playerDetails.get().getTotalWins());
             return Optional.of(playerDetailsDTO);
         }
         return Optional.empty();
@@ -47,16 +40,12 @@ public class PlayerService {
     }
 
     public String createPlayer(PlayerRegistrationDTO playerRegistrationDTO) {
-        System.out.println("TESTING");
         PlayerDetails playerDetails = new PlayerDetails();
         playerDetails.setUserId(playerRegistrationDTO.getUserId());
         playerDetails.setFirstName(playerRegistrationDTO.getFirstName());
         playerDetails.setLastName(playerRegistrationDTO.getLastName());
         playerDetails.setEloRating(DEFAULT_ELO_RATING);
-        playerDetails.setHighestElo(DEFAULT_ELO_RATING);
-        playerDetails.setLowestElo(DEFAULT_ELO_RATING);
         playerDetails.setProfilePicture(playerRegistrationDTO.getProfilePicture());
-        System.out.println("TESTING2");
         playerDetailsRepository.save(playerDetails);
         return "Player created successfully";
     }

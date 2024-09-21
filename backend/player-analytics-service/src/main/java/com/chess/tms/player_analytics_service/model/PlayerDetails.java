@@ -1,4 +1,4 @@
-package com.chess.tms.player_service.model;
+package com.chess.tms.player_analytics_service.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,19 +31,4 @@ public class PlayerDetails {
 
     @Column(name = "profile_picture", length = 255)
     private String profilePicture;
-
-    @Column(name = "total_wins")
-    private int totalWins;
-
-    @Column(name = "total_losses")
-    private int totalLosses;
-
-    @Column(name = "total_matches")
-    private int totalMatches;
-
-    @Column(name = "highest_elo")
-    private int highestElo;
-
-    @Column(name = "lowest_elo")
-    private int lowestElo;
 }

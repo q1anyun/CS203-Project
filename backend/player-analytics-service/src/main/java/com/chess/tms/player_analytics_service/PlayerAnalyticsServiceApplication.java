@@ -1,13 +1,13 @@
-package com.chess.tms.player_service;
+package com.chess.tms.player_analytics_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class PlayerServiceApplication {
+public class PlayerAnalyticsServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PlayerServiceApplication.class, args);
+		SpringApplication.run(PlayerAnalyticsServiceApplication.class, args);
 	}
 
 }

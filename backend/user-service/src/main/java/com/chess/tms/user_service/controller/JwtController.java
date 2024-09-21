@@ -2,6 +2,7 @@ package com.chess.tms.user_service.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -32,16 +33,14 @@ public class JwtController {
         this.userService = userService;
     }
 
-    @PostMapping("/getPlayerId")
-    public ResponseEntity<?> getCurrentUserPlayerId(@RequestHeader("Authorization") String tokenHeader) {
+    @GetMapping("/user")
+    public ResponseEntity<?> getCurrentUserId(@RequestHeader("Authorization") String tokenHeader) {
         try {
             // Extract token from the Authorization header
             String token = tokenHeader.startsWith("Bearer ") ? tokenHeader.substring(7) : tokenHeader;
+            Long userId = jwtUtil.extractUserId(token);
 
-            // Extract player ID from token
-            Long playerId = jwtUtil.extractPlayerId(token);
-
-            return ResponseEntity.ok(playerId);
+            return ResponseEntity.ok(userId);
 
         } catch (ExpiredJwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT token has expired.");

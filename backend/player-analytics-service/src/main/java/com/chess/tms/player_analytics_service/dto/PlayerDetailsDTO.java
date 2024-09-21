@@ -1,6 +1,4 @@
-package com.chess.tms.player_service.dto;
-
-import jakarta.persistence.Column;
+package com.chess.tms.player_analytics_service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +14,4 @@ public class PlayerDetailsDTO {
     private String firstName;
     private String lastName;
     private String profilePicture;
-    private int totalWins;
-    private int totalLosses;
-    private int totalMatches;
-    private int highestElo;
-    private int lowestElo;
 }
