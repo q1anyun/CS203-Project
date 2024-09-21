@@ -14,6 +14,7 @@ import jakarta.persistence.*;
 public class Match {
 
     public enum MatchStatus {
+        ONGOING,
         PENDING,
         COMPLETED
     }
@@ -28,16 +29,26 @@ public class Match {
     @Column(name = "player1_id", nullable = false)
     private Long player1Id;
 
-    @Column(name = "player2_id", nullable = false)
+    @Column(name = "player2_id")
     private Long player2Id;
 
+    @Column(name = "winner_id")
+    private Long winnerId;
+
+    @Column(name = "loser_id")
+    private Long loserId;
+
     @ManyToOne
-    @JoinColumn(name = "round_type_id", referencedColumnName = "id")
+    @JoinColumn(name = "round_type_id", referencedColumnName = "id", nullable = false)
     private RoundType roundType;
 
-    @Enumerated(EnumType.STRING)
-    private MatchStatus status;
+    @Column(name = "game_type_id", nullable = false)
+    private Long gameTypeId;
 
     @Column(name = "next_match_id")
     private Long nextMatchId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private MatchStatus status;
 }

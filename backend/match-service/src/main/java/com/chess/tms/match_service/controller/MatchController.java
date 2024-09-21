@@ -1,7 +1,6 @@
 package com.chess.tms.match_service.controller;
 
 import com.chess.tms.match_service.model.Match;
-import com.chess.tms.match_service.model.MatchResult;
 import com.chess.tms.match_service.service.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +16,9 @@ public class MatchController {
     private MatchService matchService;
 
     // Generate initial matches for a tournament
-    @PostMapping("/tournament/{tournamentId}/generate")
-    public ResponseEntity<String> generateInitialMatches(@PathVariable Long tournamentId) {
-        matchService.createInitialMatches(tournamentId);
+    @PostMapping("/tournament/{tournamentId}/{gameTypeId}/generate")
+    public ResponseEntity<String> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+        matchService.createInitialMatches(tournamentId, gameTypeId);
         return ResponseEntity.ok("Matches created successfully");
     }
 
@@ -27,16 +26,16 @@ public class MatchController {
     @GetMapping("/tournament/{tournamentId}")
     public ResponseEntity<List<Match>> getMatchesByTournament(@PathVariable Long tournamentId) {
         List<Match> matches = matchService.getMatchesByTournament(tournamentId);
+        System.out.println(matches.get(0).getRoundType());
         return ResponseEntity.ok(matches);
     }
 
     // Update match results and advance winner
-    @PutMapping("/tournament/{tournamentId}/match/{matchId}/result")
+    @PutMapping("/tournament/{matchId}/match/{winnerId}/result")
     public ResponseEntity<String> updateMatchResult(
-            @PathVariable Long tournamentId,
             @PathVariable Long matchId,
-            @RequestBody MatchResult matchResult) {
-        matchService.advanceWinner(matchResult);
+            @PathVariable Long winnerId) {
+        matchService.advanceWinner(matchId, winnerId);
         return ResponseEntity.ok("Winner advanced to the next round");
     }
 }

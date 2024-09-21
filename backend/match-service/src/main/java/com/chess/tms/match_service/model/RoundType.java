@@ -1,7 +1,9 @@
 package com.chess.tms.match_service.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 @Table(name = "round_type")
 public class RoundType {
