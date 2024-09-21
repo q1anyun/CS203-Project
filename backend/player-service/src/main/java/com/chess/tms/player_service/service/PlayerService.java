@@ -21,10 +21,6 @@ public class PlayerService {
     public Optional<PlayerDetailsDTO> getPlayerDetailsById(Long id) {
         Optional<PlayerDetails> playerDetails = playerDetailsRepository.findById(id);
 
-        // if (userDetails.isEmpty()) {
-        // throw new UserNotFoundException("User with ID " + userId + " not found.");
-        // }
-
         if (playerDetails.isPresent()) {
             PlayerDetailsDTO playerDetailsDTO = new PlayerDetailsDTO();
             playerDetailsDTO.setId(playerDetails.get().getId());
@@ -36,6 +32,11 @@ public class PlayerService {
             return Optional.of(playerDetailsDTO);
         }
         return Optional.empty();
+    }
+
+    public PlayerDetails getPlayerDetailsByUserId(Long id) {
+        return playerDetailsRepository.findByUserId(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     public String createPlayer(PlayerRegistrationDTO playerRegistrationDTO) {

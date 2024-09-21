@@ -60,7 +60,11 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/login", "/api/users/register/**").permitAll()  // Permit login and registration
+                .requestMatchers("/api/login", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
+                // // Only admins can access /admin/** endpoints
+                // .requestMatchers("/admin/**").hasRole("ADMIN")
+                // // Users and admins can access /user/** endpoints
+                // .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session

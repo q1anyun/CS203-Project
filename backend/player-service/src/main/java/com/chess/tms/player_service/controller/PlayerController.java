@@ -25,9 +25,16 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.createPlayer(playerRegistrationDTO));
     }
 
-        @GetMapping("/{id}/details")
-    public ResponseEntity<PlayerDetailsDTO> getUserDetails(@PathVariable("id") Long id) {
+    @GetMapping("/{id}/details")
+    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id) {
         Optional<PlayerDetailsDTO> playerDetails = playerService.getPlayerDetailsById(id);
         return playerDetails.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/{id}/user")
+    public ResponseEntity<Long> getPlayerDetailsbyUserId(@PathVariable("id") Long id) {
+        PlayerDetails playerDetails = playerService.getPlayerDetailsByUserId(id);
+        return ResponseEntity.ok(playerDetails.getId());
+    }
+
 }

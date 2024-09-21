@@ -31,15 +31,28 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User authenticate(JwtRequest input) {
+    public AuthenticatedUserDTO authenticate(JwtRequest input) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getUsername(),
                         input.getPassword()
                 )
         );
-        return usersRepository.findByUsername(input.getUsername())
+
+        User user = usersRepository.findByUsername(input.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+
+        String getPlayerDetailsEndpoint = playerServiceUrl + "/"+user.getId()+"/user";
+
+        AuthenticatedUserDTO result = new AuthenticatedUserDTO();
+        result.setEmail(user.getEmail());
+        result.setPlayerId(restTemplate.getForObject(getPlayerDetailsEndpoint, Long.class));
+        result.setRole(user.getRole());
+        result.setUsername(user.getUsername());
+        result.setUserId(user.getId());
+
+        return result;
     }
 
     public String registerPlayer(PlayerRegistrationRequestDTO player) {
