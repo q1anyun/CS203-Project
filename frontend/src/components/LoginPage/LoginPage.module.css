@@ -4,25 +4,66 @@
   background-position: center;
   height: 100vh;
   width: 100vw;
-  position: fixed; 
+  position: fixed;
   top: 0;
   left: 0;
   z-index: -1;
 }
 
+.cardContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh
+}
+
+.cardStyle {
+  padding: 30px;
+  border-radius: 20px;
+  background-color: whitesmoke;
+}
+
+.logoImage {
+  height: 40px;
+}
+
+.signInText {
+  text-align: center;
+  margin-bottom: 16px;
+  margin-top: 16px;
+}
+
+.errorMessage {
+  color: red;
+}
+
+.rightContainer {
+  text-align: right;
+}
+
+.forgotPasswordLinkStyle {
+  font-size: 16px;
+  cursor: pointer;
+  font-family: 'PT Sans', sans-serif;
+}
+
 .gradientButton {
   background: linear-gradient(to right, #000000, #434343, #000000);
+  width: 100%;
   color: #fff;
-  border: none; 
+  border: none;
+  font-size: 25px;
+  border-radius: 8px;
+  padding: 5px;
 }
 
 .gradientButton:hover {
   background: linear-gradient(to right, #434343, #000000, #434343);
 }
 
-.profilePic {
-  width: 20px; 
-  height: 20px;
-  border-radius: 50%; 
-  object-fit: cover; 
+.linkStyle {
+  font-family: 'PT Sans', sans-serif;
+  font-size: 16px;
+  cursor: pointer;
 }

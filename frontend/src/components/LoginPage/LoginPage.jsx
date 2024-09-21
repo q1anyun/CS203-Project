@@ -1,14 +1,17 @@
 import { React, useState } from 'react';
 import { Container, Typography, TextField, Button, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import styles from './LoginPage.module.css';
 import axios from 'axios';
+
+import styles from './LoginPage.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
+
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -32,57 +35,31 @@ function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:8080/api/users/login', { username, password });
-      const { token } = response.data;
+      const response = await axios.post(`${baseURL}/api/users/login`, { username, password });
+
+      // Store the token and expiration time in local storage
+      const { token, expiresIn } = response.data;
       localStorage.setItem('token', token);
+      const expirationTime = Date.now() + expiresIn * 1000;
+      localStorage.setItem('tokenExpiration', expirationTime);
+
+      // navigate to home page
       navigate('/home');
+
     } catch (err) {
       setError('Invalid username or password');
-      console.error(err);
+      console.error("Login failed:", err);
     }
   };
 
   return (
     <div className={styles.loginContainer}>
-      <Container
-        component="main"
-        maxWidth="sm"
-        sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh' }}
-      >
-        <Card
-          variant="outlined"
-          sx={{
-            padding: 3,
-            width: '100%',
-            borderRadius: '16px',
-            backgroundColor: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          <Grid2>
-            <Typography
-              variant="h3"
-              component="div"
-              sx={{ fontFamily: 'PT Serif, serif', color: '#c1a01e' }}
-            >
-              <span style={{ fontWeight: 'bold' }}>CHESS</span>
-              <img
-                src={logoImage}
-                alt="logo"
-                style={{ margin: '0 10px', height: '40px' }}
-              />
-              <span style={{ fontWeight: 'normal' }}>MVP</span>
-            </Typography>
-          </Grid2>
+      <Container maxWidth="sm" className={styles.cardContainer}>
+        <Card variant="outlined" className={styles.cardStyle}>
+          <img src={logoImage} alt="logo" className={styles.logoImage} />
+          <h1 className={styles.signInText}>SIGN IN</h1>
 
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ textAlign: 'center', marginBottom: 2, marginTop: 4, fontFamily: 'PT Sans, sans-serif' }}
-          >
-            SIGN IN
-          </Typography>
-          <Grid2 container direction="column" spacing={2}>
+          <Grid2 container spacing={3}>
             <Grid2 size={12}>
               <TextField
                 variant="outlined"
@@ -93,7 +70,6 @@ function LoginPage() {
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                sx={{ marginBottom: 2 }}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -103,6 +79,7 @@ function LoginPage() {
                 }}
               />
             </Grid2>
+
             <Grid2 size={12}>
               <TextField
                 variant="outlined"
@@ -133,43 +110,31 @@ function LoginPage() {
                 }}
               />
             </Grid2>
+
             {error && (
-              <Grid2 item xs={12}>
-                <Typography color="error" sx={{ textAlign: 'center' }}>
+              <Grid2 size={12}>
+                <h6 className={styles.errorMessage}>
                   {error}
-                </Typography>
+                </h6>
               </Grid2>
             )}
-            <Grid2 size={12} sx={{ textAlign: 'right' }}>
-              <Link
-                variant="body2"
-                sx={{ fontFamily: 'PT Sans, sans-serif', fontSize: 16 }}
-                onClick={handleDialogOpen}
-                style={{ cursor: 'pointer' }}
-              >
+
+            {/*This is not functional yet*/}
+            <Grid2 size={12} className={styles.rightContainer}>
+              <Link onClick={handleDialogOpen} className={styles.forgotPasswordLinkStyle}>
                 Forgot password?
               </Link>
             </Grid2>
-            <Grid2 item xs={12}>
-              <Button
-                type="submit"
-                variant="contained"
-                className={styles.gradientButton}
-                fullWidth
-                sx={{ fontFamily: 'PT Sans, sans-serif', fontSize: 20 }}
-                onClick={handleLogin}
-              >
+
+            <Grid2 size={12}>
+              <button type="submit" className={styles.gradientButton}
+                onClick={handleLogin}>
                 Sign In
-              </Button>
+              </button>
             </Grid2>
 
-            <Grid2 size={12} sx={{ marginTop: 2, textAlign: 'right' }}>
-              <Link
-                variant="body2"
-                sx={{ fontFamily: 'PT Sans, sans-serif', fontSize: 16 }}
-                onClick={() => navigate('/signup')}
-                style={{ cursor: 'pointer' }}
-              >
+            <Grid2 size={12} className={styles.rightContainer}>
+              <Link variant="body2" onClick={() => navigate('/signup')} className={styles.linkStyle}>
                 Don't have an account? Sign Up
               </Link>
             </Grid2>

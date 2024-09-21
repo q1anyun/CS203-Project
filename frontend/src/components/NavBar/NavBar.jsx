@@ -1,4 +1,4 @@
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -7,9 +7,26 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import styles from './NavBar.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import Image from 'react-bootstrap/Image'
+// import { jwtDecode } from 'jwt-decode';
 
-function NavBar( {profilePic }) {
+function NavBar({ profilePic }) {
+  // const [userRole, setUserRole] = useState(null);
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem('token');
+  //   if (token) {
+  //     try {
+  //       const decodedToken = jwtDecode(token);
+  //       console.log('Decoded Token:', decodedToken);
+  //       setUserRole(decodedToken.role);
+  //     } catch (error) {
+  //       console.error('Invalid token:', error);
+  //     }
+  //   }
+  // }, []);
+
   return (
+
     <Navbar expand="lg" className={styles.navbar}>
       <Container>
         <Navbar.Brand as={Link} to="/home" className={styles.navbarBrand}>
@@ -25,6 +42,14 @@ function NavBar( {profilePic }) {
 
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/home">Home</Nav.Link>
+
+          {/* {userRole === 'admin' && (
+            <Nav.Link as={Link} to="/admin/tournaments">Tournaments</Nav.Link>
+          )}
+          {userRole === 'player' && (
+            <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
+          )} */}
+
           <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
           <Nav.Link as={Link} to="/leaderboard">Leaderboard</Nav.Link>
         </Nav>
