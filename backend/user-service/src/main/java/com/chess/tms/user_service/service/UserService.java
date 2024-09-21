@@ -3,6 +3,7 @@ package com.chess.tms.user_service.service;
 import com.chess.tms.user_service.dto.*;
 import com.chess.tms.user_service.enums.UserRole;
 import com.chess.tms.user_service.exception.UserAlreadyExistsException;
+import com.chess.tms.user_service.exception.UserNotFoundException;
 import com.chess.tms.user_service.model.User;
 import com.chess.tms.user_service.repository.UsersRepository;
 
@@ -40,7 +41,7 @@ public class UserService {
         );
 
         User user = usersRepository.findByUsername(input.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
 
         String getPlayerDetailsEndpoint = playerServiceUrl + "/"+user.getId()+"/user";

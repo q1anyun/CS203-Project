@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.chess.tms.user_service.dto.AuthenticatedUserDTO;
 import com.chess.tms.user_service.dto.JwtRequest;
 import com.chess.tms.user_service.dto.JwtResponse;
+import com.chess.tms.user_service.dto.LoginResponse;
 import com.chess.tms.user_service.security.JwtUtility;
 import com.chess.tms.user_service.service.UserService;
 
@@ -56,12 +57,17 @@ public class JwtController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@RequestBody JwtRequest jwtRequest) throws Exception {
+    public ResponseEntity<LoginResponse> login(@RequestBody JwtRequest jwtRequest) throws Exception {
         AuthenticatedUserDTO authenticatedUser = userService.authenticate(jwtRequest);
         String jwtToken = jwtUtil.generateToken(authenticatedUser);
         JwtResponse jwtResponse = new JwtResponse();
         jwtResponse.setToken(jwtToken);
         jwtResponse.setExpiresIn(jwtUtil.getExpirationTime());
-        return ResponseEntity.ok(jwtResponse);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setRole(authenticatedUser.getRole());
+        loginResponse.setJwtResponse(jwtResponse);
+
+        return ResponseEntity.ok(loginResponse);
     }
 }
