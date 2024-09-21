@@ -16,26 +16,39 @@ public class MatchController {
     private MatchService matchService;
 
     // Generate initial matches for a tournament
-    @PostMapping("/tournament/{tournamentId}/{gameTypeId}/generate")
+    @PostMapping("/{tournamentId}/{gameTypeId}/generate")
     public ResponseEntity<String> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
         matchService.createInitialMatches(tournamentId, gameTypeId);
         return ResponseEntity.ok("Matches created successfully");
     }
 
     // Get all matches for a tournament
-    @GetMapping("/tournament/{tournamentId}")
+    @GetMapping("/{tournamentId}")
     public ResponseEntity<List<Match>> getMatchesByTournament(@PathVariable Long tournamentId) {
         List<Match> matches = matchService.getMatchesByTournament(tournamentId);
-        System.out.println(matches.get(0).getRoundType());
         return ResponseEntity.ok(matches);
     }
 
+    // Get all matches for a tournament
+    @GetMapping("/{matchId}")
+    public ResponseEntity<Match> getMatch(@PathVariable Long matchId) {
+        Match match = matchService.getMatch(matchId);
+        return ResponseEntity.ok(match);
+    }
+
     // Update match results and advance winner
-    @PutMapping("/tournament/{matchId}/match/{winnerId}/result")
+    @PutMapping("/{matchId}/winner/{winnerId}")
     public ResponseEntity<String> updateMatchResult(
             @PathVariable Long matchId,
             @PathVariable Long winnerId) {
         matchService.advanceWinner(matchId, winnerId);
         return ResponseEntity.ok("Winner advanced to the next round");
+    }
+
+    // Update match results and advance winner
+    @PostMapping("/{tournamentId}/advance")
+    public ResponseEntity<String> generateNextRound(@PathVariable Long tournamentId) {
+        matchService.generateNextRound(tournamentId);
+        return ResponseEntity.ok("Advanced to the next round");
     }
 }

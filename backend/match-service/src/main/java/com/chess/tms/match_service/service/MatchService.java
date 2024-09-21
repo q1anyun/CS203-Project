@@ -1,6 +1,8 @@
 package com.chess.tms.match_service.service;
 
 import com.chess.tms.match_service.dto.TournamentPlayerDTO;
+import com.chess.tms.match_service.exception.MatchDoesNotExistException;
+import com.chess.tms.match_service.exception.PlayerDoesNotExistInMatchException;
 import com.chess.tms.match_service.model.*;
 import com.chess.tms.match_service.repository.GameTypeRepository;
 import com.chess.tms.match_service.repository.MatchesRepository;
@@ -35,7 +37,6 @@ public class MatchService {
     }
 
     public TournamentPlayerDTO[] getTournamentPlayers() {
-        // Hardcoded dummy data for 18 players
         TournamentPlayerDTO player1 = new TournamentPlayerDTO(1L, 1200);
         TournamentPlayerDTO player2 = new TournamentPlayerDTO(2L, 1300);
         TournamentPlayerDTO player3 = new TournamentPlayerDTO(3L, 1400);
@@ -99,8 +100,9 @@ public class MatchService {
             TournamentPlayerDTO playerWithBye = players[totalPlayers - 1 - i];
             Match byeMatch = new Match();
             byeMatch.setTournamentId(tournamentId);
-            byeMatch.setPlayer1Id(playerWithBye.getId());
+            byeMatch.setPlayer1Id(null);
             byeMatch.setPlayer2Id(null);
+            byeMatch.setWinnerId(playerWithBye.getId());
             byeMatch.setRoundType(getRoundType(nextPowerOfTwo));
             byeMatch.setGameTypeId(gameTypeId);
             byeMatch.setStatus(Match.MatchStatus.COMPLETED);
@@ -165,9 +167,21 @@ public class MatchService {
         return matchRepository.findByTournamentId(tournamentId);
     }
 
+    public Match getMatch(Long matchId) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
+
+        return match;
+    }
+
+    // To do: Add check whether winnerId is part of the match
     public void advanceWinner(Long matchId, Long winnerId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        if(match.getPlayer1Id() != winnerId || match.getPlayer2Id() != winnerId) {
+            throw new PlayerDoesNotExistInMatchException("Player with id " + winnerId + " is not recognised in the match.");
+        }
 
         match.setWinnerId(winnerId);
         match.setLoserId(match.getPlayer1Id().equals(winnerId) ? match.getPlayer2Id() : match.getPlayer1Id());
@@ -186,6 +200,35 @@ public class MatchService {
             }
 
             matchRepository.save(nextMatch);
+        }
+    }
+
+    public void generateNextRound(Long tournamentId) {
+        // Find the most recent completed round (the round with the minimum number of completed matches)
+        // Might store current Round id in Tourmanent table instead of finding it every time
+        RoundType mostRecentCompletedRound = roundTypeRepository.findMostRecentCompletedRound(tournamentId)
+            .orElseThrow(() -> new RuntimeException("No completed rounds found for this tournament."));
+    
+        // Get the matches for that completed round
+        List<Match> completedMatches = matchRepository.findCompletedMatchesByRoundType(tournamentId, mostRecentCompletedRound.getId());
+    
+        // Assign matches for the next round
+        for (Match completedMatch : completedMatches) {
+            Long nextMatchId = completedMatch.getNextMatchId();
+            if (nextMatchId != null) {
+                Match nextMatch = matchRepository.findById(nextMatchId)
+                    .orElseThrow(() -> new RuntimeException("Next match not found for match ID: " + nextMatchId));
+    
+                System.out.println(nextMatchId);
+
+                if (nextMatch.getPlayer1Id() == null) {
+                    nextMatch.setPlayer1Id(completedMatch.getWinnerId());
+                } else if (nextMatch.getPlayer2Id() == null) {
+                    nextMatch.setPlayer2Id(completedMatch.getWinnerId());
+                }
+
+                matchRepository.save(nextMatch);
+            }
         }
     }
 }

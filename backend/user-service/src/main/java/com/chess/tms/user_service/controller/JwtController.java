@@ -34,7 +34,7 @@ public class JwtController {
     @PostMapping("/getPlayerId")
     public ResponseEntity<?> getCurrentUserPlayerId(@RequestHeader("Authorization") String tokenHeader) {
         try {
-            // Extract token from the Authorization header (assuming it's a Bearer token)
+            // Extract token from the Authorization header
             String token = tokenHeader.startsWith("Bearer ") ? tokenHeader.substring(7) : tokenHeader;
 
             // Extract player ID from token
