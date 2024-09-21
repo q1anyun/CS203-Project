@@ -29,7 +29,17 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
         response.put("message", e.getMessage());
         response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(UserDoesNotExistException.class) 
+    public ResponseEntity<Map<String, Object>> handleUserDoesNotExistException(UserDoesNotExistException e) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", e.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    
 
 }

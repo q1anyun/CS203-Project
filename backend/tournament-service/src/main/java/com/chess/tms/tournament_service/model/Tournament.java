@@ -1,18 +1,22 @@
 package com.chess.tms.tournament_service.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.enums.Type;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,9 +26,12 @@ import com.chess.tms.tournament_service.enums.Type;
 public class Tournament {
 
     @Id
-    @Column(nullable = false)
+    @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private long tournamentId;
+
+    // @Column(name = "created_by", nullable = false)
+    // private long creatorId;
 
     @Column
     private String name;
@@ -55,5 +62,9 @@ public class Tournament {
 
     @Column 
     private Type type;
+
+    @OneToMany(mappedBy = "tournament",
+                cascade = CascadeType.ALL)
+    private List<TournamentPlayer> TournamentPlayers;
 
 }
