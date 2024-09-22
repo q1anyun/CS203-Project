@@ -2,6 +2,9 @@ package com.chess.tms.user_service.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +65,7 @@ public class JwtUtility {
     public String generateToken(AuthenticatedUserDTO userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userDetails.getUserId());
+        claims.put("playerId", userDetails.getPlayerId());
         return createToken(claims, userDetails.getUsername());
     }
 
@@ -82,5 +86,24 @@ public class JwtUtility {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+
+    public ResponseEntity<?> validateToken(String token) {
+
+        try{
+         Claims claims = Jwts .parserBuilder()
+         .setSigningKey(getSigningKey())
+         .build()
+         .parseClaimsJws(token)
+         .getBody();
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("valid", true);
+            response.put("userId", claims.get("userId"));
+            response.put("role", claims.get("role"));
+            return ResponseEntity.ok(response);
+        }catch(JwtException exception){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
+        }
     }
 }

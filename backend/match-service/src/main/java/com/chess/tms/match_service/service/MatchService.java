@@ -27,14 +27,14 @@ public class MatchService {
     @Autowired
     private GameTypeRepository gameTypeRepository;
 
-    private final RestTemplate restTemplate;
+    //private final RestTemplate restTemplate;
 
     @Value("${tournament.service.url}")
     private String tournamentServiceUrl;
 
-    public MatchService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    // public MatchService(RestTemplate restTemplate) {
+    //     this.restTemplate = restTemplate;
+    // }
 
     public TournamentPlayerDTO[] getTournamentPlayers() {
         TournamentPlayerDTO player1 = new TournamentPlayerDTO(1L, 1200);
