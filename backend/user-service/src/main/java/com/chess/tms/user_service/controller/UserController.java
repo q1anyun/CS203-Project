@@ -16,8 +16,8 @@ public class UserController {
     }
 
     @PostMapping("/register/player")
-    public ResponseEntity<String> registerPlayer(@RequestBody PlayerRegistrationRequestDTO player, @RequestHeader("Authorization") String tokenHeader) {
-        return ResponseEntity.ok(userService.registerPlayer(player, tokenHeader));
+    public ResponseEntity<String> registerPlayer(@RequestBody PlayerRegistrationRequestDTO player) {
+        return ResponseEntity.ok(userService.registerPlayer(player));
     }
 
     @PostMapping("/register/admin")
