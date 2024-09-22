@@ -63,6 +63,7 @@ function NavBar({ profilePic }) {
             <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/admin/profile">View Admin Profile (tmp)</NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/admin/tournaments">View Admin Tournament view (tmp)</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/admin/matches">View Admin Matches view (tmp)</NavDropdown.Item>
             <NavDropdown.Divider />
             <NavDropdown.Item as={Link} to="/login">Logout</NavDropdown.Item>
           </NavDropdown>

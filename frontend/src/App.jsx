@@ -8,6 +8,7 @@ import PlayerProfile from './components/PlayerProfile/PlayerProfile';
 import AdminProfile from './components/AdminProfile/AdminProfile'; 
 import PlayerTournamentView from './components/PlayerTournamentView/PlayerTournamentView';
 import AdminTournamentView from './components/AdminTournamentView/AdminTournamentView';
+import AdminMatchesView from './components/AdminMatchesView/AdminMatchesView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
@@ -31,6 +32,7 @@ function AppContent() {
         <Route path="/home" element={<Home />} />
         <Route path="/player/tournaments" element={<PlayerTournamentView />} />
         <Route path="/admin/tournaments" element={<AdminTournamentView />} />
+        <Route path="/admin/matches" element={<AdminMatchesView />} />
         <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate}/>} />
         <Route path="/admin/profile" element={<AdminProfile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
