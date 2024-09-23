@@ -1,7 +1,6 @@
 import { React, useState } from 'react';
-import { Container,TextField, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
+import { Container, TextField, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 import styles from './LoginPage.module.css';
 import logoImage from '../../assets/chess_logo.png';
@@ -11,6 +10,9 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 
+// js
+import { handleClickShowPassword, handleDialogOpen, handleDialogClose, handleSubmit } from './LoginFunctions';
+
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 function LoginPage() {
@@ -19,48 +21,8 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState('');
+
   const navigate = useNavigate();
-
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
-
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-  };
-
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post(`${baseURL}/api/auth/login`, { username, password });
-
-      // Store the token and expiration time in local storage
-      const { token, expiresIn, role } = response.data;
-      localStorage.setItem('token', token);
-      const expirationTime = Date.now() + expiresIn * 1000;
-      localStorage.setItem('tokenExpiration', expirationTime);
-      localStorage.setItem('role', role);
-
-      // navigate to home page
-      navigate('/home');
-
-    } catch (err) {
-      if (err.response) {
-        if (err.response.status === 404 || err.response.status === 403) {
-          setError('Invalid username or password');
-        }else{
-          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        }
-      } else if (err.request) {
-        navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-      } else {
-        navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-      }
-    }
-  };
 
   return (
     <div className={styles.loginContainer}>
@@ -76,7 +38,7 @@ function LoginPage() {
                 fullWidth
                 label="Username"
                 autoComplete="username"
-                placeholder="example@gmail.com"
+                placeholder="chesspro321"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -110,7 +72,7 @@ function LoginPage() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                        onClick={handleClickShowPassword}
+                        onClick={() => handleClickShowPassword(setShowPassword)}
                         edge="end"
                       >
                         {showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
@@ -131,14 +93,14 @@ function LoginPage() {
 
             {/*This is not functional yet*/}
             <Grid2 size={12} className={styles.rightContainer}>
-              <Link onClick={handleDialogOpen} className={styles.forgotPasswordLinkStyle}>
+              <Link onClick={() => handleDialogOpen(setOpenDialog)} className={styles.forgotPasswordLinkStyle}>
                 Forgot password?
               </Link>
             </Grid2>
 
             <Grid2 size={12}>
               <button type="submit" className={styles.gradientButton}
-                onClick={handleLogin}>
+                onClick={(e) => handleSubmit(e, username, password, navigate, setError)}>
                 Sign In
               </button>
             </Grid2>
@@ -152,7 +114,7 @@ function LoginPage() {
         </Card>
       </Container>
 
-      <ForgotPasswordDialog open={openDialog} onClose={handleDialogClose} />
+      <ForgotPasswordDialog open={openDialog} onClose={() => handleDialogClose(setOpenDialog)} />
     </div>
   );
 }
