@@ -1,4 +1,4 @@
-package com.chess.tms.eureka;
+package com.chess.tms.eureka_server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

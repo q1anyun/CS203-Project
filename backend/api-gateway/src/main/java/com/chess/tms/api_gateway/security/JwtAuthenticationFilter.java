@@ -23,16 +23,8 @@ public class JwtAuthenticationFilter implements GatewayFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        System.out.println("Request: ");
         ServerHttpRequest request = exchange.getRequest();
-        System.out.println("Request: " + request.getURI().getPath());
-
-        final List<String> apiEndpoints = List.of("/auth/login", "/auth/register", "/eureka");
-
-        Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream()
-                .noneMatch(uri -> r.getURI().getPath().contains(uri));
-
-        if (isApiSecured.test(request)) {
-            if (authMissing(request)) return onError(exchange);
 
             String token = request.getHeaders().getOrEmpty("Authorization").get(0);
 
@@ -43,13 +35,13 @@ public class JwtAuthenticationFilter implements GatewayFilter {
             } catch (Exception e) {
                 return onError(exchange);
             }
-        }
+        
         return chain.filter(exchange);
     }
 
     private Mono<Void> onError(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
+        response.setStatusCode(HttpStatus.NOT_FOUND);
         return response.setComplete();
     }
 

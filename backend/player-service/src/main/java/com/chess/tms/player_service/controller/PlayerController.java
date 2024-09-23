@@ -41,14 +41,9 @@ public class PlayerController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetailsbyUserId(@PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
-        if(tokenValidationService.validateToken(token)){
+    public ResponseEntity<PlayerDetailsDTO> getPlayerDetailsbyUserId(@PathVariable("id") Long id) {
             PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsByUserId(id);
             return ResponseEntity.ok(playerDetails);
-        }
-        else{
-           throw new UnauthorizedAccessException("Access Denied: You do not have permission to access this resource.");
-        }
     }
 
 }

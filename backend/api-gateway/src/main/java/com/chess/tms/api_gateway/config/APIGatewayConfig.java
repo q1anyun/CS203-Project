@@ -20,7 +20,6 @@ public class ApiGatewayConfig {
 
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
-        System.out.println("Route called");
         return builder.routes()
                 .route("player-service", r -> r.path("/api/player/**")
                         .filters(f -> f.filter(filter))
