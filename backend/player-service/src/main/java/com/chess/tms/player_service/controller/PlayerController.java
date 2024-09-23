@@ -23,15 +23,21 @@ public class PlayerController {
         this.tokenValidationService = tokenValidationService;
     }
 
+    // @GetMapping("/{id}")
+    // public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
+    //     if(tokenValidationService.validateToken(token)){
+    //         PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(id);
+    //         return ResponseEntity.ok(playerDetails);
+    //     }
+    //     else{
+    //        throw new UnauthorizedAccessException("Access Denied: You do not have permission to access this resource.");
+    //     }
+    // }
+
     @GetMapping("/{id}")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id, @RequestHeader("Authorization") String token) {
-        if(tokenValidationService.validateToken(token)){
+    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id) {
             PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(id);
             return ResponseEntity.ok(playerDetails);
-        }
-        else{
-           throw new UnauthorizedAccessException("Access Denied: You do not have permission to access this resource.");
-        }
     }
 
     @GetMapping("/user/{id}")
