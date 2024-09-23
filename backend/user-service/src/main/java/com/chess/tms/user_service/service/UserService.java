@@ -42,13 +42,14 @@ public class UserService {
     }
 
     public AuthenticatedUserDTO authenticate(JwtRequest input) {
+        User user = usersRepository.findByUsername(input.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         input.getUsername(),
                         input.getPassword()));
-        User user = usersRepository.findByUsername(input.getUsername())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
+        
         AuthenticatedUserDTO result = new AuthenticatedUserDTO();
 
         if (user.getRole() == UserRole.PLAYER) {

@@ -1,5 +1,5 @@
 import { React, useState } from 'react';
-import { Container, Typography, TextField, Button, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
+import { Container,TextField, Card, Link, Grid2, InputAdornment, IconButton } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -35,20 +35,30 @@ function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post(`${baseURL}/api/users/login`, { username, password });
+      const response = await axios.post(`${baseURL}/api/auth/login`, { username, password });
 
       // Store the token and expiration time in local storage
-      const { token, expiresIn } = response.data;
+      const { token, expiresIn, role } = response.data;
       localStorage.setItem('token', token);
       const expirationTime = Date.now() + expiresIn * 1000;
       localStorage.setItem('tokenExpiration', expirationTime);
+      localStorage.setItem('role', role);
 
       // navigate to home page
       navigate('/home');
 
     } catch (err) {
-      setError('Invalid username or password');
-      console.error("Login failed:", err);
+      if (err.response) {
+        if (err.response.status === 404 || err.response.status === 403) {
+          setError('Invalid username or password');
+        }else{
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        }
+      } else if (err.request) {
+        navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+      } else {
+        navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+      }
     }
   };
 

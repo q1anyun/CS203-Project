@@ -44,7 +44,7 @@ export const handleSubmit = async (e, formData, setFormData, setErrors, setShowA
     if (Object.keys(formErrors).length > 0) return;
 
     try {
-        const response = await axios.post(`${baseURL}/api/users/register/user`, formData);
+        const response = await axios.post(`${baseURL}/api/users/register/player`, formData);
         setShowAlert(true);
     } catch (err) {
         if (err.response) {
