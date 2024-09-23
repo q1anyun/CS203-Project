@@ -7,9 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
-import com.chess.tms.player_service.dto.PlayerRegistrationDTO;
 import com.chess.tms.player_service.exception.UnauthorizedAccessException;
-import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.service.PlayerService;
 import com.chess.tms.player_service.service.TokenValidationService;
 

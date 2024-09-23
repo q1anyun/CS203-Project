@@ -1,12 +1,9 @@
 package com.chess.tms.player_service.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
-import com.chess.tms.player_service.dto.PlayerRegistrationDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.repository.PlayerDetailsRepository;
@@ -16,8 +13,6 @@ public class PlayerService {
 
     @Autowired
     private PlayerDetailsRepository playerDetailsRepository;
-
-    public static final int DEFAULT_ELO_RATING = 500;
 
     public PlayerDetailsDTO getPlayerDetailsById(Long id) {
         PlayerDetails playerDetails = playerDetailsRepository.findById(id)
