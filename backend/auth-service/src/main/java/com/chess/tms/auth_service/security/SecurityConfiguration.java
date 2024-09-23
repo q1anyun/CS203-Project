@@ -1,4 +1,4 @@
-package com.chess.tms.gateway.security;
+package com.chess.tms.auth_service.security;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,14 +24,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfiguration {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailsService;
 
     @Value("${client.url}")
     private String clientUrl;
 
-    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService customUserDetailsService) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfiguration(CustomUserDetailsService customUserDetailsService) {
         this.customUserDetailsService = customUserDetailsService;
     }
 
@@ -60,20 +58,13 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
-                //.anyRequest().permitAll() 
-                //.requestMatchers("/api/auth/**", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
-                // // Only admins can access /admin/** endpoints
-                // .requestMatchers("/admin/**").hasRole("ADMIN")
-                // // Users and admins can access /user/** endpoints
-                // .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)
             )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+            .authenticationProvider(authenticationProvider());
 
         return http.build();
     }

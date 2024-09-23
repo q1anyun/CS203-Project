@@ -16,6 +16,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -38,7 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
-
+                System.out.println("AuthHeader: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -47,9 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
         try {
-            final String jwt = authHeader.substring(7);
+            String jwt = authHeader.substring(7);
             final String userEmail = jwtUtility.extractUsername(jwt);
-
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (userEmail != null && authentication == null && userEmail != "") {
@@ -61,15 +61,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities());
 
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                            filterChain.doFilter(request, response);
                 } else {
                     // Invalid JWT token - handle as you see fit, or return 404 if appropriate
                     response.sendError(HttpServletResponse.SC_NOT_FOUND, "Invalid JWT token");
                     return;
                 }
             }
-            filterChain.doFilter(request, response);
         } catch (Exception exception) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT token");
             //handlerExceptionResolver.resolveException(request, response, null, exception);

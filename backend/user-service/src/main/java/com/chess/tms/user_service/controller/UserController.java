@@ -14,14 +14,4 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
-
-    @PostMapping("/register/player")
-    public ResponseEntity<String> registerPlayer(@RequestBody PlayerRegistrationRequestDTO player) {
-        return ResponseEntity.ok(userService.registerPlayer(player));
-    }
-
-    @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistrationRequestDTO admin) {
-        return ResponseEntity.ok(userService.registerAdmin(admin));
-    }
 }

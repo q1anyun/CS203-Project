@@ -1,13 +1,11 @@
-package com.chess.tms.gateway.security;
+package com.chess.tms.auth_service.security;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.chess.tms.auth_service.dto.AuthenticatedUserDTO;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -35,20 +33,8 @@ public class JwtUtility {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Map<String, String> extractClaims(String token) {
-        Map<String, String> claimsMap = new HashMap<>();
-    
-        Claims claims = extractAllClaims(token);  
-
-        claimsMap.put("userId", String.valueOf(claims.get("userId", Long.class)));  
-        claimsMap.put("role", claims.get("role", String.class));                   
-        claimsMap.put("playerId", String.valueOf(claims.get("playerId", Long.class))); 
-    
-        return claimsMap;
-    }
-
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        Claims claims = extractAllClaims(token);
+        final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
@@ -69,6 +55,14 @@ public class JwtUtility {
         return extractClaim(token, Claims::getExpiration);
     }
 
+    public String generateToken(AuthenticatedUserDTO userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", userDetails.getRole());
+        claims.put("userId", userDetails.getUserId());
+        claims.put("playerId", userDetails.getPlayerId());
+        System.out.println("Authentication user: " + userDetails.getUsername());
+        return createToken(claims, userDetails.getUsername());
+    }
 
     public long getExpirationTime() {
         return expiration;
@@ -87,24 +81,5 @@ public class JwtUtility {
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-    }
-
-    public ResponseEntity<?> validateToken(String token) {
-
-        try{
-         Claims claims = Jwts .parserBuilder()
-         .setSigningKey(getSigningKey())
-         .build()
-         .parseClaimsJws(token)
-         .getBody();
-
-            Map<String, Object> response = new HashMap<>();
-            response.put("valid", true);
-            response.put("userId", claims.get("userId"));
-            response.put("role", claims.get("role"));
-            return ResponseEntity.ok(response);
-        }catch(JwtException exception){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-        }
     }
 }

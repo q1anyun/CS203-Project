@@ -1,26 +1,21 @@
 package com.chess.tms.player_service.controller;
+import java.util.Map;
 
-import java.util.Optional;
-
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
-import com.chess.tms.player_service.exception.UnauthorizedAccessException;
 import com.chess.tms.player_service.service.PlayerService;
-import com.chess.tms.player_service.service.TokenValidationService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/player")
 public class PlayerController {
-
     private final PlayerService playerService;
-    private final TokenValidationService tokenValidationService;
 
-    public PlayerController(PlayerService playerService, TokenValidationService tokenValidationService) {
+    public PlayerController(PlayerService playerService) {
         this.playerService = playerService;
-        this.tokenValidationService = tokenValidationService;
     }
 
     // @GetMapping("/{id}")
@@ -35,7 +30,10 @@ public class PlayerController {
     // }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id) {
+    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") Long id, @RequestHeader("X-User-PlayerId") String playerId) {
+
+    System.out.println("Player Id: " + playerId);
+
             PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(id);
             return ResponseEntity.ok(playerDetails);
     }
@@ -45,5 +43,4 @@ public class PlayerController {
             PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsByUserId(id);
             return ResponseEntity.ok(playerDetails);
     }
-
 }

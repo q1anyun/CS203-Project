@@ -1,4 +1,6 @@
-package com.chess.tms.user_service.security;
+package com.chess.tms.player_service.security;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +12,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
-@Configuration
 @EnableWebSecurity
+@Configuration
 public class SecurityConfiguration {
     @Value("${client.url}")
     private String clientUrl;
