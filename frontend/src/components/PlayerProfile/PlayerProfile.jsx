@@ -4,6 +4,8 @@ import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs
 import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
+import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -34,6 +36,8 @@ const xLabels = [
 
 
 
+
+
 function PlayerProfile({ profilePic , onProfilePicUpdate}) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
@@ -45,10 +49,12 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const navigate = useNavigate();
   
-
-
-
+  const handleTournamentClick = (tournamentId) => {
+    navigate(`/player/profile/tournaments/${tournamentId}`);
+  };
+  
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -185,7 +191,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
                   sx={{
                     fontSize: '1.25rem',
                     padding: '12px 24px',
-                    marginX: 20, // Add horizontal margin between tabs
+                    marginX: 'auto', // Add horizontal margin between tabs
 
                   }}
                 />
@@ -194,7 +200,18 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
                   sx={{
                     fontSize: '1.25rem',
                     padding: '12px 24px',
-                    marginX: 20, // Add horizontal margin between tabs
+                    marginX: 'auto', // Add horizontal margin between tabs
+
+                  }}
+                />
+
+                <Tab
+                  label="Ongoing Tournaments"
+                  
+                  sx={{
+                    fontSize: '1.25rem',
+                    padding: '12px 24px',
+                    marginX: 'auto', // Add horizontal margin between tabs
 
                   }}
                 />
@@ -245,6 +262,50 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
 
                   </Box>
                   <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+
+                    <CardContent>
+                      <Typography variant="h6">Item 2</Typography>
+                      <Typography variant="body2">Details about Item 2</Typography>
+                    </CardContent>
+
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+
+                    <CardContent>
+                      <Typography variant="h6">Item 3</Typography>
+                      <Typography variant="body2">Details about Item 3</Typography>
+                    </CardContent>
+
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+
+                    <CardContent>
+                      <Typography variant="h6">Item 1</Typography>
+                      <Typography variant="body2">Details about Item 1</Typography>
+                    </CardContent>
+
+                  </Box>
+                </Box>
+                {/* Add more content for Tab 2 here */}
+              </Box>
+            )}
+
+              {value === 2 && (
+              <Box sx={{ p: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ mb: 2 }}>Tab 3 Content</Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}
+                  onClick={() => navigate("/player/tournaments")}>
+
+                    <CardContent>
+                      <Typography variant="h6">Singapore Open</Typography>
+                      <Typography variant="body2">Click here to view details</Typography>
+                    </CardContent>
+
+                  </Box>
+                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2,  }}>
+                 
 
                     <CardContent>
                       <Typography variant="h6">Item 2</Typography>

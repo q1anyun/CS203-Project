@@ -12,6 +12,7 @@ import AdminMatchesView from './components/AdminMatchesView/AdminMatchesView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
+import TournamentDetails from './components/PlayerProfile/TournamentDetails';
 
 function AppContent() {
   const location = useLocation();
@@ -34,11 +35,14 @@ function AppContent() {
         <Route path="/admin/tournaments" element={<AdminTournamentView />} />
         <Route path="/admin/matches" element={<AdminMatchesView />} />
         <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate}/>} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
+        <Route path="/admin/profile" element={<AdminProfile  profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate}/>} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<LoginPage />} /> 
         <Route path="/signup" element={<SignUpPage />} /> 
         <Route path="/error" element={<DefaultErrorPage />} /> 
+        <Route path='/tournamentview' element= {<TournamentDetails />}/>
+        
+
       </Routes>
     </>
   );
