@@ -31,7 +31,7 @@ function LoginPage() {
           <img src={logoImage} alt="logo" className={styles.logoImage} />
           <h1 className={styles.signInText}>SIGN IN</h1>
 
-          <Grid2 container spacing={3}>
+          <Grid2 container spacing={4}>
             <Grid2 size={12}>
               <TextField
                 variant="outlined"
@@ -91,12 +91,12 @@ function LoginPage() {
               </Grid2>
             )}
 
-            {/*This is not functional yet*/}
+            {/*This is not functional yet
             <Grid2 size={12} className={styles.rightContainer}>
               <Link onClick={() => handleDialogOpen(setOpenDialog)} className={styles.forgotPasswordLinkStyle}>
                 Forgot password?
               </Link>
-            </Grid2>
+            </Grid2> */}
 
             <Grid2 size={12}>
               <button type="submit" className={styles.gradientButton}
