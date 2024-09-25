@@ -18,6 +18,8 @@ const tournamentsData = [
         startDate: "2024-09-10",
         endDate: "2024-09-15",
         timeControl: "Rapid",
+        minElo: 1200,
+        maxElo: 1800,
         numberOfPlayers: 10,
         status: "Expired",
     },
@@ -27,6 +29,8 @@ const tournamentsData = [
         startDate: "2024-09-12",
         endDate: "2024-09-18",
         timeControl: "Blitz",
+        minElo: 800,
+        maxElo: 1400,
         numberOfPlayers: 8,
         status: "Upcoming",
     },
@@ -36,10 +40,13 @@ const tournamentsData = [
         startDate: "2024-09-20",
         endDate: "2024-09-30",
         timeControl: "Classic",
+        minElo: 1500,
+        maxElo: 2200,
         numberOfPlayers: 16,
         status: "Live",
     },
 ];
+
 
 const statusColorMap = {
     Live: 'success',
@@ -103,16 +110,18 @@ function PlayerTournamentView() {
             <Typography variant="h4" component="h2" gutterBottom className={styles.title}>
                 All Tournaments
             </Typography>
-            <TableContainer component={Paper} className={styles.tableContainer}>
+            <TableContainer component={Paper} className={styles.table}>
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell>Tournament ID</StyledTableCell>
-                            <StyledTableCell>Tournament Name</StyledTableCell>
+                            <StyledTableCell>ID</StyledTableCell>
+                            <StyledTableCell>Name</StyledTableCell>
                             <StyledTableCell>Start Date</StyledTableCell>
                             <StyledTableCell>End Date</StyledTableCell>
                             <StyledTableCell>Time Control</StyledTableCell>
-                            <StyledTableCell>Number of Players</StyledTableCell>
+                            <StyledTableCell>Min ELO</StyledTableCell>
+                            <StyledTableCell>Max ELO</StyledTableCell>
+                            <StyledTableCell>Players</StyledTableCell>
                             <StyledTableCell>Status</StyledTableCell>
                             <StyledTableCell>Actions</StyledTableCell>
                         </TableRow>
@@ -125,6 +134,8 @@ function PlayerTournamentView() {
                                 <StyledTableCell>{tournament.startDate}</StyledTableCell>
                                 <StyledTableCell>{tournament.endDate}</StyledTableCell>
                                 <StyledTableCell>{tournament.timeControl}</StyledTableCell>
+                                <StyledTableCell>{tournament.minElo}</StyledTableCell>
+                                <StyledTableCell>{tournament.maxElo}</StyledTableCell>
                                 <StyledTableCell>{tournament.numberOfPlayers}</StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
