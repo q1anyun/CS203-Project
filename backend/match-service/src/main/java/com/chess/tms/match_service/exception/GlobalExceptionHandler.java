@@ -18,8 +18,8 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("message", e.getMessage());
-        response.put("status", HttpStatus.NOT_MODIFIED.value());  // 404 Not Found status
-        return new ResponseEntity<>(response, HttpStatus.NOT_MODIFIED);
+        response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     //Handle MatchDoesNotExistException
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("message", e.getMessage());
-        response.put("status", HttpStatus.NOT_MODIFIED.value());  // 404 Not Found status
-        return new ResponseEntity<>(response, HttpStatus.NOT_MODIFIED);
+        response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 }

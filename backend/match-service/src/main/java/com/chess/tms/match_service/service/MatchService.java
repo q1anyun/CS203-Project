@@ -10,6 +10,8 @@ import com.chess.tms.match_service.repository.RoundTypeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,14 +29,17 @@ public class MatchService {
     @Autowired
     private GameTypeRepository gameTypeRepository;
 
-    //private final RestTemplate restTemplate;
+    @Value("${INTERNAL_SECRET}")
+    private String internalSecret;
 
-    @Value("${tournament.service.url}")
-    private String tournamentServiceUrl;
+    private final RestTemplate restTemplate;
 
-    // public MatchService(RestTemplate restTemplate) {
-    //     this.restTemplate = restTemplate;
-    // }
+    // @Value("${tournament.service.url}")
+    // private String tournamentServiceUrl;
+
+    public MatchService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public TournamentPlayerDTO[] getTournamentPlayers() {
         TournamentPlayerDTO player1 = new TournamentPlayerDTO(1L, 1200);
@@ -63,7 +68,14 @@ public class MatchService {
     }
 
     public void createInitialMatches(Long tournamentId, Long gameTypeId) {
-        TournamentPlayerDTO[] players = getTournamentPlayers();
+        // TournamentPlayerDTO[] players = getTournamentPlayers();
+
+        // Get all players for the tournament
+        ResponseEntity<TournamentPlayerDTO[]> response = restTemplate.exchange(
+                "http://localhost:8085/api/matches/tournament/"+tournamentId, HttpMethod.GET, null, TournamentPlayerDTO[].class);
+        
+                // Extract the body (TournamentPlayerDTO array) from the response
+        TournamentPlayerDTO[] players = response.getBody();
         int totalPlayers = players.length;
 
         // Calculate the next power of 2 for the knockout stage
@@ -177,10 +189,11 @@ public class MatchService {
     // To do: Add check whether winnerId is part of the match
     public void advanceWinner(Long matchId, Long winnerId) {
         Match match = matchRepository.findById(matchId)
-                .orElseThrow(() -> new RuntimeException("Match not found"));
+                .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
 
-        if(match.getPlayer1Id() != winnerId || match.getPlayer2Id() != winnerId) {
-            throw new PlayerDoesNotExistInMatchException("Player with id " + winnerId + " is not recognised in the match.");
+        if (match.getPlayer1Id() != winnerId || match.getPlayer2Id() != winnerId) {
+            throw new PlayerDoesNotExistInMatchException(
+                    "Player with id " + winnerId + " is not recognised in the match.");
         }
 
         match.setWinnerId(winnerId);
@@ -204,21 +217,24 @@ public class MatchService {
     }
 
     public void generateNextRound(Long tournamentId) {
-        // Find the most recent completed round (the round with the minimum number of completed matches)
-        // Might store current Round id in Tourmanent table instead of finding it every time
+        // Find the most recent completed round (the round with the minimum number of
+        // completed matches)
+        // Might store current Round id in Tourmanent table instead of finding it every
+        // time
         RoundType mostRecentCompletedRound = roundTypeRepository.findMostRecentCompletedRound(tournamentId)
-            .orElseThrow(() -> new RuntimeException("No completed rounds found for this tournament."));
-    
+                .orElseThrow(() -> new RuntimeException("No completed rounds found for this tournament."));
+
         // Get the matches for that completed round
-        List<Match> completedMatches = matchRepository.findCompletedMatchesByRoundType(tournamentId, mostRecentCompletedRound.getId());
-    
+        List<Match> completedMatches = matchRepository.findCompletedMatchesByRoundType(tournamentId,
+                mostRecentCompletedRound.getId());
+
         // Assign matches for the next round
         for (Match completedMatch : completedMatches) {
             Long nextMatchId = completedMatch.getNextMatchId();
             if (nextMatchId != null) {
                 Match nextMatch = matchRepository.findById(nextMatchId)
-                    .orElseThrow(() -> new RuntimeException("Next match not found for match ID: " + nextMatchId));
-    
+                        .orElseThrow(() -> new RuntimeException("Next match not found for match ID: " + nextMatchId));
+
                 System.out.println(nextMatchId);
 
                 if (nextMatch.getPlayer1Id() == null) {
