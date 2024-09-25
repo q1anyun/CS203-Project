@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_AUTHENTICATION_SERVICE_URL;
+const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
@@ -17,7 +17,7 @@ export const handleDialogClose = (setOpenDialog) => {
 export const handleSubmit = async (e, username, password, navigate, setError) => {
     e.preventDefault();
     try {
-        const response = await axios.post(`${baseURL}/api/auth/login`, { username, password });
+        const response = await axios.post(`${baseURL}/login`, { username, password });
         
         console.log('Response Data:', response.data);
         const { role, jwtResponse } = response.data;
