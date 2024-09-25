@@ -32,8 +32,9 @@ public class PlayerController {
     }
 
     @PutMapping("/currentPlayerById")
-    public ResponseEntity<String> updatePlayer(@PathVariable Long id, @RequestBody UpdatePlayerDetailsDTO updatedPlayerDetails) {
-         playerService.updatePlayer(id, updatedPlayerDetails);
+    public ResponseEntity<String> updatePlayer(@RequestHeader("X-User-PlayerId") String id, @RequestBody UpdatePlayerDetailsDTO updatedPlayerDetails) {
+        Long playerId = Long.parseLong(id);
+        playerService.updatePlayer(playerId, updatedPlayerDetails);
         return ResponseEntity.ok("Suceessfully updated player");
     }
     
