@@ -130,14 +130,18 @@ function PlayerTournamentView() {
                                     <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    <Button
-                                        variant="contained"
-                                        color={isJoined(tournament.tournamentId) ? 'secondary' : 'success'}
-                                        disabled={isJoined(tournament.tournamentId)}
-                                        onClick={() => handleJoin(tournament)}
-                                    >
-                                        {isJoined(tournament.tournamentId) ? 'Joined' : 'Join'}
-                                    </Button>
+                                    {tournament.status === "Live" || tournament.status === "Expired" ? ( 
+                                                <> {} </>
+                                    ) : (
+                                        <Button
+                                            variant="contained"
+                                            color={isJoined(tournament.tournamentId) ? 'secondary' : 'success'}
+                                            disabled={isJoined(tournament.tournamentId)}
+                                            onClick={() => handleJoin(tournament)}
+                                        >
+                                            {isJoined(tournament.tournamentId) ? 'Joined' : 'Join'}
+                                        </Button>
+                                    )}
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}

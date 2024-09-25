@@ -9,14 +9,13 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import { Typography, Grid2, Chip, IconButton, Fab, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
+import { Typography, Grid2, Chip, IconButton, Fab, TextField, Dialog, DialogActions, DialogContent, DialogTitle, Button, Select, MenuItem } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import styles from './AdminTournamentView.module.css';
-
 
 const tournamentsData = [
     {
@@ -86,11 +85,13 @@ export default function AdminTournamentView() {
         tournamentName: '',
         startDate: '',
         endDate: '',
-        timeControl: '',
+        timeControl: 'Classic', // Default time control
         numberOfPlayers: '',
-        status: 'Upcoming', // Default status
+        status: 'Upcoming',
     });
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
+    const timeControlOptions = ["Blitz", "Rapid", "Classic"];
 
     const handleView = (tournamentId) => {
         navigate(`/standings/${tournamentId}`);
@@ -155,7 +156,7 @@ export default function AdminTournamentView() {
             tournamentName: '',
             startDate: '',
             endDate: '',
-            timeControl: '',
+            timeControl: 'Classic',
             numberOfPlayers: '',
             status: 'Upcoming',
         });
@@ -225,12 +226,16 @@ export default function AdminTournamentView() {
                                 </StyledTableCell>
                                 <StyledTableCell>
                                     {editableRow === rowIndex ? (
-                                        <TextField
+                                        <Select
                                             value={tournament.timeControl}
                                             onChange={(e) => handleChange(e, rowIndex, 'timeControl')}
                                             variant="outlined"
                                             size="small"
-                                        />
+                                        >
+                                            {timeControlOptions.map(option => (
+                                                <MenuItem key={option} value={option}>{option}</MenuItem>
+                                            ))}
+                                        </Select>
                                     ) : (
                                         tournament.timeControl
                                     )}
@@ -243,6 +248,7 @@ export default function AdminTournamentView() {
                                             onChange={(e) => handleChange(e, rowIndex, 'numberOfPlayers')}
                                             variant="outlined"
                                             size="small"
+                                            sx={{ width: '80px' }}
                                         />
                                     ) : (
                                         tournament.numberOfPlayers
@@ -273,7 +279,7 @@ export default function AdminTournamentView() {
                     </TableBody>
                 </Table>
             </TableContainer>
-          <Fab 
+            <Fab 
                 color="success" 
                 onClick={handleCreate} 
                 aria-label="add"
@@ -337,4 +343,3 @@ export default function AdminTournamentView() {
         </div>
     );
 }
-
