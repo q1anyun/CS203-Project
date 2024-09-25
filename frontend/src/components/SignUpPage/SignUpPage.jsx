@@ -1,7 +1,8 @@
-import { React, useState } from 'react';
+import { React, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle } from '@mui/material';
+import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import countryList from 'react-select-country-list'
 
 // Icons
 import EmailIcon from '@mui/icons-material/Email';
@@ -23,10 +24,12 @@ function SignUpPage() {
     const [showPassword, setShowPassword] = useState(false); // password toggle visibility
     const [errors, setErrors] = useState({}); // display error messages
     const [showAlert, setShowAlert] = useState(false); // successful sign up
+    const options = useMemo(() => countryList().getData(), [])
     const [formData, setFormData] = useState({ // sign up form
         username: '',
         firstName: '',
         lastName: '',
+        country: 'SG',
         email: '',
         password: '',
         profilePicture: profilePic
@@ -142,6 +145,34 @@ function SignUpPage() {
                                                 ),
                                             }}
                                         />
+                                    </Grid2>
+
+                                    {/*Country field*/}
+                                    <Grid2 size={12}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Country</InputLabel>
+                                            <Select
+                                                name="country"
+                                                value={formData.country}
+                                                label="Country"
+                                                sx={{ textAlign: 'left' }}
+                                                MenuProps={{
+                                                    PaperProps: {
+                                                        style: {
+                                                            maxHeight: 200, 
+                                                            width: 'auto', 
+                                                        },
+                                                    },
+                                                }}
+                                                onChange={(e) => handleChange(e, setFormData)}
+                                            >
+                                                {options.map((country) => (
+                                                    <MenuItem key={country.value} value={country.value}>
+                                                        {country.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
                                     </Grid2>
 
                                     {/*Email field*/}
