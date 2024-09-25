@@ -23,13 +23,13 @@ public class MatchController {
     }
 
     // Get all matches for a tournament
-    @GetMapping("/{tournamentId}")
+    @GetMapping("/tournament/{tournamentId}")
     public ResponseEntity<List<Match>> getMatchesByTournament(@PathVariable Long tournamentId) {
         List<Match> matches = matchService.getMatchesByTournament(tournamentId);
         return ResponseEntity.ok(matches);
     }
 
-    // Get all matches for a tournament
+    // Get a matches for a tournament
     @GetMapping("/{matchId}")
     public ResponseEntity<Match> getMatch(@PathVariable Long matchId) {
         Match match = matchService.getMatch(matchId);

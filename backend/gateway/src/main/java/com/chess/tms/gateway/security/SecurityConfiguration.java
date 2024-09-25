@@ -60,14 +60,14 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
-                //.anyRequest().permitAll() 
+                .anyRequest().permitAll() 
                 //.requestMatchers("/api/auth/**", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
-                .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
+                //.requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
                 // // Only admins can access /admin/** endpoints
                 // .requestMatchers("/admin/**").hasRole("ADMIN")
                 // // Users and admins can access /user/** endpoints
                 // .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-                .anyRequest().authenticated()  // All other requests require authentication
+               // .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)
@@ -82,6 +82,7 @@ public class SecurityConfiguration {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(clientUrl)); // Allow requests from frontend
+        configuration.setAllowedOrigins(List.of("clientUrl")); // Allow requests from frontend
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -23,6 +23,9 @@ public class PlayerDetails {
     @Column(name = "elo_rating")
     private int eloRating;
 
+    @Column(name = "country", length = 100)
+    private String country;
+
     @Column(name = "first_name", length = 100)
     private String firstName;
 

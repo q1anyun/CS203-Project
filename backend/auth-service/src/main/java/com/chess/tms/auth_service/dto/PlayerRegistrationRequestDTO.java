@@ -21,6 +21,9 @@ public class PlayerRegistrationRequestDTO {
     @NotBlank(message = "Password is mandatory")
     private String password;
 
+    @NotBlank(message = "Country is mandatory")
+    private String country;
+
     @NotBlank(message = "First name is mandatory")
     private String firstName;
 

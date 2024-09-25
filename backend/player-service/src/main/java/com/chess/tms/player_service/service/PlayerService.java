@@ -30,6 +30,7 @@ public class PlayerService {
         playerDetailsDTO.setTotalMatches(playerDetails.getTotalMatches());
         playerDetailsDTO.setTotalLosses(playerDetails.getTotalLosses());
         playerDetailsDTO.setTotalWins(playerDetails.getTotalWins());
+        playerDetailsDTO.setCountry(playerDetails.getCountry());
         return playerDetailsDTO;
 
     }
@@ -49,6 +50,7 @@ public class PlayerService {
         playerDetailsDTO.setTotalMatches(playerDetails.getTotalMatches());
         playerDetailsDTO.setTotalLosses(playerDetails.getTotalLosses());
         playerDetailsDTO.setTotalWins(playerDetails.getTotalWins());
+        playerDetailsDTO.setCountry(playerDetails.getCountry());
         return playerDetailsDTO;
     }
 }

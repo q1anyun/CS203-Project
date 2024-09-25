@@ -80,6 +80,7 @@ public class AuthService {
         playerDetails.setEloRating(DEFAULT_ELO_RATING);
         playerDetails.setHighestElo(DEFAULT_ELO_RATING);
         playerDetails.setLowestElo(DEFAULT_ELO_RATING);
+        playerDetails.setCountry(player.getCountry());
 
         playerDetailsRepository.save(playerDetails);
 
@@ -93,12 +94,13 @@ public class AuthService {
         if (usersRepository.findByEmail(admin.getEmail()).isPresent()) {
             throw new UserAlreadyExistsException("Email already exists.");
         }
-
         User newUser = new User();
         newUser.setUsername(admin.getUsername());
         newUser.setEmail(admin.getEmail());
         newUser.setPassword(passwordEncoder.encode(admin.getPassword()));
-        newUser.setRole(admin.getRole());
+        newUser.setRole(UserRole.ADMIN);
+        newUser.setCreatedAt(java.time.LocalDateTime.now());
+        newUser.setUpdatedAt(java.time.LocalDateTime.now());
 
         usersRepository.save(newUser);
         return "Admin created successfully";

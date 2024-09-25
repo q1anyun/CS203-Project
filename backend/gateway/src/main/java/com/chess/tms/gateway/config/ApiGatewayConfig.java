@@ -47,6 +47,22 @@ public class ApiGatewayConfig {
                 .build();
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> tournamentServiceRoute() {
+        return GatewayRouterFunctions.route("tournament-service")
+                .route(RequestPredicates.path("/api/tournaments/**"), request -> 
+                    processRequestWithJwtClaims(request, "http://localhost:8084"))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> matchServiceRoute() {
+        return GatewayRouterFunctions.route("match-service")
+                .route(RequestPredicates.path("/api/matches/**"), request -> 
+                    processRequestWithJwtClaims(request, "http://localhost:8085"))
+                .build();
+    }
+
     private ServerResponse processRequestWithJwtClaims(ServerRequest request, String forwardUri) {
         // Extract the Authorization header
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
@@ -58,7 +74,7 @@ public class ApiGatewayConfig {
     
             // Add claims to headers for downstream services
             ServerRequest modifiedRequest = ServerRequest.from(request)
-                    .header("X-User-UserId", claims.get("userId"))
+                    .header("X-User-Id", claims.get("userId"))
                     .header("X-User-Role", claims.get("role"))
                     .header("X-User-PlayerId", claims.get("playerId"))
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -70,8 +86,12 @@ public class ApiGatewayConfig {
                 return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
-    
-        // If Authorization header is missing or invalid
-        return ServerResponse.status(HttpStatus.UNAUTHORIZED).build();
+        // If Authorization header is missing or invalid, just forward without headers
+        try {
+            return HandlerFunctions.http(forwardUri).handle(request);
+        } catch (Exception e) {
+            System.out.println("Error forwarding request: " + e.getMessage());
+            return ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
