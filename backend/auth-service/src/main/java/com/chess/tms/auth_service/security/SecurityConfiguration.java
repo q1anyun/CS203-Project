@@ -54,7 +54,6 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
                 .anyRequest().authenticated()  // All other requests require authentication
@@ -65,16 +64,5 @@ public class SecurityConfiguration {
             .authenticationProvider(authenticationProvider());
 
         return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(clientUrl)); // Allow requests from frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }

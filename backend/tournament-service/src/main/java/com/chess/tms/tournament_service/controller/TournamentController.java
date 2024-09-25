@@ -74,9 +74,4 @@ public class TournamentController {
     public ResponseEntity<PlayerRegistrationDTO> deletePlayerFromTournament(@PathVariable long playerid, @PathVariable long tournamentid) {
         return ResponseEntity.ok(tournamentService.deletePlayerFromTournament(playerid, tournamentid));
     }
-
-
-    
-    
-
 }

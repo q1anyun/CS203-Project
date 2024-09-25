@@ -29,22 +29,10 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                     http
                     .csrf(csrf -> csrf.disable())  // Disable CSRF
-                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                     .authorizeHttpRequests(auth -> auth
                          .anyRequest().permitAll() 
                     );
                 
             return http.build();
         }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(clientUrl)); // Allow requests from frontend
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 }

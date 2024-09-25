@@ -1,14 +1,11 @@
 package com.chess.tms.player_service.controller;
 
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
 import com.chess.tms.player_service.service.PlayerService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;

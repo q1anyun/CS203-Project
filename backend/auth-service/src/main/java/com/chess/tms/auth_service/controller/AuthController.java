@@ -23,12 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody JwtRequest jwtRequest, @RequestHeader Map<String, String> headers) throws Exception {
-        // Print out all headers
-        System.out.println("Request Headers:");
-        headers.forEach((key, value) -> System.out.println(key + ": " + value));
-
         AuthenticatedUserDTO authenticatedUser = authService.authenticate(jwtRequest);
-
         String jwtToken = jwtUtil.generateToken(authenticatedUser);
         JwtResponse jwtResponse = new JwtResponse();
         jwtResponse.setToken(jwtToken);
@@ -36,7 +31,6 @@ public class AuthController {
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setRole(authenticatedUser.getRole());
         loginResponse.setJwtResponse(jwtResponse);
-
         return ResponseEntity.ok(loginResponse);
     }
 
