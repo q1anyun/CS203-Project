@@ -94,7 +94,7 @@ export default function AdminTournamentView() {
     const timeControlOptions = ["Blitz", "Rapid", "Classic"];
 
     const handleView = (tournamentId) => {
-        navigate(`/standings/${tournamentId}`);
+        navigate(`/tournamentdetails/${tournamentId}`);
     };
 
     const handleEdit = (rowIndex) => {
