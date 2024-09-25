@@ -18,9 +18,11 @@ export const handleSubmit = async (e, username, password, navigate, setError) =>
     e.preventDefault();
     try {
         const response = await axios.post(`${baseURL}/api/auth/login`, { username, password });
-
-        // Store the token and expiration time in local storage
-        const { token, expiresIn, role } = response.data;
+        
+        console.log('Response Data:', response.data);
+        const { role, jwtResponse } = response.data;
+        const { token, expiresIn } = jwtResponse;
+    
         localStorage.setItem('token', token);
         const expirationTime = Date.now() + expiresIn * 1000;
         localStorage.setItem('tokenExpiration', expirationTime);
