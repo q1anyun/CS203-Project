@@ -1,64 +1,58 @@
 import React from 'react';
 import styles from './Home.module.css';
-import { Container, Grid2, Typography, Card, CardContent, CardActions, Button } from '@mui/material';
-import image from '../../assets/welcome.jpg';
+import { Grid2, Button } from '@mui/material';
+import image from '../../assets/welcomeBg.png';
+import tournamentImage from '../../assets/tournament-icon.png';
+import leaderboardImage from '../../assets/leaderboard-icon.png';
+import profileImage from '../../assets/profile-icon.png';
 import { Link } from 'react-router-dom';
 
 function Home() {
   return (
-    <div className={styles.bgContainer}>
-      <Container maxWidth="lg" sx={{ height: '500px', marginTop: 20, marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 2 }} className={styles.welcomeContainer}>
-        <Grid2 container spacing={4}>
-          <Grid2 size={6}>
-            <Typography variant="h4" className={styles.greetings} sx={{ marginBottom: 5 }}>Welcome to CHESS MVP</Typography>
-            <Typography variant="h6" className={styles.description}>Chess MVP is your go-to platform for knockout chess tournaments. Enjoy seamless tournament management, real-time updates, and dynamic leaderboards, all designed for players of every skill level. Dive into competitive play with ease and precision. </Typography>
-            <h2>working in progress...</h2>
-          </Grid2>
-          <Grid2 size={6}>
-            <img src={image} alt="Description" style={{ width: '100%', height: 'auto' }} />
-          </Grid2>
-        </Grid2>
-      </Container>
-
-      <Container maxWidth="lg">
+    <div className={styles.mainContainer}>
+      <div className={styles.welcomeContainer}>
         <Grid2 container spacing={3}>
+          <Grid2 size={4} className={styles.imageContainer}>
+            <img src={image} alt="welcomeImage" className={styles.Image} />
+          </Grid2>
+          <Grid2 size={8} className={styles.textContainer}>
+            <h1 className={styles.greetings}>Welcome to Chess MVP</h1>
+            <h6 className={styles.description}>YOUR PLATFORM FOR KNOCKOUT CHESS TOURNAMENTS</h6>
+          </Grid2>
+
+        </Grid2>
+      </div>
+
+      <div className={styles.cardContainer}>
+        <Grid2 container spacing={8}>
           <Grid2 size={4}>
-            <Card sx={{ maxWidth: 345, height: 200 }}>
-              <CardContent>
-                <Typography variant="h5">Tournaments</Typography>
-                <Typography variant="body2">Register for upcoming knockout chess tournaments and compete against players of all levels.</Typography>
-              </CardContent>
-              <CardActions className={styles.cardActions}>
-                <Button component={Link} to="/player/tournaments" variant="outlined" color="secondary" size="medium">To Tournaments</Button>
-              </CardActions>
-            </Card>
+            <div className={styles.card}>
+              <h1 className={styles.cardTitle}>Tournaments</h1>
+              <h5 className={styles.cardContent}>Register for upcoming knockout chess tournaments and compete against players.</h5>
+              <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
+              <Button component={Link} to="/player/tournaments" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
+            </div>
           </Grid2>
 
           <Grid2 size={4}>
-            <Card sx={{ maxWidth: 345, height: 200 }}>
-              <CardContent>
-                <Typography variant="h5">Leaderboard</Typography>
-                <Typography variant="body2">Check out the latest rankings and see where you stand among your peers.</Typography>
-              </CardContent>
-              <CardActions className={styles.cardActions}>
-                <Button component={Link} to="/leaderboard" variant="outlined" color="secondary" size="medium">To Leaderboard</Button>
-              </CardActions>
-            </Card>
+            <div className={styles.card}>
+              <h1 className={styles.cardTitle}>Leaderboard</h1>
+              <h5 className={styles.cardContent}>Check out the latest rankings and see where you stand among your peers.</h5>
+              <img src={leaderboardImage} alt="leaderboard" className={styles.cardImage} />
+              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
+            </div>
           </Grid2>
 
           <Grid2 size={4}>
-            <Card sx={{ maxWidth: 345, height: 200 }}>
-              <CardContent>
-                <Typography variant="h5">Profile</Typography>
-                <Typography variant="body2">View and manage your personal chess profile, including detailed statistics, past tournament results, and performance trends.</Typography>
-              </CardContent>
-              <CardActions className={styles.cardActions}>
-                <Button component={Link} to="/player/profile" variant="outlined" color="secondary" size="medium">To Profile</Button>
-              </CardActions>
-            </Card>
+            <div className={styles.card}>
+              <h1 className={styles.cardTitle}>Profile</h1>
+              <h5 className={styles.cardContent}>View and manage your personal chess profile, check your statistics.</h5>
+              <img src={profileImage} alt="leaderboard" className={styles.cardImage} />
+              <Button component={Link} to="/player/profile" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</Button>
+            </div>
           </Grid2>
         </Grid2>
-      </Container>
+      </div>
     </div>
   );
 }
