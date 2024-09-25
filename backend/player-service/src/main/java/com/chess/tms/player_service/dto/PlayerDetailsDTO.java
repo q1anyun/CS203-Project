@@ -1,15 +1,8 @@
 package com.chess.tms.player_service.dto;
-
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class PlayerDetailsDTO {
-
     private Long id;
     private Long userId;
     private int eloRating;
@@ -22,4 +15,5 @@ public class PlayerDetailsDTO {
     private int highestElo;
     private int lowestElo;
     private String country;
+    private int winRate;
 }

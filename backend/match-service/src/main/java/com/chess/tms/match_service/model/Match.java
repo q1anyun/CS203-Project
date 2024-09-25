@@ -42,8 +42,9 @@ public class Match {
     @JoinColumn(name = "round_type_id", referencedColumnName = "id", nullable = false)
     private RoundType roundType;
 
-    @Column(name = "game_type_id", nullable = false)
-    private Long gameTypeId;
+    @ManyToOne
+    @JoinColumn(name = "game_type_id", referencedColumnName = "id", nullable = false)
+    private GameType gameType;
 
     @Column(name = "next_match_id")
     private Long nextMatchId;

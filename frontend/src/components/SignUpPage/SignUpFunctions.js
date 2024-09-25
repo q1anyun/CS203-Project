@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
+const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
@@ -44,7 +44,7 @@ export const handleSubmit = async (e, formData, setFormData, setErrors, setShowA
     if (Object.keys(formErrors).length > 0) return;
 
     try {
-        const response = await axios.post(`${baseURL}/api/users/register/player`, formData);
+        const response = await axios.post(`${baseURL}/register/player`, formData);
         setShowAlert(true);
     } catch (err) {
         if (err.response) {

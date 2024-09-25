@@ -21,8 +21,4 @@ public class AdminRegistrationRequestDTO {
 
     @NotBlank(message = "Password is mandatory")
     private String password;
-
-    @NotBlank(message = "Role is mandatory")
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
 }

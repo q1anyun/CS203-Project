@@ -12,7 +12,7 @@ import AdminMatchesView from './components/AdminMatchesView/AdminMatchesView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
-import TournamentDetails from './components/PlayerProfile/TournamentDetails';
+import TournamentDetails from './components/TournamentDetails/TournamentDetails';
 
 function AppContent() {
   const location = useLocation();
@@ -40,8 +40,6 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} /> 
         <Route path="/signup" element={<SignUpPage />} /> 
         <Route path="/error" element={<DefaultErrorPage />} /> 
-        <Route path='/tournamentview' element= {<TournamentDetails />}/>
-        
 
       </Routes>
     </>

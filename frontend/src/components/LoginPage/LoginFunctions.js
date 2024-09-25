@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
+const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
@@ -17,10 +17,12 @@ export const handleDialogClose = (setOpenDialog) => {
 export const handleSubmit = async (e, username, password, navigate, setError) => {
     e.preventDefault();
     try {
-        const response = await axios.post(`${baseURL}/api/auth/login`, { username, password });
-
-        // Store the token and expiration time in local storage
-        const { token, expiresIn, role } = response.data;
+        const response = await axios.post(`${baseURL}/login`, { username, password });
+        
+        console.log('Response Data:', response.data);
+        const { role, jwtResponse } = response.data;
+        const { token, expiresIn } = jwtResponse;
+    
         localStorage.setItem('token', token);
         const expirationTime = Date.now() + expiresIn * 1000;
         localStorage.setItem('tokenExpiration', expirationTime);

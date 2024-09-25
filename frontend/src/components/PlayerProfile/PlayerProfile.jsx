@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './PlayerProfile.css';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
@@ -6,6 +6,8 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -43,18 +45,16 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
   const [localProfilePic, setLocalProfilePic] = useState(profilePic);
-  const [playerName, setPlayerName] = useState('Magnus Carlsen');
+  const [playerName, setPlayerName] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [country, setCountry] = useState('-');
+  // const [email, setEmail] = useState('');
+  // const [password, setPassword] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
+  const [rating, setRating] = useState(0); 
   const navigate = useNavigate();
-  
-  const handleTournamentClick = (tournamentId) => {
-    navigate(`/player/profile/tournaments/${tournamentId}`);
-  };
-  
+
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
@@ -62,11 +62,67 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
 
-  const handleNameChange = (event) => setPlayerName(event.target.value);
+  // const handleNameChange = (event) => setPlayerName(event.target.value);
   const handleFirstNameChange = (event) => setFirstName(event.target.value);
   const handleLastNameChange = (event) => setLastName(event.target.value);
-  const handleEmailChange = (event) => setEmail(event.target.value);
-  const handlePasswordChange = (event) => setPassword(event.target.value);
+  const handleCountryChange = (event) => setCountry(event.target.value);
+  // const handleEmailChange = (event) => setEmail(event.target.value);
+  // const handlePasswordChange = (event) => setPassword(event.target.value);
+ 
+
+  useEffect(() => {
+    const fetchPlayerDetails = async () => {
+        try {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                navigate('/login'); // Redirect to login if no token found
+                return;
+            }
+
+            const response = await axios.get(`${baseURL}/currentPlayerById`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            console.log('Player Data:', response.data);
+            const { firstName, lastName, eloRating, profilePic, country} = response.data;
+
+            // Store the player details in local state or localStorage as needed
+            setPlayerName(firstName + " " +lastName || '');
+            setFirstName(firstName || '');
+            setLastName(lastName || '');
+            setCountry(country ||'-'); 
+            setRating(eloRating || '-'); 
+            // setEmail(email || '');
+            setLocalProfilePic(profilePic || '');
+            
+
+        } catch (err) {
+            if (err.response) {
+                const statusCode = err.response.status;
+                const errorMessage = err.response.data.message || 'An error occurred';
+
+                // Handle specific error statuses
+                if (statusCode === 404 || statusCode === 403) {
+                    setError('Player details not found or access denied');
+                } else {
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                }
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
+        }
+    };
+
+    fetchPlayerDetails();
+}, [navigate]); // Ensure `navigate` is included in the dependencies if it's from react-router-dom
+
+  
+  
 
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
@@ -77,38 +133,59 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
       onProfilePicUpdate(imageUrl);
     }
   };
-  
+
 
   const handleSave = async () => {
-    const formData = new FormData();
-    formData.append('playerName', playerName);
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('email', email);
-    formData.append('password', password);
-
+    const token = localStorage.getItem('token'); // Use the token for authentication
+  
+    const playerData = {
+      firstName: firstName,
+      lastName: lastName,
+    };
+  
     if (selectedFile) {
-      formData.append('profilePic', selectedFile);
+      // You may need to handle file uploads separately
+      const reader = new FileReader();
+      reader.readAsDataURL(selectedFile); // Convert file to base64
+      reader.onloadend = async () => {
+        playerData.profilePic = reader.result; // Assign base64 string to profilePic
+        await sendUpdate(playerData, token);
+      };
+    } else {
+      await sendUpdate(playerData, token);
     }
-
+  };
+  
+  const sendUpdate = async (playerData, token) => {
     try {
-      const response = await fetch('/api/update-profile', {
-        method: 'POST',
-        body: formData,
+      const response = await axios.put(`${baseURL}/currentPlayerById`, playerData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json', // Sending as JSON
+        },
       });
-
-      if (response.ok) {
+  
+      if (response.status === 200) {
         console.log('Profile updated successfully');
-        // Optionally, refresh the UI with the new data
       } else {
         console.error('Error updating profile');
       }
     } catch (error) {
-      console.error('Error:', error);
+      if (error.response) {
+        console.error('Error Status:', error.response.status);
+        console.error('Error Data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error Message:', error.message);
+      }
     }
-
+  
     handleCloseEdit();
   };
+  
+ 
+  
 
 
   return (
@@ -153,19 +230,19 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
         <Grid container spacing={2} justifyContent="center">
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">7</Typography>
+              <Typography variant="h6">7</Typography> 
               <Typography variant="body2">Rank</Typography>
             </Box>
           </Grid>
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">Singapore</Typography>
+              <Typography variant="h6">{country}</Typography>
               <Typography variant="body2">Country</Typography>
             </Box>
           </Grid>
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">1800</Typography>
+              <Typography variant="h6">{rating}</Typography>
               <Typography variant="body2">Rating</Typography>
             </Box>
           </Grid>
@@ -376,13 +453,13 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
       />
     </Button>
 
-          <TextField
+          {/* <TextField
             margin="dense"
             label="Username"
             fullWidth
             value={playerName}
             onChange={handleNameChange}
-          />
+          /> */}
           <TextField
             margin="dense"
             label="First Name"
@@ -397,7 +474,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
             value={lastName}
             onChange={handleLastNameChange}
           />
-          <TextField
+          {/* <TextField
             margin="dense"
             label="Email"
             fullWidth
@@ -411,7 +488,15 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
             type="password"
             value={password}
             onChange={handlePasswordChange}
-          />
+          /> */}
+          <TextField
+            margin="dense"
+            label="Country"
+            fullWidth
+            type="country"
+            value={country}
+            onChange={handleCountryChange}
+          /> 
 
 
           <Button onClick={handleSave} color="primary">
