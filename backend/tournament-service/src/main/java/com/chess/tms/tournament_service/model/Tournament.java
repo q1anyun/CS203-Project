@@ -3,6 +3,9 @@ package com.chess.tms.tournament_service.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,10 +16,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import com.chess.tms.tournament_service.enums.Status;
-import com.chess.tms.tournament_service.enums.Type;
+import com.chess.tms.tournament_service.enums.TimeControl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -30,8 +34,11 @@ public class Tournament {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long tournamentId;
 
-    // @Column(name = "created_by", nullable = false)
-    // private long creatorId;
+    @Column(name = "created_by", nullable = false)
+    private long creatorId;
+
+    // @Column(name = 'current_round_id') 
+    // private List<Long> currentRoundId;
 
     @Column
     private String name;
@@ -49,19 +56,18 @@ public class Tournament {
     private int maxElo;
 
     @Column
-    private int maxPlayers;
+    private int totalPlayers;
 
     @Column
-    private int minPlayers;
-    
-    @Column
-    private String location;
+    private int currentPlayers;
 
-    @Column 
+    @Column
+    @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column 
-    private Type type;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private TimeControl timeControl;
 
     @OneToMany(mappedBy = "tournament",
                 cascade = CascadeType.ALL)

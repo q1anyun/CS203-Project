@@ -6,12 +6,14 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 import com.chess.tms.tournament_service.enums.Status;
-import com.chess.tms.tournament_service.enums.Type;
+import com.chess.tms.tournament_service.enums.TimeControl;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TournamentRegistrationDTO {
+
+    private long creatorId;
 
     private String name;
 
@@ -23,14 +25,12 @@ public class TournamentRegistrationDTO {
 
     private int maxElo;
 
-    private int maxPlayers;
+    private int totalPlayers;
 
-    private int minPlayers;
-
-    private String location;
+    private int currentPlayers;
 
     private Status status;
 
-    private Type type;
+    private TimeControl timeControl;
     
 }

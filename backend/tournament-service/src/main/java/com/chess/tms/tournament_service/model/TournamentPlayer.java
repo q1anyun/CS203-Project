@@ -4,6 +4,8 @@ import com.chess.tms.tournament_service.enums.RegistrationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "tournament_players")
+@Table(name = "tournament_player")
 public class TournamentPlayer {
 
     @Id
@@ -34,6 +36,8 @@ public class TournamentPlayer {
     private Tournament tournament;
 
     @Column(name = "registration_status", nullable = false)
+    
+    @Enumerated(EnumType.STRING)
     private RegistrationStatus registrationStatus;
 
 }

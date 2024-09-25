@@ -1,7 +1,6 @@
 package com.chess.tms.tournament_service.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;   
-import com.chess.tms.tournament_service.enums.Type;
 import com.chess.tms.tournament_service.model.Tournament;
 
 import java.util.List;
@@ -19,14 +18,10 @@ public interface TournamentRepository extends JpaRepository<Tournament, Long>{
 
     public List<Tournament> findByName(String name);
 
-    public List<Tournament> findByType(Type type);
-
     public List<Tournament> findAll();
     
     public List<Tournament> findByStartDate(LocalDateTime startDate);
 
     public List<Tournament> findByEndDate(LocalDateTime endDate);
-
-    public List<Tournament> findByLocation(String location);
  
 }

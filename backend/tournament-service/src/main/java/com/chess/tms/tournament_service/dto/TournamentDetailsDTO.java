@@ -1,7 +1,7 @@
 package com.chess.tms.tournament_service.dto;
 
 import com.chess.tms.tournament_service.enums.Status;
-import com.chess.tms.tournament_service.enums.Type;
+import com.chess.tms.tournament_service.enums.TimeControl;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +16,8 @@ public class TournamentDetailsDTO {
 
     private long id;
 
+    private long creatorId;
+
     private String name;
 
     private LocalDateTime startDate;
@@ -26,13 +28,11 @@ public class TournamentDetailsDTO {
 
     private int maxElo;
 
-    private int maxPlayers;
+    private int totalPlayers;
 
-    private int minPlayers;
-
-    private String location;
+    private int currentPlayers;
 
     private Status status;
 
-    private Type type;
+    private TimeControl timeControl;
 }

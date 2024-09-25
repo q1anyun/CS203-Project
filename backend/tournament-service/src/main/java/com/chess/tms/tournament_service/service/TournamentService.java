@@ -12,6 +12,7 @@ import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateDTO;
 import com.chess.tms.tournament_service.enums.RegistrationStatus;
+import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.repository.TournamentPlayerRepository;
 import com.chess.tms.tournament_service.repository.TournamentRepository;
 
@@ -34,10 +35,20 @@ public class TournamentService {
 
     //helper function
     public TournamentDetailsDTO convertEntryToDTO(Tournament tournament) {
-        return new TournamentDetailsDTO(tournament.getTournamentId(), tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), 
-                                        tournament.getMinElo(), tournament.getMaxElo(), tournament.getMaxPlayers(), 
-                                        tournament.getMinPlayers(), tournament.getLocation(), tournament.getStatus(), 
-                                        tournament.getType());
+        TournamentDetailsDTO dto = new TournamentDetailsDTO();
+        dto.setId(tournament.getTournamentId());
+        dto.setName(tournament.getName());
+        dto.setCreatorId(tournament.getCreatorId());
+        dto.setStartDate(tournament.getStartDate());
+        dto.setEndDate(tournament.getEndDate());
+        dto.setMinElo(tournament.getMinElo());
+        dto.setMaxElo(tournament.getMaxElo());
+        dto.setTotalPlayers(tournament.getTotalPlayers());
+        dto.setCurrentPlayers(tournament.getCurrentPlayers());
+        dto.setStatus(tournament.getStatus());
+        dto.setTimeControl(tournament.getTimeControl());
+
+        return dto;
     }
 
     public PlayerRegistrationDTO convertPlayerEntrytoPlayerDTO(TournamentPlayer player) {
@@ -52,15 +63,14 @@ public class TournamentService {
     public Tournament convertDTOToTournament(TournamentRegistrationDTO dto){
         Tournament tournament = new Tournament();
         tournament.setName(dto.getName());
+        tournament.setCreatorId(dto.getCreatorId());
         tournament.setStartDate(dto.getStartDate());
         tournament.setEndDate(dto.getEndDate());
         tournament.setMinElo(dto.getMinElo());
         tournament.setMaxElo(dto.getMaxElo());
-        tournament.setMaxPlayers(dto.getMaxPlayers());
-        tournament.setMinPlayers(dto.getMinPlayers());;
-        tournament.setLocation(dto.getLocation());
-        tournament.setStatus(dto.getStatus());
-        tournament.setType(dto.getType());
+        tournament.setTotalPlayers(dto.getTotalPlayers());
+        tournament.setCurrentPlayers(dto.getCurrentPlayers());
+        tournament.setTimeControl(dto.getTimeControl());
 
         return tournament;
     }
@@ -69,8 +79,7 @@ public class TournamentService {
         
         // Map DTO to entry
         Tournament tournament = convertDTOToTournament(dto);
-        //tournament.setId(tournamentRepository.count()+1);
-        
+        tournament.setStatus(Status.UPCOMING);
 
         // Save in repo
         tournamentRepository.save(tournament);
@@ -113,18 +122,29 @@ public class TournamentService {
         return tournamentDTOs;
     }
 
-    public TournamentUpdateDTO updateTournament(long id, TournamentRegistrationDTO newTournament) {
+    public TournamentUpdateDTO updateTournament(long id, TournamentDetailsDTO dto) {
         Tournament tournament = tournamentRepository.findById(id).get();
         if(tournament == null) {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
 
-
         TournamentDetailsDTO oldDTO = convertEntryToDTO(tournament);
 
-        TournamentDetailsDTO updatedDTO = createTournament(newTournament);
+        // set new tournament fields
+        tournament.setName(dto.getName());
+        tournament.setCreatorId(dto.getCreatorId());
+        tournament.setStartDate(dto.getStartDate());
+        tournament.setEndDate(dto.getEndDate());
+        tournament.setMinElo(dto.getMinElo());
+        tournament.setMaxElo(dto.getMaxElo());
+        tournament.setTotalPlayers(dto.getTotalPlayers());
+        tournament.setCurrentPlayers(dto.getCurrentPlayers());;
+        tournament.setStatus(dto.getStatus());
+        tournament.setTimeControl(dto.getTimeControl());
 
-        tournamentRepository.deleteById(id); 
+        TournamentDetailsDTO updatedDTO = convertEntryToDTO(tournament);
+
+        tournamentRepository.save(tournament); 
 
         return new TournamentUpdateDTO(oldDTO, updatedDTO);
     }
