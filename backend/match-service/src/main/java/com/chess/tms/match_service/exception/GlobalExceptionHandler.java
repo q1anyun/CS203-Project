@@ -31,4 +31,22 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(GameTypeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleGameTypeNotFoundException(GameTypeNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RoundTypeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleRoundTypeNotFoundException(RoundTypeNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }

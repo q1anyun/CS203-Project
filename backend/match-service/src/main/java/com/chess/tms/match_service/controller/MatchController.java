@@ -1,5 +1,6 @@
 package com.chess.tms.match_service.controller;
 
+import com.chess.tms.match_service.dto.MatchDTO;
 import com.chess.tms.match_service.model.Match;
 import com.chess.tms.match_service.service.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +46,17 @@ public class MatchController {
         return ResponseEntity.ok("Winner advanced to the next round");
     }
 
-    // Update match results and advance winner
+    // Advance Round
     @PostMapping("/{tournamentId}/advance")
     public ResponseEntity<String> generateNextRound(@PathVariable Long tournamentId) {
         matchService.generateNextRound(tournamentId);
         return ResponseEntity.ok("Advanced to the next round");
+    }
+
+    // Recent 5 matches for a player
+    @GetMapping("/player/{playerId}/recent")
+    public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@PathVariable Long playerId) {
+        List<MatchDTO> recentMatches = matchService.getRecentMatchesByPlayerId(playerId);
+        return ResponseEntity.ok(recentMatches);
     }
 }
