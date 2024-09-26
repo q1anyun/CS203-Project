@@ -7,6 +7,7 @@ import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const VisuallyHiddenInput = styled('input')({
@@ -40,7 +41,7 @@ const xLabels = [
 
 
 
-function PlayerProfile({ profilePic , onProfilePicUpdate}) {
+function PlayerProfile({ profilePic, onProfilePicUpdate }) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
@@ -52,7 +53,8 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
   // const [email, setEmail] = useState('');
   // const [password, setPassword] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
-  const [rating, setRating] = useState(0); 
+  const [rating, setRating] = useState(0);
+  const [error, setError] = useState(''); // Declare error state
   const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
@@ -68,61 +70,61 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
   const handleCountryChange = (event) => setCountry(event.target.value);
   // const handleEmailChange = (event) => setEmail(event.target.value);
   // const handlePasswordChange = (event) => setPassword(event.target.value);
- 
 
-  useEffect(() => {
-    const fetchPlayerDetails = async () => {
-        try {
-            const token = localStorage.getItem('token');
 
-            if (!token) {
-                navigate('/login'); // Redirect to login if no token found
-                return;
-            }
+    useEffect(() => {
+      const fetchPlayerDetails = async () => {
+          try {
+              const token = localStorage.getItem('token');
 
-            const response = await axios.get(`${baseURL}/currentPlayerById`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+              if (!token) {
+                  navigate('/login'); // Redirect to login if no token found
+                  return;
+              }
 
-            console.log('Player Data:', response.data);
-            const { firstName, lastName, eloRating, profilePic, country} = response.data;
+              const response = await axios.get(`${baseURL}/currentPlayerById`, {
+                  headers: {
+                      'Authorization': `Bearer ${token}`
+                  }
+              });
 
-            // Store the player details in local state or localStorage as needed
-            setPlayerName(firstName + " " +lastName || '');
-            setFirstName(firstName || '');
-            setLastName(lastName || '');
-            setCountry(country ||'-'); 
-            setRating(eloRating || '-'); 
-            // setEmail(email || '');
-            setLocalProfilePic(profilePic || '');
-            
+              console.log('Player Data:', response.data);
+              const { firstName, lastName, eloRating, profilePic, country} = response.data;
 
-        } catch (err) {
-            if (err.response) {
-                const statusCode = err.response.status;
-                const errorMessage = err.response.data.message || 'An error occurred';
+              // Store the player details in local state or localStorage as needed
+              setPlayerName(firstName + " " +lastName || '');
+              setFirstName(firstName || '');
+              setLastName(lastName || '');
+              setCountry(country ||'-'); 
+              setRating(eloRating || '-'); 
+              // setEmail(email || '');
+              setLocalProfilePic(profilePic || '');
 
-                // Handle specific error statuses
-                if (statusCode === 404 || statusCode === 403) {
-                    setError('Player details not found or access denied');
-                } else {
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                }
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
-        }
-    };
 
-    fetchPlayerDetails();
-}, [navigate]); // Ensure `navigate` is included in the dependencies if it's from react-router-dom
+          } catch (err) {
+              if (err.response) {
+                  const statusCode = err.response.status;
+                  const errorMessage = err.response.data.message || 'An error occurred';
+
+                  // Handle specific error statuses
+                  if (statusCode === 404 || statusCode === 403) {
+                      setError('Player details not found or access denied');
+                  } else {
+                      navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                  }
+              } else if (err.request) {
+                  navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+              } else {
+                  navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+              }
+          }
+      };
+
+      fetchPlayerDetails();
+  }, [navigate]); 
 
   
-  
+
 
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
@@ -137,12 +139,13 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
 
   const handleSave = async () => {
     const token = localStorage.getItem('token'); // Use the token for authentication
-  
+
     const playerData = {
       firstName: firstName,
       lastName: lastName,
+      country: country,
     };
-  
+
     if (selectedFile) {
       // You may need to handle file uploads separately
       const reader = new FileReader();
@@ -155,7 +158,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
       await sendUpdate(playerData, token);
     }
   };
-  
+
   const sendUpdate = async (playerData, token) => {
     try {
       const response = await axios.put(`${baseURL}/currentPlayerById`, playerData, {
@@ -164,7 +167,9 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
           'Content-Type': 'application/json', // Sending as JSON
         },
       });
-  
+      setPlayerName(firstName + " " +lastName || '');
+      setCountry(country);
+
       if (response.status === 200) {
         console.log('Profile updated successfully');
       } else {
@@ -180,12 +185,12 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
         console.error('Error Message:', error.message);
       }
     }
-  
+
     handleCloseEdit();
   };
-  
- 
-  
+
+
+
 
 
   return (
@@ -230,7 +235,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
         <Grid container spacing={2} justifyContent="center">
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">7</Typography> 
+              <Typography variant="h6">7</Typography>
               <Typography variant="body2">Rank</Typography>
             </Box>
           </Grid>
@@ -284,7 +289,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
 
                 <Tab
                   label="Ongoing Tournaments"
-                  
+
                   sx={{
                     fontSize: '1.25rem',
                     padding: '12px 24px',
@@ -367,13 +372,13 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
               </Box>
             )}
 
-              {value === 2 && (
+            {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>Tab 3 Content</Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, }}>
                   <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}
-                  onClick={() => navigate("/player/tournaments")}>
+                    onClick={() => navigate("/player/tournaments")}>
 
                     <CardContent>
                       <Typography variant="h6">Singapore Open</Typography>
@@ -381,8 +386,8 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
                     </CardContent>
 
                   </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2,  }}>
-                 
+                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2, }}>
+
 
                     <CardContent>
                       <Typography variant="h6">Item 2</Typography>
@@ -416,7 +421,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
       </Box>
       {/*dialog to edit the profile*/}
       <Dialog open={openEdit} onClose={handleCloseEdit}
-       sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
+        sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
         <DialogTitle>Edit Profile</DialogTitle>
         <DialogContent
           sx={{
@@ -424,9 +429,9 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            
+
           }}>
-          
+
           {/* Display Existing Profile Picture */}
 
           <Avatar
@@ -436,22 +441,22 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
           />
 
 
-        
 
-        {/* Label to Trigger File Input */}
-        <Button
-      component="label"
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-    >
-      Upload files
-      <VisuallyHiddenInput
-        type="file"
-        onChange={handleFileAndImageUpload}
-      
-      />
-    </Button>
+
+          {/* Label to Trigger File Input */}
+          <Button
+            component="label"
+            variant="contained"
+            tabIndex={-1}
+            startIcon={<CloudUploadIcon />}
+          >
+            Upload files
+            <VisuallyHiddenInput
+              type="file"
+              onChange={handleFileAndImageUpload}
+
+            />
+          </Button>
 
           {/* <TextField
             margin="dense"
@@ -496,7 +501,7 @@ function PlayerProfile({ profilePic , onProfilePicUpdate}) {
             type="country"
             value={country}
             onChange={handleCountryChange}
-          /> 
+          />
 
 
           <Button onClick={handleSave} color="primary">
