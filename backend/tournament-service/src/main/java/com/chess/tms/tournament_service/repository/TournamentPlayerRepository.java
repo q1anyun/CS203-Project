@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface TournamentPlayerRepository extends JpaRepository<TournamentPlayer, Long> {
 
-    public Optional<TournamentPlayer> findByPlayerId(long playerId);
+    public List<TournamentPlayer> findByPlayerId(long playerId);
 
     public Optional<TournamentPlayer> findByPlayerIdAndTournament(long playerId, Tournament tournament);
 

@@ -9,12 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import com.chess.tms.player_service.dto.GameTypeDTO;
 import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
-import com.chess.tms.player_service.dto.TournamentDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
@@ -108,6 +105,7 @@ public class PlayerService {
         responseDTO.setTournament(matchDTO.getTournament());
         responseDTO.setRoundType(matchDTO.getRoundType());
         responseDTO.setGameType(matchDTO.getGameType());
+        responseDTO.setDate(matchDTO.getDate());
 
         // Fetch winner and loser details
         PlayerDetails winner = fetchPlayerDetails(matchDTO.getWinnerId()) .orElseThrow(() -> new UserNotFoundException("User not found"));;

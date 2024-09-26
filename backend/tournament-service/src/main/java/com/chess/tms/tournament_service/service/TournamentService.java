@@ -61,6 +61,7 @@ public class TournamentService {
         }
 
         TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
+        returnDTO.setCurrentPlayers(tournamentPlayerRepository.findAllByTournament(tournament).size());
         return returnDTO;
     }
 
@@ -102,7 +103,10 @@ public class TournamentService {
         tournament.setMinElo(dto.getMinElo());
         tournament.setMaxElo(dto.getMaxElo());
         tournament.setTotalPlayers(dto.getTotalPlayers());
-        tournament.setCurrentPlayers(dto.getCurrentPlayers());;
+
+
+
+        //tournament.setCurrentPlayers(tournamentPlayerRepository.findAllByTournament(tournament).size());
         tournament.setStatus(dto.getStatus());
         tournament.setTimeControl(dto.getTimeControl());
 
@@ -158,19 +162,19 @@ public class TournamentService {
     }
 
     @Transactional
-    public PlayerRegistrationDTO deletePlayerFromTournament(long playerid, long tournamentid) {
+    public PlayerRegistrationDTO deletePlayerFromTournament(long id, long tournamentid) {
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentid);
-        Optional<TournamentPlayer> player = tournamentPlayerRepository.findByPlayerId(playerid);
+        Optional<TournamentPlayer> player = tournamentPlayerRepository.findById(id);
         if(tournament.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentid + " does not exist.");
         }
 
         if(player.isEmpty()) {
-            throw new UserDoesNotExistException("Player with id " + playerid + " does not exist.");
+            throw new UserDoesNotExistException("Tournament Player with id " + id + " does not exist.");
         }
 
-        tournamentPlayerRepository.deleteByPlayerId(playerid);
+        tournamentPlayerRepository.deleteByPlayerId(id);
 
-        return new PlayerRegistrationDTO(playerid, tournamentid, RegistrationStatus.WITHDRAWN);
+        return new PlayerRegistrationDTO(id, tournamentid, RegistrationStatus.WITHDRAWN);
     }
 }

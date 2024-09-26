@@ -58,8 +58,8 @@ public class Tournament {
     @Column
     private int totalPlayers;
 
-    @Column
-    private int currentPlayers;
+    // @Column
+    // private int currentPlayers;
 
     @Column
     @Enumerated(EnumType.STRING)

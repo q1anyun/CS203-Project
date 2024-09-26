@@ -15,5 +15,5 @@ public interface MatchesRepository extends JpaRepository<Match, Long> {
     @Query("SELECT m FROM Match m WHERE m.tournamentId = :tournamentId AND m.roundType.id = :roundTypeId AND m.status = 'COMPLETED'")
     List<Match> findCompletedMatchesByRoundType(@Param("tournamentId") Long tournamentId, @Param("roundTypeId") Long roundTypeId);
 
-    List<Match> findTop5ByPlayer1IdOrPlayer2IdOrderByDateDesc(Long player1Id, Long player2Id);
+    List<Match> findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(Long player1Id, Long player2Id);
 }

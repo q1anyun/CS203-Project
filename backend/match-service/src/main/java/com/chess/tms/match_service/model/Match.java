@@ -3,6 +3,7 @@ package com.chess.tms.match_service.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
@@ -52,4 +53,10 @@ public class Match {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private MatchStatus status;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 }

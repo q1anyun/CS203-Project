@@ -5,11 +5,9 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
-import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.service.PlayerService;
 
 

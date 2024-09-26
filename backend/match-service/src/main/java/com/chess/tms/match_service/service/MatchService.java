@@ -3,6 +3,7 @@ package com.chess.tms.match_service.service;
 import com.chess.tms.match_service.dto.MatchDTO;
 import com.chess.tms.match_service.dto.TournamentDTO;
 import com.chess.tms.match_service.dto.TournamentPlayerDTO;
+import com.chess.tms.match_service.dto.TournamentPlayerEloDTO;
 import com.chess.tms.match_service.exception.GameTypeNotFoundException;
 import com.chess.tms.match_service.exception.MatchDoesNotExistException;
 import com.chess.tms.match_service.exception.PlayerDoesNotExistInMatchException;
@@ -14,6 +15,7 @@ import com.chess.tms.match_service.repository.RoundTypeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,7 +38,7 @@ public class MatchService {
 
     private final RestTemplate restTemplate;
 
-    @Value("${tournament.service.url}")
+    @Value("${tournaments.service.url}")
     private String tournamentServiceUrl;
 
     public MatchService(RestTemplate restTemplate) {
@@ -44,10 +46,10 @@ public class MatchService {
     }
 
     public void createInitialMatches(Long tournamentId, Long gameTypeId) {
-        ResponseEntity<TournamentPlayerDTO[]> response = restTemplate.exchange(
-            tournamentServiceUrl+"/api/tournaments/"+tournamentId+"/players", HttpMethod.GET, null, TournamentPlayerDTO[].class);
+        ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
+            tournamentServiceUrl+"/api/tournaments/"+tournamentId+"/players", HttpMethod.GET, null, TournamentPlayerEloDTO[].class);
         
-        TournamentPlayerDTO[] players = response.getBody();
+        TournamentPlayerEloDTO[] players = response.getBody();
         int totalPlayers = players.length;
 
         // Calculate the next power of 2 for the knockout stage
@@ -55,7 +57,7 @@ public class MatchService {
         int byes = nextPowerOfTwo - totalPlayers;
 
         // Sort players by their Elo rating (descending order for best players first)
-        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerDTO::getEloRating).reversed());
+        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
 
         // Prepare the matches for all rounds (create all rounds in advance)
         List<Match> allMatches = new ArrayList<>();
@@ -64,8 +66,8 @@ public class MatchService {
         // Create first round matches
         List<Match> firstRoundMatches = new ArrayList<>();
         for (int i = 0; i < totalPlayers - byes; i += 2) {
-            TournamentPlayerDTO player1 = players[i];
-            TournamentPlayerDTO player2 = players[i + 1];
+            TournamentPlayerEloDTO player1 = players[i];
+            TournamentPlayerEloDTO player2 = players[i + 1];
 
             Match match = new Match();
             match.setTournamentId(tournamentId);
@@ -82,7 +84,7 @@ public class MatchService {
         // Handle byes for top players
         List<Match> byeMatches = new ArrayList<>();
         for (int i = 0; i < byes; i++) {
-            TournamentPlayerDTO playerWithBye = players[totalPlayers - 1 - i];
+            TournamentPlayerEloDTO playerWithBye = players[totalPlayers - 1 - i];
             Match byeMatch = new Match();
             byeMatch.setTournamentId(tournamentId);
             byeMatch.setPlayer1Id(null);
@@ -222,7 +224,8 @@ public class MatchService {
 
 
     public List<MatchDTO> getRecentMatchesByPlayerId(Long playerId) {
-        List<Match> matches = matchRepository.findTop5ByPlayer1IdOrPlayer2IdOrderByDateDesc(playerId, playerId);
+
+        List<Match> matches = matchRepository.findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(playerId, playerId);
         
         List<MatchDTO> matchDTOs = matches.stream()
             .map(this::convertMatchToMatchDTO)
@@ -237,6 +240,7 @@ public class MatchService {
         matchDTO.setLoserId(match.getLoserId());
         matchDTO.setRoundType(match.getRoundType());
         matchDTO.setGameType(match.getGameType());
+        matchDTO.setDate(match.getUpdatedAt());
 
         TournamentDTO tournamentDTO = getTournamentDetails(match.getTournamentId());
         matchDTO.setTournament(tournamentDTO);
@@ -245,8 +249,7 @@ public class MatchService {
     }
 
     private TournamentDTO getTournamentDetails(Long tournamentId) {
-        String tournamentUrl = tournamentServiceUrl + "/tournaments/" + tournamentId;
+        String tournamentUrl = tournamentServiceUrl + "/api/tournaments/" + tournamentId;
         return restTemplate.getForObject(tournamentUrl, TournamentDTO.class);
     }
-
 }
