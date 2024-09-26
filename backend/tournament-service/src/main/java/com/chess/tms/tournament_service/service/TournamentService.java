@@ -6,7 +6,9 @@ import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import com.chess.tms.tournament_service.dto.DTOUtil;
 import com.chess.tms.tournament_service.dto.PlayerRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
@@ -33,59 +35,21 @@ public class TournamentService {
     @Autowired
     private TournamentPlayerRepository tournamentPlayerRepository;
 
-    //helper function
-    public TournamentDetailsDTO convertEntryToDTO(Tournament tournament) {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(tournament.getTournamentId());
-        dto.setName(tournament.getName());
-        dto.setCreatorId(tournament.getCreatorId());
-        dto.setStartDate(tournament.getStartDate());
-        dto.setEndDate(tournament.getEndDate());
-        dto.setMinElo(tournament.getMinElo());
-        dto.setMaxElo(tournament.getMaxElo());
-        dto.setTotalPlayers(tournament.getTotalPlayers());
-        dto.setCurrentPlayers(tournament.getCurrentPlayers());
-        dto.setStatus(tournament.getStatus());
-        dto.setTimeControl(tournament.getTimeControl());
+    @Autowired
+    private RestTemplate restTemplate;
 
-        return dto;
-    }
 
-    public PlayerRegistrationDTO convertPlayerEntrytoPlayerDTO(TournamentPlayer player) {
-        PlayerRegistrationDTO dto = new PlayerRegistrationDTO();
-        dto.setPlayerId(player.getPlayerId());
-        dto.setRegistrationStatus(player.getRegistrationStatus());
-        dto.setTournamentId(player.getTournament().getTournamentId());
-
-        return dto;
-    }
-
-    public Tournament convertDTOToTournament(TournamentRegistrationDTO dto){
-        Tournament tournament = new Tournament();
-        tournament.setName(dto.getName());
-        tournament.setCreatorId(dto.getCreatorId());
-        tournament.setStartDate(dto.getStartDate());
-        tournament.setEndDate(dto.getEndDate());
-        tournament.setMinElo(dto.getMinElo());
-        tournament.setMaxElo(dto.getMaxElo());
-        tournament.setTotalPlayers(dto.getTotalPlayers());
-        tournament.setCurrentPlayers(dto.getCurrentPlayers());
-        tournament.setTimeControl(dto.getTimeControl());
-
-        return tournament;
-    }
-
-    public TournamentDetailsDTO createTournament(TournamentRegistrationDTO dto) {
+    public TournamentDetailsDTO createTournament(TournamentRegistrationDTO dto, long creatorId) {
         
         // Map DTO to entry
-        Tournament tournament = convertDTOToTournament(dto);
+        Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
 
         // Save in repo
         tournamentRepository.save(tournament);
 
         // Map saved entity to DTO and return
-        TournamentDetailsDTO responseDTO = convertEntryToDTO(tournament);
+        TournamentDetailsDTO responseDTO = DTOUtil.convertEntryToDTO(tournament);
 
         return responseDTO;                                                             
     }
@@ -96,7 +60,7 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
 
-        TournamentDetailsDTO returnDTO = convertEntryToDTO(tournament);
+        TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
         return returnDTO;
     }
 
@@ -106,7 +70,7 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
 
-        TournamentDetailsDTO returnDTO = convertEntryToDTO(tournament);
+        TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
         tournamentRepository.deleteById(id);
         return returnDTO;
     }
@@ -116,7 +80,7 @@ public class TournamentService {
         List<TournamentDetailsDTO> tournamentDTOs = new ArrayList<>();
 
         for (Tournament tournament : tournaments) {
-            tournamentDTOs.add(convertEntryToDTO(tournament));
+            tournamentDTOs.add(DTOUtil.convertEntryToDTO(tournament));
         }
 
         return tournamentDTOs;
@@ -128,7 +92,7 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
 
-        TournamentDetailsDTO oldDTO = convertEntryToDTO(tournament);
+        TournamentDetailsDTO oldDTO = DTOUtil.convertEntryToDTO(tournament);
 
         // set new tournament fields
         tournament.setName(dto.getName());
@@ -142,7 +106,7 @@ public class TournamentService {
         tournament.setStatus(dto.getStatus());
         tournament.setTimeControl(dto.getTimeControl());
 
-        TournamentDetailsDTO updatedDTO = convertEntryToDTO(tournament);
+        TournamentDetailsDTO updatedDTO = DTOUtil.convertEntryToDTO(tournament);
 
         tournamentRepository.save(tournament); 
 
@@ -176,7 +140,7 @@ public class TournamentService {
         }
 
         for (TournamentPlayer p : tournamentPlayerRepository.findAllByTournament(tournament.get())) {
-            dtoList.add(convertPlayerEntrytoPlayerDTO(p));
+            dtoList.add(DTOUtil.convertPlayerEntrytoPlayerDTO(p));
         }
 
         return dtoList;
@@ -187,7 +151,7 @@ public class TournamentService {
         List<PlayerRegistrationDTO> list = new ArrayList<>();
 
         for (TournamentPlayer p : tournamentPlayerRepository.findAll()) {
-            list.add(convertPlayerEntrytoPlayerDTO(p));
+            list.add(DTOUtil.convertPlayerEntrytoPlayerDTO(p));
         }
 
         return list;

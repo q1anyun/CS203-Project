@@ -3,6 +3,7 @@ package com.chess.tms.tournament_service.controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,8 +31,8 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @PostMapping("")
-    public ResponseEntity<TournamentDetailsDTO> registerTournament(@RequestBody TournamentRegistrationDTO dto) {
-        return ResponseEntity.ok(tournamentService.createTournament(dto));
+    public ResponseEntity<TournamentDetailsDTO> registerTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
+        return ResponseEntity.ok(tournamentService.createTournament(dto, Long.parseLong(id)));
     }
 
     @GetMapping("/{id}")
