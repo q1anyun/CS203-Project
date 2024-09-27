@@ -1,4 +1,4 @@
-import React from 'react';
+import { React, useState, useEffect } from 'react';
 import styles from './Home.module.css';
 import { Grid2, Button } from '@mui/material';
 import image from '../../assets/welcomeBg.png';
@@ -8,6 +8,27 @@ import profileImage from '../../assets/profile-icon.png';
 import { Link } from 'react-router-dom';
 
 function Home() {
+  const [userRole, setUserRole] = useState(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
+
+  const getTournamentLink = () => {
+    if (userRole === 'ADMIN') {
+      return '/admin/tournaments';
+    }
+    return '/player/tournaments';
+  };
+
+  const getProfileLink = () => {
+    if (userRole === 'ADMIN') {
+      return '/admin/profile';
+    }
+    return '/player/profile';
+  };
+
   return (
     <div className={styles.mainContainer}>
       <div className={styles.welcomeContainer}>
@@ -30,7 +51,7 @@ function Home() {
               <h1 className={styles.cardTitle}>Tournaments</h1>
               <h5 className={styles.cardContent}>Register for upcoming knockout chess tournaments and compete against players.</h5>
               <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
-              <Button component={Link} to="/player/tournaments" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
+              <Button component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
             </div>
           </Grid2>
 
@@ -48,7 +69,7 @@ function Home() {
               <h1 className={styles.cardTitle}>Profile</h1>
               <h5 className={styles.cardContent}>View and manage your personal chess profile, check your statistics.</h5>
               <img src={profileImage} alt="leaderboard" className={styles.cardImage} />
-              <Button component={Link} to="/player/profile" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</Button>
+              <Button component={Link} to={getProfileLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</Button>
             </div>
           </Grid2>
         </Grid2>

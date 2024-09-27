@@ -7,23 +7,14 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import styles from './NavBar.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import Image from 'react-bootstrap/Image'
-// import { jwtDecode } from 'jwt-decode';
 
 function NavBar({ profilePic }) {
-  // const [userRole, setUserRole] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem('token');
-  //   if (token) {
-  //     try {
-  //       const decodedToken = jwtDecode(token);
-  //       console.log('Decoded Token:', decodedToken);
-  //       setUserRole(decodedToken.role);
-  //     } catch (error) {
-  //       console.error('Invalid token:', error);
-  //     }
-  //   }
-  // }, []);
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
 
   return (
 
@@ -43,11 +34,17 @@ function NavBar({ profilePic }) {
         <Nav className="me-auto">
           <Nav.Link as={Link} to="/home">Home</Nav.Link>
 
-          {/* {userRole === 'admin' && (
-            <Nav.Link as={Link} to="/admin/tournaments">Tournaments</Nav.Link>
+          {/*THIS COMMENTED CODE IS THE CORRECT CODE TO BE IMPLEMENTED*/}
+          {/* {userRole === 'ADMIN' && (
+            <>
+              <Nav.Link as={Link} to="/admin/tournaments">Tournaments</Nav.Link>
+            </>
           )}
-          {userRole === 'player' && (
-            <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
+
+          {userRole === 'PLAYER' && (
+            <>
+              <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
+            </>
           )} */}
 
           <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
@@ -60,6 +57,19 @@ function NavBar({ profilePic }) {
             title={<Image src={profilePic} alt="Profile" className={styles.profilePic} />}
             id="basic-nav-dropdown"
           >
+            {/*THIS COMMENTED CODE IS THE CORRECT CODE TO BE IMPLEMENTED*/}
+            {/* {userRole === 'ADMIN' && (
+              <>
+                <NavDropdown.Item as={Link} to="/admin/profile">View Profile</NavDropdown.Item>
+              </>
+            )}
+
+            {userRole === 'PLAYER' && (
+              <>
+                <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
+              </>
+            )} */}
+
             <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/admin/profile">View Admin Profile (tmp)</NavDropdown.Item>
             <NavDropdown.Item as={Link} to="/admin/tournaments">View Admin Tournament view (tmp)</NavDropdown.Item>
