@@ -10,7 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @Configuration
 public class SecurityConfiguration {
-    @Value("${client_url}")
+    @Value("${client.url}")
     private String clientUrl;
    
     @Bean
