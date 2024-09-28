@@ -49,10 +49,14 @@ public class ApiGatewayConfig {
 
     @Bean
 public RouterFunction<ServerResponse> tournamentServiceRoute() {
-    return RouterFunctions
+    return GatewayRouterFunctions
         .route(RequestPredicates.path("/api/tournaments/**"), 
             request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
-        .andRoute(RequestPredicates.path("/api/tournamentplayers/**"), 
+        .andRoute(RequestPredicates.path("/api/tournament-players/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            .andRoute(RequestPredicates.path("/api/round-type/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            .andRoute(RequestPredicates.path("/api/game-type/**"), 
             request -> processRequestWithJwtClaims(request, "http://localhost:8084"));
 }
 

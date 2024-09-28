@@ -51,8 +51,8 @@ public class TournamentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<TournamentDetailsDTO> deleteTournament(@PathVariable("id") long id) {
-        return ResponseEntity.ok(tournamentService.deleteTournament(id));
+    public ResponseEntity<String> deleteTournament(@PathVariable("id") long id) {
+        return ResponseEntity.ok("Sucessfully deleted tournament");
     }
 
     @PutMapping("/{id}/round/{round_type}")

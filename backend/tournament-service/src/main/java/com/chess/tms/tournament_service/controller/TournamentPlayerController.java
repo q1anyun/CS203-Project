@@ -17,7 +17,7 @@ import com.chess.tms.tournament_service.service.TournamentService;
 
 
 @RestController
-@RequestMapping("/api/tournamentplayers")
+@RequestMapping("/api/tournament-players")
 public class TournamentPlayerController {
 
     @Autowired

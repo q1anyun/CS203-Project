@@ -88,7 +88,7 @@ public class TournamentService {
         return returnDTO;
     }
 
-    public TournamentDetailsDTO deleteTournament(long id) {
+    public void deleteTournament(long id) {
         Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
         if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
@@ -99,8 +99,6 @@ public class TournamentService {
         TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
 
         tournamentRepository.deleteById(id);
-    
-        return returnDTO;
     }
 
     public List<TournamentDetailsDTO> getAllTournaments() {
