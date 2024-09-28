@@ -51,4 +51,13 @@ public class MatchController {
         List<MatchDTO> recentMatches = matchService.getRecentMatchesByPlayerId(playerId);
         return ResponseEntity.ok(recentMatches);
     }
+
+     // Recent 5 matches for current player
+     @GetMapping("/player/current/recent")
+     public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@RequestHeader("X-User-PlayerId") String id) {
+        Long playerId = Long.parseLong(id); 
+        List<MatchDTO> recentMatches = matchService.getRecentMatchesByPlayerId(playerId);
+         return ResponseEntity.ok(recentMatches);
+     }
+
 }
