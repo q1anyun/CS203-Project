@@ -12,7 +12,7 @@ import com.chess.tms.tournament_service.enums.Status;
 @AllArgsConstructor
 public class TournamentRegistrationDTO {
 
-    private long creatorId;
+    private Long creatorId;
 
     private String name;
 
@@ -20,16 +20,14 @@ public class TournamentRegistrationDTO {
 
     private LocalDateTime endDate;
 
-    private int minElo;
+    private Integer minElo;
 
-    private int maxElo;
+    private Integer maxElo;
 
-    private int maxPlayers;
-
-    private int currentPlayers;
-
+    private Integer maxPlayers;
+    
     private Status status;
 
-    private int timeControl;
+    private Integer timeControl;
     
 }

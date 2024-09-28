@@ -19,6 +19,7 @@ import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
 import com.chess.tms.tournament_service.enums.Status;
+import com.chess.tms.tournament_service.repository.GameTypeRepository;
 import com.chess.tms.tournament_service.repository.TournamentPlayerRepository;
 import com.chess.tms.tournament_service.repository.TournamentRepository;
 
@@ -37,6 +38,9 @@ public class TournamentService {
 
     @Autowired
     private TournamentPlayerRepository tournamentPlayerRepository;
+    
+    @Autowired
+    private GameTypeRepository gameTypeRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -49,6 +53,7 @@ public class TournamentService {
         // Map DTO to entry
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
+        tournament.setTimeControl(gameTypeRepository.getGameTypeById(dto.getTimeControl()));
 
         // Save in repo
         tournamentRepository.save(tournament);
@@ -60,23 +65,30 @@ public class TournamentService {
     }
 
     public TournamentDetailsDTO getTournamentDetailsById(long id) {
-        Tournament tournament = tournamentRepository.findById(id).get();
-        if (tournament == null) {
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
+    
+        if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
+    
+        Tournament tournament = tournamentOptional.get();
+    
 
-        TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
-        return returnDTO;
+        return DTOUtil.convertEntryToDTO(tournament);
     }
 
     public TournamentDetailsDTO deleteTournament(long id) {
-        Tournament tournament = tournamentRepository.findById(id).get();
-        if (tournament == null) {
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
+        if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
+    
+        Tournament tournament = tournamentOptional.get();
 
         TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
+
         tournamentRepository.deleteById(id);
+    
         return returnDTO;
     }
 
@@ -92,19 +104,39 @@ public class TournamentService {
     }
 
     public void updateTournament(long id, TournamentUpdateRequestDTO dto) {
-        Tournament tournament = tournamentRepository.findById(id).get();
-        if (tournament == null) {
+        // Safely retrieve the tournament object
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
+        
+        if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
         }
-
-        tournament.setStartDate(dto.getStartDate());
-        tournament.setEndDate(dto.getEndDate());
-        tournament.setMinElo(dto.getMinElo());
-        tournament.setMaxElo(dto.getMaxElo());
-        tournament.setMaxPlayers(dto.getMaxPlayers());
-        tournament.setCurrentPlayers(dto.getCurrentPlayers());
-        tournament.setTimeControl(dto.getTimeControl());
-
+        
+        Tournament tournament = tournamentOptional.get();
+        
+        // Update the tournament fields based on the provided DTO
+        if (dto.getStartDate() != null) {
+            tournament.setStartDate(dto.getStartDate());
+        }
+        if (dto.getEndDate() != null) {
+            tournament.setEndDate(dto.getEndDate());
+        }
+        if (dto.getMinElo() != null) {
+            tournament.setMinElo(dto.getMinElo());
+        }
+        if (dto.getMaxElo() != null) {
+            tournament.setMaxElo(dto.getMaxElo());
+        }
+        if (dto.getMaxPlayers() != null) {
+            tournament.setMaxPlayers(dto.getMaxPlayers());
+        }
+        if (dto.getCurrentPlayers() != null) {
+            tournament.setCurrentPlayers(dto.getCurrentPlayers());
+        }
+        if (dto.getTimeControl() != null) {
+            tournament.setTimeControl(gameTypeRepository.getGameTypeById(dto.getTimeControl()));
+        }
+    
+        // Save the updated tournament
         tournamentRepository.save(tournament);
     }
 

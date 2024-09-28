@@ -2,11 +2,13 @@ package com.chess.tms.tournament_service.dto;
 
 import java.time.LocalDateTime;
 
+import com.chess.tms.tournament_service.model.GameType;
+
 import lombok.Data;
 
 @Data
 public class TournamentUpdateRequestDTO {
-    private long id;
+    private Long id;
 
     private String name;
 
@@ -14,13 +16,13 @@ public class TournamentUpdateRequestDTO {
 
     private LocalDateTime endDate;
 
-    private int minElo;
+    private Integer minElo;
 
-    private int maxElo;
+    private Integer maxElo;
 
-    private int maxPlayers;
+    private Integer maxPlayers;
 
-    private int currentPlayers;
+    private Integer currentPlayers;
 
-    private int timeControl;
+    private Integer timeControl;
 }

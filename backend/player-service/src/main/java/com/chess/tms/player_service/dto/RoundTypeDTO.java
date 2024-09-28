@@ -5,5 +5,5 @@ import lombok.Data;
 public class RoundTypeDTO {
     private Long id;
     private String roundName; 
-    private int numberOfPlayers;
+    private Integer numberOfPlayers;
 }

@@ -8,6 +8,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -60,8 +62,9 @@ public class Tournament {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column
-    private int timeControl;
+    @ManyToOne
+    @JoinColumn(name = "time_control", nullable = false) 
+    private GameType timeControl;
 
     @OneToMany(mappedBy = "tournament",
                 cascade = CascadeType.ALL)

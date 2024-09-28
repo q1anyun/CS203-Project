@@ -15,6 +15,6 @@ public class RoundType {
     private String roundName; 
 
     @Column(name = "number_of_players")
-    private int numberOfPlayers;
+    private Integer numberOfPlayers;
 }
 

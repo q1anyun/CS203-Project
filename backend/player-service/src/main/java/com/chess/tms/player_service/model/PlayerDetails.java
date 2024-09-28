@@ -21,7 +21,7 @@ public class PlayerDetails {
     private Long userId;
 
     @Column(name = "elo_rating")
-    private int eloRating;
+    private Integer eloRating;
 
     @Column(name = "country", length = 100)
     private String country;
@@ -36,17 +36,17 @@ public class PlayerDetails {
     private String profilePicture;
 
     @Column(name = "total_wins")
-    private int totalWins;
+    private Integer totalWins;
 
     @Column(name = "total_losses")
-    private int totalLosses;
+    private Integer totalLosses;
 
     @Column(name = "total_matches")
-    private int totalMatches;
+    private Integer totalMatches;
 
     @Column(name = "highest_elo")
-    private int highestElo;
+    private Integer highestElo;
 
     @Column(name = "lowest_elo")
-    private int lowestElo;
+    private Integer lowestElo;
 }

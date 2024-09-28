@@ -1,7 +1,10 @@
 package com.chess.tms.tournament_service.dto;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
+import com.chess.tms.tournament_service.repository.TournamentRepository;
 
 public class DTOUtil {
         //helper functions
@@ -39,9 +42,7 @@ public class DTOUtil {
         tournament.setEndDate(dto.getEndDate());
         tournament.setMinElo(dto.getMinElo());
         tournament.setMaxElo(dto.getMaxElo());
-        tournament.setCurrentPlayers(dto.getCurrentPlayers());
         tournament.setMaxPlayers(dto.getMaxPlayers());
-        tournament.setTimeControl(dto.getTimeControl());
 
         return tournament;
     }

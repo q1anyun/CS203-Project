@@ -16,6 +16,6 @@ public class GameType {
     private String name;
 
     @Column(name = "time_control_minutes", nullable = false)
-    private int timeControlMinutes;
+    private Integer timeControlMinutes;
 }
 

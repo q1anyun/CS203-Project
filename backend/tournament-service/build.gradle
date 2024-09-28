@@ -28,7 +28,14 @@ ext {
 }
 
 dependencies {
-	testImplementation 'org.mockito:mockito-core'
+    // JUnit 5 (Jupiter)
+    testImplementation 'org.junit.jupiter:junit-jupiter-api'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+
+    // Mockito for JUnit 5
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.mockito:mockito-junit-jupiter'
+
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'

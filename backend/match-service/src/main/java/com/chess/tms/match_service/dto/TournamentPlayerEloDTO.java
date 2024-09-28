@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TournamentPlayerEloDTO {
     private Long id;
-    private int eloRating;
+    private Integer eloRating;
 }

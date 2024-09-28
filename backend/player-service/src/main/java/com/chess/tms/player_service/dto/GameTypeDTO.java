@@ -5,5 +5,5 @@ import lombok.Data;
 public class GameTypeDTO {
     private Long id;
     private String name;
-    private int timeControlMinutes;  
+    private Integer timeControlMinutes;  
 }
