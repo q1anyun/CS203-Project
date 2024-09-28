@@ -1,14 +1,14 @@
 package com.chess.tms.player_service.service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
 import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
@@ -29,77 +29,66 @@ public class PlayerService {
     @Autowired
     private RestTemplate restTemplate;
 
+    // Fetch player details by player ID
     public PlayerDetailsDTO getPlayerDetailsById(Long id) {
-        PlayerDetails playerDetails = playerDetailsRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-
-        PlayerDetailsDTO playerDetailsDTO = new PlayerDetailsDTO();
-        playerDetailsDTO.setId(playerDetails.getId());
-        playerDetailsDTO.setUserId(playerDetails.getUserId());
-        playerDetailsDTO.setFirstName(playerDetails.getFirstName());
-        playerDetailsDTO.setLastName(playerDetails.getLastName());
-        playerDetailsDTO.setEloRating(playerDetails.getEloRating());
-        playerDetailsDTO.setProfilePicture(playerDetails.getProfilePicture());
-        playerDetailsDTO.setLowestElo(playerDetails.getLowestElo());
-        playerDetailsDTO.setHighestElo(playerDetails.getHighestElo());
-        playerDetailsDTO.setTotalMatches(playerDetails.getTotalMatches());
-        playerDetailsDTO.setTotalLosses(playerDetails.getTotalLosses());
-        playerDetailsDTO.setTotalWins(playerDetails.getTotalWins());
-        playerDetailsDTO.setCountry(playerDetails.getCountry());
-        playerDetailsDTO.setWinRate(playerDetails.getTotalWins()/playerDetails.getTotalMatches());
-        return playerDetailsDTO;
-
+        return playerDetailsRepository.findById(id)
+            .map(this::convertToPlayerDetailsDTO)
+            .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
     }
 
-    public PlayerDetailsDTO getPlayerDetailsByUserId(Long id) {
-        PlayerDetails playerDetails = playerDetailsRepository.findByUserId(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-        PlayerDetailsDTO playerDetailsDTO = new PlayerDetailsDTO();
-        playerDetailsDTO.setId(playerDetails.getId());
-        playerDetailsDTO.setUserId(playerDetails.getUserId());
-        playerDetailsDTO.setFirstName(playerDetails.getFirstName());
-        playerDetailsDTO.setLastName(playerDetails.getLastName());
-        playerDetailsDTO.setEloRating(playerDetails.getEloRating());
-        playerDetailsDTO.setProfilePicture(playerDetails.getProfilePicture());
-        playerDetailsDTO.setLowestElo(playerDetails.getLowestElo());
-        playerDetailsDTO.setHighestElo(playerDetails.getHighestElo());
-        playerDetailsDTO.setTotalMatches(playerDetails.getTotalMatches());
-        playerDetailsDTO.setTotalLosses(playerDetails.getTotalLosses());
-        playerDetailsDTO.setTotalWins(playerDetails.getTotalWins());
-        playerDetailsDTO.setCountry(playerDetails.getCountry());
-        playerDetailsDTO.setWinRate(playerDetails.getTotalWins()/playerDetails.getTotalMatches());
-        return playerDetailsDTO;
+    // Fetch multiple player details in a batch
+    public List<PlayerDetailsDTO> getListOfPlayerDetails(List<Long> playerIds) {
+        List<PlayerDetails> players = playerDetailsRepository.findByIdIn(playerIds);
+        return players.stream()
+                      .map(this::convertToPlayerDetailsDTO)
+                      .collect(Collectors.toList());
     }
 
+    // Convert PlayerDetails to PlayerDetailsDTO
+    private PlayerDetailsDTO convertToPlayerDetailsDTO(PlayerDetails playerDetails) {
+        PlayerDetailsDTO dto = new PlayerDetailsDTO();
+        dto.setId(playerDetails.getId());
+        dto.setUserId(playerDetails.getUserId());
+        dto.setFirstName(playerDetails.getFirstName());
+        dto.setLastName(playerDetails.getLastName());
+        dto.setEloRating(playerDetails.getEloRating());
+        dto.setProfilePicture(playerDetails.getProfilePicture());
+        dto.setLowestElo(playerDetails.getLowestElo());
+        dto.setHighestElo(playerDetails.getHighestElo());
+        dto.setTotalMatches(playerDetails.getTotalMatches());
+        dto.setTotalLosses(playerDetails.getTotalLosses());
+        dto.setTotalWins(playerDetails.getTotalWins());
+        dto.setCountry(playerDetails.getCountry());
+        return dto;
+    }
+
+    // Update player details
     public void updatePlayer(Long id, UpdatePlayerDetailsDTO updatedPlayerDetails) {
         PlayerDetails player = playerDetailsRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
-        if (updatedPlayerDetails.getCountry() != null) {
-            player.setCountry(updatedPlayerDetails.getCountry());
-        }
-        if (updatedPlayerDetails.getFirstName() != null) {
-            player.setFirstName(updatedPlayerDetails.getFirstName());
-        }
-        if (updatedPlayerDetails.getLastName() != null) {
-            player.setLastName(updatedPlayerDetails.getLastName());
-        }
-        if (updatedPlayerDetails.getProfilePicture() != null) {
-            player.setProfilePicture(updatedPlayerDetails.getProfilePicture());
-        }
+        Optional.ofNullable(updatedPlayerDetails.getCountry()).ifPresent(player::setCountry);
+        Optional.ofNullable(updatedPlayerDetails.getFirstName()).ifPresent(player::setFirstName);
+        Optional.ofNullable(updatedPlayerDetails.getLastName()).ifPresent(player::setLastName);
+        Optional.ofNullable(updatedPlayerDetails.getProfilePicture()).ifPresent(player::setProfilePicture);
 
         playerDetailsRepository.save(player);
     }
 
+    // Fetch recent matches of a player from the matches service
     public List<MatchResponseDTO> getRecentMatches(Long playerId) {
         String url = matchesServiceUrl + "/api/matches/player/" + playerId + "/recent";
-        MatchDTO[] matches = restTemplate.getForObject(url, MatchDTO[].class);
-        
-        return Arrays.stream(matches)
-                .map(this::convertToMatchResponseDTO)
-                .collect(Collectors.toList());
+        try {
+            MatchDTO[] matches = restTemplate.getForObject(url, MatchDTO[].class);
+            return Arrays.stream(matches)
+                    .map(this::convertToMatchResponseDTO)
+                    .collect(Collectors.toList());
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("Failed to fetch recent matches for playerId: " + playerId, e);
+        }
     }
 
+    // Convert MatchDTO to MatchResponseDTO
     private MatchResponseDTO convertToMatchResponseDTO(MatchDTO matchDTO) {
         MatchResponseDTO responseDTO = new MatchResponseDTO();
         responseDTO.setTournament(matchDTO.getTournament());
@@ -108,18 +97,18 @@ public class PlayerService {
         responseDTO.setDate(matchDTO.getDate());
 
         // Fetch winner and loser details
-        PlayerDetails winner = fetchPlayerDetails(matchDTO.getWinnerId()) .orElseThrow(() -> new UserNotFoundException("User not found"));;
-        PlayerDetails loser = fetchPlayerDetails(matchDTO.getLoserId()) .orElseThrow(() -> new UserNotFoundException("User not found"));;
-
-        responseDTO.setWinner(winner);
-        responseDTO.setLoser(loser);
+        responseDTO.setWinner(fetchPlayerDetails(matchDTO.getWinnerId())
+                .orElseThrow(() -> new UserNotFoundException("Winner not found")));
+        responseDTO.setLoser(fetchPlayerDetails(matchDTO.getLoserId())
+                .orElseThrow(() -> new UserNotFoundException("Loser not found")));
 
         return responseDTO;
     }
 
+    // Fetch player details by ID
     private Optional<PlayerDetails> fetchPlayerDetails(Long playerId) {
         if (playerId == null) {
-            return null;
+            return Optional.empty();
         }
         return playerDetailsRepository.findById(playerId);
     }

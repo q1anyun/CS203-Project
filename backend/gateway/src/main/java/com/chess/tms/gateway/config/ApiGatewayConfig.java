@@ -8,9 +8,9 @@ import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.web.servlet.function.RequestPredicates;
 import org.springframework.web.servlet.function.RouterFunction;
+import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -48,12 +48,13 @@ public class ApiGatewayConfig {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> tournamentServiceRoute() {
-        return GatewayRouterFunctions.route("tournament-service")
-                .route(RequestPredicates.path("/api/tournaments/**"), request -> 
-                    processRequestWithJwtClaims(request, "http://localhost:8084"))
-                .build();
-    }
+public RouterFunction<ServerResponse> tournamentServiceRoute() {
+    return RouterFunctions
+        .route(RequestPredicates.path("/api/tournaments/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+        .andRoute(RequestPredicates.path("/api/tournamentplayers/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"));
+}
 
     @Bean
     public RouterFunction<ServerResponse> matchServiceRoute() {

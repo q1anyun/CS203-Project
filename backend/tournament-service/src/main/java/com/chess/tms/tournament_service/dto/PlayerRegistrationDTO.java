@@ -14,6 +14,4 @@ public class PlayerRegistrationDTO {
     private long playerId;
 
     private long tournamentId;
-
-    private RegistrationStatus registrationStatus;
 }

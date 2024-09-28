@@ -1,4 +1,4 @@
-package com.chess.tms.player_service.dto;
+package com.chess.tms.tournament_service.dto;
 import lombok.Data;
 
 @Data
@@ -15,4 +15,5 @@ public class PlayerDetailsDTO {
     private int highestElo;
     private int lowestElo;
     private String country;
+    private int winRate;
 }

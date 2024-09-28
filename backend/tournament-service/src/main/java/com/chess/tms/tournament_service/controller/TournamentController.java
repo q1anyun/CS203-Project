@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.chess.tms.tournament_service.dto.TournamentUpdateDTO;
-import com.chess.tms.tournament_service.dto.PlayerRegistrationDTO;
+import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
 import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.service.TournamentService;
@@ -46,33 +45,13 @@ public class TournamentController {
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<TournamentUpdateDTO> updateTournament(@PathVariable ("id") long id, @RequestBody TournamentDetailsDTO updatedDTO) {
-        return ResponseEntity.ok(tournamentService.updateTournament(id, updatedDTO));
+    public ResponseEntity<String> updateTournament(@PathVariable ("id") long id, @RequestBody TournamentUpdateRequestDTO updatedDTO) {
+        tournamentService.updateTournament(id, updatedDTO);
+        return ResponseEntity.ok("Tournament updated successfully");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<TournamentDetailsDTO> deleteTournament(@PathVariable("id") long id) {
         return ResponseEntity.ok(tournamentService.deleteTournament(id));
-    }
-
-    @PostMapping("/register-players/{playerid}/{tournamentid}") 
-    public ResponseEntity<PlayerRegistrationDTO> registerPlayer(@PathVariable long playerid, @PathVariable long tournamentid) {
-        return ResponseEntity.ok(tournamentService.registerPlayer(playerid, tournamentid));
-    }
-
-    //api calls for tournament-players
-    @GetMapping("/{id}/players")
-    public ResponseEntity<List<PlayerRegistrationDTO>> getTournamentPlayersByTournamentId(@PathVariable("id") long id) {
-        return ResponseEntity.ok(tournamentService.getPlayersByTournament(id));
-    }
-
-    @GetMapping("/players")
-    public ResponseEntity<List<PlayerRegistrationDTO>> getAllPlayers() {
-        return ResponseEntity.ok(tournamentService.getAllPlayers());
-    }
-
-    @DeleteMapping("/delete-player/{playerid}/{tournamentid}")
-    public ResponseEntity<PlayerRegistrationDTO> deletePlayerFromTournament(@PathVariable long playerid, @PathVariable long tournamentid) {
-        return ResponseEntity.ok(tournamentService.deletePlayerFromTournament(playerid, tournamentid));
     }
 }

@@ -9,14 +9,16 @@ public class DTOUtil {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(tournament.getTournamentId());
         dto.setName(tournament.getName());
-        dto.setCreatorId(tournament.getCreatorId());
         dto.setStartDate(tournament.getStartDate());
         dto.setEndDate(tournament.getEndDate());
         dto.setMinElo(tournament.getMinElo());
         dto.setMaxElo(tournament.getMaxElo());
-        dto.setTotalPlayers(tournament.getTotalPlayers());
+        dto.setCurrentPlayers(tournament.getCurrentPlayers());
+        dto.setMaxPlayers(tournament.getMaxPlayers());
         dto.setStatus(tournament.getStatus());
         dto.setTimeControl(tournament.getTimeControl());
+
+        dto.setCreatorId(tournament.getCreatorId());
 
         return dto;
     }
@@ -24,7 +26,6 @@ public class DTOUtil {
     public static PlayerRegistrationDTO convertPlayerEntrytoPlayerDTO(TournamentPlayer player) {
         PlayerRegistrationDTO dto = new PlayerRegistrationDTO();
         dto.setPlayerId(player.getId());
-        dto.setRegistrationStatus(player.getRegistrationStatus());
         dto.setTournamentId(player.getTournament().getTournamentId());
 
         return dto;
@@ -38,7 +39,8 @@ public class DTOUtil {
         tournament.setEndDate(dto.getEndDate());
         tournament.setMinElo(dto.getMinElo());
         tournament.setMaxElo(dto.getMaxElo());
-        tournament.setTotalPlayers(dto.getTotalPlayers());
+        tournament.setCurrentPlayers(dto.getCurrentPlayers());
+        tournament.setMaxPlayers(dto.getMaxPlayers());
         tournament.setTimeControl(dto.getTimeControl());
 
         return tournament;

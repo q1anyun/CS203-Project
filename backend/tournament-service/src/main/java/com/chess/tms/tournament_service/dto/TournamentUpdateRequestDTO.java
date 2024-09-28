@@ -1,18 +1,12 @@
 package com.chess.tms.tournament_service.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-import com.chess.tms.tournament_service.enums.Status;
+import lombok.Data;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class TournamentRegistrationDTO {
-
-    private long creatorId;
+public class TournamentUpdateRequestDTO {
+    private long id;
 
     private String name;
 
@@ -28,8 +22,5 @@ public class TournamentRegistrationDTO {
 
     private int currentPlayers;
 
-    private Status status;
-
     private int timeControl;
-    
 }

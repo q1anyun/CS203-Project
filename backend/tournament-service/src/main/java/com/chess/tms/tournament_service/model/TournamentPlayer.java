@@ -1,11 +1,6 @@
 package com.chess.tms.tournament_service.model;
-
-import com.chess.tms.tournament_service.enums.RegistrationStatus;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,10 +29,5 @@ public class TournamentPlayer {
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false) 
     private Tournament tournament;
-
-    @Column(name = "registration_status", nullable = false)
-    
-    @Enumerated(EnumType.STRING)
-    private RegistrationStatus registrationStatus;
 
 }

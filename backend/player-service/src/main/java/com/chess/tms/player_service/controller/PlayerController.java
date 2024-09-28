@@ -21,9 +21,6 @@ public class PlayerController {
 
     @GetMapping("/currentPlayerById")
     public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@RequestHeader("X-User-PlayerId") String id) {
-
-        System.out.println("Player Id: " + id);
-
         Long playerId = Long.parseLong(id);
         PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(playerId);
         return ResponseEntity.ok(playerDetails);
@@ -43,17 +40,9 @@ public class PlayerController {
         return ResponseEntity.ok(recentMatches);
     }
 
-    // For Testing without Token Access
-    @GetMapping("/{id}")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetailsTest(@PathVariable("id") Long id) {
-        PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(id);
-        return ResponseEntity.ok(playerDetails);
-    }
-
-    // For Testing without Token Access
-    @GetMapping("/user/{id}")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetailsbyUserIdTest(@PathVariable("id") Long id) {
-        PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsByUserId(id);
+    @PostMapping("/list")
+    public ResponseEntity<List<PlayerDetailsDTO>> getListOfPlayerDetails(@RequestBody List<Long> playerIds) {
+        List<PlayerDetailsDTO> playerDetails = playerService.getListOfPlayerDetails(playerIds);
         return ResponseEntity.ok(playerDetails);
     }
 }
