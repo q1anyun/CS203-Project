@@ -50,6 +50,9 @@ public class TournamentService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${matches.service.url}")
+    private String matchServiceUrl;
+
     @Value("${players.service.url}")
     private String playerServiceUrl;
 
@@ -62,6 +65,30 @@ public class TournamentService {
         tournamentRepository.save(tournament);
 
         return "Tournament created successfully";
+    }
+
+    public String startTournament(long tournamentId) {
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
+        if (tournamentOptional.isEmpty()) {
+            throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
+        }
+    
+        Tournament tournament = tournamentOptional.get();
+
+        ResponseEntity<Long> response = restTemplate.postForEntity(
+            matchServiceUrl + "/api/matches/" + tournamentId+"/"+tournament.getTimeControl().getId()+"/generate",
+            null,
+            Long.class);
+
+        tournament.setStatus(Status.LIVE);
+        Optional<RoundType> roundTypeOptional = roundTypeRepository.findById(response.getBody());
+        if (roundTypeOptional.isEmpty()) {
+            throw new RoundTypeNotFoundException("RoundType with id " + response.getBody() + " does not exist.");
+        }
+        tournament.setCurrentRound(roundTypeOptional.get());
+        tournamentRepository.save(tournament);
+
+        return tournament.getName() + " has started and current round is "+ roundTypeOptional.get().getRoundName();
     }
 
     public TournamentDetailsDTO getTournamentDetailsById(long id) {
@@ -231,5 +258,16 @@ public class TournamentService {
     
         tournament.setCurrentRound(currentRound);
         tournamentRepository.save(tournament);
+    }
+
+    public List<TournamentDetailsDTO> getRegisteredTournaments(long playerId) {
+        List<TournamentPlayer> tournamentPlayers = tournamentPlayerRepository.findAllByPlayerId(playerId);
+        List<TournamentDetailsDTO> tournamentDetails = new ArrayList<>();
+
+        for (TournamentPlayer tp : tournamentPlayers) {
+            tournamentDetails.add(DTOUtil.convertEntryToDTO(tp.getTournament()));
+        }
+
+        return tournamentDetails;
     }
 }

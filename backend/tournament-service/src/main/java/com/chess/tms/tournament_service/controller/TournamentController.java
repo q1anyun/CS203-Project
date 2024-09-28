@@ -34,6 +34,11 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.createTournament(dto, Long.parseLong(id)));
     }
 
+    @PostMapping("/start/{tournamentId}")
+    public ResponseEntity<String> startTournament(@PathVariable("tournamentId") long tournamentId) {
+        return ResponseEntity.ok(tournamentService.startTournament(tournamentId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TournamentDetailsDTO> getTournament(@PathVariable("id") long id) {
         return ResponseEntity.ok(tournamentService.getTournamentDetailsById(id));
@@ -65,5 +70,16 @@ public class TournamentController {
     public ResponseEntity<String> completeTournament(@PathVariable ("id") long id, @PathVariable ("winnerId") long winnerId) {
         String response= tournamentService.completeTournament(id, winnerId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/registered/{playerId}")
+    public ResponseEntity<List<TournamentDetailsDTO>> getRegisteredTournaments(@PathVariable ("playerId") long playerId) {
+        return ResponseEntity.ok(tournamentService.getRegisteredTournaments(playerId));
+    }
+
+    @GetMapping("/registered/current")
+    public ResponseEntity<List<TournamentDetailsDTO>> getRegisteredTournaments( @RequestHeader("X-User-PlayerId") String id) {
+        long playerId = Long.parseLong(id);
+        return ResponseEntity.ok(tournamentService.getRegisteredTournaments(playerId));
     }
 }

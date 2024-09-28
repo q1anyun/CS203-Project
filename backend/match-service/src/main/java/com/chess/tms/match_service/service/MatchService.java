@@ -45,9 +45,9 @@ public class MatchService {
         this.restTemplate = restTemplate;
     }
 
-    public void createInitialMatches(Long tournamentId, Long gameTypeId) {
+    public Long createInitialMatches(Long tournamentId, Long gameTypeId) {
         ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
-                tournamentServiceUrl + "/api/tournamentplayers/" + tournamentId, HttpMethod.GET, null,
+                tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
                 TournamentPlayerEloDTO[].class);
 
         TournamentPlayerEloDTO[] players = response.getBody();
@@ -148,8 +148,8 @@ public class MatchService {
                 matchRepository.save(previousMatch2);
             }
         }
-
-        updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
+        return currentRoundType.getId();
+        //updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
     }
 
     // Get the RoundType based on the number of players

@@ -14,7 +14,7 @@ public class GameTypeService {
     private GameTypeRepository gameTypeRepository;
 
     public List<GameType> getGameTypes() {
-        return gameTypeRepository.getAllGameType();
+        return gameTypeRepository.findAll();
     }
 
 }

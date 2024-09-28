@@ -13,6 +13,6 @@ public class RoundTypeService {
     private RoundTypeRepository roundTypeRepository;
 
     public List<Integer> getChoicesForNumberOfPlayers() {
-        return roundTypeRepository.getAllNumberOfPlayers();
+        return roundTypeRepository.findDistinctNumberOfPlayers();
     }
 }

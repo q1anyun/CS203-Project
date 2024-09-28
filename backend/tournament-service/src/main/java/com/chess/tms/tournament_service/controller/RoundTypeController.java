@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.chess.tms.tournament_service.service.RoundTypeService;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
 
 @RestController
 @RequestMapping("/api/round-type")
@@ -18,7 +16,7 @@ public class RoundTypeController {
     private RoundTypeService roundTypeService;
 
     @GetMapping("/choices")
-    public List<Integer> getChoicesForNumberOfPlayers(@RequestParam String param) {
+    public List<Integer> getChoicesForNumberOfPlayers() {
         return roundTypeService.getChoicesForNumberOfPlayers();
     }
 }

@@ -20,4 +20,6 @@ public interface TournamentPlayerRepository extends JpaRepository<TournamentPlay
 
     public void deleteByPlayerId(long playerId);
 
+    public List<TournamentPlayer> findAllByPlayerId(long playerId);
+
 }

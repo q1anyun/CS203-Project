@@ -18,9 +18,8 @@ public class MatchController {
 
     // Generate initial matches for a tournament
     @PostMapping("/{tournamentId}/{gameTypeId}/generate")
-    public ResponseEntity<String> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
-        matchService.createInitialMatches(tournamentId, gameTypeId);
-        return ResponseEntity.ok("Matches created successfully");
+    public ResponseEntity<Long> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+        return ResponseEntity.ok(matchService.createInitialMatches(tournamentId, gameTypeId));
     }
 
     // Get all matches for a tournament
