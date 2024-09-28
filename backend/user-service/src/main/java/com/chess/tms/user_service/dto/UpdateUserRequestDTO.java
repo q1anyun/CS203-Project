@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class UpdateUserRequestDTO {
-    private String username;
     private String email;
     private String password;
     private UserRole role;

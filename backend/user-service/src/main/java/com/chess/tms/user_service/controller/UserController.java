@@ -17,11 +17,11 @@ public class UserController {
     }
 
     // Update User Endpoint
-    @PutMapping("/{userId}")
+    @PutMapping("/update")
     public ResponseEntity<String> updateUser(
-            @PathVariable Long userId,
+            @RequestHeader("X-User-Id") String id,
             @RequestBody UpdateUserRequestDTO updateUserRequestDTO) {
-        
+        Long userId = Long.parseLong(id);
         userService.updateUser(userId, updateUserRequestDTO);
         return ResponseEntity.ok("Successfully updated credentials");
     }

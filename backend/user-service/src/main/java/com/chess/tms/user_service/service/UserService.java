@@ -24,17 +24,17 @@ public class UserService {
         User user = usersRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found."));
 
-        // Check if username is the same or already exists
-        if (updateUserRequestDTO.getUsername() != null && 
-            !updateUserRequestDTO.getUsername().isEmpty()) {
-            if (updateUserRequestDTO.getUsername().equals(user.getUsername())) {
-                throw new UserAlreadyExistsException("Username is the same as the current username.");
-            }
-            if (usersRepository.findByUsername(updateUserRequestDTO.getUsername()).isPresent()) {
-                throw new UserAlreadyExistsException("Username " + updateUserRequestDTO.getUsername() + " is already taken.");
-            }
-            user.setUsername(updateUserRequestDTO.getUsername());
-        }
+        // // Check if username is the same or already exists
+        // if (updateUserRequestDTO.getUsername() != null && 
+        //     !updateUserRequestDTO.getUsername().isEmpty()) {
+        //     if (updateUserRequestDTO.getUsername().equals(user.getUsername())) {
+        //         throw new UserAlreadyExistsException("Username is the same as the current username.");
+        //     }
+        //     if (usersRepository.findByUsername(updateUserRequestDTO.getUsername()).isPresent()) {
+        //         throw new UserAlreadyExistsException("Username " + updateUserRequestDTO.getUsername() + " is already taken.");
+        //     }
+        //     user.setUsername(updateUserRequestDTO.getUsername());
+        // }
 
         // Check if email is the same or already exists
         if (updateUserRequestDTO.getEmail() != null && 

@@ -43,4 +43,5 @@ public class AuthController {
     public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistrationRequestDTO admin) {
         return ResponseEntity.ok(authService.registerAdmin(admin));
     }
+    
 }
