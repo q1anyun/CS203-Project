@@ -14,7 +14,6 @@ import org.springframework.web.client.RestTemplate;
 
 import com.chess.tms.tournament_service.dto.DTOUtil;
 import com.chess.tms.tournament_service.dto.PlayerDetailsDTO;
-import com.chess.tms.tournament_service.dto.PlayerRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
@@ -50,15 +49,12 @@ public class TournamentService {
 
     public TournamentDetailsDTO createTournament(TournamentRegistrationDTO dto, long creatorId) {
 
-        // Map DTO to entry
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
         tournament.setTimeControl(gameTypeRepository.getGameTypeById(dto.getTimeControl()));
 
-        // Save in repo
         tournamentRepository.save(tournament);
 
-        // Map saved entity to DTO and return
         TournamentDetailsDTO responseDTO = DTOUtil.convertEntryToDTO(tournament);
 
         return responseDTO;
@@ -104,7 +100,6 @@ public class TournamentService {
     }
 
     public void updateTournament(long id, TournamentUpdateRequestDTO dto) {
-        // Safely retrieve the tournament object
         Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
         
         if (tournamentOptional.isEmpty()) {
@@ -113,7 +108,6 @@ public class TournamentService {
         
         Tournament tournament = tournamentOptional.get();
         
-        // Update the tournament fields based on the provided DTO
         if (dto.getStartDate() != null) {
             tournament.setStartDate(dto.getStartDate());
         }

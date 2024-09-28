@@ -47,7 +47,7 @@ public class MatchService {
 
     public void createInitialMatches(Long tournamentId, Long gameTypeId) {
         ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
-            tournamentServiceUrl+"/api/tournaments/"+tournamentId+"/players", HttpMethod.GET, null, TournamentPlayerEloDTO[].class);
+            tournamentServiceUrl+"/api/tournamentplayers/"+tournamentId, HttpMethod.GET, null, TournamentPlayerEloDTO[].class);
         
         TournamentPlayerEloDTO[] players = response.getBody();
         int totalPlayers = players.length;
@@ -163,12 +163,10 @@ public class MatchService {
         return match;
     }
 
-    // To do: Add check whether winnerId is part of the match
     public void advanceWinner(Long matchId, Long winnerId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
-
-        if (match.getPlayer1Id() != winnerId || match.getPlayer2Id() != winnerId) {
+        if (!match.getPlayer1Id().equals(winnerId) && !match.getPlayer2Id().equals(winnerId)) {
             throw new PlayerDoesNotExistInMatchException(
                     "Player with id " + winnerId + " is not recognised in the match.");
         }

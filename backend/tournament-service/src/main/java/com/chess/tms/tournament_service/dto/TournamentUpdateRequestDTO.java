@@ -2,8 +2,6 @@ package com.chess.tms.tournament_service.dto;
 
 import java.time.LocalDateTime;
 
-import com.chess.tms.tournament_service.model.GameType;
-
 import lombok.Data;
 
 @Data

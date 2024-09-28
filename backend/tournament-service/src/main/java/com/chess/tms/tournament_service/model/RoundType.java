@@ -1,0 +1,20 @@
+package com.chess.tms.tournament_service.model;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "round_type")
+public class RoundType {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "round_name", nullable = false, length = 50)
+    private String roundName; 
+
+    @Column(name = "number_of_players")
+    private Integer numberOfPlayers;
+}
+

@@ -63,6 +63,10 @@ public class Tournament {
     private Status status;
 
     @ManyToOne
+    @JoinColumn(name = "current_round") 
+    private RoundType roundType;
+
+    @ManyToOne
     @JoinColumn(name = "time_control", nullable = false) 
     private GameType timeControl;
 

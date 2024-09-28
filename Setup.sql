@@ -1,8 +1,6 @@
 use chess_tms;
 
 
-
-
 CREATE TABLE user (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
    username VARCHAR(50) NOT NULL,
@@ -12,6 +10,7 @@ CREATE TABLE user (
    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
 
 CREATE TABLE player_details (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -29,11 +28,20 @@ CREATE TABLE player_details (
    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
+
 CREATE TABLE game_type (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
    name VARCHAR(50) NOT NULL,
    time_control_minutes INT NOT NULL
 );
+
+
+CREATE TABLE round_type (
+   id BIGINT AUTO_INCREMENT PRIMARY KEY,
+   round_name VARCHAR(50) NOT NULL,
+   number_of_players INT NOT NULL
+);
+
 
 CREATE TABLE tournament (
    id bigint AUTO_INCREMENT PRIMARY KEY,
@@ -46,9 +54,12 @@ CREATE TABLE tournament (
    total_players INT NOT NULL,
    status ENUM("EXPIRED", "LIVE", "UPCOMING"),
    time_control BIGINT NOT NULL, 
+   current_round BIGINT,
+   FOREIGN KEY (current_round) REFERENCES round_type(id),
    FOREIGN KEY (time_control) REFERENCES game_type(id),
    FOREIGN KEY (created_by) REFERENCES user(id) ON DELETE CASCADE
 );
+
 
 CREATE TABLE tournament_player (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -58,11 +69,7 @@ CREATE TABLE tournament_player (
    FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
 
-CREATE TABLE round_type (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   round_name VARCHAR(50) NOT NULL,
-   number_of_players INT NOT NULL
-);
+
 
 
 CREATE TABLE matches (
@@ -88,6 +95,7 @@ CREATE TABLE matches (
    FOREIGN KEY (game_type_id) REFERENCES game_type(id)
 );
 
+
 CREATE TABLE elo_history (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
    player_id BIGINT NOT NULL,
@@ -98,6 +106,7 @@ CREATE TABLE elo_history (
    FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
 
+
 CREATE TABLE leaderboard (
    id BIGINT AUTO_INCREMENT PRIMARY KEY,
    player_id BIGINT NOT NULL,
@@ -107,10 +116,24 @@ CREATE TABLE leaderboard (
    FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
 
+
+INSERT INTO round_type (round_name, number_of_players) VALUES
+('Finals', 2),
+('Semi Finals', 4),
+('Quarter Finals', 8),
+('Top 16', 16),
+('Top 32', 32),
+('Top 64', 64);
+
+
+
+
 INSERT INTO user (username, email, password, role, created_at, updated_at)
 VALUES 
 ('admin1', 'admin1@example.com', '$2a$10$6bZUlV1zkqD6kqFGrP1XduJzZ1tiZa8gj0W5HbXUls1p.jYtEbcJm', 'ADMIN', NOW(), NOW()),
 ('admin2', 'admin2@example.com', '$2a$10$CzKz4xLXlB5FY5twYsT.5euRr71h9n0icEMTzxY8qFdIW/.pM6vW.', 'ADMIN', NOW(), NOW());
+
+
 
 
 -- Insert dummy data for 20 players with hashed password "pass"
@@ -137,6 +160,7 @@ VALUES
 ('player19', 'player19@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW()),
 ('player20', 'player20@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW());
 
+
 -- Insert corresponding player details for each player (ID 3 to 22)
 INSERT INTO player_details (user_id, elo_rating, country, first_name, last_name, profile_picture, total_wins, total_losses, total_matches, highest_elo, lowest_elo)
 VALUES 
@@ -161,6 +185,11 @@ VALUES
 (19, 1100, 'Egypt', 'Player', 'Nineteen', 'profile19.jpg', 9, 9, 18, 1150, 1050),
 (20, 1000, 'Kenya', 'Player', 'Twenty', 'profile20.jpg', 8, 10, 18, 1050, 950);
 
+
+
+
+
+
 -- Insert dummy data into game_type table
 INSERT INTO game_type (name, time_control_minutes)
 VALUES 
@@ -171,12 +200,14 @@ VALUES
 ('Armageddon', 5),      -- Armageddon (Blitz tiebreak game)
 ('Fischer Random', 15); -- Fischer Random chess (15 minutes per player)
 
+
 -- Insert dummy data into the `tournament` table
 INSERT INTO tournament (created_by, name, start_date, end_date, min_elo, max_elo,current_players, total_players, status, time_control) 
 VALUES 
 (1, 'Chess Rapid Championship', '2024-10-01 10:00:00', '2024-10-02 18:00:00', 1200, 2400, 16, 16, 'UPCOMING', 1),  -- Time control ID 1 -> Rapid
 (2, 'Blitz Open Tournament', '2024-11-10 09:00:00', '2024-11-10 20:00:00', 1000, 2200,20, 32, 'UPCOMING', 2),     -- Time control ID 2 -> Blitz
 (1, 'Classic Masters Event', '2024-12-05 10:00:00', '2024-12-06 18:00:00', 1400, 2600,8 , 8, 'UPCOMING', 3);      -- Time control ID 3 -> Classic
+
 
 -- Insert dummy data into the `tournament_player` table
 -- For 'Chess Rapid Championship'
@@ -198,6 +229,7 @@ VALUES
 (16, 1), 
 (17, 1), 
 (18, 1);  -- Total 16 players
+
 
 -- For 'Blitz Open Tournament'
 INSERT INTO tournament_player (player_id, tournament_id) 
@@ -223,6 +255,7 @@ VALUES
 (19, 2), 
 (20, 2);  -- Total 20 players
 
+
 -- For 'Classic Masters Event'
 INSERT INTO tournament_player (player_id, tournament_id) 
 VALUES 
@@ -234,3 +267,5 @@ VALUES
 (10, 3), 
 (11, 3), 
 (12, 3);  -- Total 8 players
+
+
