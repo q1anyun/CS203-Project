@@ -20,6 +20,7 @@ import com.chess.tms.tournament_service.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.LongAdder;
 
 
 @Data
@@ -32,10 +33,13 @@ public class Tournament {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long tournamentId;
+    private Long tournamentId;
 
     @Column(name = "created_by", nullable = false)
-    private long creatorId;
+    private Long creatorId;
+
+    @Column
+    private Long winnerId;
 
     @Column
     private String name;
@@ -47,16 +51,16 @@ public class Tournament {
     private LocalDateTime endDate;
 
     @Column
-    private int minElo;
+    private Integer minElo;
 
     @Column
-    private int maxElo;
+    private Integer maxElo;
 
     @Column
-    private int currentPlayers;
+    private Integer currentPlayers;
 
     @Column
-    private int maxPlayers;
+    private Integer maxPlayers;
 
     @Column
     @Enumerated(EnumType.STRING)
@@ -64,7 +68,7 @@ public class Tournament {
 
     @ManyToOne
     @JoinColumn(name = "current_round") 
-    private RoundType roundType;
+    private RoundType currentRound;
 
     @ManyToOne
     @JoinColumn(name = "time_control", nullable = false) 

@@ -21,10 +21,10 @@ public class TournamentPlayer {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "player_id", nullable = false, unique = true)
-    private long playerId;
+    private Long playerId;
 
     @ManyToOne
     @JoinColumn(name = "tournament_id", nullable = false) 

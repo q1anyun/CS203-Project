@@ -47,14 +47,17 @@ public class MatchService {
 
     public void createInitialMatches(Long tournamentId, Long gameTypeId) {
         ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
-            tournamentServiceUrl+"/api/tournamentplayers/"+tournamentId, HttpMethod.GET, null, TournamentPlayerEloDTO[].class);
-        
+                tournamentServiceUrl + "/api/tournamentplayers/" + tournamentId, HttpMethod.GET, null,
+                TournamentPlayerEloDTO[].class);
+
         TournamentPlayerEloDTO[] players = response.getBody();
         int totalPlayers = players.length;
 
         // Calculate the next power of 2 for the knockout stage
         int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));
         int byes = nextPowerOfTwo - totalPlayers;
+
+        RoundType currentRoundType = getRoundType(nextPowerOfTwo);
 
         // Sort players by their Elo rating (descending order for best players first)
         Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
@@ -73,9 +76,9 @@ public class MatchService {
             match.setTournamentId(tournamentId);
             match.setPlayer1Id(player1.getId());
             match.setPlayer2Id(player2.getId());
-            match.setRoundType(getRoundType(nextPowerOfTwo));
+            match.setRoundType(currentRoundType);
             match.setGameType(gameTypeRepository.findById(gameTypeId)
-                .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
             match.setStatus(Match.MatchStatus.PENDING);
             firstRoundMatches.add(match);
             allMatches.add(match);
@@ -90,9 +93,9 @@ public class MatchService {
             byeMatch.setPlayer1Id(null);
             byeMatch.setPlayer2Id(null);
             byeMatch.setWinnerId(playerWithBye.getId());
-            byeMatch.setRoundType(getRoundType(nextPowerOfTwo));
+            byeMatch.setRoundType(currentRoundType);
             byeMatch.setGameType(gameTypeRepository.findById(gameTypeId)
-                .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
             byeMatch.setStatus(Match.MatchStatus.COMPLETED);
             byeMatches.add(byeMatch);
             allMatches.add(byeMatch);
@@ -116,7 +119,8 @@ public class MatchService {
                 nextRoundMatch.setTournamentId(tournamentId);
                 nextRoundMatch.setRoundType(getRoundType(currentRoundSize * 2));
                 nextRoundMatch.setGameType(gameTypeRepository.findById(gameTypeId)
-                .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+                        .orElseThrow(
+                                () -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
                 nextRoundMatch.setStatus(Match.MatchStatus.PENDING);
                 currentRoundMatches.add(nextRoundMatch);
                 allMatches.add(nextRoundMatch);
@@ -144,13 +148,22 @@ public class MatchService {
                 matchRepository.save(previousMatch2);
             }
         }
+
+        updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
     }
 
     // Get the RoundType based on the number of players
     private RoundType getRoundType(int numberOfPlayers) {
-    return roundTypeRepository.findByNumberOfPlayers(numberOfPlayers)
-            .orElseThrow(() -> new RoundTypeNotFoundException("Round type not found for " + numberOfPlayers + " players"));
-}
+        return roundTypeRepository.findByNumberOfPlayers(numberOfPlayers)
+                .orElseThrow(() -> new RoundTypeNotFoundException(
+                        "Round type not found for " + numberOfPlayers + " players"));
+    }
+
+    private void updateCurrentRoundForTournament(Long tournamentId, Long roundTypeId) {
+        String updateRoundUrl = tournamentServiceUrl + "/api/tournaments/" + tournamentId + "/round/" + roundTypeId;
+        // Call the endpoint to update the current round
+        restTemplate.put(updateRoundUrl, null);
+    }
 
     public List<Match> getMatchesByTournament(Long tournamentId) {
         return matchRepository.findByTournamentId(tournamentId);
@@ -163,7 +176,7 @@ public class MatchService {
         return match;
     }
 
-    public void advanceWinner(Long matchId, Long winnerId) {
+    public String advanceWinner(Long matchId, Long winnerId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
         if (!match.getPlayer1Id().equals(winnerId) && !match.getPlayer2Id().equals(winnerId)) {
@@ -179,7 +192,7 @@ public class MatchService {
 
         if (match.getNextMatchId() != null) {
             Match nextMatch = matchRepository.findById(match.getNextMatchId())
-                    .orElseThrow(() -> new RuntimeException("Next match not found"));
+                    .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
 
             if (nextMatch.getPlayer1Id() == null) {
                 nextMatch.setPlayer1Id(winnerId);
@@ -188,50 +201,39 @@ public class MatchService {
             }
 
             matchRepository.save(nextMatch);
-        }
-    }
 
-    public void generateNextRound(Long tournamentId) {
-        // Find the most recent completed round (the round with the minimum number of
-        // completed matches)
-        // Might store current Round id in Tourmanent table instead of finding it every
-        // time
-        RoundType mostRecentCompletedRound = roundTypeRepository.findMostRecentCompletedRound(tournamentId)
-                .orElseThrow(() -> new RuntimeException("No completed rounds found for this tournament."));
+            // Check if round is completed
+            RoundType roundType = roundTypeRepository.findById(match.getRoundType().getId())
+                    .orElseThrow(
+                            () -> new RoundTypeNotFoundException("Round type not found while checking next round"));
 
-        // Get the matches for that completed round
-        List<Match> completedMatches = matchRepository.findCompletedMatchesByRoundType(tournamentId,
-                mostRecentCompletedRound.getId());
+            List<Match> roundMatches = matchRepository.findByRoundTypeIdAndTournamentId(match.getTournamentId(),
+                    roundType.getId());
 
-        // Assign matches for the next round
-        for (Match completedMatch : completedMatches) {
-            Long nextMatchId = completedMatch.getNextMatchId();
-            if (nextMatchId != null) {
-                Match nextMatch = matchRepository.findById(nextMatchId)
-                        .orElseThrow(() -> new RuntimeException("Next match not found for match ID: " + nextMatchId));
-                if (nextMatch.getPlayer1Id() == null) {
-                    nextMatch.setPlayer1Id(completedMatch.getWinnerId());
-                } else if (nextMatch.getPlayer2Id() == null) {
-                    nextMatch.setPlayer2Id(completedMatch.getWinnerId());
-                }
-
-                matchRepository.save(nextMatch);
+            boolean roundCompleted = roundMatches.stream().allMatch(m -> m.getStatus() == Match.MatchStatus.COMPLETED);
+            if (roundCompleted) {
+                updateCurrentRoundForTournament(match.getTournamentId(), nextMatch.getRoundType().getId());
+                return "Tournament has advanced to the next round";
             }
+            return "Winner advanced to the next round";
+        }else{
+            String updateTournamentUrl = tournamentServiceUrl + "/api/tournaments/" + match.getTournamentId()+"/winner/"+winnerId;
+            restTemplate.put(updateTournamentUrl, null);
+            return "Tournament completed";
         }
     }
-
 
     public List<MatchDTO> getRecentMatchesByPlayerId(Long playerId) {
 
         List<Match> matches = matchRepository.findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(playerId, playerId);
-        
+
         List<MatchDTO> matchDTOs = matches.stream()
-            .map(this::convertMatchToMatchDTO)
-            .collect(Collectors.toList());
+                .map(this::convertMatchToMatchDTO)
+                .collect(Collectors.toList());
 
         return matchDTOs;
     }
-    
+
     private MatchDTO convertMatchToMatchDTO(Match match) {
         MatchDTO matchDTO = new MatchDTO();
         matchDTO.setWinnerId(match.getWinnerId());

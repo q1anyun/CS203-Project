@@ -16,4 +16,6 @@ public interface MatchesRepository extends JpaRepository<Match, Long> {
     List<Match> findCompletedMatchesByRoundType(@Param("tournamentId") Long tournamentId, @Param("roundTypeId") Long roundTypeId);
 
     List<Match> findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(Long player1Id, Long player2Id);
+
+    List<Match> findByRoundTypeIdAndTournamentId(Long tournamentId, Long roundTypeId);
 }

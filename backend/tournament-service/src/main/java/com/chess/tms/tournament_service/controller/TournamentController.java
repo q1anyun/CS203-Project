@@ -30,7 +30,7 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @PostMapping("")
-    public ResponseEntity<TournamentDetailsDTO> registerTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
+    public ResponseEntity<String> registerTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
         return ResponseEntity.ok(tournamentService.createTournament(dto, Long.parseLong(id)));
     }
 
@@ -53,5 +53,17 @@ public class TournamentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<TournamentDetailsDTO> deleteTournament(@PathVariable("id") long id) {
         return ResponseEntity.ok(tournamentService.deleteTournament(id));
+    }
+
+    @PutMapping("/{id}/round/{round_type}")
+    public ResponseEntity<String> updateCurrentRoundForTournament(@PathVariable ("id") long id, @PathVariable ("round_type") long roundType) {
+        tournamentService.updateCurrentRoundForTournament(id, roundType);
+        return ResponseEntity.ok("Current round updated to " + roundType);
+    }
+
+    @PutMapping("/{id}/winner/{winnerId}")
+    public ResponseEntity<String> completeTournament(@PathVariable ("id") long id, @PathVariable ("winnerId") long winnerId) {
+        String response= tournamentService.completeTournament(id, winnerId);
+        return ResponseEntity.ok(response);
     }
 }

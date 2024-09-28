@@ -19,6 +19,8 @@ public class TournamentDetailsDTO {
 
     private Long creatorId;
 
+    private PlayerDetailsDTO winner;
+
     private String name;
 
     private LocalDateTime startDate;

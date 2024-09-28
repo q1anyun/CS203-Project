@@ -42,15 +42,7 @@ public class MatchController {
     public ResponseEntity<String> updateMatchResult(
             @PathVariable Long matchId,
             @PathVariable Long winnerId) {
-        matchService.advanceWinner(matchId, winnerId);
-        return ResponseEntity.ok("Winner advanced to the next round");
-    }
-
-    // Advance Round
-    @PostMapping("/{tournamentId}/advance")
-    public ResponseEntity<String> generateNextRound(@PathVariable Long tournamentId) {
-        matchService.generateNextRound(tournamentId);
-        return ResponseEntity.ok("Advanced to the next round");
+        return ResponseEntity.ok(matchService.advanceWinner(matchId, winnerId));
     }
 
     // Recent 5 matches for a player

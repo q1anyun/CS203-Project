@@ -20,9 +20,15 @@ public class PlayerController {
     }
 
     @GetMapping("/currentPlayerById")
-    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@RequestHeader("X-User-PlayerId") String id) {
+    public ResponseEntity<PlayerDetailsDTO> getCurrentPlayerDetails(@RequestHeader("X-User-PlayerId") String id) {
         Long playerId = Long.parseLong(id);
         PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(playerId);
+        return ResponseEntity.ok(playerDetails);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PlayerDetailsDTO> getPlayerDetails(@PathVariable("id") long id) {
+        PlayerDetailsDTO playerDetails = playerService.getPlayerDetailsById(id);
         return ResponseEntity.ok(playerDetails);
     }
 

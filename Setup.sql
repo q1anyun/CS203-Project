@@ -55,9 +55,11 @@ CREATE TABLE tournament (
    status ENUM("EXPIRED", "LIVE", "UPCOMING"),
    time_control BIGINT NOT NULL, 
    current_round BIGINT,
+   winner_id BIGINT,
    FOREIGN KEY (current_round) REFERENCES round_type(id),
    FOREIGN KEY (time_control) REFERENCES game_type(id),
-   FOREIGN KEY (created_by) REFERENCES user(id) ON DELETE CASCADE
+   FOREIGN KEY (created_by) REFERENCES user(id),
+   FOREIGN KEY (winner_id) REFERENCES player_details(id)
 );
 
 

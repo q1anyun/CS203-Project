@@ -1,10 +1,7 @@
 package com.chess.tms.tournament_service.dto;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
-import com.chess.tms.tournament_service.repository.TournamentRepository;
 
 public class DTOUtil {
         //helper functions
@@ -20,7 +17,7 @@ public class DTOUtil {
         dto.setMaxPlayers(tournament.getMaxPlayers());
         dto.setStatus(tournament.getStatus());
         dto.setTimeControl(tournament.getTimeControl());
-
+        dto.setCurrentRound(tournament.getCurrentRound());
         dto.setCreatorId(tournament.getCreatorId());
 
         return dto;

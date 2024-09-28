@@ -19,13 +19,16 @@ import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.repository.GameTypeRepository;
+import com.chess.tms.tournament_service.repository.RoundTypeRepository;
 import com.chess.tms.tournament_service.repository.TournamentPlayerRepository;
 import com.chess.tms.tournament_service.repository.TournamentRepository;
 
 import jakarta.transaction.Transactional;
 
+import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
 import com.chess.tms.tournament_service.exception.UserDoesNotExistException;
+import com.chess.tms.tournament_service.model.RoundType;
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
 
@@ -42,12 +45,15 @@ public class TournamentService {
     private GameTypeRepository gameTypeRepository;
 
     @Autowired
+    private RoundTypeRepository roundTypeRepository;
+
+    @Autowired
     private RestTemplate restTemplate;
 
     @Value("${players.service.url}")
     private String playerServiceUrl;
 
-    public TournamentDetailsDTO createTournament(TournamentRegistrationDTO dto, long creatorId) {
+    public String createTournament(TournamentRegistrationDTO dto, long creatorId) {
 
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
@@ -55,9 +61,7 @@ public class TournamentService {
 
         tournamentRepository.save(tournament);
 
-        TournamentDetailsDTO responseDTO = DTOUtil.convertEntryToDTO(tournament);
-
-        return responseDTO;
+        return "Tournament created successfully";
     }
 
     public TournamentDetailsDTO getTournamentDetailsById(long id) {
@@ -68,9 +72,20 @@ public class TournamentService {
         }
     
         Tournament tournament = tournamentOptional.get();
-    
 
-        return DTOUtil.convertEntryToDTO(tournament);
+        TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
+
+        if(tournament.getWinnerId() != null) {
+
+            ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+                playerServiceUrl + "/api/player/" + tournament.getWinnerId(),
+                PlayerDetailsDTO.class);
+
+            PlayerDetailsDTO winner = response.getBody();
+            returnDTO.setWinner(winner);
+        }
+
+        return returnDTO;
     }
 
     public TournamentDetailsDTO deleteTournament(long id) {
@@ -170,6 +185,20 @@ public class TournamentService {
 
     }
 
+    public String completeTournament(Long id, Long winnerId) {
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
+        if (tournamentOptional.isEmpty()) {
+            throw new TournamentDoesNotExistException("Tournament with id " + id + " does not exist.");
+        }
+    
+        Tournament tournament = tournamentOptional.get();
+        tournament.setWinnerId(winnerId);
+        tournament.setStatus(Status.COMPLETED);
+        tournamentRepository.save(tournament);
+    
+        return tournament.getName() + " has been completed";
+    }
+
     // public List<PlayerRegistrationDTO> getAllPlayers() {
     //     List<PlayerRegistrationDTO> list = new ArrayList<>();
 
@@ -193,5 +222,16 @@ public class TournamentService {
         }
 
         tournamentPlayerRepository.deleteByPlayerId(id);
+    }
+
+    public void updateCurrentRoundForTournament(long tournamentId, long roundTypeId) {
+        Tournament tournament = tournamentRepository.findById(tournamentId)
+                .orElseThrow(() -> new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist."));
+    
+        RoundType currentRound = roundTypeRepository.findById(roundTypeId)
+                .orElseThrow(() -> new RoundTypeNotFoundException("RoundType with id " + roundTypeId + " does not exist."));
+    
+        tournament.setCurrentRound(currentRound);
+        tournamentRepository.save(tournament);
     }
 }
