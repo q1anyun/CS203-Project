@@ -52,7 +52,7 @@ CREATE TABLE tournament (
    min_elo INT,
    max_elo INT,
    total_players INT NOT NULL,
-   status ENUM("EXPIRED", "LIVE", "UPCOMING"),
+   status ENUM("EXPIRED", "LIVE", "UPCOMING", "COMPLETED") NOT NULL DEFAULT 'UPCOMING',
    time_control BIGINT NOT NULL, 
    current_round BIGINT,
    winner_id BIGINT,
