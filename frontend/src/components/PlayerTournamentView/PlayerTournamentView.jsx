@@ -1,5 +1,5 @@
 import * as React from 'react'; 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -10,43 +10,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
 import styles from './PlayerTournamentView.module.css';
-
-const tournamentsData = [
-    {
-        tournamentId: 100823,
-        tournamentName: "Chess Masters",
-        startDate: "2024-09-10",
-        endDate: "2024-09-15",
-        timeControl: "Rapid",
-        minElo: 1200,
-        maxElo: 1800,
-        numberOfPlayers: 10,
-        status: "Expired",
-    },
-    {
-        tournamentId: 200564,
-        tournamentName: "Junior Championship",
-        startDate: "2024-09-12",
-        endDate: "2024-09-18",
-        timeControl: "Blitz",
-        minElo: 800,
-        maxElo: 1400,
-        numberOfPlayers: 8,
-        status: "Upcoming",
-    },
-    {
-        tournamentId: 200789,
-        tournamentName: "Grand Slam",
-        startDate: "2024-09-20",
-        endDate: "2024-09-30",
-        timeControl: "Classic",
-        minElo: 1500,
-        maxElo: 2200,
-        numberOfPlayers: 16,
-        status: "Live",
-    },
-];
-
 
 const statusColorMap = {
     Live: 'success',
@@ -76,11 +39,33 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 function PlayerTournamentView() {
-    const [tournaments, setTournaments] = useState(tournamentsData);
+    const [tournaments, setTournaments] = useState([]);
     const [joinedTournaments, setJoinedTournaments] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState(null);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
+    const [loading, setLoading] = useState(true); // Add loading state
+    const [error, setError] = useState(null); // Add error state
+
+    // Fetch tournaments from the backend
+    useEffect(() => {
+        const fetchTournaments = async () => {
+            try {
+                const response = await fetch('/api/player/tournaments');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                setTournaments(data); // Assuming your backend returns an array of tournaments
+            } catch (error) {
+                setError(error.message); // Set error message if fetching fails
+            } finally {
+                setLoading(false); // End loading state
+            }
+        };
+
+        fetchTournaments();
+    }, []);
 
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
@@ -96,14 +81,38 @@ function PlayerTournamentView() {
         setAgreedToTerms(event.target.checked);
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         if (selectedTournament) {
-            setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament.tournamentId]);
-            setOpenDialog(false);
+            try {
+                const response = await fetch(`/api/tournament/${selectedTournament.tournamentId}/enroll`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ /* any additional data needed */ })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to enroll in the tournament');
+                }
+
+                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament.tournamentId]);
+                setOpenDialog(false);
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
     const isJoined = (tournamentId) => joinedTournaments.includes(tournamentId);
+
+    if (loading) {
+        return <Typography>Loading tournaments...</Typography>; // Loading state
+    }
+
+    if (error) {
+        return <Typography>Error: {error}</Typography>; // Error handling
+    }
 
     return (
         <div>

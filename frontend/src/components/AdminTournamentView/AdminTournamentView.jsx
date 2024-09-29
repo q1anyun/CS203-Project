@@ -1,52 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import styles from './AdminTournamentView.module.css';
 import axios from 'axios';
-
-const tournamentsData = [
-    {
-        tournamentId: 100823,
-        tournamentName: "Chess Masters",
-        startDate: "2024-09-10",
-        endDate: "2024-09-15",
-        timeControl: "Rapid",
-        minElo: 1200,
-        maxElo: 1600,
-        currentPlayers: 8,
-        totalPlayers: 10,
-        status: "Expired",
-    },
-    {
-        tournamentId: 200564,
-        tournamentName: "Junior Championship",
-        startDate: "2024-09-12",
-        endDate: "2024-09-18",
-        timeControl: "Blitz",
-        minElo: 800,
-        maxElo: 1200,
-        currentPlayers: 6,
-        totalPlayers: 8,
-        status: "Upcoming",
-    },
-    {
-        tournamentId: 200789,
-        tournamentName: "Grand Slam",
-        startDate: "2024-09-20",
-        endDate: "2024-09-30",
-        timeControl: "Classic",
-        minElo: 1600,
-        maxElo: 2000,
-        currentPlayers: 15,
-        totalPlayers: 16,
-        status: "Live",
-    },
-];
+import styles from './AdminTournamentView.module.css';
 
 const statusColorMap = {
     Live: 'success',
@@ -70,7 +31,9 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 export default function AdminTournamentView() {
-    const [tournaments, setTournaments] = useState(tournamentsData);
+    const [tournaments, setTournaments] = useState([]);
+    const [loading, setLoading] = useState(true); // Loading state
+    const [error, setError] = useState(null); // Error state
     const [editableRow, setEditableRow] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
@@ -90,14 +53,30 @@ export default function AdminTournamentView() {
 
     const timeControlOptions = ["Blitz", "Rapid", "Classic"];
 
+    useEffect(() => {
+        // Fetch all tournaments from the backend
+        const fetchTournaments = async () => {
+            try {
+                const response = await axios.get('http://localhost:8080/api/tournaments');
+                setTournaments(response.data); // Populate tournaments with the fetched data
+                setLoading(false); // Turn off loading
+            } catch (error) {
+                console.error('Error fetching tournaments:', error);
+                setError(error); // Capture the error
+                setLoading(false); // Turn off loading even if there's an error
+            }
+        };
+
+        fetchTournaments();
+    }, []); // Empty dependency array to run the effect only once when the component mounts
+
     const handleEdit = (rowIndex) => {
         setEditableRow(rowIndex);
     };
 
-    //BACKEND
     const handleSave = async (rowIndex) => {
         const updatedTournament = tournaments[rowIndex];
-        
+
         try {
             const response = await axios.put(`http://localhost:8080/api/tournaments/${updatedTournament.tournamentId}`, updatedTournament);
             setTournaments(prevTournaments => {
@@ -110,7 +89,6 @@ export default function AdminTournamentView() {
             console.error('Error updating tournament:', error);
         }
     };
-    
 
     const handleChange = (e, rowIndex, field) => {
         const newTournaments = [...tournaments];
@@ -123,7 +101,6 @@ export default function AdminTournamentView() {
         setDeleteDialogOpen(true);
     };
 
-    //BACKEND
     const handleDeleteConfirm = async () => {
         try {
             await axios.delete(`http://localhost:8080/api/tournaments/${tournamentToDelete}`);
@@ -157,19 +134,18 @@ export default function AdminTournamentView() {
         });
     };
 
-    //BACKEND
     const handleCreateSubmit = async () => {
         const newTournamentData = {
             ...newTournament,
-            tournamentId: Math.floor(Math.random() * 100000), 
-            currentPlayers: 0, 
-            status: 'Upcoming', 
+            tournamentId: Math.floor(Math.random() * 100000),
+            currentPlayers: 0,
+            status: 'Upcoming',
         };
-    
+
         try {
             const response = await axios.post('http://localhost:8080/api/tournaments', newTournamentData);
-            setTournaments([response.data, ...tournaments]); 
-            
+            setTournaments([response.data, ...tournaments]);
+
             // Reset to default values
             setNewTournament({
                 tournamentId: '',
@@ -183,13 +159,20 @@ export default function AdminTournamentView() {
                 totalPlayers: '',
                 status: 'Upcoming',
             });
-            
+
             setCreateDialogOpen(false);
         } catch (error) {
             console.error('Error creating tournament:', error);
         }
     };
-    
+
+    if (loading) {
+        return <CircularProgress />;
+    }
+
+    if (error) {
+        return <Typography color="error">Error loading tournaments: {error.message}</Typography>;
+    }
 
     return (
         <div>
@@ -296,160 +279,132 @@ export default function AdminTournamentView() {
                                         tournament.maxElo
                                     )}
                                 </StyledTableCell>
+                                <StyledTableCell>{tournament.currentPlayers}/{tournament.totalPlayers}</StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <span style={{ marginRight: '8px' }}>{tournament.currentPlayers}/</span>
-                                            <TextField
-                                                type="number"
-                                                value={tournament.totalPlayers}
-                                                onChange={(e) => handleChange(e, rowIndex, 'totalPlayers')}
-                                                variant="outlined"
-                                                size="small"
-                                                sx={{ width: '80px' }}
-                                            />
-                                        </div>
-                                    ) : (
-                                        `${tournament.currentPlayers}/${tournament.totalPlayers}`
-                                    )}
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
+                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
                                     {editableRow === rowIndex ? (
-                                        <IconButton aria-label="save" color="primary" onClick={() => handleSave(rowIndex)}>
+                                        <IconButton onClick={() => handleSave(rowIndex)}>
                                             <SaveIcon />
                                         </IconButton>
                                     ) : (
-                                        <IconButton aria-label="edit" color="secondary" onClick={() => handleEdit(rowIndex)}>
-                                            <EditIcon />
-                                        </IconButton>
+                                        <>
+                                            <IconButton onClick={() => handleEdit(rowIndex)}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleDeleteClick(tournament.tournamentId)}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                            <IconButton>
+                                                <VisibilityIcon />
+                                            </IconButton>
+                                        </>
                                     )}
-                                    <IconButton aria-label="view" color="primary" onClick={() => console.log(`Viewing ${tournament.tournamentId}`)}>
-                                        <VisibilityIcon />
-                                    </IconButton>
-                                    <IconButton aria-label="delete" color="error" onClick={() => handleDeleteClick(tournament.tournamentId)}>
-                                        <DeleteIcon />
-                                    </IconButton>
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-
-            <Fab color="primary" aria-label="add" onClick={handleCreate}>
+            <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab}>
                 <AddIcon />
             </Fab>
 
+            {/* Create Tournament Dialog */}
             <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
-    <DialogTitle>Create New Tournament</DialogTitle>
-    <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
-    <DialogTitle>Create New Tournament</DialogTitle>
-    <DialogContent>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Tournament Name:</span>
-            <TextField
-                name="tournamentName"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Start Date:</span>
-            <TextField
-                type="date"
-                name="startDate"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>End Date:</span>
-            <TextField
-                type="date"
-                name="endDate"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Time Control:</span>
-            <Select
-                name="timeControl"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            >
-                {timeControlOptions.map(option => (
-                    <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-            </Select>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Min ELO:</span>
-            <TextField
-                type="number"
-                name="minElo"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Max ELO:</span>
-            <TextField
-                type="number"
-                name="maxElo"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ marginRight: '8px', fontSize: '0.875rem' }}>Total Players:</span>
-            <TextField
-                type="number"
-                name="totalPlayers"
-                fullWidth
-                onChange={handleInputChange}
-                variant="outlined"
-                size="small" // Smaller size
-            />
-        </div>
-        </DialogContent>
-        <DialogActions>
-            <Button onClick={handleCreateDialogClose}>Cancel</Button>
-            <Button onClick={handleCreateSubmit} color="primary">Create</Button>
-        </DialogActions>
-        </Dialog>
+                <DialogTitle>Create New Tournament</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        name="tournamentName"
+                        label="Tournament Name"
+                        value={newTournament.tournamentName}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                    <TextField
+                        name="startDate"
+                        label="Start Date"
+                        type="date"
+                        value={newTournament.startDate}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        name="endDate"
+                        label="End Date"
+                        type="date"
+                        value={newTournament.endDate}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <Select
+                        name="timeControl"
+                        label="Time Control"
+                        value={newTournament.timeControl}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                    >
+                        {timeControlOptions.map(option => (
+                            <MenuItem key={option} value={option}>{option}</MenuItem>
+                        ))}
+                    </Select>
+                    <TextField
+                        name="minElo"
+                        label="Min ELO"
+                        type="number"
+                        value={newTournament.minElo}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                    <TextField
+                        name="maxElo"
+                        label="Max ELO"
+                        type="number"
+                        value={newTournament.maxElo}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                    <TextField
+                        name="totalPlayers"
+                        label="Total Players"
+                        type="number"
+                        value={newTournament.totalPlayers}
+                        onChange={handleInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCreateDialogClose} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleCreateSubmit} color="primary">
+                        Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-            <DialogActions>
-                <Button onClick={handleCreateDialogClose}>Cancel</Button>
-                <Button onClick={handleCreateSubmit} color="primary">Create</Button>
-            </DialogActions>
-        </Dialog>
-
-        <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-            <DialogTitle>Delete Tournament</DialogTitle>
-            <DialogContent>
-                Are you sure you want to delete this tournament?
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleDeleteCancel}>Cancel</Button>
-                <Button onClick={handleDeleteConfirm} color="error">Delete</Button> 
-            </DialogActions>
-        </Dialog>
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
+                <DialogTitle>Confirm Delete</DialogTitle>
+                <DialogActions>
+                    <Button onClick={handleDeleteCancel} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDeleteConfirm} color="primary">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 }
