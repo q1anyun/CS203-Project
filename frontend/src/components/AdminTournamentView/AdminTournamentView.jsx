@@ -39,15 +39,14 @@ export default function AdminTournamentView() {
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [newTournament, setNewTournament] = useState({
-        tournamentId: '',
-        tournamentName: '',
+        name: '',
         startDate: '',
         endDate: '',
         timeControl: '',
         minElo: '',
         maxElo: '',
         currentPlayers: '0',
-        totalPlayers: '',
+        Players: '',
         status: 'Upcoming',
     });
 
@@ -148,15 +147,13 @@ export default function AdminTournamentView() {
 
             // Reset to default values
             setNewTournament({
-                tournamentId: '',
-                tournamentName: '',
+                name: '',
                 startDate: '',
                 endDate: '',
                 timeControl: 'Classic',
                 minElo: '',
                 maxElo: '',
-                currentPlayers: 0,
-                totalPlayers: '',
+                maxPlayers: '',
                 status: 'Upcoming',
             });
 
@@ -197,18 +194,18 @@ export default function AdminTournamentView() {
                     </TableHead>
                     <TableBody>
                         {tournaments.map((tournament, rowIndex) => (
-                            <StyledTableRow key={tournament.tournamentId}>
-                                <StyledTableCell>{tournament.tournamentId}</StyledTableCell>
+                            <StyledTableRow key={tournament.id}>
+                                <StyledTableCell>{tournament.id}</StyledTableCell>
                                 <StyledTableCell>
                                     {editableRow === rowIndex ? (
                                         <TextField
-                                            value={tournament.tournamentName}
+                                            value={tournament.name}
                                             onChange={(e) => handleChange(e, rowIndex, 'tournamentName')}
                                             variant="outlined"
                                             size="small"
                                         />
                                     ) : (
-                                        tournament.tournamentName
+                                        tournament.name
                                     )}
                                 </StyledTableCell>
                                 <StyledTableCell>
@@ -240,7 +237,7 @@ export default function AdminTournamentView() {
                                 <StyledTableCell>
                                     {editableRow === rowIndex ? (
                                         <Select
-                                            value={tournament.timeControl}
+                                            value={tournament.timeControl.name}
                                             onChange={(e) => handleChange(e, rowIndex, 'timeControl')}
                                             variant="outlined"
                                             size="small"
@@ -250,7 +247,7 @@ export default function AdminTournamentView() {
                                             ))}
                                         </Select>
                                     ) : (
-                                        tournament.timeControl
+                                        tournament.timeControl.name
                                     )}
                                 </StyledTableCell>
                                 <StyledTableCell>
@@ -279,7 +276,7 @@ export default function AdminTournamentView() {
                                         tournament.maxElo
                                     )}
                                 </StyledTableCell>
-                                <StyledTableCell>{tournament.currentPlayers}/{tournament.totalPlayers}</StyledTableCell>
+                                <StyledTableCell>{tournament.currentPlayers}/{tournament.maxPlayers}</StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
@@ -293,7 +290,7 @@ export default function AdminTournamentView() {
                                             <IconButton onClick={() => handleEdit(rowIndex)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton onClick={() => handleDeleteClick(tournament.tournamentId)}>
+                                            <IconButton onClick={() => handleDeleteClick(tournament.id)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                             <IconButton>
@@ -374,10 +371,10 @@ export default function AdminTournamentView() {
                         margin="dense"
                     />
                     <TextField
-                        name="totalPlayers"
+                        name="maxPlayers"
                         label="Total Players"
                         type="number"
-                        value={newTournament.totalPlayers}
+                        value={newTournament.maxPlayers}
                         onChange={handleInputChange}
                         fullWidth
                         margin="dense"
