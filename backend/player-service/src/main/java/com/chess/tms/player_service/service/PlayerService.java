@@ -1,5 +1,8 @@
 package com.chess.tms.player_service.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,8 +32,10 @@ public class PlayerService {
     @Autowired
     private RestTemplate restTemplate;
 
+
     // Fetch player details by player ID
     public PlayerDetailsDTO getPlayerDetailsById(Long id) {
+       
         return playerDetailsRepository.findById(id)
             .map(this::convertToPlayerDetailsDTO)
             .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
@@ -44,6 +49,7 @@ public class PlayerService {
                       .collect(Collectors.toList());
     }
 
+   
     // Convert PlayerDetails to PlayerDetailsDTO
     private PlayerDetailsDTO convertToPlayerDetailsDTO(PlayerDetails playerDetails) {
         PlayerDetailsDTO dto = new PlayerDetailsDTO();
@@ -67,6 +73,7 @@ public class PlayerService {
         PlayerDetails player = playerDetailsRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found"));
 
+        
         Optional.ofNullable(updatedPlayerDetails.getCountry()).ifPresent(player::setCountry);
         Optional.ofNullable(updatedPlayerDetails.getFirstName()).ifPresent(player::setFirstName);
         Optional.ofNullable(updatedPlayerDetails.getLastName()).ifPresent(player::setLastName);
@@ -78,6 +85,7 @@ public class PlayerService {
     // Fetch recent matches of a player from the matches service
     public List<MatchResponseDTO> getRecentMatches(Long playerId) {
         String url = matchesServiceUrl + "/api/matches/player/" + playerId + "/recent";
+       
         try {
             MatchDTO[] matches = restTemplate.getForObject(url, MatchDTO[].class);
             return Arrays.stream(matches)
@@ -89,7 +97,7 @@ public class PlayerService {
     }
 
     // Convert MatchDTO to MatchResponseDTO
-    private MatchResponseDTO convertToMatchResponseDTO(MatchDTO matchDTO) {
+     private MatchResponseDTO convertToMatchResponseDTO(MatchDTO matchDTO) {
         MatchResponseDTO responseDTO = new MatchResponseDTO();
         responseDTO.setTournament(matchDTO.getTournament());
         responseDTO.setRoundType(matchDTO.getRoundType());
@@ -97,6 +105,7 @@ public class PlayerService {
         responseDTO.setDate(matchDTO.getDate());
 
         // Fetch winner and loser details
+       
         responseDTO.setWinner(fetchPlayerDetails(matchDTO.getWinnerId())
                 .orElseThrow(() -> new UserNotFoundException("Winner not found")));
         responseDTO.setLoser(fetchPlayerDetails(matchDTO.getLoserId())
@@ -108,8 +117,10 @@ public class PlayerService {
     // Fetch player details by ID
     private Optional<PlayerDetails> fetchPlayerDetails(Long playerId) {
         if (playerId == null) {
+       
             return Optional.empty();
         }
         return playerDetailsRepository.findById(playerId);
     }
+
 }

@@ -55,6 +55,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(''); // Declare error state
+  const [recentMatches, setRecentMatches] = useState([]);
   const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
@@ -72,58 +73,103 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   // const handlePasswordChange = (event) => setPassword(event.target.value);
 
 
-    useEffect(() => {
-      const fetchPlayerDetails = async () => {
-          try {
-              const token = localStorage.getItem('token');
+  useEffect(() => {
+    const fetchPlayerDetails = async () => {
+      try {
+        const token = localStorage.getItem('token');
 
-              if (!token) {
-                  navigate('/login'); // Redirect to login if no token found
-                  return;
-              }
+        if (!token) {
+          navigate('/login'); // Redirect to login if no token found
+          return;
+        }
 
-              const response = await axios.get(`${baseURL}/currentPlayerById`, {
-                  headers: {
-                      'Authorization': `Bearer ${token}`
-                  }
-              });
-
-              console.log('Player Data:', response.data);
-              const { firstName, lastName, eloRating, profilePic, country} = response.data;
-
-              // Store the player details in local state or localStorage as needed
-              setPlayerName(firstName + " " +lastName || '');
-              setFirstName(firstName || '');
-              setLastName(lastName || '');
-              setCountry(country ||'-'); 
-              setRating(eloRating || '-'); 
-              // setEmail(email || '');
-              setLocalProfilePic(profilePic || '');
-
-
-          } catch (err) {
-              if (err.response) {
-                  const statusCode = err.response.status;
-                  const errorMessage = err.response.data.message || 'An error occurred';
-
-                  // Handle specific error statuses
-                  if (statusCode === 404 || statusCode === 403) {
-                      setError('Player details not found or access denied');
-                  } else {
-                      navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                  }
-              } else if (err.request) {
-                  navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-              } else {
-                  navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-              }
+        const response = await axios.get(`${baseURL}/currentPlayerById`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
-      };
+        });
 
-      fetchPlayerDetails();
-  }, [navigate]); 
+        console.log('Player Data:', response.data);
+        const { firstName, lastName, eloRating, profilePic, country } = response.data;
 
-  
+        // Store the player details in local state or localStorage as needed
+        setPlayerName(firstName + " " + lastName || '');
+        setFirstName(firstName || '');
+        setLastName(lastName || '');
+        setCountry(country || '-');
+        setRating(eloRating || '-');
+        // setEmail(email || '');
+        setLocalProfilePic(profilePic || '');
+
+
+      } catch (err) {
+        if (err.response) {
+          const statusCode = err.response.status;
+          const errorMessage = err.response.data.message || 'An error occurred';
+
+          // Handle specific error statuses
+          if (statusCode === 404 || statusCode === 403) {
+            setError('Player details not found or access denied');
+          } else {
+            navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+          }
+        } else if (err.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+        }
+      }
+    };
+
+    fetchPlayerDetails();
+  }, [navigate]);
+
+  const fetchRecentMatches = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await axios.get(`${baseURL}/recentMatches`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('Recent Matches:', response.data);
+      setRecentMatches(response.data || []);
+    } catch (err) {
+      // Handle errors here...
+      if (err.response) {
+        const statusCode = err.response.status;
+        const errorMessage = err.response.data.message || 'An error occurred';
+
+        // Handle specific error statuses
+        if (statusCode === 404 || statusCode === 403) {
+          setError('Player details not found or access denied');
+        } else {
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        }
+      } else if (err.request) {
+        navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+      } else {
+        navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+      }
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await fetchRecentMatches();
+    };
+
+    fetchData();
+  }, [navigate]);
+
+
+
 
 
   const handleFileAndImageUpload = (event) => {
@@ -167,7 +213,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
           'Content-Type': 'application/json', // Sending as JSON
         },
       });
-      setPlayerName(firstName + " " +lastName || '');
+      setPlayerName(firstName + " " + lastName || '');
       setCountry(country);
 
       if (response.status === 200) {
@@ -332,41 +378,24 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
 
             {value === 1 && (
               <Box sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Tab 1 Content</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Recent Matches</Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {recentMatches.length > 0 ? (
+                    recentMatches.map((match, index) => (
+                      <Box key={index} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+                        <CardContent>
+                          <Typography variant="h6">{match.tournament.name}</Typography>
+                          <Typography variant="body2">{match.winner.firstName} vs {match.loser.firstName}</Typography>
+                          <Typography variant="body2">winner: {match.winner.firstName}</Typography>
+                
+                        </CardContent>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body2">No recent matches available.</Typography>
+                  )}
 
-                    <CardContent>
-                      <Typography variant="h6">Item 1</Typography>
-                      <Typography variant="body2">Details about Item 1</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 2</Typography>
-                      <Typography variant="body2">Details about Item 2</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 3</Typography>
-                      <Typography variant="body2">Details about Item 3</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 1</Typography>
-                      <Typography variant="body2">Details about Item 1</Typography>
-                    </CardContent>
-
-                  </Box>
                 </Box>
                 {/* Add more content for Tab 2 here */}
               </Box>
