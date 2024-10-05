@@ -7,6 +7,7 @@ import lombok.Data;
 
 @Data
 public class MatchDTO {
+    private Long id;
     private TournamentDTO tournament;
     private Long winnerId;
     private Long loserId;

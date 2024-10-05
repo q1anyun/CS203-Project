@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class TournamentDTO {
-    private Long tournamentId;
+    private Long id;
     private String name;
 }
