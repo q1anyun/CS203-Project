@@ -65,6 +65,7 @@ function AppContent() {
         <Route path="/admin/matches" element={<AdminMatchesView />} />
         <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />} />
         <Route path="/admin/profile" element={<AdminProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />} />
+        <Route path="/player/tournaments/:id" element={<TournamentDetails />} />
 
         {/* General Routes */}
         <Route path="/home" element={<Home />} />
