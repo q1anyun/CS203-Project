@@ -22,7 +22,7 @@ public class LeaderboardEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "player_id", nullable = false)
+    @Column(name = "player_id", nullable = false, unique = true)
     private long playerId;
     
     @Column(name = "elo_rating", nullable = false)

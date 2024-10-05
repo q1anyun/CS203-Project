@@ -13,7 +13,9 @@ import com.chess.tms.leaderboard_service.model.LeaderboardEntry;
 @Repository
 public interface LeaderboardRepository extends JpaRepository<LeaderboardEntry, Long>{
 
-    public List<LeaderboardEntry> findAll();
+    public List<LeaderboardEntry> findAllByOrderByEloDesc();
+
+    public List<LeaderboardEntry> findAllByOrderByEloAsc();
 
     public Optional<LeaderboardEntry> findById(long id);
 
@@ -31,7 +33,7 @@ public interface LeaderboardRepository extends JpaRepository<LeaderboardEntry, L
 
     public List<LeaderboardEntry> findByRankingLessThanEqual(int maxRank);
 
-    public List<LeaderboardEntry> findByRankingBetween (int minRank, int maxRank);
+    public List<LeaderboardEntry> findByRankingBetween(int minRank, int maxRank);
 
     public Optional<LeaderboardEntry> deleteByPlayerId(long playerId);
     

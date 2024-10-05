@@ -8,8 +8,8 @@ import com.chess.tms.leaderboard_service.service.LeaderboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,18 +29,28 @@ public class LeaderboardController {
 
     @GetMapping("")
     public ResponseEntity<List<LeaderboardDTO>> getAllRankings() {
-        return ResponseEntity.ok(leaderboardService.findAllRankings());
+        return ResponseEntity.ok(leaderboardService.findAllRankingsDesc());
     }
 
-    @GetMapping("minElo-{minElo}/maxElo-{maxElo}")
-    public ResponseEntity<List<LeaderboardDTO>> findByEloBetween(@RequestParam("minElo") int minElo, @RequestParam("maxElo") int maxElo) {
+    @GetMapping("/desc") 
+    public ResponseEntity<List<LeaderboardDTO>> getAllRankingsDesc() {
+        return ResponseEntity.ok(leaderboardService.findAllRankingsDesc());
+    }
+
+    @GetMapping("/minElo-{minElo}/maxElo-{maxElo}")
+    public ResponseEntity<List<LeaderboardDTO>> findByEloBetween(@PathVariable("minElo") int minElo, @PathVariable("maxElo") int maxElo) {
         return ResponseEntity.ok(leaderboardService.findByEloBetween(minElo, maxElo));
     
     }
 
-    @GetMapping("minRanking-{minRanking}")
-    public ResponseEntity<List<LeaderboardDTO>> findAllAboveRanking(int minRank) {
+    @GetMapping("/minRanking-{minRanking}")
+    public ResponseEntity<List<LeaderboardDTO>> findAllAboveRanking(@PathVariable("minRanking") int minRank) {
         return ResponseEntity.ok(leaderboardService.findByRankingGreaterThanEqual(minRank));
+    }
+
+    @GetMapping("/playerid-{playerId}") 
+    public ResponseEntity<LeaderboardDTO> findByPlayerId(@PathVariable long playerId) {
+        return ResponseEntity.ok(leaderboardService.findByPlayerId(playerId));
     }
 
     @PostMapping("")
@@ -48,13 +58,13 @@ public class LeaderboardController {
         return ResponseEntity.ok(leaderboardService.saveEntry(dto));
     }
 
-    @DeleteMapping("id")
-    public ResponseEntity<LeaderboardDTO> deleteEntry(long playerId) {
+    @DeleteMapping("/{playerId}")
+    public ResponseEntity<LeaderboardDTO> deleteEntry(@PathVariable long playerId) {
         return ResponseEntity.ok(leaderboardService.deleteEntry(playerId));
     }
 
-    @PutMapping("updateLeaderboard/{entryId}") 
-    public ResponseEntity<LeaderboardDTO> updateEntry(LeaderboardDTO updateDTO) {
+    @PutMapping("/updateLeaderboard") 
+    public ResponseEntity<LeaderboardDTO> updateEntry(@RequestBody LeaderboardDTO updateDTO) {
         return ResponseEntity.ok(leaderboardService.updateEntry(updateDTO));
     }
 

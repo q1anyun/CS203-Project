@@ -9,6 +9,8 @@ public class LeaderboardDTO extends LeaderboardRequestDTO{
    
     private long id;
 
+    private int ranking;
+
     public long getId() {
         return id;
     }
@@ -16,5 +18,12 @@ public class LeaderboardDTO extends LeaderboardRequestDTO{
     public void setId(long id) {
         this.id = id;
     }
-    
+
+    public int getRanking() {
+        return ranking;
+    }
+
+    public void setRanking(int ranking) {
+        this.ranking = ranking;
+    }
 }

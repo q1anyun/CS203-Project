@@ -63,6 +63,14 @@ public class ApiGatewayConfig {
                 .build();
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> leaderboardServiceRoute() {
+        return GatewayRouterFunctions.route("leaderboard-service")
+                .route(RequestPredicates.path("/api/leaderboard/**"), request ->
+                    processRequestWithJwtClaims(request, "http://localhost:8087"))
+                .build();
+    }
+
     private ServerResponse processRequestWithJwtClaims(ServerRequest request, String forwardUri) {
         // Extract the Authorization header
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
