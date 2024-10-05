@@ -82,4 +82,10 @@ public class TournamentController {
         long playerId = Long.parseLong(id);
         return ResponseEntity.ok(tournamentService.getRegisteredTournaments(playerId));
     }
+
+    @GetMapping("/live/current")
+    public ResponseEntity<List<TournamentDetailsDTO>> getLiveTournaments( @RequestHeader("X-User-PlayerId") String id) {
+        long playerId = Long.parseLong(id);
+        return ResponseEntity.ok(tournamentService.getLiveTournaments(playerId));
+    }
 }

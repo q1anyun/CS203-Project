@@ -270,4 +270,19 @@ public class TournamentService {
 
         return tournamentDetails;
     }
+
+    public List<TournamentDetailsDTO> getLiveTournaments(long playerId) {
+
+        List<TournamentPlayer> tournamentPlayers = tournamentPlayerRepository.findAllByPlayerId(playerId);
+        List<TournamentDetailsDTO> liveTournaments = new ArrayList<>();
+        
+        for (TournamentPlayer tp : tournamentPlayers) {
+            Tournament tournament = tp.getTournament();
+            if (tournament.getStatus() == Status.LIVE) {
+                liveTournaments.add(DTOUtil.convertEntryToDTO(tournament));
+            }
+        }
+    
+        return liveTournaments;
+    }
 }

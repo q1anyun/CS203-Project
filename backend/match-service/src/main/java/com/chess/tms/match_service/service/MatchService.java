@@ -236,6 +236,7 @@ public class MatchService {
 
     private MatchDTO convertMatchToMatchDTO(Match match) {
         MatchDTO matchDTO = new MatchDTO();
+        matchDTO.setId(match.getId());
         matchDTO.setWinnerId(match.getWinnerId());
         matchDTO.setLoserId(match.getLoserId());
         matchDTO.setRoundType(match.getRoundType());
