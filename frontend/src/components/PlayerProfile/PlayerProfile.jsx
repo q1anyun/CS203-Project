@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
+const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -50,13 +51,16 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [country, setCountry] = useState('-');
+
   // const [email, setEmail] = useState('');
   // const [password, setPassword] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
+  const [liveTournaments, setLiveTournaments] = useState([]);
   const navigate = useNavigate();
+
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -72,42 +76,59 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   // const handleEmailChange = (event) => setEmail(event.target.value);
   // const handlePasswordChange = (event) => setPassword(event.target.value);
 
-
   useEffect(() => {
-    const fetchPlayerDetails = async () => {
+    const fetchPlayerAndMatchData = async () => {
+      const token = localStorage.getItem('token');
+
+      if (!token ) {
+        navigate('/login');  // Redirect to login if no token
+        return;
+      }
+
       try {
-        const token = localStorage.getItem('token');
-
-        if (!token) {
-          navigate('/login'); // Redirect to login if no token found
-          return;
-        }
-
-        const response = await axios.get(`${baseURL}/currentPlayerById`, {
+        // Fetch player details
+        const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
           headers: {
-            'Authorization': `Bearer ${token}`
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
+        console.log('player details:', playerResponse.data);
 
-        console.log('Player Data:', response.data);
-        const { firstName, lastName, eloRating, profilePic, country } = response.data;
-
-        // Store the player details in local state or localStorage as needed
-        setPlayerName(firstName + " " + lastName || '');
+        const { firstName, lastName, eloRating, profilePic, country } = playerResponse.data;
+        setPlayerName(firstName + " " + lastName);
         setFirstName(firstName || '');
         setLastName(lastName || '');
         setCountry(country || '-');
         setRating(eloRating || '-');
-        // setEmail(email || '');
         setLocalProfilePic(profilePic || '');
 
+        // Fetch recent matches
+        const matchResponse = await axios.get(`${baseURL}/recentMatches`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        console.log('past matches:', matchResponse.data);
+
+        setRecentMatches(matchResponse.data || []);
+        console.log(`${baseURL2}/live/current`);
+        // Fetch live tournaments
+        const tournamentResponse = await axios.get(`${baseURL2}/live/current`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        console.log('Live Tournaments:', tournamentResponse.data);
+
+        setLiveTournaments(tournamentResponse.data || []);
 
       } catch (err) {
+        // Handle errors
         if (err.response) {
           const statusCode = err.response.status;
           const errorMessage = err.response.data.message || 'An error occurred';
 
-          // Handle specific error statuses
           if (statusCode === 404 || statusCode === 403) {
             setError('Player details not found or access denied');
           } else {
@@ -121,56 +142,8 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
       }
     };
 
-    fetchPlayerDetails();
+    fetchPlayerAndMatchData();
   }, [navigate]);
-
-  const fetchRecentMatches = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
-      const response = await axios.get(`${baseURL}/recentMatches`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      console.log('Recent Matches:', response.data);
-      setRecentMatches(response.data || []);
-    } catch (err) {
-      // Handle errors here...
-      if (err.response) {
-        const statusCode = err.response.status;
-        const errorMessage = err.response.data.message || 'An error occurred';
-
-        // Handle specific error statuses
-        if (statusCode === 404 || statusCode === 403) {
-          setError('Player details not found or access denied');
-        } else {
-          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        }
-      } else if (err.request) {
-        navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-      } else {
-        navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchRecentMatches();
-    };
-
-    fetchData();
-  }, [navigate]);
-
-
-
-
 
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
@@ -388,7 +361,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
                           <Typography variant="h6">{match.tournament.name}</Typography>
                           <Typography variant="body2">{match.winner.firstName} vs {match.loser.firstName}</Typography>
                           <Typography variant="body2">winner: {match.winner.firstName}</Typography>
-                
+
                         </CardContent>
                       </Box>
                     ))
@@ -403,47 +376,36 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
 
             {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Tab 3 Content</Typography>
+                <Typography variant="h6" sx={{ mb: 2 }}>Ongoing Tournaments</Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}
-                    onClick={() => navigate("/player/tournaments")}>
-
-                    <CardContent>
-                      <Typography variant="h6">Singapore Open</Typography>
-                      <Typography variant="body2">Click here to view details</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2, }}>
-
-
-                    <CardContent>
-                      <Typography variant="h6">Item 2</Typography>
-                      <Typography variant="body2">Details about Item 2</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 3</Typography>
-                      <Typography variant="body2">Details about Item 3</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 1</Typography>
-                      <Typography variant="body2">Details about Item 1</Typography>
-                    </CardContent>
-
-                  </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {liveTournaments.length > 0 ? (
+                    liveTournaments.map((tournament, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          padding: 2,
+                          border: '1px solid #ddd',
+                          borderRadius: 2,
+                        }}
+                        // onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
+                      >
+                        <CardContent>
+                          <Typography variant="h6">{tournament.name}</Typography>
+                          <Typography variant="body2">Click here to view details</Typography>
+                        </CardContent>
+                      </Box>
+                    ))
+                  ) : (
+                    <Typography variant="body2">No ongoing tournaments found.</Typography>
+                  )}
                 </Box>
-                {/* Add more content for Tab 2 here */}
               </Box>
             )}
+
 
           </CardContent>
         </Card>
