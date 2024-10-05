@@ -47,13 +47,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
   const [localProfilePic, setLocalProfilePic] = useState(profilePic);
-  const [playerName, setPlayerName] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [country, setCountry] = useState('-');
-
-  // const [email, setEmail] = useState('');
-  // const [password, setPassword] = useState('');
+  const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [rating, setRating] = useState(0);
   const [error, setError] = useState(''); // Declare error state
@@ -69,18 +63,21 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
 
-  // const handleNameChange = (event) => setPlayerName(event.target.value);
-  const handleFirstNameChange = (event) => setFirstName(event.target.value);
-  const handleLastNameChange = (event) => setLastName(event.target.value);
-  const handleCountryChange = (event) => setCountry(event.target.value);
-  // const handleEmailChange = (event) => setEmail(event.target.value);
-  // const handlePasswordChange = (event) => setPassword(event.target.value);
+  const handleDetailChange = (event) => {
+    const { name, value } = event.target; // Destructure name and value from the event
+
+    // Update the corresponding field in playerDetails
+    setPlayerDetails((prevDetails) => ({
+      ...prevDetails,            // Keep the existing playerDetails fields
+      [name]: value              // Update only the field that triggered the change
+    }));
+  };
 
   useEffect(() => {
     const fetchPlayerAndMatchData = async () => {
       const token = localStorage.getItem('token');
 
-      if (!token ) {
+      if (!token) {
         navigate('/login');  // Redirect to login if no token
         return;
       }
@@ -93,14 +90,9 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
           },
         });
         console.log('player details:', playerResponse.data);
+        setPlayerDetails(playerResponse.data || []);
+        setLocalProfilePic(playerDetails.profilePicture || '');
 
-        const { firstName, lastName, eloRating, profilePic, country } = playerResponse.data;
-        setPlayerName(firstName + " " + lastName);
-        setFirstName(firstName || '');
-        setLastName(lastName || '');
-        setCountry(country || '-');
-        setRating(eloRating || '-');
-        setLocalProfilePic(profilePic || '');
 
         // Fetch recent matches
         const matchResponse = await axios.get(`${baseURL}/recentMatches`, {
@@ -108,8 +100,9 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             'Authorization': `Bearer ${token}`,
           },
         });
-        
+
         console.log('past matches:', matchResponse.data);
+
 
         setRecentMatches(matchResponse.data || []);
         console.log(`${baseURL2}/live/current`);
@@ -160,9 +153,9 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
     const token = localStorage.getItem('token'); // Use the token for authentication
 
     const playerData = {
-      firstName: firstName,
-      lastName: lastName,
-      country: country,
+      firstName: playerDetails.firstName,
+      lastName: playerDetails.lastName,
+      country: playerDetails.country,
     };
 
     if (selectedFile) {
@@ -186,10 +179,10 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
           'Content-Type': 'application/json', // Sending as JSON
         },
       });
-      setPlayerName(firstName + " " + lastName || '');
-      setCountry(country);
+      setPlayerDetails(playerData || '');
 
       if (response.status === 200) {
+        window.location.reload();
         console.log('Profile updated successfully');
       } else {
         console.error('Error updating profile');
@@ -230,7 +223,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
           {/* Profile Card Section */}
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
-            alt={playerName}
+            alt={playerDetails.firstName}
             src={localProfilePic}
           />
 
@@ -243,7 +236,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             Edit Profile
           </Button>
           <CardContent>
-            <Typography variant="h4">{playerName}</Typography>
+            <Typography variant="h4">{playerDetails.firstName + " " + playerDetails.lastName}</Typography>
           </CardContent>
         </Box>
 
@@ -260,13 +253,13 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
           </Grid>
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">{country}</Typography>
+              <Typography variant="h6">{playerDetails.country}</Typography>
               <Typography variant="body2">Country</Typography>
             </Box>
           </Grid>
           <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">{rating}</Typography>
+              <Typography variant="h6">{playerDetails.eloRating}</Typography>
               <Typography variant="body2">Rating</Typography>
             </Box>
           </Grid>
@@ -327,7 +320,12 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
                   <PieChart
                     series={[
-                      { data: data },
+                      {
+                        data: [
+                          { id: 0, value: playerDetails.totalWins, label: 'Wins', color: 'orange' },
+                          { id: 1, value: playerDetails.totalLosses, label: 'Losses', color: 'grey' },
+                        ]
+                      },
                     ]}
                     width={400}
                     height={200}
@@ -391,7 +389,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
                           border: '1px solid #ddd',
                           borderRadius: 2,
                         }}
-                        // onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
+                        onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
                       >
                         <CardContent>
                           <Typography variant="h6">{tournament.name}</Typography>
@@ -427,7 +425,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
 
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 1 }}
-            alt={playerName}
+            alt={playerDetails.firstName}
             src={localProfilePic}  // Use current profile picture
           />
 
@@ -457,18 +455,22 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             onChange={handleNameChange}
           /> */}
           <TextField
-            margin="dense"
             label="First Name"
+            name="firstName"
+            value={playerDetails.firstName}
+            onChange={handleDetailChange}
+            variant="outlined"
             fullWidth
-            value={firstName}
-            onChange={handleFirstNameChange}
+            margin="normal"
           />
           <TextField
-            margin="dense"
             label="Last Name"
+            name="lastName"
+            value={playerDetails.lastName}
+            onChange={handleDetailChange}
+            variant="outlined"
             fullWidth
-            value={lastName}
-            onChange={handleLastNameChange}
+            margin="normal"
           />
           {/* <TextField
             margin="dense"
@@ -486,12 +488,13 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             onChange={handlePasswordChange}
           /> */}
           <TextField
-            margin="dense"
             label="Country"
+            name="country"
+            value={playerDetails.country}
+            onChange={handleDetailChange}
+            variant="outlined"
             fullWidth
-            type="country"
-            value={country}
-            onChange={handleCountryChange}
+            margin="normal"
           />
 
 
