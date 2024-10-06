@@ -56,10 +56,10 @@ function TournamentDetails() {
   return (
     <Box sx={{ padding: 2 }}>
       {/* Tournament Title */}
-      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '40px', marginBottom: '30px', fontWeight: 'bold', marginLeft: '20px' }}>
+      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '40px', marginBottom: '5px', fontWeight: 'bold', marginLeft: '20px' }}>
         {tournament.name}
       </Typography>
-      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '20px', marginBottom: '30px', fontWeight: 'regular', marginLeft: '20px' }}>
+      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '15px', marginBottom: '30px', fontWeight: 'regular', marginLeft: '20px' }}>
         Description of the event
       </Typography>
 
