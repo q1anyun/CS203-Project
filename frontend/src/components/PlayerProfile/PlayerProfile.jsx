@@ -5,8 +5,8 @@ import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
+
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -38,11 +38,11 @@ const xLabels = [
 
 
 
-function PlayerProfile({ profilePic, onProfilePicUpdate }) {
+function PlayerProfile({profilePic}) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
+  const [localProfilePic, setLocalProfilePic] = useState(null);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(''); // Declare error state
@@ -50,6 +50,14 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [liveTournaments, setLiveTournaments] = useState([]);
   const navigate = useNavigate();
 
+  
+
+  useEffect(() => {
+    if (profilePic) {
+      setLocalProfilePic(profilePic); 
+      // Update localProfilePic when profilePic changes
+    }
+  }, [profilePic]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -88,17 +96,6 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         setPlayerDetails(playerResponse.data || []);
 
 
-         // Fetch profile picture
-      const profilePicResponse = await axios.get(`${baseURL}/profilePicture`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        responseType: 'blob', // Important for handling images
-      });
-
-      const imageUrl = URL.createObjectURL(profilePicResponse.data);
-      setLocalProfilePic(imageUrl); // Set the image URL for displaying the profile picture
-      console.log('Profile picture URL:', imageUrl);
 
 
         // Fetch recent matches
@@ -122,6 +119,8 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         console.log('Live Tournaments:', tournamentResponse.data);
 
         setLiveTournaments(tournamentResponse.data || []);
+        console.log(localProfilePic); 
+        
 
       } catch (err) {
         // Handle errors
@@ -151,7 +150,6 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         setSelectedFile(file);
         const imageUrl = URL.createObjectURL(file);
         setLocalProfilePic(imageUrl);
-        onProfilePicUpdate(imageUrl);
     }
 };
 
@@ -186,7 +184,7 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
             },
         });
     }
-
+    window.location.reload();
     console.log('Profile updated successfully');
     handleCloseEdit();
   };
