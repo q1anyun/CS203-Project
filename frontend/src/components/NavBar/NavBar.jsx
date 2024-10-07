@@ -20,14 +20,10 @@ function NavBar({ profilePic }) {
 
     <Navbar expand="lg" className={styles.navbar}>
       <Container>
-        <Navbar.Brand as={Link} to="/home" className={styles.navbarBrand}>
+        <Navbar.Brand as={Link} to="/home">
           <span style={{ fontWeight: 'bold' }}>CHESS</span>
-          <img
-            src={logoImage}
-            alt="logo"
-            style={{ margin: '0 10px', height: '40px' }}
-          />
-          <span style={{ fontWeight: 'normal' }}>MVP</span>
+          <img src={logoImage} alt="chessMVPlogo" className={styles.logoImage}/>
+          <span style={{ fontWeight: 'bold' }}>MVP</span>
         </Navbar.Brand>
         <Navbar.Toggle />
 

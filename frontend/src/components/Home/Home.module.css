@@ -2,7 +2,7 @@
     padding-top: 2%;
     overflow: hidden;
     background-color: black;
-    height: 50vh;
+    height: 40vh;
 }
 
 .imageContainer {
@@ -41,8 +41,9 @@
     flex-wrap: wrap;
     align-items: center;
     background: linear-gradient(179.4deg, black 0%, rgb(12, 20, 69) 20%, rgb(71, 30, 84) 100%);
-    min-height: 50vh;
+    min-height: 60vh;
     padding: 5%;
+    justify-content: center;
 }
 
 .card {
@@ -53,6 +54,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: 500px;
+    align-items: center;
 }
 
 .cardTitle {
@@ -64,6 +67,7 @@
 }
 
 .cardImage {
-    height: 350px;
+    height: 300px;
+    width: 300px;
     overflow: hidden;
 }

@@ -6,12 +6,11 @@
 
 
 body {
-    font-family: 'PT Sans', sans-serif;
+    font-family: "League Spartan", sans-serif;
     text-align: center;
 }
 
 h1 {
     font-family: 'Inter', sans-serif;  /* Changing body font to Inter */
     text-align: center;
-
 }

@@ -5,12 +5,8 @@
     left: 0; 
     width: 100%; 
     z-index: 1000; 
-    background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.navbarBrand{
-    color: wheat;
+    font-family: "League Spartan", sans-serif;
 }
 
 .profilePic {
@@ -18,4 +14,9 @@
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.logoImage {
+    height: 30px;
+    margin: 3px;
 }

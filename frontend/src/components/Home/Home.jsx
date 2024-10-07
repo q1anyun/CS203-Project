@@ -48,19 +48,19 @@ function Home() {
         <Grid2 container spacing={8}>
           <Grid2 size={4}>
             <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Tournaments</h1>
-              <h5 className={styles.cardContent}>Register for upcoming knockout chess tournaments and compete against players.</h5>
-              <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
-              <Button component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
+              <h1 className={styles.cardTitle}>Leaderboard</h1>
+              <h5 className={styles.cardContent}>Check out the latest rankings and see where you stand among your peers.</h5>
+              <img src={leaderboardImage} alt="leaderboard" className={styles.cardImage} />
+              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
             </div>
           </Grid2>
 
           <Grid2 size={4}>
             <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Leaderboard</h1>
-              <h5 className={styles.cardContent}>Check out the latest rankings and see where you stand among your peers.</h5>
-              <img src={leaderboardImage} alt="leaderboard" className={styles.cardImage} />
-              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
+              <h1 className={styles.cardTitle}>Tournaments</h1>
+              <h5 className={styles.cardContent}>Register for upcoming knockout chess tournaments and compete against players.</h5>
+              <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
+              <Button component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
             </div>
           </Grid2>
 
