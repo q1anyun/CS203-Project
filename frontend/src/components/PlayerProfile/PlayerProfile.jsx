@@ -23,10 +23,6 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-const data = [
-  { id: 0, value: 8, label: 'Wins', color: 'orange' },
-  { id: 1, value: 9, label: 'Losses', color: 'grey' },
-];
 const uData = [1500, 1528, 1560, 1600, 1670, 1800, 1900];
 const xLabels = [
   '1',
@@ -49,7 +45,6 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const [localProfilePic, setLocalProfilePic] = useState(profilePic);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [rating, setRating] = useState(0);
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
@@ -91,7 +86,19 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         });
         console.log('player details:', playerResponse.data);
         setPlayerDetails(playerResponse.data || []);
-        setLocalProfilePic(playerDetails.profilePicture || '');
+
+
+         // Fetch profile picture
+      const profilePicResponse = await axios.get(`${baseURL}/profilePicture`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        responseType: 'blob', // Important for handling images
+      });
+
+      const imageUrl = URL.createObjectURL(profilePicResponse.data);
+      setLocalProfilePic(imageUrl); // Set the image URL for displaying the profile picture
+      console.log('Profile picture URL:', imageUrl);
 
 
         // Fetch recent matches
@@ -141,68 +148,50 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setLocalProfilePic(imageUrl);
-      onProfilePicUpdate(imageUrl);
+        setSelectedFile(file);
+        const imageUrl = URL.createObjectURL(file);
+        setLocalProfilePic(imageUrl);
+        onProfilePicUpdate(imageUrl);
     }
-  };
+};
+
 
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token'); // Use the token for authentication
+    const token = localStorage.getItem('token');
 
+    // Update player details
     const playerData = {
-      firstName: playerDetails.firstName,
-      lastName: playerDetails.lastName,
-      country: playerDetails.country,
+        firstName: playerDetails.firstName,
+        lastName: playerDetails.lastName,
+        country: playerDetails.country,
     };
 
-    if (selectedFile) {
-      // You may need to handle file uploads separately
-      const reader = new FileReader();
-      reader.readAsDataURL(selectedFile); // Convert file to base64
-      reader.onloadend = async () => {
-        playerData.profilePic = reader.result; // Assign base64 string to profilePic
-        await sendUpdate(playerData, token);
-      };
-    } else {
-      await sendUpdate(playerData, token);
-    }
-  };
-
-  const sendUpdate = async (playerData, token) => {
-    try {
-      const response = await axios.put(`${baseURL}/currentPlayerById`, playerData, {
+    // Update player details
+    await axios.put(`${baseURL}/currentPlayerById`, playerData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json', // Sending as JSON
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
-      });
-      setPlayerDetails(playerData || '');
+    });
 
-      if (response.status === 200) {
-        window.location.reload();
-        console.log('Profile updated successfully');
-      } else {
-        console.error('Error updating profile');
-      }
-    } catch (error) {
-      if (error.response) {
-        console.error('Error Status:', error.response.status);
-        console.error('Error Data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error Message:', error.message);
-      }
+    // Handle file upload
+    if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        await axios.post(`${baseURL}/uploadProfile`, formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     }
 
+    console.log('Profile updated successfully');
     handleCloseEdit();
   };
 
-
-
+  
 
 
   return (
