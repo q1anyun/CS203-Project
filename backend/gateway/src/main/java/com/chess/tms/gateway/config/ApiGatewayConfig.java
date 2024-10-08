@@ -76,6 +76,14 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
                 .build();
     }
 
+    @Bean
+    public RouterFunction<ServerResponse> eloServiceRoute() {
+        return GatewayRouterFunctions.route("elo-service")
+                .route(RequestPredicates.path("/api/elo/**"), request ->
+                    processRequestWithJwtClaims(request, "http://localhost:8086"))
+                .build();
+    }
+
     private ServerResponse processRequestWithJwtClaims(ServerRequest request, String forwardUri) {
         // Extract the Authorization header
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);

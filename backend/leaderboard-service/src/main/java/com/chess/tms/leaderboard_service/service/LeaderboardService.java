@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.chess.tms.leaderboard_service.repository.LeaderboardRepository;
@@ -17,10 +18,15 @@ import com.chess.tms.leaderboard_service.exception.EntryAlreadyExistsException;
 import com.chess.tms.leaderboard_service.exception.EntryDoesNotExistException;
 import com.chess.tms.leaderboard_service.model.LeaderboardEntry;
 import com.chess.tms.leaderboard_service.dto.DTOUtil;
+import com.chess.tms.leaderboard_service.dto.EloUpdateDTO;
 
 @Service 
-public class LeaderboardService {
-    
+public class LeaderboardService { 
+
+    @Value("${elo.service.url}")
+    private String playerServiceUrl;
+
+
     @Autowired
     public LeaderboardRepository leaderboardRepository;
 
@@ -106,14 +112,15 @@ public class LeaderboardService {
         if (entry.isPresent()) {
             throw new EntryAlreadyExistsException("Entry with player id: " + dto.getPlayerId() + " exists");
         }
-        LeaderboardEntry newEntry = DTOUtil.convertDTOToEntry(dto, entry.get().getId());
+        LeaderboardEntry newEntry = DTOUtil.convertDTOToEntry(dto);
         newEntry.setRanking(getRanking(leaderboardRepository.findAll(), newEntry));
-
+        
         leaderboardRepository.save(newEntry);
 
         LeaderboardDTO saved = (LeaderboardDTO) dto;
-        saved.setId(leaderboardRepository.findByPlayerId(dto.getPlayerId()).get().getId());
-        saved.setLastUpdated(LocalDateTime.now());
+        newEntry = leaderboardRepository.findByPlayerId(dto.getPlayerId()).get();
+        saved.setId(newEntry.getId());
+        saved.setLastUpdated(newEntry.getLastUpdated());
 
         return saved;
     }
@@ -142,12 +149,30 @@ public class LeaderboardService {
         updatedEntry.setId(entry.get().getId());
         updatedEntry.setPlayerId(updateDTO.getPlayerId());
         updatedEntry.setElo(updateDTO.getElo());
-        //updatedEntry.setRanking(updateDTO.getRanking());
-        updatedEntry.setLastUpdated(LocalDateTime.now());
 
         leaderboardRepository.save(updatedEntry);
 
         return DTOUtil.convertEntryToDTO(updatedEntry);
+    }
+
+    public LeaderboardDTO updateElo(EloUpdateDTO dto) {
+        Optional<LeaderboardEntry> entry = leaderboardRepository.findByPlayerId(dto.getPlayerId());
+
+        if (entry.isEmpty()) {
+            throw new EntryDoesNotExistException("Entry with playerId " + dto.getPlayerId() + " does not exist");
+        }
+
+        LeaderboardEntry updatedEntry = new LeaderboardEntry();
+        updatedEntry.setId(entry.get().getId());
+        updatedEntry.setPlayerId(dto.getPlayerId());
+        updatedEntry.setElo(dto.getNewElo());
+        updatedEntry.setLastUpdated(entry.get().getLastUpdated());
+
+        leaderboardRepository.save(updatedEntry);
+
+        return DTOUtil.convertEntryToDTO(updatedEntry);
+
+
     }
 
     

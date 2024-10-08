@@ -7,6 +7,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +36,17 @@ public class LeaderboardEntry {
     private int ranking;
 
     @Column(name = "last_updated")
+    @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime lastUpdated;
+
+    @PrePersist
+    protected void onCreate() {
+        this.lastUpdated = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.lastUpdated = LocalDateTime.now();
+    }
 
 }
