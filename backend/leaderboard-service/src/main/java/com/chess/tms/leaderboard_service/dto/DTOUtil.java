@@ -1,6 +1,5 @@
 package com.chess.tms.leaderboard_service.dto;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +28,11 @@ public class DTOUtil {
         return dtoList;
     }
 
-    public static LeaderboardEntry convertDTOToEntry(LeaderboardRequestDTO dto, long entryId) {
+    public static LeaderboardEntry convertDTOToEntry(LeaderboardRequestDTO dto) {
         LeaderboardEntry entry = new LeaderboardEntry();
 
-        entry.setId(entryId);
         entry.setPlayerId(dto.getPlayerId());
         entry.setElo(dto.getElo());
-        //entry.setRanking(dto.getRanking());
-        entry.setLastUpdated(dto.getLastUpdated());
-
         return entry;
     } 
 }

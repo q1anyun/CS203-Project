@@ -2,6 +2,7 @@ package com.chess.tms.leaderboard_service.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chess.tms.leaderboard_service.dto.EloUpdateDTO;
 import com.chess.tms.leaderboard_service.dto.LeaderboardDTO;
 import com.chess.tms.leaderboard_service.service.LeaderboardService;
 
@@ -68,6 +69,10 @@ public class LeaderboardController {
         return ResponseEntity.ok(leaderboardService.updateEntry(updateDTO));
     }
 
+    @PutMapping("/updateElo")
+    public ResponseEntity<LeaderboardDTO> updateElo(@RequestBody EloUpdateDTO eloUpdateDTO) {
+        return ResponseEntity.ok(leaderboardService.updateElo(eloUpdateDTO));
+    }
 
 }
     

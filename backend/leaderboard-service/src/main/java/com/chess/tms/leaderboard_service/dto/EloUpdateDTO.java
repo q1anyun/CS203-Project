@@ -1,6 +1,5 @@
 package com.chess.tms.leaderboard_service.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,10 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LeaderboardRequestDTO {
+public class EloUpdateDTO {
 
     private long playerId;
 
-    private int elo;
-
+    private int newElo;
 }
