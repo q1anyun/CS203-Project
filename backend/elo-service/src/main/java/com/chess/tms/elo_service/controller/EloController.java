@@ -8,15 +8,19 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
+import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 import com.chess.tms.elo_service.service.EloService;
 import com.chess.tms.elo_service.enums.Reason;
 
-@Controller
+@RestController
 @RequestMapping("/api/elo")
 public class EloController {
 
@@ -49,12 +53,12 @@ public class EloController {
     }
 
     @PostMapping("")
-    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloRequestDTO dto) {
+    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
         return ResponseEntity.ok(eloService.saveEloHistory(dto));
     }
 
-    // @PutMapping("") 
-    // public ResponseEntity<EloDTO> updateByPlayerId(UpdateDTO dto) {
-    //     return ResponseEntity.ok(eloService.updateHistory(dto));
-    // }
+    @PutMapping("/match") 
+    public void updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
+        eloService.updateMatchPlayersElo(dto);
+    }
 }

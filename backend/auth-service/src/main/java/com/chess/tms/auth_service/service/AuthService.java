@@ -79,7 +79,6 @@ public class AuthService {
         playerDetails.setProfilePicture(player.getProfilePicture());
         playerDetails.setEloRating(DEFAULT_ELO_RATING);
         playerDetails.setHighestElo(DEFAULT_ELO_RATING);
-        playerDetails.setLowestElo(DEFAULT_ELO_RATING);
         playerDetails.setCountry(player.getCountry());
 
         playerDetailsRepository.save(playerDetails);

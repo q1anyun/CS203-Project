@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EloRequestDTO {
-    private long playerId;
+public class MatchEloRequestDTO {
+    private EloRequestDTO winner;
 
-    private int currentElo; 
+    public EloRequestDTO loser;
 }
