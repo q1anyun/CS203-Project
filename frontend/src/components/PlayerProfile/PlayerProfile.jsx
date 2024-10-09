@@ -5,8 +5,8 @@ import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
+
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -23,10 +23,6 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-const data = [
-  { id: 0, value: 8, label: 'Wins', color: 'orange' },
-  { id: 1, value: 9, label: 'Losses', color: 'grey' },
-];
 const uData = [1500, 1528, 1560, 1600, 1670, 1800, 1900];
 const xLabels = [
   '1',
@@ -42,19 +38,26 @@ const xLabels = [
 
 
 
-function PlayerProfile({ profilePic, onProfilePicUpdate }) {
+function PlayerProfile({profilePic}) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
+  const [localProfilePic, setLocalProfilePic] = useState(null);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [rating, setRating] = useState(0);
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
   const navigate = useNavigate();
 
+  
+
+  useEffect(() => {
+    if (profilePic) {
+      setLocalProfilePic(profilePic); 
+      // Update localProfilePic when profilePic changes
+    }
+  }, [profilePic]);
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
@@ -91,7 +94,8 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         });
         console.log('player details:', playerResponse.data);
         setPlayerDetails(playerResponse.data || []);
-        setLocalProfilePic(playerDetails.profilePicture || '');
+
+
 
 
         // Fetch recent matches
@@ -115,6 +119,8 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
         console.log('Live Tournaments:', tournamentResponse.data);
 
         setLiveTournaments(tournamentResponse.data || []);
+        console.log(localProfilePic); 
+        
 
       } catch (err) {
         // Handle errors
@@ -141,68 +147,49 @@ function PlayerProfile({ profilePic, onProfilePicUpdate }) {
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setSelectedFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setLocalProfilePic(imageUrl);
-      onProfilePicUpdate(imageUrl);
+        setSelectedFile(file);
+        const imageUrl = URL.createObjectURL(file);
+        setLocalProfilePic(imageUrl);
     }
-  };
+};
+
 
 
   const handleSave = async () => {
-    const token = localStorage.getItem('token'); // Use the token for authentication
+    const token = localStorage.getItem('token');
 
+    // Update player details
     const playerData = {
-      firstName: playerDetails.firstName,
-      lastName: playerDetails.lastName,
-      country: playerDetails.country,
+        firstName: playerDetails.firstName,
+        lastName: playerDetails.lastName,
+        country: playerDetails.country,
     };
 
-    if (selectedFile) {
-      // You may need to handle file uploads separately
-      const reader = new FileReader();
-      reader.readAsDataURL(selectedFile); // Convert file to base64
-      reader.onloadend = async () => {
-        playerData.profilePic = reader.result; // Assign base64 string to profilePic
-        await sendUpdate(playerData, token);
-      };
-    } else {
-      await sendUpdate(playerData, token);
-    }
-  };
-
-  const sendUpdate = async (playerData, token) => {
-    try {
-      const response = await axios.put(`${baseURL}/currentPlayerById`, playerData, {
+    // Update player details
+    await axios.put(`${baseURL}/currentPlayerById`, playerData, {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json', // Sending as JSON
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
         },
-      });
-      setPlayerDetails(playerData || '');
+    });
 
-      if (response.status === 200) {
-        window.location.reload();
-        console.log('Profile updated successfully');
-      } else {
-        console.error('Error updating profile');
-      }
-    } catch (error) {
-      if (error.response) {
-        console.error('Error Status:', error.response.status);
-        console.error('Error Data:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Error Message:', error.message);
-      }
+    // Handle file upload
+    if (selectedFile) {
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+        await axios.post(`${baseURL}/uploadProfile`, formData, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
     }
-
+    window.location.reload();
+    console.log('Profile updated successfully');
     handleCloseEdit();
   };
 
-
-
+  
 
 
   return (
