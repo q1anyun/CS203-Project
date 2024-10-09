@@ -61,6 +61,7 @@ public class TournamentService {
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
         tournament.setTimeControl(gameTypeRepository.getGameTypeById(dto.getTimeControl()));
+        tournament.setCurrentPlayers(0);
 
         tournamentRepository.save(tournament);
 

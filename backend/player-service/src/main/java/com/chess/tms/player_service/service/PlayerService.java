@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
+import com.chess.tms.player_service.dto.RankingDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
@@ -69,6 +70,16 @@ public class PlayerService {
         dto.setTotalLosses(playerDetails.getTotalLosses());
         dto.setTotalWins(playerDetails.getTotalWins());
         dto.setCountry(playerDetails.getCountry());
+        return dto;
+    }
+
+    private RankingDTO convertToRankingDTO(PlayerDetails playerDetails) {
+        RankingDTO dto = new RankingDTO();
+        dto.setUserId(playerDetails.getUserId());
+        dto.setFirstName(playerDetails.getFirstName());
+        dto.setLastName(playerDetails.getLastName());
+        dto.setEloRating(playerDetails.getEloRating());
+        
         return dto;
     }
 
@@ -126,11 +137,11 @@ public class PlayerService {
         return playerDetailsRepository.findById(playerId);
     }
 
-    public List<PlayerDetailsDTO> findTop100Players() {
+    public List<RankingDTO> findTop100Players() {
         List<PlayerDetails> top100 = playerDetailsRepository.findByOrderByEloRatingDesc(Limit.of(100));
 
-        List<PlayerDetailsDTO> dtoList = Arrays.stream(top100.toArray(new PlayerDetails[100]))
-        .map(this::convertToPlayerDetailsDTO)
+        List<RankingDTO> dtoList = Arrays.stream(top100.toArray(new PlayerDetails[100]))
+        .map(this::convertToRankingDTO)
         .collect(Collectors.toList());
 
         return dtoList;
