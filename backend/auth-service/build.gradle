@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.3.3'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco' 
 }
 
 group = 'com.chess.tms'
@@ -28,6 +29,7 @@ ext {
 }
 
 dependencies {
+	// Main application dependencies
 	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 	implementation 'org.hibernate.validator:hibernate-validator:8.0.0.Final'
@@ -39,12 +41,21 @@ dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JWT for authentication
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Testing dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'  // JUnit 5, Mockito, Spring Testing
+	testImplementation 'org.springframework.security:spring-security-test'  // Spring Security Testing
+	testImplementation 'org.testcontainers:testcontainers:1.19.0'  // Testcontainers (core)
+	testImplementation 'org.testcontainers:mysql:1.19.0'  // MySQL Testcontainers module
+	testImplementation 'org.testcontainers:junit-jupiter:1.19.0'  // JUnit support for Testcontainers
+
+	// WireMock for mocking external APIs
+	testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0'
 }
 
 dependencyManagement {
@@ -54,5 +65,22 @@ dependencyManagement {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform() 
+	finalizedBy 'jacocoTestReport' 
+}
+
+jacoco {
+	toolVersion = "0.8.10" 
+}
+
+jacocoTestReport {
+	reports {
+		xml.required.set(true)
+		csv.required.set(true)
+		html.outputLocation.set(layout.buildDirectory.dir('jacocoHtml'))
+	}
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
 }

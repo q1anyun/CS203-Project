@@ -1,9 +1,4 @@
 package com.chess.tms.auth_service.dto;
-
-import com.chess.tms.auth_service.enums.UserRole;
-
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;

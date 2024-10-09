@@ -1,6 +1,4 @@
 package com.chess.tms.auth_service.security;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,20 +10,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
     private final CustomUserDetailsService customUserDetailsService;
-
-    @Value("${client.url}")
-    private String clientUrl;
 
     public SecurityConfiguration(CustomUserDetailsService customUserDetailsService) {
         this.customUserDetailsService = customUserDetailsService;
@@ -56,6 +47,9 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
+                .requestMatchers("/api/auth/**").authenticated()
+                // .requestMatchers("/api/auth/login", "/api/auth/register/player").permitAll()  // Permit login and registration to everyone
+                // .requestMatchers("/api/auth/register/admin").hasRole("ADMIN") // Only allow ADMINs to access /api/auth/register/admin
                 .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session
