@@ -1,4 +1,4 @@
-import * as React from 'react'; 
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -10,6 +10,10 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
 import styles from './PlayerTournamentView.module.css';
+import axios from 'axios'
+const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+
 
 const statusColorMap = {
     Live: 'success',
@@ -49,14 +53,16 @@ function PlayerTournamentView() {
 
     // Fetch tournaments from the backend
     useEffect(() => {
+        const token = localStorage.getItem('token');
         const fetchTournaments = async () => {
             try {
-                const response = await fetch('/api/player/tournaments');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setTournaments(data); // Assuming your backend returns an array of tournaments
+                const response = await axios.get(`${baseURL}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                console.log(response.data);
+                setTournaments(response.data); // Assuming your backend returns an array of tournaments
             } catch (error) {
                 setError(error.message); // Set error message if fetching fails
             } finally {
@@ -84,14 +90,12 @@ function PlayerTournamentView() {
     const handleRegister = async () => {
         if (selectedTournament) {
             try {
-                const response = await fetch(`/api/tournament/${selectedTournament.tournamentId}/enroll`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ /* any additional data needed */ })
-                });
+                const response = await axios.post(`${baseURL2}/register/current/${tournamentid}`, {
 
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
                 if (!response.ok) {
                     throw new Error('Failed to enroll in the tournament');
                 }
@@ -137,21 +141,21 @@ function PlayerTournamentView() {
                     </TableHead>
                     <TableBody>
                         {tournaments.map((tournament) => (
-                            <StyledTableRow key={tournament.tournamentId}>
-                                <StyledTableCell>{tournament.tournamentId}</StyledTableCell>
-                                <StyledTableCell>{tournament.tournamentName}</StyledTableCell>
+                            <StyledTableRow key={tournament.id}>
+                                <StyledTableCell>{tournament.id}</StyledTableCell>
+                                <StyledTableCell>{tournament.name}</StyledTableCell>
                                 <StyledTableCell>{tournament.startDate}</StyledTableCell>
                                 <StyledTableCell>{tournament.endDate}</StyledTableCell>
-                                <StyledTableCell>{tournament.timeControl}</StyledTableCell>
+                                <StyledTableCell>{tournament.timeControl.timeControlMinutes}</StyledTableCell>
                                 <StyledTableCell>{tournament.minElo}</StyledTableCell>
                                 <StyledTableCell>{tournament.maxElo}</StyledTableCell>
-                                <StyledTableCell>{tournament.numberOfPlayers}</StyledTableCell>
+                                <StyledTableCell>{tournament.maxPlayers}</StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {tournament.status === "Live" || tournament.status === "Expired" ? ( 
-                                                <> {} </>
+                                    {tournament.status === "Live" || tournament.status === "Expired" ? (
+                                        <> { } </>
                                     ) : (
                                         <Button
                                             variant="contained"
