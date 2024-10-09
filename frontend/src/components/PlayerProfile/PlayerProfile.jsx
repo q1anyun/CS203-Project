@@ -12,6 +12,7 @@ import countryList from 'react-select-country-list'
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const baseURL3 = import.meta.env.VITE_ELO_SERVICE_URL;
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -25,16 +26,16 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-const uData = [1500, 1528, 1560, 1600, 1670, 1800, 1900];
-const xLabels = [
-  '1',
-  '2',
-  '3',
-  '4',
-  '5',
-  '6',
-  '7',
-];
+// const uData = [1500, 1528, 1560, 1600, 1670, 1800, 1900];
+// const xLabels = [
+//   '1',
+//   '2',
+//   '3',
+//   '4',
+//   '5',
+//   '6',
+//   '7',
+// ];
 
 
 
@@ -46,6 +47,8 @@ function PlayerProfile({ profilePic }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [localProfilePic, setLocalProfilePic] = useState(null);
   const [playerDetails, setPlayerDetails] = useState([]);
+  const [uData, setUData] = useState([]);
+  const [xLabels, setXLabels] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
@@ -99,6 +102,16 @@ function PlayerProfile({ profilePic }) {
         setPlayerDetails(playerResponse.data || []);
 
 
+        // Fetch chart data
+        const chartResponse = await axios.get(`${baseURL3}/chart/1`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        console.log('chart data:', chartResponse.data);
+        setUData(chartResponse.data.map((data) => data.elo));
+        setXLabels(chartResponse.data.map((data) => data.date));
+
 
 
         // Fetch recent matches
@@ -146,6 +159,8 @@ function PlayerProfile({ profilePic }) {
 
     fetchPlayerAndMatchData();
   }, [navigate]);
+
+
 
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
@@ -304,7 +319,7 @@ function PlayerProfile({ profilePic }) {
             </Box>
             {value === 0 && (
               <Box sx={{ p: 2 }}>
-                <Typography variant="body1">Content for Tab 1</Typography>
+                {/* <Typography variant="body1">Content for Tab 1</Typography> */}
                 {/* Add more content for Tab 1 here */}
                 {/* Pie Chart Section */}
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
@@ -465,7 +480,7 @@ function PlayerProfile({ profilePic }) {
               label="Country"
               onChange={handleDetailChange}
               sx={{ textAlign: 'left' }}
-             
+
             >
               {options.map((country) => (
                 <MenuItem key={country.value} value={country.value}>

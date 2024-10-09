@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
@@ -60,5 +62,16 @@ public class EloController {
     @PutMapping("/match") 
     public void updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
         eloService.updateMatchPlayersElo(dto);
+    }
+
+    @GetMapping("/chart/current")
+    public ResponseEntity<List<EloHistoryChartDTO>> findCurrentPlayerEloHistoryForChart(@RequestHeader("X-User-PlayerId") String id) {
+        long playerId = Long.parseLong(id);
+        return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(playerId));
+    }
+
+    @GetMapping("/chart/{id}")
+    public ResponseEntity<List<EloHistoryChartDTO>> findPlayerEloHistoryForChart(@PathVariable long id) {
+        return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
 }

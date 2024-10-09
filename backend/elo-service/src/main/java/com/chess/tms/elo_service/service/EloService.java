@@ -1,13 +1,18 @@
 package com.chess.tms.elo_service.service;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.chess.tms.elo_service.dto.DTOUtil;
+import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.repository.EloRepository;
@@ -17,6 +22,7 @@ import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.enums.Reason;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.transaction.Transactional;
@@ -32,7 +38,7 @@ public class EloService {
 
     @Value("${players.service.url}")
     private String playersServiceUrl;
-    
+
     private EloRepository eloRepository;
 
     private RestTemplate restTemplate;
@@ -66,7 +72,7 @@ public class EloService {
             throw new PlayerHistoryNotFoundException("Player with player id " + playerId + " has no history");
         }
         List<EloResponseDTO> deleted = DTOUtil.convertEntriesToResponseDTOs(list.get());
-        
+
         eloRepository.deleteByPlayerId(playerId);
         return deleted;
     }
@@ -83,30 +89,32 @@ public class EloService {
         newEloHistory.setPlayerId(dto.getPlayerId());
         newEloHistory.setChangeReason(dto.getChangeReason());
         newEloHistory.setCreatedAt(LocalDateTime.now());
-       
+
         eloRepository.save(newEloHistory);
-        //System.out.println(leaderboardServiceUrl + "/api/leaderboard/updateElo");
-        //restTemplate.put(leaderboardServiceUrl + "/api/leaderboard/updateElo",  new EloUpdateDTO(dto.getPlayerId(), dto.getNewElo()));
-        
+        // System.out.println(leaderboardServiceUrl + "/api/leaderboard/updateElo");
+        // restTemplate.put(leaderboardServiceUrl + "/api/leaderboard/updateElo", new
+        // EloUpdateDTO(dto.getPlayerId(), dto.getNewElo()));
+
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
 
     public List<EloResponseDTO> findByPlayerIdAndChangeReason(long playerId, String changeReason) {
-        Reason reason = Reason.WIN;  
+        Reason reason = Reason.WIN;
         if (changeReason.equals("win")) {
             reason = Reason.WIN;
         } else if (changeReason.equals("loss")) {
             reason = Reason.LOSS;
         } else {
-            throw new InvalidReasonException("Reason: " + changeReason + " is not valid. Valid reasons: win, loss, draw"); 
+            throw new InvalidReasonException(
+                    "Reason: " + changeReason + " is not valid. Valid reasons: win, loss, draw");
         }
-        
+
         List<EloHistory> list = eloRepository.findByPlayerIdAndChangeReasonOrderByCreatedAtDesc(playerId, reason);
         List<EloResponseDTO> responses = DTOUtil.convertEntriesToResponseDTOs(list);
         return responses;
     }
 
-    public void updateMatchPlayersElo(MatchEloRequestDTO dto){
+    public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
         EloRequestDTO winner = dto.getWinner();
         EloRequestDTO loser = dto.getLoser();
 
@@ -119,12 +127,23 @@ public class EloService {
         String loserServiceUrl = playersServiceUrl + "/api/player/elo/" + loser.getPlayerId();
 
         restTemplate.put(winnerServiceUrl, newWinnerElo);
-        restTemplate.put(loserServiceUrl,  newLoserElo);
+        restTemplate.put(loserServiceUrl, newLoserElo);
 
         // Save Elo History
         EloHistoryRequestDTO winnerHistory = new EloHistoryRequestDTO(winner.getPlayerId(), newWinnerElo, Reason.WIN);
         EloHistoryRequestDTO loserHistory = new EloHistoryRequestDTO(loser.getPlayerId(), newLoserElo, Reason.LOSS);
         saveEloHistory(winnerHistory);
         saveEloHistory(loserHistory);
+    }
+
+    public List<EloHistoryChartDTO> findPlayerEloHistoryForChart(long id) {
+        List<EloHistory> eloHistoryList = eloRepository.findLatestEloHistoryByPlayerId(id);
+
+        List<EloHistoryChartDTO> chartDTOs = eloHistoryList.stream()
+                .map(history -> new EloHistoryChartDTO(history.getNewElo(), history.getCreatedAt().toLocalDate()))
+                .sorted(Comparator.comparing(EloHistoryChartDTO::getDate))
+                .collect(Collectors.toList());
+
+        return chartDTOs;
     }
 }
