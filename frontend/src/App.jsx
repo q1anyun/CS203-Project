@@ -15,6 +15,8 @@ import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './styles/theme';
 
 function AppContent() {
   const location = useLocation();
@@ -79,9 +81,12 @@ function AppContent() {
 
 function App() {
   return (
+    <ThemeProvider theme={theme}>
+
     <Router>
       <AppContent />
     </Router>
+    </ThemeProvider>
   );
 }
 

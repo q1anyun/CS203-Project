@@ -8,6 +8,8 @@ import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import countryList from 'react-select-country-list'
+import useProfilePic from '../ProfilePicture/UseProfilePicture';
+import defaultProfilePic from '../../assets/default_user.png'
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -44,7 +46,7 @@ function PlayerProfile({ profilePic }) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(null);
+  const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(''); // Declare error state
@@ -52,6 +54,8 @@ function PlayerProfile({ profilePic }) {
   const [liveTournaments, setLiveTournaments] = useState([]);
   const options = useMemo(() => countryList().getData(), [])
   const navigate = useNavigate();
+  profilePic = useProfilePic(); 
+
 
 
 
@@ -97,6 +101,7 @@ function PlayerProfile({ profilePic }) {
         });
         console.log('player details:', playerResponse.data);
         setPlayerDetails(playerResponse.data || []);
+ 
 
 
 
@@ -122,7 +127,7 @@ function PlayerProfile({ profilePic }) {
         console.log('Live Tournaments:', tournamentResponse.data);
 
         setLiveTournaments(tournamentResponse.data || []);
-        console.log(localProfilePic);
+      
 
 
       } catch (err) {

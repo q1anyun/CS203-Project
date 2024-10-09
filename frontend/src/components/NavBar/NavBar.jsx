@@ -8,9 +8,11 @@ import styles from './NavBar.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import Image from 'react-bootstrap/Image';
 import useProfilePic from '../ProfilePicture/UseProfilePicture';
+import { Typography } from '@mui/material';
 
 function NavBar({profilePic}) {
   const [userRole, setUserRole] = useState(null);
+  profilePic = useProfilePic(); 
   
 
   useEffect(() => {
@@ -30,7 +32,8 @@ function NavBar({profilePic}) {
         <Navbar.Toggle />
 
         <Nav className="me-auto">
-          <Nav.Link as={Link} to="/home">Home</Nav.Link>
+          <Nav.Link as={Link} to="/home">
+          <Typography variant="navBar">Home</Typography></Nav.Link>
 
           {/*THIS COMMENTED CODE IS THE CORRECT CODE TO BE IMPLEMENTED*/}
           {/* {userRole === 'ADMIN' && (
@@ -45,8 +48,11 @@ function NavBar({profilePic}) {
             </>
           )} */}
 
-          <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
-          <Nav.Link as={Link} to="/leaderboard">Leaderboard</Nav.Link>
+          <Nav.Link as={Link} to="/player/tournaments">
+          <Typography variant="navBar">Tournaments</Typography>
+          </Nav.Link>
+          <Nav.Link as={Link} to="/leaderboard">
+          <Typography variant="navBar">Leaderboard</Typography></Nav.Link>
         </Nav>
 
         <Navbar.Collapse className="justify-content-end">
@@ -68,12 +74,22 @@ function NavBar({profilePic}) {
               </>
             )} */}
 
-            <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/profile">View Admin Profile (tmp)</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/tournaments">View Admin Tournament view (tmp)</NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/matches">View Admin Matches view (tmp)</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/player/profile">
+            <Typography variant="navBar">View Profile</Typography>
+            </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/admin/profile">
+            <Typography variant="navBar">View Admin Profile</Typography>
+            </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/admin/tournaments">
+            <Typography variant="navBar">View Admin Tournament view (tmp)</Typography>
+            </NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/admin/matches">
+            <Typography variant="navBar">View Admin Matches view (tmp)</Typography>
+            </NavDropdown.Item>
             <NavDropdown.Divider />
-            <NavDropdown.Item as={Link} to="/login">Logout</NavDropdown.Item>
+            <NavDropdown.Item as={Link} to="/login">
+            <Typography variant="navBar">Logout</Typography>
+            </NavDropdown.Item>
           </NavDropdown>
         </Navbar.Collapse>
       </Container>
