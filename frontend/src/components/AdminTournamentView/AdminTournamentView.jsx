@@ -326,7 +326,19 @@ export default function AdminTournamentView() {
                                         tournament.maxElo
                                     )}
                                 </StyledTableCell>
-                                <StyledTableCell>{tournament.currentPlayers}/{tournament.maxPlayers}</StyledTableCell>
+                                <StyledTableCell>
+                                    {editableRow === rowIndex ? (
+                                        <TextField
+                                            type="number"
+                                            value={tournament.maxPlayers}
+                                            onChange={(e) => handleChange(e, rowIndex, 'maxPlayers')}
+                                            variant="outlined"
+                                            size="small"
+                                        />
+                                    ) : (
+                                        `${tournament.currentPlayers}/${tournament.maxPlayers}`
+                                    )}
+                                </StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
