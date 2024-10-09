@@ -226,6 +226,9 @@ export default function AdminTournamentView() {
             <Typography variant="h4" component="h2" gutterBottom className={styles.title}>
                 All Tournaments
             </Typography>
+            <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab}>
+                <AddIcon />
+            </Fab>
             <TableContainer component={Paper} className={styles.table}>
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
@@ -366,9 +369,7 @@ export default function AdminTournamentView() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab}>
-                <AddIcon />
-            </Fab>
+
 
             {/* Create Tournament Dialog */}
             <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
