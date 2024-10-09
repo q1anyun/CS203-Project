@@ -11,9 +11,6 @@ import com.chess.tms.tournament_service.enums.Status;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TournamentRegistrationDTO {
-
-    private Long creatorId;
-
     private String name;
 
     private LocalDateTime startDate;
@@ -25,8 +22,6 @@ public class TournamentRegistrationDTO {
     private Integer maxElo;
 
     private Integer maxPlayers;
-    
-    private Status status;
 
     private Integer timeControl;
     
