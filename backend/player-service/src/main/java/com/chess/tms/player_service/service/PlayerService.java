@@ -1,5 +1,9 @@
 package com.chess.tms.player_service.service;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -9,6 +13,7 @@ import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
@@ -17,6 +22,11 @@ import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.repository.PlayerDetailsRepository;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 
 @Service
 public class PlayerService {
@@ -30,24 +40,22 @@ public class PlayerService {
     @Autowired
     private RestTemplate restTemplate;
 
-
     // Fetch player details by player ID
     public PlayerDetailsDTO getPlayerDetailsById(Long id) {
-       
+
         return playerDetailsRepository.findById(id)
-            .map(this::convertToPlayerDetailsDTO)
-            .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
+                .map(this::convertToPlayerDetailsDTO)
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
     }
 
     // Fetch multiple player details in a batch
     public List<PlayerDetailsDTO> getListOfPlayerDetails(List<Long> playerIds) {
         List<PlayerDetails> players = playerDetailsRepository.findByIdIn(playerIds);
         return players.stream()
-                      .map(this::convertToPlayerDetailsDTO)
-                      .collect(Collectors.toList());
+                .map(this::convertToPlayerDetailsDTO)
+                .collect(Collectors.toList());
     }
 
-   
     // Convert PlayerDetails to PlayerDetailsDTO
     private PlayerDetailsDTO convertToPlayerDetailsDTO(PlayerDetails playerDetails) {
         PlayerDetailsDTO dto = new PlayerDetailsDTO();
@@ -57,8 +65,6 @@ public class PlayerService {
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
         dto.setProfilePicture(playerDetails.getProfilePicture());
-        dto.setLowestElo(playerDetails.getLowestElo());
-        dto.setHighestElo(playerDetails.getHighestElo());
         dto.setTotalMatches(playerDetails.getTotalMatches());
         dto.setTotalLosses(playerDetails.getTotalLosses());
         dto.setTotalWins(playerDetails.getTotalWins());
@@ -69,9 +75,8 @@ public class PlayerService {
     // Update player details
     public void updatePlayer(Long id, UpdatePlayerDetailsDTO updatedPlayerDetails) {
         PlayerDetails player = playerDetailsRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
 
-        
         Optional.ofNullable(updatedPlayerDetails.getCountry()).ifPresent(player::setCountry);
         Optional.ofNullable(updatedPlayerDetails.getFirstName()).ifPresent(player::setFirstName);
         Optional.ofNullable(updatedPlayerDetails.getLastName()).ifPresent(player::setLastName);
@@ -83,7 +88,7 @@ public class PlayerService {
     // Fetch recent matches of a player from the matches service
     public List<MatchResponseDTO> getRecentMatches(Long playerId) {
         String url = matchesServiceUrl + "/api/matches/player/" + playerId + "/recent";
-       
+
         try {
             MatchDTO[] matches = restTemplate.getForObject(url, MatchDTO[].class);
             return Arrays.stream(matches)
@@ -95,7 +100,7 @@ public class PlayerService {
     }
 
     // Convert MatchDTO to MatchResponseDTO
-     private MatchResponseDTO convertToMatchResponseDTO(MatchDTO matchDTO) {
+    private MatchResponseDTO convertToMatchResponseDTO(MatchDTO matchDTO) {
         MatchResponseDTO responseDTO = new MatchResponseDTO();
         responseDTO.setTournament(matchDTO.getTournament());
         responseDTO.setRoundType(matchDTO.getRoundType());
@@ -103,7 +108,7 @@ public class PlayerService {
         responseDTO.setDate(matchDTO.getDate());
 
         // Fetch winner and loser details
-       
+
         responseDTO.setWinner(fetchPlayerDetails(matchDTO.getWinnerId())
                 .orElseThrow(() -> new UserNotFoundException("Winner not found")));
         responseDTO.setLoser(fetchPlayerDetails(matchDTO.getLoserId())
@@ -115,7 +120,7 @@ public class PlayerService {
     // Fetch player details by ID
     private Optional<PlayerDetails> fetchPlayerDetails(Long playerId) {
         if (playerId == null) {
-       
+
             return Optional.empty();
         }
         return playerDetailsRepository.findById(playerId);
@@ -130,5 +135,40 @@ public class PlayerService {
 
         return dtoList;
     }
+    // Update player elo rating
+    public void updatePlayerElo(long playerId, int newElo) {
+        PlayerDetails player = playerDetailsRepository.findById(playerId)
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+
+        player.setEloRating(newElo);
+
+        if(player.getHighestElo() == null || newElo > player.getHighestElo()) {
+            player.setHighestElo(newElo);
+        }
+
+        playerDetailsRepository.save(player);
+    }
+    public void uploadProfilePicture(Long playerId, MultipartFile file) throws IOException {
+        // Create upload directory if it doesn't exist
+        String uploadDir = "profile-picture"; // Change this to your desired path
+        Files.createDirectories(Paths.get(uploadDir));
+        
+        // Rename the file using playerId
+        String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
+        String newFileName = "player_" + playerId + fileExtension; // e.g., player_123.jpg
+        Path filePath = Paths.get(uploadDir, newFileName);
+    
+        // Save the file
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        
+        // Update the player record with the new file path
+        PlayerDetails player = playerDetailsRepository.findById(playerId)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
+        player.setProfilePicture(filePath.toString());
+        playerDetailsRepository.save(player);
+    }
+    
+
+    
 
 }

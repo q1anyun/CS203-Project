@@ -1,122 +1,144 @@
 use chess_tms;
 
 
+
+
 CREATE TABLE user (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   username VARCHAR(50) NOT NULL,
-   email VARCHAR(100) NOT NULL,
-   password VARCHAR(255) NOT NULL,
-   role ENUM('PLAYER', 'ADMIN') NOT NULL,
-   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role ENUM('PLAYER', 'ADMIN') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+
 
 
 CREATE TABLE player_details (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   user_id BIGINT NOT NULL,
-   elo_rating INT,
-   first_name VARCHAR(100),
-   last_name VARCHAR(100),
-   country VARCHAR(100),
-   profile_picture VARCHAR(255),
-   total_wins INT DEFAULT 0,
-   total_losses INT DEFAULT 0,
-   total_matches INT DEFAULT 0,
-   highest_elo INT,
-   lowest_elo INT,
-   FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  elo_rating INT,
+  first_name VARCHAR(100),
+  last_name VARCHAR(100),
+  country VARCHAR(100),
+  profile_picture VARCHAR(255),
+  total_wins INT DEFAULT 0,
+  total_losses INT DEFAULT 0,
+  total_matches INT DEFAULT 0,
+  highest_elo INT,
+  FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
+
+
 
 
 CREATE TABLE game_type (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   name VARCHAR(50) NOT NULL,
-   time_control_minutes INT NOT NULL
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  time_control_minutes INT NOT NULL
 );
+
+
 
 
 CREATE TABLE round_type (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   round_name VARCHAR(50) NOT NULL,
-   number_of_players INT NOT NULL
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  round_name VARCHAR(50) NOT NULL,
+  number_of_players INT NOT NULL
 );
+
+
 
 
 CREATE TABLE tournament (
-   id bigint AUTO_INCREMENT PRIMARY KEY,
-   created_by BIGINT NOT NULL,
-   name VARCHAR(100) NOT NULL,
-   start_date DATETIME NOT NULL,
-   end_date DATETIME NOT NULL,
-   min_elo INT,
-   max_elo INT,
-   total_players INT NOT NULL,
-   status ENUM("EXPIRED", "LIVE", "UPCOMING", "COMPLETED") NOT NULL DEFAULT 'UPCOMING',
-   time_control BIGINT NOT NULL, 
-   current_round BIGINT,
-   winner_id BIGINT,
-   FOREIGN KEY (current_round) REFERENCES round_type(id),
-   FOREIGN KEY (time_control) REFERENCES game_type(id),
-   FOREIGN KEY (created_by) REFERENCES user(id),
-   FOREIGN KEY (winner_id) REFERENCES player_details(id)
+  id bigint AUTO_INCREMENT PRIMARY KEY,
+  created_by BIGINT NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  start_date DATETIME NOT NULL,
+  end_date DATETIME NOT NULL,
+  min_elo INT,
+  max_elo INT,
+  current_players INT NOT NULL,
+  max_players INT NOT NULL,
+  status ENUM("EXPIRED", "LIVE", "UPCOMING", "COMPLETED") NOT NULL DEFAULT 'UPCOMING',
+  time_control BIGINT NOT NULL,
+  current_round BIGINT,
+  winner_id BIGINT,
+  FOREIGN KEY (current_round) REFERENCES round_type(id),
+  FOREIGN KEY (time_control) REFERENCES game_type(id),
+  FOREIGN KEY (created_by) REFERENCES user(id),
+  FOREIGN KEY (winner_id) REFERENCES player_details(id)
 );
+
+
 
 
 CREATE TABLE tournament_player (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   tournament_id BIGINT NOT NULL,
-   player_id BIGINT NOT NULL,
-   FOREIGN KEY (tournament_id) REFERENCES tournament(id) ON DELETE CASCADE,
-   FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  tournament_id BIGINT NOT NULL,
+  player_id BIGINT NOT NULL,
+  FOREIGN KEY (tournament_id) REFERENCES tournament(id) ON DELETE CASCADE,
+  FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
+
+
+
+
 
 
 
 
 CREATE TABLE matches (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   tournament_id BIGINT NOT NULL,
-   game_type_id BIGINT NOT NULL,
-   player1_id BIGINT NULL,
-   player2_id BIGINT NULL,
-   winner_id BIGINT NULL,
-   loser_id BIGINT NULL,
-   round_type_id BIGINT NOT NULL,
-   next_match_id BIGINT NULL,
-   status ENUM('ONGOING', 'PENDING', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
-   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-   FOREIGN KEY (tournament_id) REFERENCES tournament(id) ON DELETE CASCADE,
-   FOREIGN KEY (player1_id) REFERENCES player_details(id),
-   FOREIGN KEY (player2_id) REFERENCES player_details(id),
-   FOREIGN KEY (winner_id) REFERENCES player_details(id),
-   FOREIGN KEY (loser_id) REFERENCES player_details(id),
-   FOREIGN KEY (round_type_id) REFERENCES round_type(id),
-   FOREIGN KEY (next_match_id) REFERENCES matches(id),
-   FOREIGN KEY (game_type_id) REFERENCES game_type(id)
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  tournament_id BIGINT NOT NULL,
+  game_type_id BIGINT NOT NULL,
+  player1_id BIGINT NULL,
+  player2_id BIGINT NULL,
+  winner_id BIGINT NULL,
+  loser_id BIGINT NULL,
+  round_type_id BIGINT NOT NULL,
+  next_match_id BIGINT NULL,
+  status ENUM('ONGOING', 'PENDING', 'COMPLETED') NOT NULL DEFAULT 'PENDING',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (tournament_id) REFERENCES tournament(id) ON DELETE CASCADE,
+  FOREIGN KEY (player1_id) REFERENCES player_details(id),
+  FOREIGN KEY (player2_id) REFERENCES player_details(id),
+  FOREIGN KEY (winner_id) REFERENCES player_details(id),
+  FOREIGN KEY (loser_id) REFERENCES player_details(id),
+  FOREIGN KEY (round_type_id) REFERENCES round_type(id),
+  FOREIGN KEY (next_match_id) REFERENCES matches(id),
+  FOREIGN KEY (game_type_id) REFERENCES game_type(id)
 );
+
+
 
 
 CREATE TABLE elo_history (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   player_id BIGINT NOT NULL,
-   old_elo INT NOT NULL,
-   new_elo INT NOT NULL,
-   change_reason ENUM('WIN', 'LOSS', 'DRAW') NOT NULL,
-   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  player_id BIGINT NOT NULL,
+  old_elo INT NOT NULL,
+  new_elo INT NOT NULL,
+  change_reason ENUM('WIN', 'LOSS', 'DRAW') NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
+
+
 
 
 CREATE TABLE leaderboard (
-   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-   player_id BIGINT NOT NULL,
-   elo_rating INT NOT NULL,
-   ranking INT NOT NULL,
-   last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  player_id BIGINT NOT NULL,
+  elo_rating INT NOT NULL,
+  ranking INT NOT NULL,
+  last_updated TIMESTAMP,
+  FOREIGN KEY (player_id) REFERENCES player_details(id) ON DELETE CASCADE
 );
+
+
 
 
 INSERT INTO round_type (round_name, number_of_players) VALUES
@@ -130,17 +152,25 @@ INSERT INTO round_type (round_name, number_of_players) VALUES
 
 
 
+
+
+
+
 INSERT INTO user (username, email, password, role, created_at, updated_at)
-VALUES 
+VALUES
 ('admin1', 'admin1@example.com', '$2a$10$6bZUlV1zkqD6kqFGrP1XduJzZ1tiZa8gj0W5HbXUls1p.jYtEbcJm', 'ADMIN', NOW(), NOW()),
 ('admin2', 'admin2@example.com', '$2a$10$CzKz4xLXlB5FY5twYsT.5euRr71h9n0icEMTzxY8qFdIW/.pM6vW.', 'ADMIN', NOW(), NOW());
 
 
 
 
+
+
+
+
 -- Insert dummy data for 20 players with hashed password "pass"
 INSERT INTO user (username, email, password, role, created_at, updated_at)
-VALUES 
+VALUES
 ('player1', 'player1@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW()),
 ('player2', 'player2@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW()),
 ('player3', 'player3@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW()),
@@ -163,9 +193,11 @@ VALUES
 ('player20', 'player20@example.com', '$2a$10$7QH1gPz7JvF3kVYjThEhTuFZUIO4Y7HIGePmRoM0FdN2UdfSgPaNi', 'PLAYER', NOW(), NOW());
 
 
+
+
 -- Insert corresponding player details for each player (ID 3 to 22)
 INSERT INTO player_details (user_id, elo_rating, country, first_name, last_name, profile_picture, total_wins, total_losses, total_matches, highest_elo, lowest_elo)
-VALUES 
+VALUES
 (1, 1100, 'USA', 'Player', 'One', 'profile1.jpg', 10, 2, 12, 1150, 1050),
 (2, 1200, 'UK', 'Player', 'Two', 'profile2.jpg', 12, 4, 16, 1220, 1100),
 (3, 1300, 'Canada', 'Player', 'Three', 'profile3.jpg', 14, 3, 17, 1350, 1200),
@@ -190,11 +222,9 @@ VALUES
 
 
 
-
-
 -- Insert dummy data into game_type table
 INSERT INTO game_type (name, time_control_minutes)
-VALUES 
+VALUES
 ('Blitz', 5),           -- Blitz chess (5 minutes per player)
 ('Rapid', 25),          -- Rapid chess (25 minutes per player)
 ('Classical', 90),      -- Classical chess (90 minutes per player)
@@ -203,71 +233,77 @@ VALUES
 ('Fischer Random', 15); -- Fischer Random chess (15 minutes per player)
 
 
+
+
 -- Insert dummy data into the `tournament` table
-INSERT INTO tournament (created_by, name, start_date, end_date, min_elo, max_elo,current_players, total_players, status, time_control) 
-VALUES 
+INSERT INTO tournament (created_by, name, start_date, end_date, min_elo, max_elo,current_players, total_players, status, time_control)
+VALUES
 (1, 'Chess Rapid Championship', '2024-10-01 10:00:00', '2024-10-02 18:00:00', 1200, 2400, 16, 16, 'UPCOMING', 1),  -- Time control ID 1 -> Rapid
 (2, 'Blitz Open Tournament', '2024-11-10 09:00:00', '2024-11-10 20:00:00', 1000, 2200,20, 32, 'UPCOMING', 2),     -- Time control ID 2 -> Blitz
 (1, 'Classic Masters Event', '2024-12-05 10:00:00', '2024-12-06 18:00:00', 1400, 2600,8 , 8, 'UPCOMING', 3);      -- Time control ID 3 -> Classic
 
 
+
+
 -- Insert dummy data into the `tournament_player` table
 -- For 'Chess Rapid Championship'
-INSERT INTO tournament_player (player_id, tournament_id) 
-VALUES 
+INSERT INTO tournament_player (player_id, tournament_id)
+VALUES
 (3, 1),  -- Player with ID 3 in tournament ID 1
-(4, 1), 
-(5, 1), 
-(6, 1), 
-(7, 1), 
-(8, 1), 
-(9, 1), 
-(10, 1), 
-(11, 1), 
-(12, 1), 
-(13, 1), 
-(14, 1), 
-(15, 1), 
-(16, 1), 
-(17, 1), 
+(4, 1),
+(5, 1),
+(6, 1),
+(7, 1),
+(8, 1),
+(9, 1),
+(10, 1),
+(11, 1),
+(12, 1),
+(13, 1),
+(14, 1),
+(15, 1),
+(16, 1),
+(17, 1),
 (18, 1);  -- Total 16 players
 
 
+
+
 -- For 'Blitz Open Tournament'
-INSERT INTO tournament_player (player_id, tournament_id) 
-VALUES 
+INSERT INTO tournament_player (player_id, tournament_id)
+VALUES
 (1, 2),  -- Player with ID 1 in tournament ID 2
-(2, 2), 
-(3, 2), 
-(4, 2), 
-(5, 2), 
-(6, 2), 
-(7, 2), 
-(8, 2), 
-(9, 2), 
-(10, 2), 
-(11, 2), 
-(12, 2), 
-(13, 2), 
-(14, 2), 
-(15, 2), 
-(16, 2), 
-(17, 2), 
-(18, 2), 
-(19, 2), 
+(2, 2),
+(3, 2),
+(4, 2),
+(5, 2),
+(6, 2),
+(7, 2),
+(8, 2),
+(9, 2),
+(10, 2),
+(11, 2),
+(12, 2),
+(13, 2),
+(14, 2),
+(15, 2),
+(16, 2),
+(17, 2),
+(18, 2),
+(19, 2),
 (20, 2);  -- Total 20 players
 
 
+
+
 -- For 'Classic Masters Event'
-INSERT INTO tournament_player (player_id, tournament_id) 
-VALUES 
+INSERT INTO tournament_player (player_id, tournament_id)
+VALUES
 (5, 3),  -- Player with ID 5 in tournament ID 3
-(6, 3), 
-(7, 3), 
-(8, 3), 
-(9, 3), 
-(10, 3), 
-(11, 3), 
+(6, 3),
+(7, 3),
+(8, 3),
+(9, 3),
+(10, 3),
+(11, 3),
 (12, 3);  -- Total 8 players
-
-

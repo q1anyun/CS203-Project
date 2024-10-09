@@ -1,5 +1,7 @@
 package com.chess.tms.elo_service.dto;
 
+import com.chess.tms.elo_service.enums.Reason;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,8 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EloRequestDTO {
+public class EloHistoryRequestDTO {
     private long playerId;
 
-    private int currentElo; 
+    private int newElo; 
+    
+    private Reason changeReason;
 }

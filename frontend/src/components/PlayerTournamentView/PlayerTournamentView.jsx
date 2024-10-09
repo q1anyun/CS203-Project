@@ -1,4 +1,4 @@
-import * as React from 'react'; 
+import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
@@ -10,6 +10,10 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
 import styles from './PlayerTournamentView.module.css';
+import axios from 'axios';
+
+const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
 const statusColorMap = {
     Live: 'success',
@@ -42,34 +46,47 @@ function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [joinedTournaments, setJoinedTournaments] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedTournament, setSelectedTournament] = useState(null);
+    const [selectedTournament, setSelectedTournament] = useState([]);
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [loading, setLoading] = useState(true); // Add loading state
-    const [error, setError] = useState(null); // Add error state
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const token = localStorage.getItem('token');
 
-    // Fetch tournaments from the backend
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const response = await fetch('/api/player/tournaments');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setTournaments(data); // Assuming your backend returns an array of tournaments
+                // Fetch all tournaments
+                const response = await axios.get(`${baseURL}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setTournaments(response.data);
+
+                // Fetch the tournaments that the user has registered for
+                const tournamentJoinedResponse = await axios.get(`${baseURL}/registered/current`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                setJoinedTournaments(tournamentJoinedResponse.data);
             } catch (error) {
-                setError(error.message); // Set error message if fetching fails
+                setError(error.message);
             } finally {
-                setLoading(false); // End loading state
+                setLoading(false);
             }
         };
 
         fetchTournaments();
     }, []);
 
+    const isJoined = (tournamentId) => {
+        return joinedTournaments.includes(tournamentId);
+    };
+
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
-        setOpenDialog(true);  // Open the registration pop-up
+        setOpenDialog(true);
     };
 
     const handleDialogClose = () => {
@@ -82,21 +99,20 @@ function PlayerTournamentView() {
     };
 
     const handleRegister = async () => {
-        if (selectedTournament) {
+        console.log(token);
+        if (selectedTournament.id != null) {
             try {
-                const response = await fetch(`/api/tournament/${selectedTournament.tournamentId}/enroll`, {
-                    method: 'POST',
+                const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        
                     },
-                    body: JSON.stringify({ /* any additional data needed */ })
                 });
-
-                if (!response.ok) {
+                if (response.status !== 200) {
                     throw new Error('Failed to enroll in the tournament');
                 }
 
-                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament.tournamentId]);
+                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament.id]);
                 setOpenDialog(false);
             } catch (error) {
                 console.error(error);
@@ -104,14 +120,12 @@ function PlayerTournamentView() {
         }
     };
 
-    const isJoined = (tournamentId) => joinedTournaments.includes(tournamentId);
-
     if (loading) {
-        return <Typography>Loading tournaments...</Typography>; // Loading state
+        return <Typography>Loading tournaments...</Typography>;
     }
 
     if (error) {
-        return <Typography>Error: {error}</Typography>; // Error handling
+        return <Typography>Error: {error}</Typography>;
     }
 
     return (
@@ -137,29 +151,29 @@ function PlayerTournamentView() {
                     </TableHead>
                     <TableBody>
                         {tournaments.map((tournament) => (
-                            <StyledTableRow key={tournament.tournamentId}>
-                                <StyledTableCell>{tournament.tournamentId}</StyledTableCell>
-                                <StyledTableCell>{tournament.tournamentName}</StyledTableCell>
+                            <StyledTableRow key={tournament.id}>
+                                <StyledTableCell>{tournament.id}</StyledTableCell>
+                                <StyledTableCell>{tournament.name}</StyledTableCell>
                                 <StyledTableCell>{tournament.startDate}</StyledTableCell>
                                 <StyledTableCell>{tournament.endDate}</StyledTableCell>
-                                <StyledTableCell>{tournament.timeControl}</StyledTableCell>
+                                <StyledTableCell>{tournament.timeControl.timeControlMinutes}</StyledTableCell>
                                 <StyledTableCell>{tournament.minElo}</StyledTableCell>
                                 <StyledTableCell>{tournament.maxElo}</StyledTableCell>
-                                <StyledTableCell>{tournament.numberOfPlayers}</StyledTableCell>
+                                <StyledTableCell>{tournament.maxPlayers}</StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {tournament.status === "Live" || tournament.status === "Expired" ? ( 
-                                                <> {} </>
+                                    {tournament.status === "Live" || tournament.status === "Expired" ? (
+                                        <></>
                                     ) : (
                                         <Button
                                             variant="contained"
-                                            color={isJoined(tournament.tournamentId) ? 'secondary' : 'success'}
-                                            disabled={isJoined(tournament.tournamentId)}
+                                            color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                            disabled={isJoined(tournament.id)}
                                             onClick={() => handleJoin(tournament)}
                                         >
-                                            {isJoined(tournament.tournamentId) ? 'Joined' : 'Join'}
+                                            {isJoined(tournament.id) ? 'Joined' : 'Join'}
                                         </Button>
                                     )}
                                 </StyledTableCell>
@@ -205,7 +219,11 @@ function PlayerTournamentView() {
                             </Button>
                         </Grid>
                         <Grid item>
-                            <Button onClick={handleRegister} color="success" variant="contained" disabled={!agreedToTerms}>
+                            <Button
+                                onClick={handleRegister}
+                                variant="contained"
+                                disabled={!agreedToTerms}
+                            >
                                 Register
                             </Button>
                         </Grid>
@@ -217,3 +235,4 @@ function PlayerTournamentView() {
 }
 
 export default PlayerTournamentView;
+

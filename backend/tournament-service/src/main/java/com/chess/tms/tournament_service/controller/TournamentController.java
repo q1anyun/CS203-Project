@@ -30,7 +30,7 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @PostMapping("")
-    public ResponseEntity<String> registerTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
+    public ResponseEntity<String> createTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
         return ResponseEntity.ok(tournamentService.createTournament(dto, Long.parseLong(id)));
     }
 

@@ -13,6 +13,5 @@ public class PlayerDetailsDTO {
     private Integer totalLosses;
     private Integer totalMatches;
     private Integer highestElo;
-    private Integer lowestElo;
     private String country;
 }

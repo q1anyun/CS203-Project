@@ -8,9 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.chess.tms.elo_service.dto.DTOUtil;
+import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.repository.EloRepository;
 import com.chess.tms.elo_service.dto.EloUpdateDTO;
+import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.enums.Reason;
@@ -25,8 +27,11 @@ import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
 @Service
 public class EloService {
 
-    @Value("$(leaderboard.service.url)")
+    @Value("${leaderboard.service.url}")
     private String leaderboardServiceUrl;
+
+    @Value("${players.service.url}")
+    private String playersServiceUrl;
     
     private EloRepository eloRepository;
 
@@ -66,7 +71,7 @@ public class EloService {
         return deleted;
     }
 
-    public EloResponseDTO saveEloHistory(EloRequestDTO dto) {
+    public EloResponseDTO saveEloHistory(EloHistoryRequestDTO dto) {
         List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
         EloHistory newEloHistory = new EloHistory();
 
@@ -80,9 +85,9 @@ public class EloService {
         newEloHistory.setCreatedAt(LocalDateTime.now());
        
         eloRepository.save(newEloHistory);
+        //System.out.println(leaderboardServiceUrl + "/api/leaderboard/updateElo");
+        //restTemplate.put(leaderboardServiceUrl + "/api/leaderboard/updateElo",  new EloUpdateDTO(dto.getPlayerId(), dto.getNewElo()));
         
-        restTemplate.put("http://localhost:8080/api/leaderboard/updateElo",  new EloUpdateDTO(dto.getPlayerId(), dto.getNewElo()));
-     
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
 
@@ -92,8 +97,6 @@ public class EloService {
             reason = Reason.WIN;
         } else if (changeReason.equals("loss")) {
             reason = Reason.LOSS;
-        } else if (changeReason.equals("draw")) {
-            reason = Reason.DRAW;
         } else {
             throw new InvalidReasonException("Reason: " + changeReason + " is not valid. Valid reasons: win, loss, draw"); 
         }
@@ -103,5 +106,25 @@ public class EloService {
         return responses;
     }
 
+    public void updateMatchPlayersElo(MatchEloRequestDTO dto){
+        EloRequestDTO winner = dto.getWinner();
+        EloRequestDTO loser = dto.getLoser();
 
+        // Elo Algorithm
+        int newWinnerElo = winner.getCurrentElo() + 1;
+        int newLoserElo = loser.getCurrentElo() - 1;
+
+        // Update Player's Elo
+        String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
+        String loserServiceUrl = playersServiceUrl + "/api/player/elo/" + loser.getPlayerId();
+
+        restTemplate.put(winnerServiceUrl, newWinnerElo);
+        restTemplate.put(loserServiceUrl,  newLoserElo);
+
+        // Save Elo History
+        EloHistoryRequestDTO winnerHistory = new EloHistoryRequestDTO(winner.getPlayerId(), newWinnerElo, Reason.WIN);
+        EloHistoryRequestDTO loserHistory = new EloHistoryRequestDTO(loser.getPlayerId(), newLoserElo, Reason.LOSS);
+        saveEloHistory(winnerHistory);
+        saveEloHistory(loserHistory);
+    }
 }
