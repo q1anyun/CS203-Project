@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+
 import './PlayerProfile.css';
-import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
+import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import countryList from 'react-select-country-list'
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -38,7 +40,7 @@ const xLabels = [
 
 
 
-function PlayerProfile({profilePic}) {
+function PlayerProfile({ profilePic }) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
@@ -48,13 +50,14 @@ function PlayerProfile({profilePic}) {
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
+  const options = useMemo(() => countryList().getData(), [])
   const navigate = useNavigate();
 
-  
+
 
   useEffect(() => {
     if (profilePic) {
-      setLocalProfilePic(profilePic); 
+      setLocalProfilePic(profilePic);
       // Update localProfilePic when profilePic changes
     }
   }, [profilePic]);
@@ -119,8 +122,8 @@ function PlayerProfile({profilePic}) {
         console.log('Live Tournaments:', tournamentResponse.data);
 
         setLiveTournaments(tournamentResponse.data || []);
-        console.log(localProfilePic); 
-        
+        console.log(localProfilePic);
+
 
       } catch (err) {
         // Handle errors
@@ -147,11 +150,11 @@ function PlayerProfile({profilePic}) {
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-        setSelectedFile(file);
-        const imageUrl = URL.createObjectURL(file);
-        setLocalProfilePic(imageUrl);
+      setSelectedFile(file);
+      const imageUrl = URL.createObjectURL(file);
+      setLocalProfilePic(imageUrl);
     }
-};
+  };
 
 
 
@@ -160,36 +163,36 @@ function PlayerProfile({profilePic}) {
 
     // Update player details
     const playerData = {
-        firstName: playerDetails.firstName,
-        lastName: playerDetails.lastName,
-        country: playerDetails.country,
+      firstName: playerDetails.firstName,
+      lastName: playerDetails.lastName,
+      country: playerDetails.country,
     };
 
     // Update player details
     await axios.put(`${baseURL}/currentPlayerById`, playerData, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
     });
 
     // Handle file upload
     if (selectedFile) {
-        const formData = new FormData();
-        formData.append("file", selectedFile);
-        await axios.post(`${baseURL}/uploadProfile`, formData, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data',
-            },
-        });
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      await axios.post(`${baseURL}/uploadProfile`, formData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
     }
     window.location.reload();
     console.log('Profile updated successfully');
     handleCloseEdit();
   };
 
-  
+
 
 
   return (
@@ -434,13 +437,7 @@ function PlayerProfile({profilePic}) {
             />
           </Button>
 
-          {/* <TextField
-            margin="dense"
-            label="Username"
-            fullWidth
-            value={playerName}
-            onChange={handleNameChange}
-          /> */}
+
           <TextField
             label="First Name"
             name="firstName"
@@ -459,31 +456,24 @@ function PlayerProfile({profilePic}) {
             fullWidth
             margin="normal"
           />
-          {/* <TextField
-            margin="dense"
-            label="Email"
-            fullWidth
-            value={email}
-            onChange={handleEmailChange}
-          />
-          <TextField
-            margin="dense"
-            label="Password"
-            fullWidth
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-          /> */}
-          <TextField
-            label="Country"
-            name="country"
-            value={playerDetails.country}
-            onChange={handleDetailChange}
-            variant="outlined"
-            fullWidth
-            margin="normal"
-          />
 
+          <FormControl fullWidth>
+            <InputLabel>Country</InputLabel>
+            <Select
+              name="country"
+              value={playerDetails.country}
+              label="Country"
+              onChange={handleDetailChange}
+              sx={{ textAlign: 'left' }}
+             
+            >
+              {options.map((country) => (
+                <MenuItem key={country.value} value={country.value}>
+                  {country.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
           <Button onClick={handleSave} color="primary">
             Save
