@@ -1,12 +1,20 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Container, Typography } from '@mui/material';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function DefaultErrorPage() {
     const location = useLocation();
     const query = new URLSearchParams(location.search);
     const statusCode = query.get('statusCode');
     const errorMessage = query.get('errorMessage') || 'Something went wrong.';
+    const navigate = useNavigate();
+    
+    useEffect(() => {
+        // Redirect to /login page if error is 401 (Unauthorized) due to JWT expiration
+        if (statusCode === '401') {
+            navigate('/login');
+        }
+    }, [statusCode, navigate]);
 
     return (
         <Container>

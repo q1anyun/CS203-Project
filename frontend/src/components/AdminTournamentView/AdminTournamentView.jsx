@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -8,11 +8,16 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
+import { useNavigate } from 'react-router-dom'; 
+
+const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
+const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
 const statusColorMap = {
-    Live: 'success',
-    Upcoming: 'warning',
-    Expired: 'default',
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    EXPIRED: 'default',
 };
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -38,6 +43,29 @@ export default function AdminTournamentView() {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [timeControlOptions, setTimeControlOptions] = useState([]);
+    const [roundTypeOptions, setRoundTypeOptions] = useState([]);
+
+    const navigate = useNavigate();
+    useEffect(() => {
+        const fetchTimeControls = async () => {
+            const response = await axios.get(`${gameTypeURL}`);
+            setTimeControlOptions(response.data);
+        };
+
+        fetchTimeControls();
+    }, []);
+
+    useEffect(() => {
+        const fetchRoundType = async () => {
+            const response = await axios.get(`${roundTypeURL}/choices`);
+            setRoundTypeOptions(response.data);
+        };
+
+        fetchRoundType();
+    }, []);
+
+    // for create new table
     const [newTournament, setNewTournament] = useState({
         name: '',
         startDate: '',
@@ -45,18 +73,20 @@ export default function AdminTournamentView() {
         timeControl: '',
         minElo: '',
         maxElo: '',
-        currentPlayers: '0',
-        Players: '',
-        status: 'Upcoming',
+        maxPlayers: '',
+        status: 'UPCOMING',
     });
 
-    const timeControlOptions = ["Blitz", "Rapid", "Classic"];
+    const handleViewDetails = (id) => {
+        // Navigate to /tournament/id route
+        navigate(`/admin/tournament/${id}`);
+    };
 
     useEffect(() => {
         // Fetch all tournaments from the backend
         const fetchTournaments = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/api/tournaments');
+                const response = await axios.get(`${baseURL}`);
                 setTournaments(response.data); // Populate tournaments with the fetched data
                 setLoading(false); // Turn off loading
             } catch (error) {
@@ -77,7 +107,7 @@ export default function AdminTournamentView() {
         const updatedTournament = tournaments[rowIndex];
 
         try {
-            const response = await axios.put(`http://localhost:8080/api/tournaments/${updatedTournament.tournamentId}`, updatedTournament);
+            const response = await axios.put(`${baseURL}${updatedTournament.tournamentId}`, updatedTournament);
             setTournaments(prevTournaments => {
                 const newTournaments = [...prevTournaments];
                 newTournaments[rowIndex] = response.data; // Update with the response from the backend
@@ -102,7 +132,7 @@ export default function AdminTournamentView() {
 
     const handleDeleteConfirm = async () => {
         try {
-            await axios.delete(`http://localhost:8080/api/tournaments/${tournamentToDelete}`);
+            await axios.delete(`${baseURL}/${tournamentToDelete}`);
             const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
             setTournaments(updatedTournaments);
             setDeleteDialogOpen(false);
@@ -134,15 +164,27 @@ export default function AdminTournamentView() {
     };
 
     const handleCreateSubmit = async () => {
+        const token = localStorage.getItem('token');
+
+        const startDateWithTime = `${newTournament.startDate}T00:00:00`; // Add 12 AM time to start date
+        const endDateWithTime = `${newTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
+
         const newTournamentData = {
             ...newTournament,
             tournamentId: Math.floor(Math.random() * 100000),
-            currentPlayers: 0,
-            status: 'Upcoming',
+            startDate: startDateWithTime,
+            endDate: endDateWithTime
         };
 
+        console.log("New Tournament Data:", newTournamentData);
+
         try {
-            const response = await axios.post('http://localhost:8080/api/tournaments', newTournamentData);
+            const response = await axios.post(`${baseURL}`, newTournamentData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`, // Add the JWT token here
+                }
+            });
+            // console.error('Error data:', error.response.data);
             setTournaments([response.data, ...tournaments]);
 
             // Reset to default values
@@ -150,16 +192,24 @@ export default function AdminTournamentView() {
                 name: '',
                 startDate: '',
                 endDate: '',
-                timeControl: 'Classic',
+                timeControl: '',
                 minElo: '',
                 maxElo: '',
                 maxPlayers: '',
-                status: 'Upcoming',
+                status: 'UPCOMING',
             });
 
             setCreateDialogOpen(false);
+            window.location.reload();
         } catch (error) {
-            console.error('Error creating tournament:', error);
+            if (error.response) {
+                console.error('Error data:', error.response.data); // Response from the backend
+                console.error('Error status:', error.response.status); // Status code (e.g., 400)
+                console.error('Error headers:', error.response.headers); // Response headers
+            } else {
+                console.error('Error message:', error.message);
+            }
+            // console.error('Error creating tournament:', error);
         }
     };
 
@@ -187,7 +237,7 @@ export default function AdminTournamentView() {
                             <StyledTableCell>Time Control</StyledTableCell>
                             <StyledTableCell>Min ELO</StyledTableCell>
                             <StyledTableCell>Max ELO</StyledTableCell>
-                            <StyledTableCell>Players</StyledTableCell>
+                            <StyledTableCell>MaxPlayers</StyledTableCell>
                             <StyledTableCell>Status</StyledTableCell>
                             <StyledTableCell>Actions</StyledTableCell>
                         </TableRow>
@@ -200,7 +250,7 @@ export default function AdminTournamentView() {
                                     {editableRow === rowIndex ? (
                                         <TextField
                                             value={tournament.name}
-                                            onChange={(e) => handleChange(e, rowIndex, 'tournamentName')}
+                                            onChange={(e) => handleChange(e, rowIndex, 'name')}
                                             variant="outlined"
                                             size="small"
                                         />
@@ -237,17 +287,17 @@ export default function AdminTournamentView() {
                                 <StyledTableCell>
                                     {editableRow === rowIndex ? (
                                         <Select
-                                            value={tournament.timeControl.name}
+                                            value={tournament.timeControl?.name || ''}
                                             onChange={(e) => handleChange(e, rowIndex, 'timeControl')}
                                             variant="outlined"
                                             size="small"
                                         >
                                             {timeControlOptions.map(option => (
-                                                <MenuItem key={option} value={option}>{option}</MenuItem>
+                                                <MenuItem key={option.id} value={option.id}>{option.name}</MenuItem>
                                             ))}
                                         </Select>
                                     ) : (
-                                        tournament.timeControl.name
+                                        tournament.timeControl ? tournament.timeControl.name : 'No Time Control'
                                     )}
                                 </StyledTableCell>
                                 <StyledTableCell>
@@ -294,7 +344,7 @@ export default function AdminTournamentView() {
                                                 <DeleteIcon />
                                             </IconButton>
                                             <IconButton>
-                                                <VisibilityIcon />
+                                                <VisibilityIcon onClick={() => handleViewDetails(tournament.id)} />
                                             </IconButton>
                                         </>
                                     )}
@@ -313,9 +363,9 @@ export default function AdminTournamentView() {
                 <DialogTitle>Create New Tournament</DialogTitle>
                 <DialogContent>
                     <TextField
-                        name="tournamentName"
+                        name="name"
                         label="Tournament Name"
-                        value={newTournament.tournamentName}
+                        value={newTournament.name}
                         onChange={handleInputChange}
                         fullWidth
                         margin="dense"
@@ -340,18 +390,30 @@ export default function AdminTournamentView() {
                         margin="dense"
                         InputLabelProps={{ shrink: true }}
                     />
-                    <Select
-                        name="timeControl"
-                        label="Time Control"
-                        value={newTournament.timeControl}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                    >
-                        {timeControlOptions.map(option => (
-                            <MenuItem key={option} value={option}>{option}</MenuItem>
-                        ))}
-                    </Select>
+                    <FormControl fullWidth>
+                        <InputLabel>Time Control</InputLabel>
+                        <Select
+                            name="timeControl"
+                            label="Time Control"
+                            value={newTournament.timeControl}
+                            onChange={handleInputChange}
+                            sx={{ textAlign: 'left' }}
+                            MenuProps={{
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200,
+                                        width: 'auto',
+                                    },
+                                },
+                            }}
+                        >
+                            {timeControlOptions.map((option) => (
+                                <MenuItem key={option.id} value={option.id}>
+                                    {option.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                     <TextField
                         name="minElo"
                         label="Min ELO"
@@ -370,15 +432,32 @@ export default function AdminTournamentView() {
                         fullWidth
                         margin="dense"
                     />
-                    <TextField
-                        name="maxPlayers"
-                        label="Total Players"
-                        type="number"
-                        value={newTournament.maxPlayers}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                    />
+
+                    <FormControl fullWidth>
+                        <InputLabel>Max Players</InputLabel>
+                        <Select
+                            name="maxPlayers"
+                            label="Max Players"
+                            value={newTournament.maxPlayers}
+                            onChange={handleInputChange}
+                            sx={{ textAlign: 'left' }}
+                            MenuProps={{
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200,
+                                        width: 'auto',
+                                    },
+                                },
+                            }}
+                        >
+                            {roundTypeOptions.map((optionId) => (
+                                <MenuItem key={optionId} value={optionId}>
+                                    {optionId}
+                                </MenuItem>
+                            ))}
+
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCreateDialogClose} color="secondary">
