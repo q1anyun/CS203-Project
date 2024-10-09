@@ -14,17 +14,15 @@ import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
+import useProfilePic from './components/ProfilePicture/UseProfilePicture';
 
 function AppContent() {
   const location = useLocation();
   const hideNavBarPaths = ['/login', '/signup', '/error'];
   // State to store the current profile picture, initialized with the default image
-  const [profilePic, setProfilePic] = useState(defaultProfilePic);
+  const profilePic = useProfilePic(); 
 
-  // Callback to update the profile image from PlayerProfile
-  const handleProfilePicUpdate = (newImage) => {
-    setProfilePic(newImage); // Update profile pic state
-  };
+ 
 
   return (
     <>
@@ -63,8 +61,8 @@ function AppContent() {
         <Route path="/player/tournaments" element={<PlayerTournamentView />} />
         <Route path="/admin/tournaments" element={<AdminTournamentView />} />
         <Route path="/admin/matches" element={<AdminMatchesView />} />
-        <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />} />
-        <Route path="/admin/profile" element={<AdminProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />} />
+        <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} />} />
+        <Route path="/admin/profile" element={<AdminProfile profilePic={profilePic}  />} />
         <Route path="/player/tournaments/:id" element={<TournamentDetails />} />
 
         {/* General Routes */}
