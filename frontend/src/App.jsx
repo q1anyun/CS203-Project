@@ -16,7 +16,7 @@ import TournamentDetails from './components/TournamentDetails/TournamentDetails'
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from './styles/theme';
+import theme from './styles/theme.js';
 
 function AppContent() {
   const location = useLocation();

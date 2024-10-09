@@ -1,6 +1,6 @@
 import { React, useState, useEffect } from 'react';
 import styles from './Home.module.css';
-import { Grid2, Button } from '@mui/material';
+import { Grid2, Button, Typography, Box } from '@mui/material';
 import image from '../../assets/welcomeBg.png';
 import tournamentImage from '../../assets/tournament-icon.png';
 import leaderboardImage from '../../assets/leaderboard-icon.png';
@@ -30,35 +30,38 @@ function Home() {
   };
 
   return (
-    <div className={styles.mainContainer}>
-      <div className={styles.welcomeContainer}>
-        <Grid2 container spacing={3}>
-          <Grid2 size={4} className={styles.imageContainer}>
-            <img src={image} alt="welcomeImage" className={styles.Image} />
-          </Grid2>
-          <Grid2 size={8} className={styles.textContainer}>
-            <h1 className={styles.greetings}>Welcome to Chess MVP</h1>
-            <h6 className={styles.description}>YOUR PLATFORM FOR KNOCKOUT CHESS TOURNAMENTS</h6>
-          </Grid2>
 
-        </Grid2>
-      </div>
+    <Box  >
+      <Box className={styles.welcomeContainer}>
+        {/* Image or other components can be added here */}
+        <Box  >
+          <Typography variant="homePage" className={styles.greetings} display="block">
+            Welcome to Chess MVP
+          </Typography>
 
-      <div className={styles.cardContainer}>
+          <Typography variant="homePage2" className={styles.description} align="center" display="block">
+            Your platform for Chess Knockout Tournaments
+          </Typography>
+        </Box>
+      </Box>
+
+
+      <div className={styles.cardContainer} style={{ marginTop: '-130px' }}>
         <Grid2 container spacing={8}>
           <Grid2 size={4}>
             <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Leaderboard</h1>
-              <h5 className={styles.cardContent}>Check out the latest rankings and see where you stand among your peers.</h5>
+              <Typography variant="homePage3" className={styles.cardTitle} display="block">Leaderboard</Typography>
+              <Typography variant="homePage2" className={styles.cardContent} display="block">Check out the latest rankings and see where you stand among your peers.</Typography>
               <img src={leaderboardImage} alt="leaderboard" className={styles.cardImage} />
-              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
+              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium"  sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
             </div>
           </Grid2>
 
           <Grid2 size={4}>
             <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Tournaments</h1>
-              <h5 className={styles.cardContent}>Register for upcoming knockout chess tournaments and compete against players.</h5>
+            <Typography variant="homePage3" className={styles.cardTitle} display="block">Tournaments</Typography>
+            <Typography variant="homePage2" className={styles.cardContent} display="block">Register for upcoming knockout chess tournaments and compete against players.</Typography>
+
               <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
               <Button component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
             </div>
@@ -66,15 +69,15 @@ function Home() {
 
           <Grid2 size={4}>
             <div className={styles.card}>
-              <h1 className={styles.cardTitle}>Profile</h1>
-              <h5 className={styles.cardContent}>View and manage your personal chess profile, check your statistics.</h5>
+            <Typography variant="homePage3" className={styles.cardTitle} display="block">Profile</Typography>
+            <Typography variant="homePage2" className={styles.cardContent} display="block">View and manage your personal chess profile, check your statistics.</Typography>
               <img src={profileImage} alt="leaderboard" className={styles.cardImage} />
               <Button component={Link} to={getProfileLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</Button>
             </div>
           </Grid2>
         </Grid2>
       </div>
-    </div>
+    </Box>
   );
 }
 

@@ -56,10 +56,10 @@ function TournamentDetails() {
   return (
     <Box sx={{ padding: 2 }}>
       {/* Tournament Title */}
-      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '40px', marginBottom: '5px', fontWeight: 'bold', marginLeft: '20px' }}>
+      <Typography variant="header1" gutterBottom >
         {tournament.name}
       </Typography>
-      <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '15px', marginBottom: '30px', fontWeight: 'regular', marginLeft: '20px' }}>
+      <Typography variant="body4" gutterBottom textAlign={'left'} marginLeft = '40px'  display="block">
         Description of the event
       </Typography>
 
@@ -70,7 +70,7 @@ function TournamentDetails() {
 
           {Object.entries(matchesByRound).map(([roundName, matches]) => (
             <Box key={roundName} sx={{ marginBottom: 3 }}>
-              <Typography variant="h1" gutterBottom sx={{ textAlign: 'left', fontSize: '30px', marginBottom: '30px', fontWeight: 'bold', marginLeft: '20px' }}>
+              <Typography variant="header2" gutterBottom >
                 {roundName}
                 <span style={{ fontSize: '15px', fontWeight: 'medium', marginLeft: '10px', letterSpacing: '0.5px' }}>Tournament Bracket</span></Typography>
 
@@ -91,12 +91,8 @@ function TournamentDetails() {
                       {/* Box for Date of the Event at the Top */}
                       <Box sx={{ mb: 2 }}> {/* marginBottom: 20px, using theme spacing */}
                         <Typography
-                          variant="h1"
-                          sx={{
-                            textAlign: 'left',
-                            fontSize: '10px',
-                            fontWeight: 'light',
-                          }}
+                          variant="body4"
+                          textAlign={'left'}
                         >
                           Date of the Event
                         </Typography>
@@ -107,35 +103,35 @@ function TournamentDetails() {
                         {/* Left Column for Players */}
                         <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
                           <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                            <Avatar alt={`Player ${match.player1Id}`} src={`/path/to/avatar/${match.player1Id}.jpg`} sx={{ mr: 1 }} />
-                            <Typography variant="h1" sx={{ fontWeight: 'bold', fontSize: '20px' }}>
+                            <Avatar alt={`Player ${match.player1Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
+                            <Typography variant="header3" >
                               Player {match.player1Id}
                             </Typography>
                           </Box>
                           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Avatar alt={`Player ${match.player2Id}`} src={`/path/to/avatar/${match.player2Id}.jpg`} sx={{ mr: 1 }} />
-                            <Typography variant="h1" sx={{ fontWeight: 'bold', fontSize: '20px' }}>
+                            <Avatar alt={`Player ${match.player2Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
+                            <Typography variant="header3" >
                               Player {match.player2Id}
                             </Typography>
                           </Box>
                         </Box>
 
                         {/* Divider */}
-                        <Divider orientation="vertical" sx={{ height: '100px', mx: 5 }} /> {/* marginLeft: 80px, marginRight: 40px */}
+                        <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr:8 }} /> {/* marginLeft: 80px, marginRight: 40px */}
 
                         {/* Right Column for Winner */}
-                        <Box sx={{ flexShrink: 0, textAlign: 'center' }}>
-                          <Typography variant="h1" sx={{ fontWeight: 'light', mb: 1, fontSize: '15px' }}>
+                        <Box sx={{ flexShrink: 0, alignItems:'center' }}>
+                          <Typography variant="body4">
                             Winner:
                           </Typography>
                           <Box sx={{ mb: 2 }}>
                             <Avatar
                               alt={`Winner ${match.winnerId}`}
-                              src={match.winnerId ? `/path/to/avatar/${match.winnerId}.jpg` : '/path/to/default-avatar.jpg'} // Fallback avatar
-                              sx={{ width: 56, height: 56, justifyContent: 'center' }} // Adjust size as needed
+                              src={match.winnerId ? `../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg` : '/path/to/default-avatar.jpg'} // Fallback avatar
+                              sx={{ width: 56, height: 56, justifyContent: 'center' , alignContent: 'center'}} // Adjust size as needed
                             />
                           </Box>
-                          <Typography variant="h1" sx={{ fontWeight: 'bold', mb: 3, fontSize: '20px' }}>
+                          <Typography variant="header3">
                             {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
                           </Typography>
                         </Box>
@@ -152,7 +148,7 @@ function TournamentDetails() {
       {/* Card for Tournament Rankings */}
       <Card>
         <CardContent>
-          <Typography variant="h4">Tournament Rankings</Typography>
+          <Typography variant="header4">Tournament Rankings</Typography>
           <Divider sx={{ my: 2 }} />
           {/*           
           <Grid container spacing={2} >
@@ -167,7 +163,7 @@ function TournamentDetails() {
                   }}
                 >
                   <Typography variant="h6">#{entry.rank}</Typography>
-                  <Typography variant="body1">{entry.player}</Typography>
+                  <Typography variant="body4">{entry.player}</Typography>
                   <Typography variant="body2">Points: {entry.points}</Typography>
                 </Box>
               </Grid>
