@@ -59,8 +59,6 @@ public class PlayerService {
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
         dto.setProfilePicture(playerDetails.getProfilePicture());
-        dto.setLowestElo(playerDetails.getLowestElo());
-        dto.setHighestElo(playerDetails.getHighestElo());
         dto.setTotalMatches(playerDetails.getTotalMatches());
         dto.setTotalLosses(playerDetails.getTotalLosses());
         dto.setTotalWins(playerDetails.getTotalWins());
@@ -71,7 +69,7 @@ public class PlayerService {
     // Update player details
     public void updatePlayer(Long id, UpdatePlayerDetailsDTO updatedPlayerDetails) {
         PlayerDetails player = playerDetailsRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
 
         
         Optional.ofNullable(updatedPlayerDetails.getCountry()).ifPresent(player::setCountry);
@@ -123,4 +121,17 @@ public class PlayerService {
         return playerDetailsRepository.findById(playerId);
     }
 
+    // Update player elo rating
+    public void updatePlayerElo(long playerId, int newElo) {
+        PlayerDetails player = playerDetailsRepository.findById(playerId)
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+
+        player.setEloRating(newElo);
+
+        if(player.getHighestElo() == null || newElo > player.getHighestElo()) {
+            player.setHighestElo(newElo);
+        }
+
+        playerDetailsRepository.save(player);
+    }
 }
