@@ -99,17 +99,16 @@ function PlayerTournamentView() {
     };
 
     const handleRegister = async () => {
-        const token2 = localStorage.getItem('token');
-        console.log(token2); 
+        console.log(token);
         if (selectedTournament.id != null) {
             try {
-                await axios.post(`${baseURL2}/register/current/1`, {
+                const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
                     headers: {
-                        'Authorization': `Bearer ${token2}`,
+                        'Authorization': `Bearer ${token}`,
                         
                     },
                 });
-                if (!response.ok) {
+                if (response.status !== 200) {
                     throw new Error('Failed to enroll in the tournament');
                 }
 
