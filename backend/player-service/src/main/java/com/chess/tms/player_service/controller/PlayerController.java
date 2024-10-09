@@ -17,6 +17,7 @@ import org.springframework.http.MediaType;
 
 import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
+import com.chess.tms.player_service.dto.RankingDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
 import com.chess.tms.player_service.service.PlayerService;
 
@@ -64,7 +65,7 @@ public class PlayerController {
     }
 
     @GetMapping("/getTop100Players")
-    public ResponseEntity<List<PlayerDetailsDTO>> findTop100Players() {
+    public ResponseEntity<List<RankingDTO>> findTop100Players() {
         return ResponseEntity.ok(playerService.findTop100Players());
     }
     @PutMapping("/elo/{id}")
