@@ -46,7 +46,4 @@ public class PlayerDetails {
 
     @Column(name = "highest_elo")
     private int highestElo;
-
-    @Column(name = "lowest_elo")
-    private int lowestElo;
 }

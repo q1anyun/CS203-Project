@@ -64,9 +64,8 @@ public class PlayerController {
     }
 
     @PutMapping("/elo/{id}")
-    public ResponseEntity<Integer> updatePlayerElo(@PathVariable("id") long id, @RequestBody int newElo) {
+    public void updatePlayerElo(@PathVariable("id") long id, @RequestBody int newElo) {
         playerService.updatePlayerElo(id, newElo);
-        return ResponseEntity.ok(newElo);
     }
     // for testing
     @PostMapping("/uploadProfile")
