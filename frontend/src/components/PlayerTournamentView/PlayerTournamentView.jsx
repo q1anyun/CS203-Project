@@ -46,7 +46,7 @@ function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [joinedTournaments, setJoinedTournaments] = useState([]);
     const [openDialog, setOpenDialog] = useState(false);
-    const [selectedTournament, setSelectedTournament] = useState([]);
+    const [selectedTournament, setSelectedTournament] = useState({});
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -70,6 +70,7 @@ function PlayerTournamentView() {
                     },
                 });
                 setJoinedTournaments(tournamentJoinedResponse.data);
+                console.log(tournamentJoinedResponse.data); 
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -81,8 +82,9 @@ function PlayerTournamentView() {
     }, []);
 
     const isJoined = (tournamentId) => {
-        return joinedTournaments.includes(tournamentId);
+        return joinedTournaments.some(tournament => tournament.id === tournamentId);
     };
+    
 
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
@@ -100,8 +102,9 @@ function PlayerTournamentView() {
 
     const handleRegister = async () => {
         console.log(token);
-        if (selectedTournament.id != null) {
+       
             try {
+                console.log(selectedTournament.id); 
                 const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -112,12 +115,12 @@ function PlayerTournamentView() {
                     throw new Error('Failed to enroll in the tournament');
                 }
 
-                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament.id]);
+                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament]);
                 setOpenDialog(false);
             } catch (error) {
                 console.error(error);
             }
-        }
+        
     };
 
     if (loading) {

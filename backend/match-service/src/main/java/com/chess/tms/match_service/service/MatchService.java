@@ -206,13 +206,34 @@ public class MatchService {
             RoundType roundType = roundTypeRepository.findById(match.getRoundType().getId())
                     .orElseThrow(
                             () -> new RoundTypeNotFoundException("Round type not found while checking next round"));
+                            System.out.println(roundType);
 
-            List<Match> roundMatches = matchRepository.findByRoundTypeIdAndTournamentId(match.getTournamentId(),
+            List<Match> roundMatches = matchRepository.findByTournamentIdAndRoundTypeId(match.getTournamentId(),
                     roundType.getId());
-
+                    
+            
             boolean roundCompleted = roundMatches.stream().allMatch(m -> m.getStatus() == Match.MatchStatus.COMPLETED);
+           
+            
             if (roundCompleted) {
                 updateCurrentRoundForTournament(match.getTournamentId(), nextMatch.getRoundType().getId());
+                // Assign matches for the next round
+                for (Match completedMatch : roundMatches) {
+                    Long nextMatchId = completedMatch.getNextMatchId();
+                    if (nextMatchId != null) {
+                        Match advanceMatch = matchRepository.findById(nextMatchId)
+                                .orElseThrow(() -> new RuntimeException(
+                                        "Next match not found for match ID: " + nextMatchId));
+                        System.out.println(completedMatch.getWinnerId());
+                        if (advanceMatch.getPlayer1Id() == null) {
+                            advanceMatch.setPlayer1Id(completedMatch.getWinnerId());
+                        } else if (advanceMatch.getPlayer2Id() == null) {
+                            advanceMatch.setPlayer2Id(completedMatch.getWinnerId());
+                        }
+                        matchRepository.save(advanceMatch);
+                    }
+                }
+
                 return "Tournament has advanced to the next round";
             }
             return "Winner advanced to the next round";
