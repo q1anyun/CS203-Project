@@ -8,12 +8,15 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
+import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
 import styles from './PlayerTournamentView.module.css';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+
 
 const statusColorMap = {
     Live: 'success',
@@ -51,6 +54,7 @@ function PlayerTournamentView() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTournaments = async () => {
@@ -123,6 +127,12 @@ function PlayerTournamentView() {
         
     };
 
+    const handleViewDetails = (tournamentId) => {
+        // Navigate to the tournament details page
+        navigate(`${tournamentId}`); // Adjust the route according to your routing setup
+    };
+
+
     if (loading) {
         return <Typography>Loading tournaments...</Typography>;
     }
@@ -170,6 +180,7 @@ function PlayerTournamentView() {
                                     {tournament.status === "Live" || tournament.status === "Expired" ? (
                                         <></>
                                     ) : (
+                                        <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <Button
                                             variant="contained"
                                             color={isJoined(tournament.id) ? 'secondary' : 'success'}
@@ -178,7 +189,17 @@ function PlayerTournamentView() {
                                         >
                                             {isJoined(tournament.id) ? 'Joined' : 'Join'}
                                         </Button>
+                                        <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
+                                        style={{ marginLeft: '8px' }}
+                                    >
+                                        <VisibilityIcon /> {/* Visibility Icon */}
+                                    </Button>
+                                    </div>
                                     )}
+                                   
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
