@@ -1,13 +1,11 @@
 package com.chess.tms.player_service.service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -121,6 +119,16 @@ public class PlayerService {
             return Optional.empty();
         }
         return playerDetailsRepository.findById(playerId);
+    }
+
+    public List<PlayerDetailsDTO> findTop100Players() {
+        List<PlayerDetails> top100 = playerDetailsRepository.findByOrderByEloRatingDesc(Limit.of(100));
+
+        List<PlayerDetailsDTO> dtoList = Arrays.stream(top100.toArray(new PlayerDetails[100]))
+        .map(this::convertToPlayerDetailsDTO)
+        .collect(Collectors.toList());
+
+        return dtoList;
     }
 
 }

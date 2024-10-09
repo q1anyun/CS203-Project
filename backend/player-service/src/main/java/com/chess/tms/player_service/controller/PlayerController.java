@@ -51,4 +51,9 @@ public class PlayerController {
         List<PlayerDetailsDTO> playerDetails = playerService.getListOfPlayerDetails(playerIds);
         return ResponseEntity.ok(playerDetails);
     }
+
+    @GetMapping("/getTop100Players")
+    public ResponseEntity<List<PlayerDetailsDTO>> findTop100Players() {
+        return ResponseEntity.ok(playerService.findTop100Players());
+    }
 }
