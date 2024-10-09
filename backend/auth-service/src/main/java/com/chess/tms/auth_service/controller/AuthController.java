@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody JwtRequest jwtRequest, @RequestHeader Map<String, String> headers) throws Exception {
+    public ResponseEntity<LoginResponse> login(@RequestBody JwtRequest jwtRequest) throws Exception {
         AuthenticatedUserDTO authenticatedUser = authService.authenticate(jwtRequest);
         String jwtToken = jwtUtil.generateToken(authenticatedUser);
         JwtResponse jwtResponse = new JwtResponse();
@@ -35,12 +36,12 @@ public class AuthController {
     }
 
     @PostMapping("/register/player")
-    public ResponseEntity<String> registerPlayer(@RequestBody PlayerRegistrationRequestDTO player) {
+    public ResponseEntity<String> registerPlayer(@Valid @RequestBody PlayerRegistrationRequestDTO player) {
         return ResponseEntity.ok(authService.registerPlayer(player));
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistrationRequestDTO admin) {
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistrationRequestDTO admin) {
         return ResponseEntity.ok(authService.registerAdmin(admin));
     }
     
