@@ -35,8 +35,7 @@ function NavBar({profilePic}) {
           <Nav.Link as={Link} to="/home">
           <Typography variant="navBar">Home</Typography></Nav.Link>
 
-          {/*THIS COMMENTED CODE IS THE CORRECT CODE TO BE IMPLEMENTED*/}
-          {/* {userRole === 'ADMIN' && (
+          {userRole === 'ADMIN' && (
             <>
               <Nav.Link as={Link} to="/admin/tournaments">Tournaments</Nav.Link>
             </>
@@ -46,11 +45,8 @@ function NavBar({profilePic}) {
             <>
               <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
             </>
-          )} */}
+          )}
 
-          <Nav.Link as={Link} to="/player/tournaments">
-          <Typography variant="navBar">Tournaments</Typography>
-          </Nav.Link>
           <Nav.Link as={Link} to="/leaderboard">
           <Typography variant="navBar">Leaderboard</Typography></Nav.Link>
         </Nav>
@@ -61,8 +57,8 @@ function NavBar({profilePic}) {
             title={<Image src={profilePic} alt="Profile" className={styles.profilePic} />}
             id="basic-nav-dropdown"
           >
-            {/*THIS COMMENTED CODE IS THE CORRECT CODE TO BE IMPLEMENTED*/}
-            {/* {userRole === 'ADMIN' && (
+
+            {userRole === 'ADMIN' && (
               <>
                 <NavDropdown.Item as={Link} to="/admin/profile">View Profile</NavDropdown.Item>
               </>
@@ -72,20 +68,8 @@ function NavBar({profilePic}) {
               <>
                 <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
               </>
-            )} */}
-
-            <NavDropdown.Item as={Link} to="/player/profile">
-            <Typography variant="navBar">View Profile</Typography>
-            </NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/profile">
-            <Typography variant="navBar">View Admin Profile</Typography>
-            </NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/tournaments">
-            <Typography variant="navBar">View Admin Tournament view (tmp)</Typography>
-            </NavDropdown.Item>
-            <NavDropdown.Item as={Link} to="/admin/matches">
-            <Typography variant="navBar">View Admin Matches view (tmp)</Typography>
-            </NavDropdown.Item>
+            )}
+     
             <NavDropdown.Divider />
             <NavDropdown.Item as={Link} to="/login">
             <Typography variant="navBar">Logout</Typography>
