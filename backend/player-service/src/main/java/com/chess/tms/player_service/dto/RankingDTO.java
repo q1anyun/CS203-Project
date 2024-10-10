@@ -12,5 +12,5 @@ public class RankingDTO {
     private String firstName;
     private String lastName;
     private Integer eloRating;
-
+    private String profilePicture;
 }

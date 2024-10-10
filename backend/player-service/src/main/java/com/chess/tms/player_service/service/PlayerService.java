@@ -79,6 +79,7 @@ public class PlayerService {
         dto.setFirstName(playerDetails.getFirstName());
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
+        dto.setProfilePicture(playerDetails.getProfilePicture());
         
         return dto;
     }
