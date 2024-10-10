@@ -28,32 +28,27 @@ public class TournamentPlayerController {
         return ResponseEntity.ok(tournamentService.getPlayersByTournament(id));
     }
 
-    // @GetMapping("")
-    // public ResponseEntity<List<PlayerRegistrationDTO>> getAllPlayers() {
-    //     return ResponseEntity.ok(tournamentService.getAllPlayers());
-    // }
-
     @DeleteMapping("/{playerid}/{tournamentid}")
-    public ResponseEntity<String> deletePlayerFromTournament(@PathVariable long playerid, @PathVariable long tournamentid) {
+    public ResponseEntity<String> deletePlayerFromTournament(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
         tournamentService.deletePlayerFromTournament(playerid, tournamentid);
         return ResponseEntity.ok("Player deleted successfully");
     }
 
     @PostMapping("/register/{playerid}/{tournamentid}") 
-    public ResponseEntity<String> registerPlayer(@PathVariable long playerid, @PathVariable long tournamentid) {
+    public ResponseEntity<String> registerPlayer(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
         tournamentService.registerPlayer(playerid, tournamentid);
         return ResponseEntity.ok("Player registered successfully");
     }
 
     @DeleteMapping("/current/{tournamentid}")
-    public ResponseEntity<String> deleteCurrentPlayerFromTournament(@RequestHeader("X-User-PlayerId") String id, @PathVariable long tournamentid) {
+    public ResponseEntity<String> deleteCurrentPlayerFromTournament(@RequestHeader("X-User-PlayerId") String id, @PathVariable("tournamentid") long tournamentid) {
         Long playerId = Long.parseLong(id);
         tournamentService.deletePlayerFromTournament(playerId, tournamentid);
         return ResponseEntity.ok("Player deleted successfully");
     }
 
     @PostMapping("/register/current/{tournamentid}") 
-    public ResponseEntity<String> registerCurrentPlayer(@RequestHeader("X-User-PlayerId") String id, @PathVariable long tournamentid) {
+    public ResponseEntity<String> registerCurrentPlayer(@RequestHeader("X-User-PlayerId") String id, @PathVariable("tournamentid") long tournamentid) {
         Long playerId = Long.parseLong(id);
         tournamentService.registerPlayer(playerId, tournamentid);
         return ResponseEntity.ok("Player registered successfully");

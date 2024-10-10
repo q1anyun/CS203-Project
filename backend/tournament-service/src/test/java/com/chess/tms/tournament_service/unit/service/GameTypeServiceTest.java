@@ -1,4 +1,4 @@
-package com.chess.tms.tournament_service.unit;
+package com.chess.tms.tournament_service.unit.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;

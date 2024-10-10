@@ -12,16 +12,6 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    //Handle TournamentAlreadyExistsException
-    @ExceptionHandler(TournamentAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleTournamentAlreadyExistsException(TournamentAlreadyExistsException e) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("message", e.getMessage());
-        response.put("status", HttpStatus.CONFLICT.value());  // 409 Conflict status
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
-    }
-
     //Handle TournamentDoesNotExistException
     @ExceptionHandler(TournamentDoesNotExistException.class)
     public ResponseEntity<Map<String, Object>> handleTournamentDoesNotExistException(TournamentDoesNotExistException e) {
@@ -29,15 +19,6 @@ public class GlobalExceptionHandler {
         response.put("timestamp", LocalDateTime.now());
         response.put("message", e.getMessage());
         response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UserDoesNotExistException.class) 
-    public ResponseEntity<Map<String, Object>> handleUserDoesNotExistException(UserDoesNotExistException e) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("message", e.getMessage());
-        response.put("status", HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
     
@@ -49,5 +30,15 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(PlayerAlreadyRegisteredException.class)
+    public ResponseEntity<Map<String, Object>> handlePlayerAlreadyRegistered(PlayerAlreadyRegisteredException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.CONFLICT.value());
+        response.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
 
 }

@@ -1,7 +1,6 @@
 package com.chess.tms.tournament_service.dto;
 
 import com.chess.tms.tournament_service.model.Tournament;
-import com.chess.tms.tournament_service.model.TournamentPlayer;
 
 public class DTOUtil {
         //helper functions
@@ -19,14 +18,6 @@ public class DTOUtil {
         dto.setTimeControl(tournament.getTimeControl());
         dto.setCurrentRound(tournament.getCurrentRound());
         dto.setCreatorId(tournament.getCreatorId());
-
-        return dto;
-    }
-
-    public static PlayerRegistrationDTO convertPlayerEntrytoPlayerDTO(TournamentPlayer player) {
-        PlayerRegistrationDTO dto = new PlayerRegistrationDTO();
-        dto.setPlayerId(player.getId());
-        dto.setTournamentId(player.getTournament().getTournamentId());
 
         return dto;
     }

@@ -1,4 +1,4 @@
-package com.chess.tms.tournament_service.unit;
+package com.chess.tms.tournament_service.unit.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -190,7 +190,7 @@ void testGetTournamentDetailsByIdWithWinner() {
     @Test
     void testCompleteTournamentSuccess() {
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-        when(tournamentPlayerRepository.existsByPlayerIdAndTournamentId(1L, 1L)).thenReturn(true);
+        when(tournamentPlayerRepository.existsByPlayerIdAndId(1L, 1L)).thenReturn(true);
 
         String result = tournamentService.completeTournament(1L, 1L);
 
@@ -207,7 +207,7 @@ void testCompleteTournamentWhenTournamentDoesNotExist() {
         tournamentService.completeTournament(1L, 100L);
     });
 
-    verify(tournamentPlayerRepository, never()).existsByPlayerIdAndTournamentId(anyLong(), anyLong());
+    verify(tournamentPlayerRepository, never()).existsByPlayerIdAndId(anyLong(), anyLong());
     verify(tournamentRepository, never()).save(any(Tournament.class));
 }
 
@@ -406,7 +406,7 @@ void testRegisterPlayerToFullTournament() {
 void testRegisterPlayerAlreadyRegistered() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
     
-    when(tournamentPlayerRepository.existsByPlayerIdAndTournamentId(100L, 1L)).thenReturn(true);
+    when(tournamentPlayerRepository.existsByPlayerIdAndId(100L, 1L)).thenReturn(true);
 
     assertThrows(PlayerAlreadyRegisteredException.class, () -> {
         tournamentService.registerPlayer(100L, 1L);
@@ -521,7 +521,7 @@ void testGetPlayersByTournamentNoPlayers() {
 @Test
 void testCompleteTournamentNoWinner() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-    when(tournamentPlayerRepository.existsByPlayerIdAndTournamentId(99L, 1L)).thenReturn(false);
+    when(tournamentPlayerRepository.existsByPlayerIdAndId(99L, 1L)).thenReturn(false);
 
     assertThrows(UserDoesNotExistException.class, () -> {
         tournamentService.completeTournament(1L, 99L);
