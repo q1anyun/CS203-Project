@@ -22,4 +22,6 @@ public interface TournamentPlayerRepository extends JpaRepository<TournamentPlay
 
     public List<TournamentPlayer> findAllByPlayerId(long playerId);
 
+    public boolean existsByPlayerIdAndTournamentId(long playerId, long tournamentId);
+
 }
