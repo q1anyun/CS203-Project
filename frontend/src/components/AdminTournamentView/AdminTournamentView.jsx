@@ -515,7 +515,7 @@ export default function AdminTournamentView() {
                         name="startDate"
                         label="Start Date"
                         type="date"
-                        value={`${ tournamentToEdit.startDate.split('T')[0]}`}
+                        value={tournamentToEdit?.startDate ? tournamentToEdit.startDate.split('T')[0] : ''} 
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -525,7 +525,7 @@ export default function AdminTournamentView() {
                         name="endDate"
                         label="End Date"
                         type="date"
-                        value={`${ tournamentToEdit.endDate.split('T')[0]}`}
+                        value={tournamentToEdit?.endDate ? tournamentToEdit.endDate.split('T')[0] : ''} 
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -536,7 +536,7 @@ export default function AdminTournamentView() {
                         <Select
                             name="timeControl"
                             label="Time Control"
-                            value={tournamentToEdit.timeControl.timeControlMinutes}
+                            value={tournamentToEdit?.timeControl?.timeControlMinutes || ''}
                             onChange={handleEditInputChange}
                             sx={{ textAlign: 'left' }}
                             MenuProps={{
