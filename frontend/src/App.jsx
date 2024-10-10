@@ -31,8 +31,7 @@ function AppContent() {
     <>
       {!hideNavBarPaths.includes(location.pathname) && <NavBar profilePic={profilePic} />}
       <Routes>
-        {/*COMMENTED CODE, CORRECT CODE IMPLEMENTATION*/}
-        {/* <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/" element={<Navigate to="/login" />} />
 
         <Route path="/player/tournaments"
           element={<ProtectedRoute>
@@ -46,29 +45,24 @@ function AppContent() {
 
         <Route path="/player/profile"
           element={<ProtectedRoute>
-            <PlayerProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />
+            <PlayerProfile profilePic={profilePic} />
           </ProtectedRoute>} />
 
         <Route path="/admin/profile"
           element={<ProtectedRoute>
-            <AdminProfile profilePic={profilePic} onProfilePicUpdate={handleProfilePicUpdate} />
+            <AdminProfile profilePic={profilePic} />
           </ProtectedRoute>} />
 
-        <Route path="/admin/matches"
+        <Route path="/admin/tournaments/:id"
           element={<ProtectedRoute>
-            <AdminMatchesView />
-          </ProtectedRoute>} /> */}
+            <AdminTournamentDetails />
+          </ProtectedRoute>} />
 
-        {/* Routes to be removed, replace with commented code above */}
-        <Route path="/" element={<Navigate to="/home" />} />
-        <Route path="/player/tournaments" element={<PlayerTournamentView />} />
-        <Route path="/admin/tournaments" element={<AdminTournamentView />} />
-        <Route path="/admin/matches" element={<AdminMatchesView />} />
-        <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} />} />
-        <Route path="/admin/profile" element={<AdminProfile profilePic={profilePic}  />} />
-        <Route path="/player/tournaments/:id" element={<TournamentDetails />} />
-        <Route path="/admin/tournaments/:id" element={<AdminTournamentDetails />} />
-
+          <Route path="/player/tournaments/:id"
+          element={<ProtectedRoute>
+            <TournamentDetails />
+          </ProtectedRoute>} />
+       
         {/* General Routes */}
         <Route path="/home" element={<Home />} />
         <Route path="/leaderboard" element={<Leaderboard />} />

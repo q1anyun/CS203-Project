@@ -11,15 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.chess.tms.elo_service.dto.DTOUtil;
-import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
-import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.repository.EloRepository;
-import com.chess.tms.elo_service.dto.EloUpdateDTO;
-import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
-import com.chess.tms.elo_service.dto.EloRequestDTO;
-import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.enums.Reason;
 
 import java.time.LocalDate;
@@ -29,6 +22,13 @@ import jakarta.transaction.Transactional;
 
 import com.chess.tms.elo_service.exception.InvalidReasonException;
 import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
+import com.chess.tms.elo_service.exception.dto.DTOUtil;
+import com.chess.tms.elo_service.exception.dto.EloHistoryChartDTO;
+import com.chess.tms.elo_service.exception.dto.EloHistoryRequestDTO;
+import com.chess.tms.elo_service.exception.dto.EloRequestDTO;
+import com.chess.tms.elo_service.exception.dto.EloResponseDTO;
+import com.chess.tms.elo_service.exception.dto.EloUpdateDTO;
+import com.chess.tms.elo_service.exception.dto.MatchEloRequestDTO;
 
 @Service
 public class EloService {
@@ -112,6 +112,17 @@ public class EloService {
         List<EloHistory> list = eloRepository.findByPlayerIdAndChangeReasonOrderByCreatedAtDesc(playerId, reason);
         List<EloResponseDTO> responses = DTOUtil.convertEntriesToResponseDTOs(list);
         return responses;
+    }
+
+    public int[] calculateEloChange(int elo1, int elo2) {
+        double p1 = (1.0 / Math.pow(10, elo1 - elo2) / 400);
+        double p2 = (1.0 / Math.pow(10, elo2 - elo1) / 400);
+        int k = 40;
+
+        int[] changedElo = new int[2];
+
+        changedElo[0] = (int) (elo1 + (1.0 - p1) * k);
+        changedElo[1] = (int) (elo2 + (1.0 - p2))
     }
 
     public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
