@@ -145,32 +145,6 @@ function TournamentDetails() {
           ))}
         </CardContent>
       </Card>
-      {/* Card for Tournament Rankings */}
-      <Card>
-        <CardContent>
-          <Typography variant="header4">Tournament Rankings</Typography>
-          <Divider sx={{ my: 2 }} />
-          {/*           
-          <Grid container spacing={2} >
-            {tournament.leaderboard.map((entry) => (
-              <Grid item xs={15} key={entry.rank}>
-                <Box
-                  sx={{
-                    padding: 1,
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: 1,
-                    textAlign: 'center',
-                  }}
-                >
-                  <Typography variant="h6">#{entry.rank}</Typography>
-                  <Typography variant="body4">{entry.player}</Typography>
-                  <Typography variant="body2">Points: {entry.points}</Typography>
-                </Box>
-              </Grid>
-            ))}
-          </Grid> */}
-        </CardContent>
-      </Card>
 
     </Box>
 

@@ -37,13 +37,15 @@ function NavBar({profilePic}) {
 
           {userRole === 'ADMIN' && (
             <>
-              <Nav.Link as={Link} to="/admin/tournaments">Tournaments</Nav.Link>
+              <Nav.Link as={Link} to="/admin/tournaments">
+              <Typography variant="navBar">Tournaments</Typography></Nav.Link>
             </>
           )}
 
           {userRole === 'PLAYER' && (
             <>
-              <Nav.Link as={Link} to="/player/tournaments">Tournaments</Nav.Link>
+              <Nav.Link as={Link} to="/player/tournaments">
+              <Typography variant="navBar">Tournaments</Typography></Nav.Link>
             </>
           )}
 

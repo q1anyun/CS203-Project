@@ -44,7 +44,7 @@ function PlayerProfile({ profilePic }) {
   const [liveTournaments, setLiveTournaments] = useState([]);
   const options = useMemo(() => countryList().getData(), [])
   const navigate = useNavigate();
-  profilePic = useProfilePic(); 
+  profilePic = useProfilePic();
 
 
 
@@ -91,7 +91,7 @@ function PlayerProfile({ profilePic }) {
         });
         console.log('player details:', playerResponse.data);
         setPlayerDetails(playerResponse.data || []);
- 
+
 
 
         // Fetch chart data
@@ -127,7 +127,7 @@ function PlayerProfile({ profilePic }) {
         console.log('Live Tournaments:', tournamentResponse.data);
 
         setLiveTournaments(tournamentResponse.data || []);
-      
+
 
 
       } catch (err) {
@@ -256,9 +256,9 @@ function PlayerProfile({ profilePic }) {
           </Grid>
           <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-            <Typography variant="header3" display='block'>Rating</Typography>
+              <Typography variant="header3" display='block'>Rating</Typography>
               <Typography variant="playerProfile2" display='block'>{playerDetails.eloRating}</Typography>
-             
+
             </Box>
           </Grid>
         </Grid>
@@ -286,7 +286,7 @@ function PlayerProfile({ profilePic }) {
                   }
                   sx={{
                     padding: '12px 24px',
-                    marginX: 'auto', 
+                    marginX: 'auto',
 
                   }}
                 />
@@ -297,7 +297,7 @@ function PlayerProfile({ profilePic }) {
                     </Typography>
                   }
                   sx={{
-                    
+
                     padding: '12px 24px',
                     marginX: 'auto', // Add horizontal margin between tabs
 
@@ -307,12 +307,12 @@ function PlayerProfile({ profilePic }) {
                 <Tab
                   label={
                     <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
-                     Ongoing Tournaments
+                      Ongoing Tournaments
                     </Typography>
                   }
 
                   sx={{
-                   
+
                     padding: '12px 24px',
                     marginX: 'auto', // Add horizontal margin between tabs
 
@@ -323,7 +323,7 @@ function PlayerProfile({ profilePic }) {
             </Box>
             {value === 0 && (
               <Box sx={{ p: 2 }}>
-               
+
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
                   <PieChart
                     series={[
@@ -355,88 +355,84 @@ function PlayerProfile({ profilePic }) {
 
 
             {value === 1 && (
-            <Box sx={{ p: 2, height: '100%', textAlign: 'center' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {recentMatches.length > 0 ? (
-                recentMatches.map((match, index) => (
-                  <Grid container spacing={2} marginLeft="5px" key={match.id}>
-                    <Grid item xs={12}>
-                      <Card
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          p: 2,
-                          backgroundColor: 'background.paper',
-                          borderRadius: 2,
-                          
-                          flexGrow: 1,
-                        }}
-                      >
-
-          
-                        {/* Flexbox for Players and Winner */}
-                        <CardContent sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                          {/* Left Column for Players */}
-                          <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
-                            {/* Player 1 */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                              <Avatar
-                                alt={`Player ${match.player1Id}`}
-                                src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`}
-                                sx={{ mr: 1 }}
-                              />
-                              <Typography variant="header3">Player {match.player1Id}</Typography>
-                            </Box>
-          
-                            {/* Player 2 */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                              <Avatar
-                                alt={`Player ${match.player2Id}`}
-                                src={`../../../backend/player-service/profile-picture/player_${match.player2Id}.jpg`}
-                                sx={{ mr: 1 }}
-                              />
-                              <Typography variant="header3">Player {match.player2Id}</Typography>
-                            </Box>
-                          </Box>
-          
-                          {/* Divider */}
-                          <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} />
-          
-                          {/* Right Column for Winner */}
-                          <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
-                            <Typography variant="body4">Winner:</Typography>
-                            <Box sx={{ mb: 2 }}>
-                              <Avatar
-                                alt={`Winner ${match.winnerId}`}
-                                src={
-                                  match.winnerId
-                                    ? `../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`
-                                    : '/path/to/default-avatar.jpg'
-                                }
-                                sx={{
-                                  width: 56,
-                                  height: 56,
-                                  justifyContent: 'center',
-                                  alignContent: 'center',
-                                }}
-                              />
-                            </Box>
-                            <Typography variant="header3">
-                              {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
-                            </Typography>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  </Grid>
-                ))
-              ) : (
-                <Typography variant="playerProfile2">No recent matches available.</Typography>
-              )}
-            </Box>
-          </Box>
-        )}
+             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2 }}>
+             {recentMatches.length > 0 ? (
+               recentMatches.map((match, index) => (
+                 <Card
+                   key={match.id}
+                   sx={{
+                     display: 'flex',
+                     flexDirection: 'column',
+                     p: 2,
+                     backgroundColor: 'background.paper',
+                     borderRadius: 2,
+                     flexGrow: 1,
+                     alignItems: 'center'
+                  
+                   }}
+                 >
+                   <Typography variant="header3">{match.tournament.name}</Typography>
            
+                   {/* Flexbox for Players and Winner */}
+                   <CardContent sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                     {/* Left Column for Players */}
+                     <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
+                       {/* Player 1 */}
+                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                         <Avatar
+                           alt={`Player ${match.winner.id}`}
+                           src={`../../../backend/player-service/profile-picture/player_${match.winner.id}.jpg`}
+                           sx={{ mr: 1 }}
+                         />
+                         <Typography variant="body4">{match.winner.firstName}</Typography>
+                       </Box>
+           
+                       {/* Player 2 */}
+                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                         <Avatar
+                           alt={`Player ${match.loser.id}`}
+                           src={`../../../backend/player-service/profile-picture/player_${match.loser.id}.jpg`}
+                           sx={{ mr: 1 }}
+                         />
+                         <Typography variant="body4">{match.loser.firstName}</Typography>
+                       </Box>
+                     </Box>
+           
+                     {/* Divider */}
+                     <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} />
+           
+                     {/* Right Column for Winner */}
+                     <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
+                       <Typography variant="body4">Winner:</Typography>
+                       <Box sx={{ mb: 2 }}>
+                         <Avatar
+                           alt={`Winner ${match.winner.id}`}
+                           src={
+                             match.winnerId
+                               ? `../../../backend/player-service/profile-picture/player_${match.winner.id}.jpg`
+                               : '/path/to/default-avatar.jpg'
+                           }
+                           sx={{
+                             width: 56,
+                             height: 56,
+                             justifyContent: 'center',
+                             alignContent: 'center',
+                           }}
+                         />
+                       </Box>
+                       <Typography variant="body4">
+                         {match.winner.id ? ` ${match.winner.firstName}` : 'Pending'}
+                       </Typography>
+                     </Box>
+                   </CardContent>
+                 </Card>
+               ))
+             ) : (
+               <Typography variant="playerProfile2">No recent matches available.</Typography>
+             )}
+           </Box>
+            )}
+
 
             {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
@@ -458,7 +454,7 @@ function PlayerProfile({ profilePic }) {
                       >
                         <CardContent>
                           <Typography variant="header2">{tournament.name}</Typography>
-                          <Typography variant="body4" display = 'block'>Click here to view details</Typography>
+                          <Typography variant="body4" display='block'>Click here to view details</Typography>
                         </CardContent>
                       </Box>
                     ))
