@@ -28,19 +28,6 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-// const uData = [1500, 1528, 1560, 1600, 1670, 1800, 1900];
-// const xLabels = [
-//   '1',
-//   '2',
-//   '3',
-//   '4',
-//   '5',
-//   '6',
-//   '7',
-// ];
-
-
-
 
 
 function PlayerProfile({ profilePic }) {
@@ -108,7 +95,7 @@ function PlayerProfile({ profilePic }) {
 
 
         // Fetch chart data
-        const chartResponse = await axios.get(`${baseURL3}/chart/1`, {
+        const chartResponse = await axios.get(`${baseURL3}/chart/current`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -246,31 +233,32 @@ function PlayerProfile({ profilePic }) {
             Edit Profile
           </Button>
           <CardContent>
-            <Typography variant="h4">{playerDetails.firstName + " " + playerDetails.lastName}</Typography>
+            <Typography variant="playerProfile">{playerDetails.firstName + " " + playerDetails.lastName}</Typography>
           </CardContent>
         </Box>
 
         {/* Divider to separate sections */}
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ my: 0.5 }} />
 
         {/* Three Boxes Section */}
         <Grid container spacing={2} justifyContent="center">
-          <Grid item xs={4}>
+          {/* <Grid item xs={4}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">7</Typography>
-              <Typography variant="body2">Rank</Typography>
+              <Typography variant="body4">7</Typography>
+              <Typography variant="header3">Rank</Typography>
+            </Box>
+          </Grid> */}
+          <Grid item xs={6}>
+            <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
+              <Typography variant="header3" display='block'>Country</Typography>
+              <Typography variant="playerProfile2" display='block'>{playerDetails.country}</Typography>
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">{playerDetails.country}</Typography>
-              <Typography variant="body2">Country</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={4}>
-            <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="h6">{playerDetails.eloRating}</Typography>
-              <Typography variant="body2">Rating</Typography>
+            <Typography variant="header3" display='block'>Rating</Typography>
+              <Typography variant="playerProfile2" display='block'>{playerDetails.eloRating}</Typography>
+             
             </Box>
           </Grid>
         </Grid>
@@ -282,7 +270,7 @@ function PlayerProfile({ profilePic }) {
               <Tabs
                 value={value}
                 onChange={handleChange}
-                aria-label="tabs example"
+                aria-label="tabs"
                 sx={{
                   '& .MuiTabs-flexContainer': {
                     justifyContent: 'center', // Center the tabs
@@ -291,29 +279,40 @@ function PlayerProfile({ profilePic }) {
 
               >
                 <Tab
-                  label="Results Statistics"
+                  label={
+                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
+                      Results Statistics
+                    </Typography>
+                  }
                   sx={{
-                    fontSize: '1.25rem',
+                    padding: '12px 24px',
+                    marginX: 'auto', 
+
+                  }}
+                />
+                <Tab
+                  label={
+                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
+                      Past Matches
+                    </Typography>
+                  }
+                  sx={{
+                    
                     padding: '12px 24px',
                     marginX: 'auto', // Add horizontal margin between tabs
 
                   }}
                 />
-                <Tab
-                  label="Past Matches"
-                  sx={{
-                    fontSize: '1.25rem',
-                    padding: '12px 24px',
-                    marginX: 'auto', // Add horizontal margin between tabs
-
-                  }}
-                />
 
                 <Tab
-                  label="Ongoing Tournaments"
+                  label={
+                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
+                     Ongoing Tournaments
+                    </Typography>
+                  }
 
                   sx={{
-                    fontSize: '1.25rem',
+                   
                     padding: '12px 24px',
                     marginX: 'auto', // Add horizontal margin between tabs
 
@@ -324,9 +323,7 @@ function PlayerProfile({ profilePic }) {
             </Box>
             {value === 0 && (
               <Box sx={{ p: 2 }}>
-                {/* <Typography variant="body1">Content for Tab 1</Typography> */}
-                {/* Add more content for Tab 1 here */}
-                {/* Pie Chart Section */}
+               
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
                   <PieChart
                     series={[
@@ -358,33 +355,91 @@ function PlayerProfile({ profilePic }) {
 
 
             {value === 1 && (
-              <Box sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Recent Matches</Typography>
+            <Box sx={{ p: 2, height: '100%', textAlign: 'center' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {recentMatches.length > 0 ? (
+                recentMatches.map((match, index) => (
+                  <Grid container spacing={2} marginLeft="5px" key={match.id}>
+                    <Grid item xs={12}>
+                      <Card
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          p: 2,
+                          backgroundColor: 'background.paper',
+                          borderRadius: 2,
+                          
+                          flexGrow: 1,
+                        }}
+                      >
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {recentMatches.length > 0 ? (
-                    recentMatches.map((match, index) => (
-                      <Box key={index} sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-                        <CardContent>
-                          <Typography variant="h6">{match.tournament.name}</Typography>
-                          <Typography variant="body2">{match.winner.firstName} vs {match.loser.firstName}</Typography>
-                          <Typography variant="body2">winner: {match.winner.firstName}</Typography>
-
+          
+                        {/* Flexbox for Players and Winner */}
+                        <CardContent sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                          {/* Left Column for Players */}
+                          <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
+                            {/* Player 1 */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                              <Avatar
+                                alt={`Player ${match.player1Id}`}
+                                src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`}
+                                sx={{ mr: 1 }}
+                              />
+                              <Typography variant="header3">Player {match.player1Id}</Typography>
+                            </Box>
+          
+                            {/* Player 2 */}
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              <Avatar
+                                alt={`Player ${match.player2Id}`}
+                                src={`../../../backend/player-service/profile-picture/player_${match.player2Id}.jpg`}
+                                sx={{ mr: 1 }}
+                              />
+                              <Typography variant="header3">Player {match.player2Id}</Typography>
+                            </Box>
+                          </Box>
+          
+                          {/* Divider */}
+                          <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} />
+          
+                          {/* Right Column for Winner */}
+                          <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
+                            <Typography variant="body4">Winner:</Typography>
+                            <Box sx={{ mb: 2 }}>
+                              <Avatar
+                                alt={`Winner ${match.winnerId}`}
+                                src={
+                                  match.winnerId
+                                    ? `../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`
+                                    : '/path/to/default-avatar.jpg'
+                                }
+                                sx={{
+                                  width: 56,
+                                  height: 56,
+                                  justifyContent: 'center',
+                                  alignContent: 'center',
+                                }}
+                              />
+                            </Box>
+                            <Typography variant="header3">
+                              {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
+                            </Typography>
+                          </Box>
                         </CardContent>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography variant="body2">No recent matches available.</Typography>
-                  )}
-
-                </Box>
-                {/* Add more content for Tab 2 here */}
-              </Box>
-            )}
+                      </Card>
+                    </Grid>
+                  </Grid>
+                ))
+              ) : (
+                <Typography variant="playerProfile2">No recent matches available.</Typography>
+              )}
+            </Box>
+          </Box>
+        )}
+           
 
             {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Ongoing Tournaments</Typography>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {liveTournaments.length > 0 ? (
@@ -402,13 +457,13 @@ function PlayerProfile({ profilePic }) {
                         onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
                       >
                         <CardContent>
-                          <Typography variant="h6">{tournament.name}</Typography>
-                          <Typography variant="body2">Click here to view details</Typography>
+                          <Typography variant="header2">{tournament.name}</Typography>
+                          <Typography variant="body4" display = 'block'>Click here to view details</Typography>
                         </CardContent>
                       </Box>
                     ))
                   ) : (
-                    <Typography variant="body2">No ongoing tournaments found.</Typography>
+                    <Typography variant="playerProfile2">No ongoing tournaments found.</Typography>
                   )}
                 </Box>
               </Box>

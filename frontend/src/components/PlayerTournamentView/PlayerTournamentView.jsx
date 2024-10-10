@@ -12,7 +12,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
 import styles from './PlayerTournamentView.module.css';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
@@ -29,6 +29,7 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
         backgroundColor: theme.palette.common.black,
         color: theme.palette.common.white,
         textAlign: 'center',
+        variant: 'header1'
     },
     [`&.${tableCellClasses.body}`]: {
         fontSize: 14,
@@ -74,7 +75,7 @@ function PlayerTournamentView() {
                     },
                 });
                 setJoinedTournaments(tournamentJoinedResponse.data);
-                console.log(tournamentJoinedResponse.data); 
+                console.log(tournamentJoinedResponse.data);
             } catch (error) {
                 setError(error.message);
             } finally {
@@ -88,7 +89,7 @@ function PlayerTournamentView() {
     const isJoined = (tournamentId) => {
         return joinedTournaments.some(tournament => tournament.id === tournamentId);
     };
-    
+
 
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
@@ -106,25 +107,25 @@ function PlayerTournamentView() {
 
     const handleRegister = async () => {
         console.log(token);
-       
-            try {
-                console.log(selectedTournament.id); 
-                const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        
-                    },
-                });
-                if (response.status !== 200) {
-                    throw new Error('Failed to enroll in the tournament');
-                }
 
-                setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament]);
-                setOpenDialog(false);
-            } catch (error) {
-                console.error(error);
+        try {
+            console.log(selectedTournament.id);
+            const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+
+                },
+            });
+            if (response.status !== 200) {
+                throw new Error('Failed to enroll in the tournament');
             }
-        
+
+            setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament]);
+            setOpenDialog(false);
+        } catch (error) {
+            console.error(error);
+        }
+
     };
 
     const handleViewDetails = (tournamentId) => {
@@ -143,36 +144,36 @@ function PlayerTournamentView() {
 
     return (
         <div>
-            <Typography variant="h4" component="h2" gutterBottom className={styles.title}>
+            <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
                 All Tournaments
             </Typography>
             <TableContainer component={Paper} className={styles.table}>
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell>ID</StyledTableCell>
-                            <StyledTableCell>Name</StyledTableCell>
-                            <StyledTableCell>Start Date</StyledTableCell>
-                            <StyledTableCell>End Date</StyledTableCell>
-                            <StyledTableCell>Time Control</StyledTableCell>
-                            <StyledTableCell>Min ELO</StyledTableCell>
-                            <StyledTableCell>Max ELO</StyledTableCell>
-                            <StyledTableCell>Players</StyledTableCell>
-                            <StyledTableCell>Status</StyledTableCell>
-                            <StyledTableCell>Actions</StyledTableCell>
+                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {tournaments.map((tournament) => (
                             <StyledTableRow key={tournament.id}>
-                                <StyledTableCell>{tournament.id}</StyledTableCell>
-                                <StyledTableCell>{tournament.name}</StyledTableCell>
-                                <StyledTableCell>{tournament.startDate}</StyledTableCell>
-                                <StyledTableCell>{tournament.endDate}</StyledTableCell>
-                                <StyledTableCell>{tournament.timeControl.timeControlMinutes}</StyledTableCell>
-                                <StyledTableCell>{tournament.minElo}</StyledTableCell>
-                                <StyledTableCell>{tournament.maxElo}</StyledTableCell>
-                                <StyledTableCell>{tournament.maxPlayers}</StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.startDate}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.endDate}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
@@ -181,25 +182,25 @@ function PlayerTournamentView() {
                                         <></>
                                     ) : (
                                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <Button
-                                            variant="contained"
-                                            color={isJoined(tournament.id) ? 'secondary' : 'success'}
-                                            disabled={isJoined(tournament.id)}
-                                            onClick={() => handleJoin(tournament)}
-                                        >
-                                            {isJoined(tournament.id) ? 'Joined' : 'Join'}
-                                        </Button>
-                                        <Button
-                                        variant="outlined"
-                                        color="primary"
-                                        onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
-                                        style={{ marginLeft: '8px' }}
-                                    >
-                                        <VisibilityIcon /> {/* Visibility Icon */}
-                                    </Button>
-                                    </div>
+                                            <Button
+                                                variant="contained"
+                                                color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                                disabled={isJoined(tournament.id)}
+                                                onClick={() => handleJoin(tournament)}
+                                            >
+                                                {isJoined(tournament.id) ? 'Joined' : 'Join'}
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
+                                                color="primary"
+                                                onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
+                                                style={{ marginLeft: '8px' }}
+                                            >
+                                                <VisibilityIcon /> {/* Visibility Icon */}
+                                            </Button>
+                                        </div>
                                     )}
-                                   
+
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
@@ -209,29 +210,34 @@ function PlayerTournamentView() {
 
             {/* Dialog for Terms of Agreement */}
             <Dialog open={openDialog} onClose={handleDialogClose}>
-                <DialogTitle align="center">Registration for Chess Tournament</DialogTitle>
+                <DialogTitle variant='header4' align="center">Registration for Chess Tournament</DialogTitle>
                 <DialogContent>
-                    <DialogContentText align="center">
+                    <DialogContentText align="center" variant='body4'>
                         Please agree to the following terms to join the tournament:
                     </DialogContentText>
                     <Box sx={{ margin: '16px 0' }}>
-                        <Typography variant="body2" gutterBottom>
+                        <Typography variant="body4" gutterBottom display='block'>
                             • No use of chess bots or external assistance during matches.
                         </Typography>
-                        <Typography variant="body2" gutterBottom>
+                        <Typography variant="body4" gutterBottom display='block'>
                             • All participants must maintain good sportsmanship.
                         </Typography>
-                        <Typography variant="body2" gutterBottom>
+                        <Typography variant="body4" gutterBottom display='block'>
                             • Adherence to tournament rules is mandatory.
                         </Typography>
-                        <Typography variant="body2" gutterBottom>
+                        <Typography variant="body4" gutterBottom display='block'>
                             • Failure to comply may result in disqualification.
                         </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+
                         <FormControlLabel
                             control={<Checkbox checked={agreedToTerms} onChange={handleAgreeChange} />}
-                            label="I agree to the terms and conditions"
+                            label={
+                                <Typography variant="body4">
+                                    I agree to the terms and conditions
+                                </Typography>
+                            }
                         />
                     </Box>
                 </DialogContent>

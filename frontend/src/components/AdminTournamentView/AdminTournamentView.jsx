@@ -8,7 +8,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
@@ -39,12 +39,15 @@ export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(null); // Error state
-    const [editableRow, setEditableRow] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [tournamentToEdit, setTournamentToEdit] = useState(null);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [timeControlOptions, setTimeControlOptions] = useState([]);
     const [roundTypeOptions, setRoundTypeOptions] = useState([]);
+
+    const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -74,7 +77,17 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
-        status: 'UPCOMING',
+    });
+
+    // for edit 
+    const [updateTournament, setUpdateTournament] = useState({
+        name: '',
+        startDate: '',
+        endDate: '',
+        timeControl: '',
+        minElo: '',
+        maxElo: '',
+        maxPlayers: '',
     });
 
     const handleViewDetails = (id) => {
@@ -99,26 +112,6 @@ export default function AdminTournamentView() {
         fetchTournaments();
     }, []); // Empty dependency array to run the effect only once when the component mounts
 
-    const handleEdit = (rowIndex) => {
-        setEditableRow(rowIndex);
-    };
-
-    const handleSave = async (rowIndex) => {
-        const updatedTournament = tournaments[rowIndex];
-
-        try {
-            const response = await axios.put(`${baseURL}${updatedTournament.tournamentId}`, updatedTournament);
-            setTournaments(prevTournaments => {
-                const newTournaments = [...prevTournaments];
-                newTournaments[rowIndex] = response.data; // Update with the response from the backend
-                return newTournaments;
-            });
-            setEditableRow(null);
-        } catch (error) {
-            console.error('Error updating tournament:', error);
-        }
-    };
-
     const handleChange = (e, rowIndex, field) => {
         const newTournaments = [...tournaments];
         newTournaments[rowIndex][field] = e.target.value;
@@ -130,13 +123,32 @@ export default function AdminTournamentView() {
         setDeleteDialogOpen(true);
     };
 
+    const handleEditClick = (tournamentId) => {
+        setTournamentToEdit(tournamentId);
+        setEditDialogOpen(true);
+    };
+
+    {/* DELETE TOURNAMENT */ }
     const handleDeleteConfirm = async () => {
         try {
-            await axios.delete(`${baseURL}/${tournamentToDelete}`);
-            const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
-            setTournaments(updatedTournaments);
-            setDeleteDialogOpen(false);
-            setTournamentToDelete(null);
+            console.log(baseURL);
+            const response = await axios.delete(`${baseURL}/${tournamentToDelete}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            // Check if the deletion was successful
+            if (response.status === 200) {
+                const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
+                setTournaments(updatedTournaments);
+                setDeleteDialogOpen(false);
+                setTournamentToDelete(null);
+                console.log('Tournament deleted successfully.');
+                window.location.reload();
+            } else {
+                console.warn('Delete request did not return a success status:', response.status);
+            }
         } catch (error) {
             console.error('Error deleting tournament:', error);
         }
@@ -151,6 +163,14 @@ export default function AdminTournamentView() {
         setCreateDialogOpen(true);
     };
 
+    const handleEdit = () => {
+        setEditDialogOpen(true);
+    };
+
+    const handleEditDialogClose = () => {
+        setEditDialogOpen(false);
+    };
+
     const handleCreateDialogClose = () => {
         setCreateDialogOpen(false);
     };
@@ -163,9 +183,15 @@ export default function AdminTournamentView() {
         });
     };
 
-    const handleCreateSubmit = async () => {
-        const token = localStorage.getItem('token');
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setUpdateTournament({
+            ...updateTournament,
+            [name]: value,
+        });
+    };
 
+    const handleCreateSubmit = async () => {
         const startDateWithTime = `${newTournament.startDate}T00:00:00`; // Add 12 AM time to start date
         const endDateWithTime = `${newTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
 
@@ -196,7 +222,6 @@ export default function AdminTournamentView() {
                 minElo: '',
                 maxElo: '',
                 maxPlayers: '',
-                status: 'UPCOMING',
             });
 
             setCreateDialogOpen(false);
@@ -210,6 +235,57 @@ export default function AdminTournamentView() {
                 console.error('Error message:', error.message);
             }
             // console.error('Error creating tournament:', error);
+        }
+    };
+
+    const handleEditSubmit = async () => {
+        const startDateWithTime = `${updateTournament.startDate}T00:00:00`; // Add 12 AM time to start date
+        const endDateWithTime = `${updateTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
+
+        const updatedTournamentData = {
+            ...updateTournament,
+            startDate: startDateWithTime,
+            endDate: endDateWithTime
+        };
+        console.log(updatedTournamentData)
+        try {
+            // Send the update request to the backend (assuming PUT is for updating)
+            const response = await axios.put(`${baseURL}/${tournamentToEdit}`, updatedTournamentData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`, // Include JWT token
+                }
+            });
+
+            // Update the tournaments list by replacing the updated tournament
+            const updatedTournaments = tournaments.map(t =>
+                t.tournamentId === tournamentToEdit ? response.data : t
+            );
+
+            // Update the state with the new tournaments data
+            setTournaments(updatedTournaments);
+
+            // Reset to default values after successful edit
+            setUpdateTournament({
+                name: '',
+                startDate: '',
+                endDate: '',
+                timeControl: '',
+                minElo: '',
+                maxElo: '',
+                maxPlayers: ''
+            });
+
+            // Close the edit dialog
+            setEditDialogOpen(false);
+            window.location.reload();
+        } catch (error) {
+            if (error.response) {
+                console.error('Error data:', error.response.data); // Backend response
+                console.error('Error status:', error.response.status); // HTTP status code
+                console.error('Error headers:', error.response.headers); // Headers
+            } else {
+                console.error('Error message:', error.message); // General error
+            }
         }
     };
 
@@ -250,119 +326,43 @@ export default function AdminTournamentView() {
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell>{tournament.id}</StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            value={tournament.name}
-                                            onChange={(e) => handleChange(e, rowIndex, 'name')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        tournament.name
-                                    )}
+                                    {/* Display as text */}
+                                    <Typography>{tournament.name}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            type="date"
-                                            value={tournament.startDate}
-                                            onChange={(e) => handleChange(e, rowIndex, 'startDate')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        tournament.startDate
-                                    )}
+                                    {/* Display date as text */}
+                                    <Typography>{tournament.startDate}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            type="date"
-                                            value={tournament.endDate}
-                                            onChange={(e) => handleChange(e, rowIndex, 'endDate')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        tournament.endDate
-                                    )}
+                                    <Typography>{tournament.endDate}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <Select
-                                            value={tournament.timeControl?.name || ''}
-                                            onChange={(e) => handleChange(e, rowIndex, 'timeControl')}
-                                            variant="outlined"
-                                            size="small"
-                                        >
-                                            {timeControlOptions.map(option => (
-                                                <MenuItem key={option.id} value={option.id}>{option.name}</MenuItem>
-                                            ))}
-                                        </Select>
-                                    ) : (
-                                        tournament.timeControl ? tournament.timeControl.name : 'No Time Control'
-                                    )}
+                                    <Typography>{tournament.timeControl?.name || ''}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            type="number"
-                                            value={tournament.minElo}
-                                            onChange={(e) => handleChange(e, rowIndex, 'minElo')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        tournament.minElo
-                                    )}
+                                    <Typography>{tournament.minElo}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            type="number"
-                                            value={tournament.maxElo}
-                                            onChange={(e) => handleChange(e, rowIndex, 'maxElo')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        tournament.maxElo
-                                    )}
+                                    <Typography>{tournament.maxElo}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <TextField
-                                            type="number"
-                                            value={tournament.maxPlayers}
-                                            onChange={(e) => handleChange(e, rowIndex, 'maxPlayers')}
-                                            variant="outlined"
-                                            size="small"
-                                        />
-                                    ) : (
-                                        `${tournament.currentPlayers}/${tournament.maxPlayers}`
-                                    )}
+                                    <Typography>{tournament.maxPlayers}</Typography>
                                 </StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    {editableRow === rowIndex ? (
-                                        <IconButton onClick={() => handleSave(rowIndex)}>
-                                            <SaveIcon />
+                                    <>
+                                        <IconButton onClick={() => handleEditClick(tournament.id)}>
+                                            <EditIcon />
                                         </IconButton>
-                                    ) : (
-                                        <>
-                                            <IconButton onClick={() => handleEdit(rowIndex)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton onClick={() => handleDeleteClick(tournament.id)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                            <IconButton>
-                                                <VisibilityIcon onClick={() => handleViewDetails(tournament.id)} />
-                                            </IconButton>
-                                        </>
-                                    )}
+                                        <IconButton onClick={() => handleDeleteClick(tournament.id)}>
+                                            <DeleteIcon />
+                                        </IconButton>
+                                        <IconButton>
+                                            <VisibilityIcon onClick={() => handleViewDetails(tournament.id)} />
+                                        </IconButton>
+                                    </>
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
@@ -478,6 +478,117 @@ export default function AdminTournamentView() {
                     </Button>
                     <Button onClick={handleCreateSubmit} color="primary">
                         Create
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Tournament Dialog */}
+            <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+                <DialogTitle>Edit Tournament</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        name="name"
+                        label="Tournament Name"
+                        value={updateTournament.name}
+                        onChange={handleEditInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                    <TextField
+                        name="startDate"
+                        label="Start Date"
+                        type="date"
+                        value={updateTournament.startDate}
+                        onChange={handleEditInputChange}
+                        fullWidth
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <TextField
+                        name="endDate"
+                        label="End Date"
+                        type="date"
+                        value={updateTournament.endDate}
+                        onChange={handleEditInputChange}
+                        fullWidth
+                        margin="dense"
+                        InputLabelProps={{ shrink: true }}
+                    />
+                    <FormControl fullWidth>
+                        <InputLabel>Time Control</InputLabel>
+                        <Select
+                            name="timeControl"
+                            label="Time Control"
+                            value={updateTournament.timeControl}
+                            onChange={handleEditInputChange}
+                            sx={{ textAlign: 'left' }}
+                            MenuProps={{
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200,
+                                        width: 'auto',
+                                    },
+                                },
+                            }}
+                        >
+                            {timeControlOptions.map((option) => (
+                                <MenuItem key={option.id} value={option.id}>
+                                    {option.name}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <TextField
+                        name="minElo"
+                        label="Min ELO"
+                        type="number"
+                        value={updateTournament.minElo}
+                        onChange={handleEditInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+                    <TextField
+                        name="maxElo"
+                        label="Max ELO"
+                        type="number"
+                        value={updateTournament.maxElo}
+                        onChange={handleEditInputChange}
+                        fullWidth
+                        margin="dense"
+                    />
+
+                    <FormControl fullWidth>
+                        <InputLabel>Max Players</InputLabel>
+                        <Select
+                            name="maxPlayers"
+                            label="Max Players"
+                            value={updateTournament.maxPlayers}
+                            onChange={handleEditInputChange}
+                            sx={{ textAlign: 'left' }}
+                            MenuProps={{
+                                PaperProps: {
+                                    style: {
+                                        maxHeight: 200,
+                                        width: 'auto',
+                                    },
+                                },
+                            }}
+                        >
+                            {roundTypeOptions.map((optionId) => (
+                                <MenuItem key={optionId} value={optionId}>
+                                    {optionId}
+                                </MenuItem>
+                            ))}
+
+                        </Select>
+                    </FormControl>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleEditDialogClose} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleEditSubmit} color="primary">
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
