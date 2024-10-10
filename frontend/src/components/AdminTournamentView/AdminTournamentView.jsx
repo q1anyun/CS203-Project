@@ -41,12 +41,13 @@ export default function AdminTournamentView() {
     const [loading, setLoading] = useState(true); // Loading state
     const [error, setError] = useState(null); // Error state
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [tournamentToEdit, setTournamentToEdit] = useState(null);
+    const [tournamentToEdit, setTournamentToEdit] = useState([]);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [timeControlOptions, setTimeControlOptions] = useState([]);
     const [roundTypeOptions, setRoundTypeOptions] = useState([]);
+    
 
     const token = localStorage.getItem('token');
 
@@ -124,10 +125,26 @@ export default function AdminTournamentView() {
         setDeleteDialogOpen(true);
     };
 
-    const handleEditClick = (tournamentId) => {
-        setTournamentToEdit(tournamentId);
-        console.
-        setEditDialogOpen(true);
+    const handleEditClick = async (tournamentId) => {
+        // Set the tournament ID to edit
+        
+    
+        try {
+            // Fetch tournament data using axios
+            const response = await axios.get(`${baseURL}/${tournamentId}`);
+            
+    
+            // Log the fetched data
+            console.log(response.data );
+            setTournamentToEdit(response.data);
+            
+            
+            // Open the edit dialog after fetching the data
+            setEditDialogOpen(true);
+            
+        } catch (error) {
+            console.error('Error fetching tournament data:', error);
+        }
     };
 
     {/* DELETE TOURNAMENT */ }
@@ -290,6 +307,14 @@ export default function AdminTournamentView() {
             }
         }
     };
+
+    const formatDateString = (isoString) => {
+        console.log("Input date string:", isoString); // Log the input
+        const date = new Date(isoString);
+        console.log("Parsed date:", date); // Log the parsed date
+        return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
+    };
+    
 
     if (loading) {
         return <CircularProgress />;
@@ -490,7 +515,7 @@ export default function AdminTournamentView() {
                         name="startDate"
                         label="Start Date"
                         type="date"
-                        value={tournamentToEdit.startDate}
+                        value={`${ tournamentToEdit.startDate.split('T')[0]}`}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -500,7 +525,7 @@ export default function AdminTournamentView() {
                         name="endDate"
                         label="End Date"
                         type="date"
-                        value={updateTournament.endDate}
+                        value={`${ tournamentToEdit.endDate.split('T')[0]}`}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -511,7 +536,7 @@ export default function AdminTournamentView() {
                         <Select
                             name="timeControl"
                             label="Time Control"
-                            value={updateTournament.timeControl}
+                            value={tournamentToEdit.timeControl.timeControlMinutes}
                             onChange={handleEditInputChange}
                             sx={{ textAlign: 'left' }}
                             MenuProps={{
@@ -534,7 +559,7 @@ export default function AdminTournamentView() {
                         name="minElo"
                         label="Min ELO"
                         type="number"
-                        value={updateTournament.minElo}
+                        value={tournamentToEdit.minElo}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -543,7 +568,7 @@ export default function AdminTournamentView() {
                         name="maxElo"
                         label="Max ELO"
                         type="number"
-                        value={updateTournament.maxElo}
+                        value={tournamentToEdit.maxElo}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -554,7 +579,7 @@ export default function AdminTournamentView() {
                         <Select
                             name="maxPlayers"
                             label="Max Players"
-                            value={updateTournament.maxPlayers}
+                            value={tournamentToEdit.maxPlayers}
                             onChange={handleEditInputChange}
                             sx={{ textAlign: 'left' }}
                             MenuProps={{
