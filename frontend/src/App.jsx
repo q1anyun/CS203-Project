@@ -13,6 +13,7 @@ import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
+import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
 import { ThemeProvider } from '@mui/material/styles';
@@ -66,6 +67,7 @@ function AppContent() {
         <Route path="/player/profile" element={<PlayerProfile profilePic={profilePic} />} />
         <Route path="/admin/profile" element={<AdminProfile profilePic={profilePic}  />} />
         <Route path="/player/tournaments/:id" element={<TournamentDetails />} />
+        <Route path="/admin/tournaments/:id" element={<AdminTournamentDetails />} />
 
         {/* General Routes */}
         <Route path="/home" element={<Home />} />

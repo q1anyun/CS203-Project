@@ -79,7 +79,7 @@ export default function AdminTournamentView() {
 
     const handleViewDetails = (id) => {
         // Navigate to /tournament/id route
-        navigate(`/admin/tournament/${id}`);
+        navigate(`/admin/tournaments/${id}`);
     };
 
     useEffect(() => {
