@@ -6,8 +6,6 @@ import lombok.Data;
 
 @Data
 public class TournamentUpdateRequestDTO {
-    private Long id;
-
     private String name;
 
     private LocalDateTime startDate;
@@ -19,8 +17,6 @@ public class TournamentUpdateRequestDTO {
     private Integer maxElo;
 
     private Integer maxPlayers;
-
-    private Integer currentPlayers;
 
     private Integer timeControl;
 }

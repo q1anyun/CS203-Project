@@ -164,9 +164,6 @@ public class TournamentService {
         if (dto.getMaxPlayers() != null) {
             tournament.setMaxPlayers(dto.getMaxPlayers());
         }
-        if (dto.getCurrentPlayers() != null) {
-            tournament.setCurrentPlayers(dto.getCurrentPlayers());
-        }
         if (dto.getTimeControl() != null) {
             tournament.setTimeControl(gameTypeRepository.getGameTypeById(dto.getTimeControl()));
         }
