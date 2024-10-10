@@ -22,11 +22,17 @@ const theme = createTheme({
       fontWeight: 'bold',
     
     },
+    header4:{
+      fontSize:'15px', 
+      fontWeight: 'regular',
+      
+    },
     body4: {
       fontSize: '15px',
       fontWeight: 'light',
       textAlign: 'left'
     },
+    
     navBar: {
         fontSize: '18px',
         textAlign: 'center',
@@ -56,6 +62,19 @@ const theme = createTheme({
       textAlign: 'center',
      
     },
+
+    playerProfile: {
+      fontSize: '40px',
+      fontWeight:'Medium',
+      textAlign: 'center',
+     
+    },
+
+    playerProfile2: {
+      fontSize: '20px',
+      fontWeight:'Medium',
+      textAlign: 'center',
+    }
     // Add more styles as needed
   },
 });
