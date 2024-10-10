@@ -355,7 +355,7 @@ function PlayerProfile({ profilePic }) {
 
 
             {value === 1 && (
-             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2 }}>
+             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2,justifyContent: 'center' }}>
              {recentMatches.length > 0 ? (
                recentMatches.map((match, index) => (
                  <Card
@@ -428,7 +428,9 @@ function PlayerProfile({ profilePic }) {
                  </Card>
                ))
              ) : (
-               <Typography variant="playerProfile2">No recent matches available.</Typography>
+              <Typography variant="playerProfile2" align="center">
+              No recent matches available.
+            </Typography>
              )}
            </Box>
             )}

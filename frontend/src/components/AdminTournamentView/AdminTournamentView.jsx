@@ -10,6 +10,7 @@ import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
 
+
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
@@ -47,7 +48,8 @@ export default function AdminTournamentView() {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [timeControlOptions, setTimeControlOptions] = useState([]);
     const [roundTypeOptions, setRoundTypeOptions] = useState([]);
-    
+    const [errors, setErrors] = useState({});
+
 
     const token = localStorage.getItem('token');
 
@@ -92,6 +94,32 @@ export default function AdminTournamentView() {
         maxPlayers: '',
     });
 
+    //set errors
+
+    const validateForm = (tournament) => {
+        const newErrors = {};
+        Object.keys(tournament).forEach((key) => {
+            if (!tournament[key]) {
+                newErrors[key] = 'This field is required';
+            }
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    
+    const resetNewTournament = () => {
+        setNewTournament({
+            name: '',
+            startDate: '',
+            endDate: '',
+            timeControl: '',
+            minElo: '',
+            maxElo: '',
+            maxPlayers: '',
+        });
+    };
+
     const handleViewDetails = (id) => {
         // Navigate to /tournament/id route
         navigate(`/admin/tournaments/${id}`);
@@ -127,21 +155,20 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         // Set the tournament ID to edit
-        
-    
+
         try {
             // Fetch tournament data using axios
             const response = await axios.get(`${baseURL}/${tournamentId}`);
-            
-    
+
+
             // Log the fetched data
-            console.log(response.data );
+            console.log(response.data);
             setTournamentToEdit(response.data);
-            
-            
+
+
             // Open the edit dialog after fetching the data
             setEditDialogOpen(true);
-            
+
         } catch (error) {
             console.error('Error fetching tournament data:', error);
         }
@@ -187,10 +214,13 @@ export default function AdminTournamentView() {
     };
 
     const handleEditDialogClose = () => {
+        setErrors({});
         setEditDialogOpen(false);
     };
 
     const handleCreateDialogClose = () => {
+        setErrors({});
+        resetNewTournament(); 
         setCreateDialogOpen(false);
     };
 
@@ -204,60 +234,67 @@ export default function AdminTournamentView() {
 
     const handleEditInputChange = (e) => {
         const { name, value } = e.target;
-        setUpdateTournament({
-            ...updateTournament,
+        setTournamentToEdit({
+            ...setTournamentToEdit,
             [name]: value,
         });
     };
 
     const handleCreateSubmit = async () => {
-        const startDateWithTime = `${newTournament.startDate}T00:00:00`; // Add 12 AM time to start date
-        const endDateWithTime = `${newTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
 
-        const newTournamentData = {
-            ...newTournament,
-            tournamentId: Math.floor(Math.random() * 100000),
-            startDate: startDateWithTime,
-            endDate: endDateWithTime
-        };
+        if (validateForm(newTournament)) {
+            const startDateWithTime = `${newTournament.startDate}T00:00:00`; // Add 12 AM time to start date
+            const endDateWithTime = `${newTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
 
-        console.log("New Tournament Data:", newTournamentData);
+            const newTournamentData = {
+                ...newTournament,
+                tournamentId: Math.floor(Math.random() * 100000),
+                startDate: startDateWithTime,
+                endDate: endDateWithTime
+            };
 
-        try {
-            const response = await axios.post(`${baseURL}`, newTournamentData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Add the JWT token here
+            console.log("New Tournament Data:", newTournamentData);
+
+            try {
+                const response = await axios.post(`${baseURL}`, newTournamentData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Add the JWT token here
+                    }
+                });
+                // console.error('Error data:', error.response.data);
+                setTournaments([response.data, ...tournaments]);
+
+                // Reset to default values
+                setNewTournament({
+                    name: '',
+                    startDate: '',
+                    endDate: '',
+                    timeControl: '',
+                    minElo: '',
+                    maxElo: '',
+                    maxPlayers: '',
+                });
+
+                setCreateDialogOpen(false);
+                window.location.reload();
+            } catch (error) {
+                if (error.response) {
+                    console.error('Error data:', error.response.data); // Response from the backend
+                    console.error('Error status:', error.response.status); // Status code (e.g., 400)
+                    console.error('Error headers:', error.response.headers); // Response headers
+                } else {
+                    console.error('Error message:', error.message);
                 }
-            });
-            // console.error('Error data:', error.response.data);
-            setTournaments([response.data, ...tournaments]);
-
-            // Reset to default values
-            setNewTournament({
-                name: '',
-                startDate: '',
-                endDate: '',
-                timeControl: '',
-                minElo: '',
-                maxElo: '',
-                maxPlayers: '',
-            });
-
-            setCreateDialogOpen(false);
-            window.location.reload();
-        } catch (error) {
-            if (error.response) {
-                console.error('Error data:', error.response.data); // Response from the backend
-                console.error('Error status:', error.response.status); // Status code (e.g., 400)
-                console.error('Error headers:', error.response.headers); // Response headers
-            } else {
-                console.error('Error message:', error.message);
+                // console.error('Error creating tournament:', error);
             }
-            // console.error('Error creating tournament:', error);
         }
+
+
     };
 
     const handleEditSubmit = async () => {
+        
+        if (validateForm(updateTournament)) {
         const startDateWithTime = `${updateTournament.startDate}T00:00:00`; // Add 12 AM time to start date
         const endDateWithTime = `${updateTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
 
@@ -306,6 +343,7 @@ export default function AdminTournamentView() {
                 console.error('Error message:', error.message); // General error
             }
         }
+    }
     };
 
     const formatDateString = (isoString) => {
@@ -314,7 +352,7 @@ export default function AdminTournamentView() {
         console.log("Parsed date:", date); // Log the parsed date
         return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
     };
-    
+
 
     if (loading) {
         return <CircularProgress />;
@@ -390,7 +428,7 @@ export default function AdminTournamentView() {
                     <Typography variant="header3" sx={{ mb: 2 }}>
                         Create New Tournament
                     </Typography>
-                    </DialogTitle>
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         name="name"
@@ -399,6 +437,8 @@ export default function AdminTournamentView() {
                         onChange={handleInputChange}
                         fullWidth
                         margin="dense"
+                        error={!!errors.name}
+                        helperText={errors.name}
                     />
                     <TextField
                         name="startDate"
@@ -409,6 +449,8 @@ export default function AdminTournamentView() {
                         fullWidth
                         margin="dense"
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.startDate}
+                        helperText={errors.startDate}
                     />
                     <TextField
                         name="endDate"
@@ -419,23 +461,17 @@ export default function AdminTournamentView() {
                         fullWidth
                         margin="dense"
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.endDate}
+                        helperText={errors.endDate}
                     />
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.timeControl}>
                         <InputLabel>Time Control</InputLabel>
                         <Select
                             name="timeControl"
                             label="Time Control"
                             value={newTournament.timeControl}
                             onChange={handleInputChange}
-                            sx={{ textAlign: 'left' }}
-                            MenuProps={{
-                                PaperProps: {
-                                    style: {
-                                        maxHeight: 200,
-                                        width: 'auto',
-                                    },
-                                },
-                            }}
+                            className="text-left"
                         >
                             {timeControlOptions.map((option) => (
                                 <MenuItem key={option.id} value={option.id}>
@@ -443,6 +479,11 @@ export default function AdminTournamentView() {
                                 </MenuItem>
                             ))}
                         </Select>
+                        {errors.timeControl && (
+                            <Typography color="error" variant="caption">
+                                {errors.timeControl}
+                            </Typography>
+                        )}
                     </FormControl>
                     <TextField
                         name="minElo"
@@ -452,6 +493,8 @@ export default function AdminTournamentView() {
                         onChange={handleInputChange}
                         fullWidth
                         margin="dense"
+                        error={!!errors.minElo}
+                        helperText={errors.minElo}
                     />
                     <TextField
                         name="maxElo"
@@ -461,32 +504,29 @@ export default function AdminTournamentView() {
                         onChange={handleInputChange}
                         fullWidth
                         margin="dense"
+                        error={!!errors.maxElo}
+                        helperText={errors.maxElo}
                     />
-
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.maxPlayers}>
                         <InputLabel>Max Players</InputLabel>
                         <Select
                             name="maxPlayers"
                             label="Max Players"
                             value={newTournament.maxPlayers}
                             onChange={handleInputChange}
-                            sx={{ textAlign: 'left' }}
-                            MenuProps={{
-                                PaperProps: {
-                                    style: {
-                                        maxHeight: 200,
-                                        width: 'auto',
-                                    },
-                                },
-                            }}
+                            className="text-left"
                         >
                             {roundTypeOptions.map((optionId) => (
                                 <MenuItem key={optionId} value={optionId}>
                                     {optionId}
                                 </MenuItem>
                             ))}
-
                         </Select>
+                        {errors.maxPlayers && (
+                            <Typography color="error" variant="caption">
+                                {errors.maxPlayers}
+                            </Typography>
+                        )}
                     </FormControl>
                 </DialogContent>
                 <DialogActions>
@@ -510,26 +550,32 @@ export default function AdminTournamentView() {
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
+                        error={!!errors.name}
+                        helperText={errors.name}
                     />
                     <TextField
                         name="startDate"
                         label="Start Date"
                         type="date"
-                        value={tournamentToEdit?.startDate ? tournamentToEdit.startDate.split('T')[0] : ''} 
+                        value={tournamentToEdit?.startDate ? tournamentToEdit.startDate.split('T')[0] : ''}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.startDate}
+                        helperText={errors.startDate}
                     />
                     <TextField
                         name="endDate"
                         label="End Date"
                         type="date"
-                        value={tournamentToEdit?.endDate ? tournamentToEdit.endDate.split('T')[0] : ''} 
+                        value={tournamentToEdit?.endDate ? tournamentToEdit.endDate.split('T')[0] : ''}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
                         InputLabelProps={{ shrink: true }}
+                        error={!!errors.endDate}
+                        helperText={errors.endDate}
                     />
                     <FormControl fullWidth>
                         <InputLabel>Time Control</InputLabel>
@@ -542,7 +588,7 @@ export default function AdminTournamentView() {
                             MenuProps={{
                                 PaperProps: {
                                     style: {
-                                        maxHeight: 200,
+
                                         width: 'auto',
                                     },
                                 },
@@ -554,6 +600,11 @@ export default function AdminTournamentView() {
                                 </MenuItem>
                             ))}
                         </Select>
+                        {errors.timeControl && (
+                            <Typography color="error" variant="caption">
+                                {errors.timeControl}
+                            </Typography>
+                        )}
                     </FormControl>
                     <TextField
                         name="minElo"
@@ -598,6 +649,11 @@ export default function AdminTournamentView() {
                             ))}
 
                         </Select>
+                        {errors.maxPlayers && (
+                            <Typography color="error" variant="caption">
+                                {errors.maxPlayers}
+                            </Typography>
+                        )}
                     </FormControl>
                 </DialogContent>
                 <DialogActions>
