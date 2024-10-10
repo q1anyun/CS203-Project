@@ -1,4 +1,4 @@
-package com.chess.tms.elo_service.exception.dto;
+package com.chess.tms.elo_service.dto;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,7 +2,6 @@ package com.chess.tms.match_service.service;
 
 import com.chess.tms.match_service.dto.MatchDTO;
 import com.chess.tms.match_service.dto.TournamentDTO;
-import com.chess.tms.match_service.dto.TournamentPlayerDTO;
 import com.chess.tms.match_service.dto.TournamentPlayerEloDTO;
 import com.chess.tms.match_service.exception.GameTypeNotFoundException;
 import com.chess.tms.match_service.exception.MatchDoesNotExistException;
@@ -15,7 +14,6 @@ import com.chess.tms.match_service.repository.RoundTypeRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
