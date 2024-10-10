@@ -22,10 +22,10 @@ const statusColorMap = {
 };
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    '&:first-child': {
+    '&:first-of-type': {
         textAlign: 'center',
     },
-    '&:last-child': {
+    '&:last-of-type': {
         textAlign: 'center',
     },
 }));
@@ -35,6 +35,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
         backgroundColor: theme.palette.action.hover,
     },
 }));
+
 
 
 export default function AdminTournamentView() {
@@ -94,6 +95,18 @@ export default function AdminTournamentView() {
         maxPlayers: '',
     });
 
+    const resetNewTournament = () => {
+        setNewTournament({
+            name: '',
+            startDate: '',
+            endDate: '',
+            timeControl: '',
+            minElo: '',
+            maxElo: '',
+            maxPlayers: '',
+        });
+    };
+
     //set errors
 
     const validateForm = (tournament) => {
@@ -107,18 +120,8 @@ export default function AdminTournamentView() {
         return Object.keys(newErrors).length === 0;
     };
 
-    
-    const resetNewTournament = () => {
-        setNewTournament({
-            name: '',
-            startDate: '',
-            endDate: '',
-            timeControl: '',
-            minElo: '',
-            maxElo: '',
-            maxPlayers: '',
-        });
-    };
+
+
 
     const handleViewDetails = (id) => {
         // Navigate to /tournament/id route
@@ -164,6 +167,17 @@ export default function AdminTournamentView() {
             // Log the fetched data
             console.log(response.data);
             setTournamentToEdit(response.data);
+
+            setUpdateTournament({
+                name: response.data.name || '',
+                startDate: response.data.startDate || '',
+                endDate: response.data.endDate || '',
+                timeControl: response.data.timeControl.timeControlMinutes || '',
+                minElo: response.data.minElo || '',
+                maxElo: response.data.maxElo || '',
+                maxPlayers: response.data.maxPlayers || '',
+            });
+
 
 
             // Open the edit dialog after fetching the data
@@ -220,7 +234,7 @@ export default function AdminTournamentView() {
 
     const handleCreateDialogClose = () => {
         setErrors({});
-        resetNewTournament(); 
+        resetNewTournament();
         setCreateDialogOpen(false);
     };
 
@@ -234,10 +248,14 @@ export default function AdminTournamentView() {
 
     const handleEditInputChange = (e) => {
         const { name, value } = e.target;
-        setTournamentToEdit({
-            ...setTournamentToEdit,
-            [name]: value,
-        });
+        console.log(`Changing ${name} to ${value}`); // Debugging line
+        const formattedValue = (name === 'startDate' || name === 'endDate') ? value + 'T00:00:00' : value;
+
+        setUpdateTournament(prevState => ({
+            ...prevState,
+            [name]: formattedValue
+        }));
+        console.log(updateTournament); // This may still show the old state due to batching
     };
 
     const handleCreateSubmit = async () => {
@@ -264,16 +282,7 @@ export default function AdminTournamentView() {
                 // console.error('Error data:', error.response.data);
                 setTournaments([response.data, ...tournaments]);
 
-                // Reset to default values
-                setNewTournament({
-                    name: '',
-                    startDate: '',
-                    endDate: '',
-                    timeControl: '',
-                    minElo: '',
-                    maxElo: '',
-                    maxPlayers: '',
-                });
+                set
 
                 setCreateDialogOpen(false);
                 window.location.reload();
@@ -293,65 +302,59 @@ export default function AdminTournamentView() {
     };
 
     const handleEditSubmit = async () => {
-        
+
         if (validateForm(updateTournament)) {
-        const startDateWithTime = `${updateTournament.startDate}T00:00:00`; // Add 12 AM time to start date
-        const endDateWithTime = `${updateTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
 
-        const updatedTournamentData = {
-            ...updateTournament,
-            startDate: startDateWithTime,
-            endDate: endDateWithTime
-        };
-        console.log(updatedTournamentData)
-        try {
-            // Send the update request to the backend (assuming PUT is for updating)
-            const response = await axios.put(`${baseURL}/${tournamentToEdit}`, updatedTournamentData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`, // Include JWT token
+
+            const updatedTournamentData = {
+                ...updateTournament,
+
+            };
+            console.log(updatedTournamentData)
+            try {
+                // Send the update request to the backend (assuming PUT is for updating)
+
+                const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Include JWT token
+                    }
+                });
+
+                // Update the tournaments list by replacing the updated tournament
+                const updatedTournaments = tournaments.map(t =>
+                    t.tournamentId === tournamentToEdit ? response.data : t
+                );
+
+                // Update the state with the new tournaments data
+                setTournaments(updatedTournaments);
+
+                // Reset to default values after successful edit
+                setUpdateTournament({
+                    name: '',
+                    startDate: '',
+                    endDate: '',
+                    timeControl: '',
+                    minElo: '',
+                    maxElo: '',
+                    maxPlayers: ''
+                });
+
+                // Close the edit dialog
+                setEditDialogOpen(false);
+                window.location.reload();
+            } catch (error) {
+                if (error.response) {
+                    console.error('Error data:', error.response.data); // Backend response
+                    console.error('Error status:', error.response.status); // HTTP status code
+                    console.error('Error headers:', error.response.headers); // Headers
+                } else {
+                    console.error('Error message:', error.message); // General error
                 }
-            });
-
-            // Update the tournaments list by replacing the updated tournament
-            const updatedTournaments = tournaments.map(t =>
-                t.tournamentId === tournamentToEdit ? response.data : t
-            );
-
-            // Update the state with the new tournaments data
-            setTournaments(updatedTournaments);
-
-            // Reset to default values after successful edit
-            setUpdateTournament({
-                name: '',
-                startDate: '',
-                endDate: '',
-                timeControl: '',
-                minElo: '',
-                maxElo: '',
-                maxPlayers: ''
-            });
-
-            // Close the edit dialog
-            setEditDialogOpen(false);
-            window.location.reload();
-        } catch (error) {
-            if (error.response) {
-                console.error('Error data:', error.response.data); // Backend response
-                console.error('Error status:', error.response.status); // HTTP status code
-                console.error('Error headers:', error.response.headers); // Headers
-            } else {
-                console.error('Error message:', error.message); // General error
             }
         }
-    }
     };
 
-    const formatDateString = (isoString) => {
-        console.log("Input date string:", isoString); // Log the input
-        const date = new Date(isoString);
-        console.log("Parsed date:", date); // Log the parsed date
-        return date.toISOString().split('T')[0]; // Returns date in YYYY-MM-DD format
-    };
+
 
 
     if (loading) {
@@ -540,13 +543,16 @@ export default function AdminTournamentView() {
             </Dialog>
 
             {/* Edit Tournament Dialog */}
+            {/* Edit Tournament Dialog */}
             <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-                <DialogTitle><Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography></DialogTitle>
+                <DialogTitle>
+                    <Typography variant="h6" sx={{ mb: 2 }}>Edit Tournament</Typography>
+                </DialogTitle>
                 <DialogContent>
                     <TextField
                         name="name"
                         label="Name"
-                        value={tournamentToEdit.name}
+                        value={updateTournament.name}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -557,7 +563,7 @@ export default function AdminTournamentView() {
                         name="startDate"
                         label="Start Date"
                         type="date"
-                        value={tournamentToEdit?.startDate ? tournamentToEdit.startDate.split('T')[0] : ''}
+                        value={updateTournament?.startDate ? updateTournament.startDate.split('T')[0] : ''}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -569,7 +575,7 @@ export default function AdminTournamentView() {
                         name="endDate"
                         label="End Date"
                         type="date"
-                        value={tournamentToEdit?.endDate ? tournamentToEdit.endDate.split('T')[0] : ''}
+                        value={updateTournament?.endDate ? updateTournament.endDate.split('T')[0] : ''}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -577,18 +583,17 @@ export default function AdminTournamentView() {
                         error={!!errors.endDate}
                         helperText={errors.endDate}
                     />
-                    <FormControl fullWidth>
+                    <FormControl fullWidth margin="dense" error={!!errors.timeControl}>
                         <InputLabel>Time Control</InputLabel>
                         <Select
                             name="timeControl"
                             label="Time Control"
-                            value={tournamentToEdit?.timeControl?.timeControlMinutes || ''}
+                            value={updateTournament?.timeControl || ''}
                             onChange={handleEditInputChange}
                             sx={{ textAlign: 'left' }}
                             MenuProps={{
                                 PaperProps: {
                                     style: {
-
                                         width: 'auto',
                                     },
                                 },
@@ -610,7 +615,7 @@ export default function AdminTournamentView() {
                         name="minElo"
                         label="Min ELO"
                         type="number"
-                        value={tournamentToEdit.minElo}
+                        value={updateTournament.minElo}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -619,18 +624,20 @@ export default function AdminTournamentView() {
                         name="maxElo"
                         label="Max ELO"
                         type="number"
-                        value={tournamentToEdit.maxElo}
+                        value={updateTournament.maxElo}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
+                        error={updateTournament.maxElo < updateTournament.minElo} // Validation logic
+                        helperText={updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                     />
 
-                    <FormControl fullWidth>
+                    <FormControl fullWidth margin="dense" error={!!errors.maxPlayers}>
                         <InputLabel>Max Players</InputLabel>
                         <Select
                             name="maxPlayers"
                             label="Max Players"
-                            value={tournamentToEdit.maxPlayers}
+                            value={updateTournament.maxPlayers || ''}
                             onChange={handleEditInputChange}
                             sx={{ textAlign: 'left' }}
                             MenuProps={{
@@ -647,7 +654,6 @@ export default function AdminTournamentView() {
                                     {optionId}
                                 </MenuItem>
                             ))}
-
                         </Select>
                         {errors.maxPlayers && (
                             <Typography color="error" variant="caption">
@@ -660,11 +666,12 @@ export default function AdminTournamentView() {
                     <Button onClick={handleEditDialogClose} color="secondary">
                         Cancel
                     </Button>
-                    <Button onClick={handleEditSubmit} color="primary">
-                        Save
+                    <Button onClick={handleEditSubmit} color="primary" disabled={loading}> {/* Disable button if loading */}
+                        {loading ? 'Saving...' : 'Save'}
                     </Button>
                 </DialogActions>
             </Dialog>
+
 
             {/* Delete Confirmation Dialog */}
             <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
