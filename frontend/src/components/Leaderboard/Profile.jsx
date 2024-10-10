@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, Typography, Avatar, Paper } from '@mui/material';
 
-function Profile({ rank, firstName, lastName, username, eloPoints, profilePhoto }) {
+function Profile({ rank, firstName, lastName, eloRating, profilePhoto }) {
   const fullName = `${firstName} ${lastName.toUpperCase()}`;
 
   return (
@@ -14,11 +14,10 @@ function Profile({ rank, firstName, lastName, username, eloPoints, profilePhoto 
             <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
               {fullName}
             </Typography>
-            <Typography variant="body1">@{username}</Typography>
           </Stack>
         </Stack>
         <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-          {eloPoints}
+          {eloRating}
         </Typography>
       </Stack>
     </Paper>
