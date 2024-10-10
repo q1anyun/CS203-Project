@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl, Box } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -34,6 +34,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
         backgroundColor: theme.palette.action.hover,
     },
 }));
+
 
 export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
@@ -125,6 +126,7 @@ export default function AdminTournamentView() {
 
     const handleEditClick = (tournamentId) => {
         setTournamentToEdit(tournamentId);
+        console.
         setEditDialogOpen(true);
     };
 
@@ -299,55 +301,41 @@ export default function AdminTournamentView() {
 
     return (
         <div>
-            <Typography variant="h4" component="h2" gutterBottom className={styles.title}>
-                All Tournaments
-            </Typography>
-            <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab}>
-                <AddIcon />
-            </Fab>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Typography variant="header1" component="h2" className={styles.title}>
+                    All Tournaments
+                </Typography>
+                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }} >
+                    <AddIcon />
+                </Fab>
+            </Box>
             <TableContainer component={Paper} className={styles.table}>
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell>ID</StyledTableCell>
-                            <StyledTableCell>Name</StyledTableCell>
-                            <StyledTableCell>Start Date</StyledTableCell>
-                            <StyledTableCell>End Date</StyledTableCell>
-                            <StyledTableCell>Time Control</StyledTableCell>
-                            <StyledTableCell>Min ELO</StyledTableCell>
-                            <StyledTableCell>Max ELO</StyledTableCell>
-                            <StyledTableCell>MaxPlayers</StyledTableCell>
-                            <StyledTableCell>Status</StyledTableCell>
-                            <StyledTableCell>Actions</StyledTableCell>
+                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {tournaments.map((tournament, rowIndex) => (
                             <StyledTableRow key={tournament.id}>
-                                <StyledTableCell>{tournament.id}</StyledTableCell>
-                                <StyledTableCell>
-                                    {/* Display as text */}
-                                    <Typography>{tournament.name}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    {/* Display date as text */}
-                                    <Typography>{tournament.startDate}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography>{tournament.endDate}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography>{tournament.timeControl?.name || ''}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography>{tournament.minElo}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography>{tournament.maxElo}</Typography>
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography>{tournament.maxPlayers}</Typography>
-                                </StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.startDate}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.endDate}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
@@ -373,7 +361,11 @@ export default function AdminTournamentView() {
 
             {/* Create Tournament Dialog */}
             <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
-                <DialogTitle>Create New Tournament</DialogTitle>
+                <DialogTitle>
+                    <Typography variant="header3" sx={{ mb: 2 }}>
+                        Create New Tournament
+                    </Typography>
+                    </DialogTitle>
                 <DialogContent>
                     <TextField
                         name="name"
@@ -484,12 +476,12 @@ export default function AdminTournamentView() {
 
             {/* Edit Tournament Dialog */}
             <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-                <DialogTitle>Edit Tournament</DialogTitle>
+                <DialogTitle><Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography></DialogTitle>
                 <DialogContent>
                     <TextField
                         name="name"
-                        label="Tournament Name"
-                        value={updateTournament.name}
+                        label="Name"
+                        value={tournamentToEdit.name}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
@@ -498,7 +490,7 @@ export default function AdminTournamentView() {
                         name="startDate"
                         label="Start Date"
                         type="date"
-                        value={updateTournament.startDate}
+                        value={tournamentToEdit.startDate}
                         onChange={handleEditInputChange}
                         fullWidth
                         margin="dense"
