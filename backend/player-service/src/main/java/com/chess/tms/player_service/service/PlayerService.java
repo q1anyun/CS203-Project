@@ -178,8 +178,12 @@ public class PlayerService {
         player.setProfilePicture(filePath.toString());
         playerDetailsRepository.save(player);
     }
-    
 
-    
+    public Integer getRankingForCurrentPlayer(Long playerId) {
+        PlayerDetails player = playerDetailsRepository.findById(playerId)
+            .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+
+        return player.getEloRating();
+    }
 
 }

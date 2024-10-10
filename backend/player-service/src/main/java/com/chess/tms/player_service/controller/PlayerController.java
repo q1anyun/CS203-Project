@@ -102,4 +102,10 @@ public class PlayerController {
                 .body(resource);
     }
 
+    @GetMapping("/getRanking")
+    public ResponseEntity<Integer> getRankingForCurrentPlayer(@RequestHeader("X-User-PlayerId") String id) {
+        return ResponseEntity.ok(playerService.getRankingForCurrentPlayer(Long.parseLong(id)));
+    }
+
+
 }
