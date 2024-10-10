@@ -41,5 +41,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
     
+    @ExceptionHandler(GameTypeNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleGameTypeNotFoundException(GameTypeNotFoundException e) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", e.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 
 }

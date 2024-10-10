@@ -79,6 +79,7 @@ public class PlayerService {
         dto.setFirstName(playerDetails.getFirstName());
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
+        dto.setProfilePicture(playerDetails.getProfilePicture());
         
         return dto;
     }
@@ -178,8 +179,12 @@ public class PlayerService {
         player.setProfilePicture(filePath.toString());
         playerDetailsRepository.save(player);
     }
-    
 
-    
+    public Integer getRankingForCurrentPlayer(Long playerId) {
+        PlayerDetails player = playerDetailsRepository.findById(playerId)
+            .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+
+        return player.getEloRating();
+    }
 
 }

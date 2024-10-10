@@ -116,6 +116,7 @@ public class TournamentService {
         return returnDTO;
     }
 
+    @Transactional
     public void deleteTournament(long id) {
         Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
         if (tournamentOptional.isEmpty()) {
