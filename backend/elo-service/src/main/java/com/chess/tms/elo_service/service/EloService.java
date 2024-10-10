@@ -22,13 +22,13 @@ import jakarta.transaction.Transactional;
 
 import com.chess.tms.elo_service.exception.InvalidReasonException;
 import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
-import com.chess.tms.elo_service.exception.dto.DTOUtil;
-import com.chess.tms.elo_service.exception.dto.EloHistoryChartDTO;
-import com.chess.tms.elo_service.exception.dto.EloHistoryRequestDTO;
-import com.chess.tms.elo_service.exception.dto.EloRequestDTO;
-import com.chess.tms.elo_service.exception.dto.EloResponseDTO;
-import com.chess.tms.elo_service.exception.dto.EloUpdateDTO;
-import com.chess.tms.elo_service.exception.dto.MatchEloRequestDTO;
+import com.chess.tms.elo_service.dto.DTOUtil;
+import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
+import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
+import com.chess.tms.elo_service.dto.EloRequestDTO;
+import com.chess.tms.elo_service.dto.EloResponseDTO;
+import com.chess.tms.elo_service.dto.EloUpdateDTO;
+import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 
 @Service
 public class EloService {
@@ -114,15 +114,17 @@ public class EloService {
         return responses;
     }
 
-    public int[] calculateEloChange(int elo1, int elo2) {
-        double p1 = (1.0 / Math.pow(10, elo1 - elo2) / 400);
-        double p2 = (1.0 / Math.pow(10, elo2 - elo1) / 400);
-        int k = 40;
+    public int[] calculateEloChange(int winnerElo, int loserElo) {
+        double p1 = (1.0 / (1.0 + (Math.pow(10, (winnerElo - loserElo) / 400))));
+        double p2 = (1.0 / (1.0 + (Math.pow(10, (loserElo - winnerElo) / 400))));
+        int k = 30;
 
         int[] changedElo = new int[2];
 
-        changedElo[0] = (int) (elo1 + (1.0 - p1) * k);
-        changedElo[1] = (int) (elo2 + (1.0 - p2))
+        changedElo[0] = (int) (winnerElo + (1.0 - p1) * k);
+        changedElo[1] = (int) (loserElo + (0.0 - p2) * k);
+
+        return changedElo;
     }
 
     public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
@@ -130,8 +132,9 @@ public class EloService {
         EloRequestDTO loser = dto.getLoser();
 
         // Elo Algorithm
-        int newWinnerElo = winner.getCurrentElo() + 1;
-        int newLoserElo = loser.getCurrentElo() - 1;
+        int[] changedElo = calculateEloChange(winner.getCurrentElo(), loser.getCurrentElo());
+        int newWinnerElo = changedElo[0];
+        int newLoserElo = changedElo[1];
 
         // Update Player's Elo
         String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
