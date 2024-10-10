@@ -1,6 +1,4 @@
-package com.chess.tms.elo_service.dto;
-
-import java.time.LocalDateTime;
+package com.chess.tms.elo_service.exception.dto;
 
 import com.chess.tms.elo_service.enums.Reason;
 
@@ -11,17 +9,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EloDTO {
-
-    private long id;
-
+public class EloHistoryRequestDTO {
     private long playerId;
-    
-    private int oldElo;
 
     private int newElo; 
-
+    
     private Reason changeReason;
-
-    private LocalDateTime createdAt;
 }
