@@ -29,6 +29,7 @@ import com.chess.tms.tournament_service.repository.TournamentRepository;
 import jakarta.transaction.Transactional;
 
 import com.chess.tms.tournament_service.exception.GameTypeNotFoundException;
+import com.chess.tms.tournament_service.exception.InsufficientPlayersException;
 import com.chess.tms.tournament_service.exception.MatchServiceException;
 import com.chess.tms.tournament_service.exception.MaxPlayersReachedException;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
@@ -84,6 +85,11 @@ public class TournamentService {
         }
 
         Tournament tournament = tournamentOptional.get();
+
+        if(tournament.getCurrentPlayers() < 2){
+            throw new InsufficientPlayersException("Tournament cannot start with less than 2 players.");
+        }
+        
         ResponseEntity<Long> response;
 
         try {

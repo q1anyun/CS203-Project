@@ -29,6 +29,7 @@ import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.exception.GameTypeNotFoundException;
+import com.chess.tms.tournament_service.exception.InsufficientPlayersException;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
 import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
@@ -648,6 +649,20 @@ void testGetPlayersByTournament_TournamentDoesNotExist() {
 
     verify(tournamentPlayerRepository, times(0)).findAllByTournament(any(Tournament.class));
     verify(restTemplate, times(0)).postForEntity(anyString(), any(), eq(PlayerDetailsDTO[].class));
+}
+
+@Test
+void testStartTournamentWithInsufficientPlayers() {
+    tournament.setCurrentPlayers(1);
+
+    when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+
+    assertThrows(InsufficientPlayersException.class, () -> {
+        tournamentService.startTournament(1L);
+    });
+
+    verify(restTemplate, times(0)).postForEntity(anyString(), any(), any());
+    verify(tournamentRepository, times(0)).save(any(Tournament.class));
 }
 
 }
