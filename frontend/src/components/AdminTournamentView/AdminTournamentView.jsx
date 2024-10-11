@@ -120,6 +120,9 @@ export default function AdminTournamentView() {
         return Object.keys(newErrors).length === 0;
     };
 
+   
+
+
 
 
 
@@ -158,6 +161,7 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         // Set the tournament ID to edit
+        
 
         try {
             // Fetch tournament data using axios
@@ -167,12 +171,13 @@ export default function AdminTournamentView() {
             // Log the fetched data
             console.log(response.data);
             setTournamentToEdit(response.data);
+            const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
 
             setUpdateTournament({
                 name: response.data.name || '',
                 startDate: response.data.startDate || '',
                 endDate: response.data.endDate || '',
-                timeControl: response.data.timeControl.timeControlMinutes || '',
+                timeControl: timeControlOption.id || '',
                 minElo: response.data.minElo || '',
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
@@ -407,9 +412,13 @@ export default function AdminTournamentView() {
                                 </StyledTableCell>
                                 <StyledTableCell>
                                     <>
-                                        <IconButton onClick={() => handleEditClick(tournament.id)}>
+                                        <IconButton
+                                            onClick={() => handleEditClick(tournament.id)}
+                                            disabled={tournament.status !== "UPCOMING"} // Disable if status is "Live"
+                                        >
                                             <EditIcon />
                                         </IconButton>
+
                                         <IconButton onClick={() => handleDeleteClick(tournament.id)}>
                                             <DeleteIcon />
                                         </IconButton>
