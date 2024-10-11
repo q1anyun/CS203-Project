@@ -2,6 +2,7 @@
 
 ## Project Description 
 **CS203 Project 
+![System Diagram](frontend/src/assets/System%20Diagram.jpg)
 
 ## Team Members
 - [Philip](https://github.com/philipljh)  
@@ -9,8 +10,6 @@
 - [Xavier](https://github.com/teystyxavy)
 - [Qian Yun](https://github.com/q1anyun)
 - [Jia Kai](https://github.com/jiakai-2002)
-
-![System Diagram](frontend/src/assets/System%20Diagram.jpg)
 
 ## Configuration table
   
