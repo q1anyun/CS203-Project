@@ -17,6 +17,8 @@ import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.service.TournamentService;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 
@@ -30,7 +32,7 @@ public class TournamentController {
     private TournamentService tournamentService;
 
     @PostMapping("")
-    public ResponseEntity<String> createTournament(@RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
+    public ResponseEntity<String> createTournament(@Valid @RequestBody TournamentRegistrationDTO dto, @RequestHeader("X-User-Id") String id) {
         return ResponseEntity.ok(tournamentService.createTournament(dto, Long.parseLong(id)));
     }
 
