@@ -44,13 +44,13 @@ public class EloController {
     }
 
     @GetMapping("/{playerId}/{changeReason}")
-    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerId(@PathVariable long playerId, @PathVariable String changeReason) {
+    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(@PathVariable long playerId, @PathVariable String changeReason) {
         return ResponseEntity.ok(eloService.findByPlayerIdAndChangeReason(playerId, changeReason));
     }
 
 
-    @DeleteMapping("/delete-{playerId}") 
-    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable long playerId) {
+    @DeleteMapping("/delete/{playerId}") 
+    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable("playerId") long playerId) {
         return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
     }
 
