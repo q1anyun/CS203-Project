@@ -44,7 +44,7 @@ public class EloController {
     }
 
     @GetMapping("/{playerId}/{changeReason}")
-    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable String changeReason) {
+    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable("changeReason") String changeReason) {
         return ResponseEntity.ok(eloService.findByPlayerIdAndChangeReason(playerId, changeReason));
     }
 

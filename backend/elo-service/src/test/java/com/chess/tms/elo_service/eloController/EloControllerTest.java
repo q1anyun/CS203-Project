@@ -8,9 +8,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +30,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.chess.tms.elo_service.controller.EloController;
+import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
+import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 import com.chess.tms.elo_service.exception.GlobalExceptionHandler;
-import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.service.EloService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -82,8 +85,7 @@ public class EloControllerTest {
                 .content(jsonPayload)
                 .header("X-User-Id", "1"))
                 .andExpect(status().isOk())
-                .andExpect(content().json(expectedResponseJson
-            ));
+                .andExpect(content().json(expectedResponseJson));
                 
             verify(eloService, times(1)).saveEloHistory(any(EloHistoryRequestDTO.class));
     }
@@ -150,6 +152,79 @@ public class EloControllerTest {
 
         verify(eloService, times(1)).findByPlayerIdAndChangeReason(1L, "win");
     }
+
+    @Test
+    void testUpdateMatchPlayersEloSuccess() throws Exception {
+
+        String jsonPayload = """
+            {
+                "playerId": 1,
+                "newElo": 1315
+            },
+            {
+                "playerId": 2,
+                "newElo": 1320
+            }
+                """;
+        
+        mockMvc.perform(put("/api/elo/match")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(jsonPayload)
+        .header("X-User-Id", "1"))
+        .andExpect(status().isOk());
+
+        verify(eloService, times(1)).updateMatchPlayersElo(any(MatchEloRequestDTO.class));
+    }
+
+    @Test
+    void testFindCurrentPlayerEloHistoryForChart() throws Exception {
+        List<EloHistoryChartDTO> list = new ArrayList<>();
+        LocalDate t1 = LocalDate.now();
+        LocalDate t2 = LocalDate.now();
+        
+        list.add(new EloHistoryChartDTO(1385, t1));
+        list.add(new EloHistoryChartDTO(1285, t2));
+
+        when(eloService.findPlayerEloHistoryForChart(1L))
+            .thenReturn(list);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String expectedResponseJson = objectMapper.writeValueAsString(list);
+        
+        mockMvc.perform(get("/api/elo/chart/current")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content("")
+        .header("X-User-PlayerId", "1"))
+        .andExpect(status().isOk())
+        .andExpect(content().json(expectedResponseJson));
+
+        verify(eloService, times(1)).findPlayerEloHistoryForChart(1L);
+    }
+
+    @Test
+    void testFindPlayerEloHistoryForChart() throws Exception {
+        List<EloHistoryChartDTO> list = new ArrayList<>();
+
+        list.add(new EloHistoryChartDTO(1315, LocalDate.parse("2024-10-10")));
+        list.add(new EloHistoryChartDTO(1320, LocalDate.parse("2024-02-03")));
+
+        when(eloService.findPlayerEloHistoryForChart(1L))
+            .thenReturn(list);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String expectedResponseJson = objectMapper.writeValueAsString(list);
+        
+        mockMvc.perform(get("/api/elo/chart/1"))
+        .andExpect(status().isOk())
+        .andExpect(content().json(expectedResponseJson));
+        
+        verify(eloService, times(1)).findPlayerEloHistoryForChart(1L);
+    }
+
+
+
 
 
 }
