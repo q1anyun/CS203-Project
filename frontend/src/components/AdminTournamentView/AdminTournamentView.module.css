@@ -27,3 +27,7 @@
     border-bottom: none; /* Remove bottom border from data cells */
     text-align: center; /* Center align data text */
 }
+
+.errorMessage {
+    color: red;
+}

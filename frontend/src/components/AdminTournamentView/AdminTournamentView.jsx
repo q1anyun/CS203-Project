@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl, Box } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl, Box, Grid2 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
-import SaveIcon from '@mui/icons-material/Save';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
-
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs from 'dayjs';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
@@ -36,8 +38,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-
-
 export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [loading, setLoading] = useState(true); // Loading state
@@ -50,6 +50,8 @@ export default function AdminTournamentView() {
     const [timeControlOptions, setTimeControlOptions] = useState([]);
     const [roundTypeOptions, setRoundTypeOptions] = useState([]);
     const [errors, setErrors] = useState({});
+
+    const [createFormError, setCreateFormError] = useState('');
 
 
     const token = localStorage.getItem('token');
@@ -76,8 +78,8 @@ export default function AdminTournamentView() {
     // for create new table
     const [newTournament, setNewTournament] = useState({
         name: '',
-        startDate: '',
-        endDate: '',
+        startDate: null,
+        endDate: null,
         timeControl: '',
         minElo: '',
         maxElo: '',
@@ -110,21 +112,26 @@ export default function AdminTournamentView() {
     //set errors
 
     const validateForm = (tournament) => {
-        const newErrors = {};
-        Object.keys(tournament).forEach((key) => {
-            if (!tournament[key]) {
-                newErrors[key] = 'This field is required';
-            }
+        // Check if any required field is empty
+        const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
+            return !tournament[key];  // Returns true if any field is empty
         });
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+
+        // If any required field is missing, set the error message
+        if (isAnyFieldEmpty) {
+            setCreateFormError('Please fill up all required fields');
+            return false;
+        }
+
+        const { minElo, maxElo } = tournament;
+        if (minElo < 0 || maxElo < minElo) {
+            return false;
+        }
+
+        // Clear error and return true if validation passes
+        setCreateFormError('');
+        return true;
     };
-
-   
-
-
-
-
 
     const handleViewDetails = (id) => {
         // Navigate to /tournament/id route
@@ -136,6 +143,7 @@ export default function AdminTournamentView() {
         const fetchTournaments = async () => {
             try {
                 const response = await axios.get(`${baseURL}`);
+                console.log(response.data);
                 setTournaments(response.data); // Populate tournaments with the fetched data
                 setLoading(false); // Turn off loading
             } catch (error) {
@@ -161,7 +169,7 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         // Set the tournament ID to edit
-        
+
 
         try {
             // Fetch tournament data using axios
@@ -175,8 +183,12 @@ export default function AdminTournamentView() {
 
             setUpdateTournament({
                 name: response.data.name || '',
-                startDate: response.data.startDate || '',
-                endDate: response.data.endDate || '',
+                startDate: response.data.startDate
+                    ? new Date(response.data.startDate + 'Z')
+                    : null,
+                endDate: response.data.endDate
+                    ? new Date(response.data.endDate + 'Z')
+                    : null,
                 timeControl: timeControlOption.id || '',
                 minElo: response.data.minElo || '',
                 maxElo: response.data.maxElo || '',
@@ -228,17 +240,14 @@ export default function AdminTournamentView() {
         setCreateDialogOpen(true);
     };
 
-    const handleEdit = () => {
-        setEditDialogOpen(true);
-    };
-
     const handleEditDialogClose = () => {
+        setCreateFormError('');
         setErrors({});
         setEditDialogOpen(false);
     };
 
     const handleCreateDialogClose = () => {
-        setErrors({});
+        setCreateFormError('');
         resetNewTournament();
         setCreateDialogOpen(false);
     };
@@ -253,27 +262,35 @@ export default function AdminTournamentView() {
 
     const handleEditInputChange = (e) => {
         const { name, value } = e.target;
-        console.log(`Changing ${name} to ${value}`); // Debugging line
-        const formattedValue = (name === 'startDate' || name === 'endDate') ? value + 'T00:00:00' : value;
-
         setUpdateTournament(prevState => ({
             ...prevState,
-            [name]: formattedValue
+            [name]: value
         }));
-        console.log(updateTournament); // This may still show the old state due to batching
+    };
+
+    const handleDateChange = (name, newValue) => {
+        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
+        const localISOString = localDate ? localDate.toISOString() : '';
+        setNewTournament({
+            ...newTournament,
+            [name]: localISOString,
+        });
+    };
+
+    const handleEditDateChange = (name, newValue) => {
+        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
+        const localISOString = localDate ? localDate.toISOString() : '';
+        setUpdateTournament((prevState) => ({
+            ...prevState,
+            [name]: localISOString,
+        }));
     };
 
     const handleCreateSubmit = async () => {
 
         if (validateForm(newTournament)) {
-            const startDateWithTime = `${newTournament.startDate}T00:00:00`; // Add 12 AM time to start date
-            const endDateWithTime = `${newTournament.endDate}T00:00:00`;     // Add 12 AM time to end date
-
             const newTournamentData = {
                 ...newTournament,
-                tournamentId: Math.floor(Math.random() * 100000),
-                startDate: startDateWithTime,
-                endDate: endDateWithTime
             };
 
             console.log("New Tournament Data:", newTournamentData);
@@ -281,14 +298,10 @@ export default function AdminTournamentView() {
             try {
                 const response = await axios.post(`${baseURL}`, newTournamentData, {
                     headers: {
-                        'Authorization': `Bearer ${token}`, // Add the JWT token here
+                        'Authorization': `Bearer ${token}`,
                     }
                 });
-                // console.error('Error data:', error.response.data);
                 setTournaments([response.data, ...tournaments]);
-
-                set
-
                 setCreateDialogOpen(false);
                 window.location.reload();
             } catch (error) {
@@ -386,8 +399,8 @@ export default function AdminTournamentView() {
                         <TableRow>
                             <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
@@ -401,8 +414,33 @@ export default function AdminTournamentView() {
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.startDate}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.endDate}</Typography></StyledTableCell>
+                                {/* <StyledTableCell><Typography variant="body4">{new Date(tournament.startDate).toLocaleString('en-GB', { timeZone: 'Asia/Singapore' })}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{new Date(tournament.endDate).toLocaleString('en-GB', { timeZone: 'Asia/Singapore' })}</Typography></StyledTableCell> */}
+                                <StyledTableCell>
+                                    <Typography variant="body4">
+                                        {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
+                                            timeZone: 'Asia/Singapore',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </Typography>
+                                </StyledTableCell>
+
+                                <StyledTableCell>
+                                    <Typography variant="body4">
+                                        {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
+                                            timeZone: 'Asia/Singapore',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </Typography>
+                                </StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
@@ -422,8 +460,8 @@ export default function AdminTournamentView() {
                                         <IconButton onClick={() => handleDeleteClick(tournament.id)}>
                                             <DeleteIcon />
                                         </IconButton>
-                                        <IconButton>
-                                            <VisibilityIcon onClick={() => handleViewDetails(tournament.id)} />
+                                        <IconButton onClick={() => handleViewDetails(tournament.id)}>
+                                            <VisibilityIcon />
                                         </IconButton>
                                     </>
                                 </StyledTableCell>
@@ -437,109 +475,113 @@ export default function AdminTournamentView() {
             {/* Create Tournament Dialog */}
             <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
                 <DialogTitle>
-                    <Typography variant="header3" sx={{ mb: 2 }}>
+                    <Typography variant="header3">
                         Create New Tournament
                     </Typography>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        name="name"
-                        label="Tournament Name"
-                        value={newTournament.name}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                        error={!!errors.name}
-                        helperText={errors.name}
-                    />
-                    <TextField
-                        name="startDate"
-                        label="Start Date"
-                        type="date"
-                        value={newTournament.startDate}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                        InputLabelProps={{ shrink: true }}
-                        error={!!errors.startDate}
-                        helperText={errors.startDate}
-                    />
-                    <TextField
-                        name="endDate"
-                        label="End Date"
-                        type="date"
-                        value={newTournament.endDate}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                        InputLabelProps={{ shrink: true }}
-                        error={!!errors.endDate}
-                        helperText={errors.endDate}
-                    />
-                    <FormControl fullWidth error={!!errors.timeControl}>
-                        <InputLabel>Time Control</InputLabel>
-                        <Select
-                            name="timeControl"
-                            label="Time Control"
-                            value={newTournament.timeControl}
-                            onChange={handleInputChange}
-                            className="text-left"
-                        >
-                            {timeControlOptions.map((option) => (
-                                <MenuItem key={option.id} value={option.id}>
-                                    {option.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        {errors.timeControl && (
-                            <Typography color="error" variant="caption">
-                                {errors.timeControl}
-                            </Typography>
-                        )}
-                    </FormControl>
-                    <TextField
-                        name="minElo"
-                        label="Min ELO"
-                        type="number"
-                        value={newTournament.minElo}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                        error={!!errors.minElo}
-                        helperText={errors.minElo}
-                    />
-                    <TextField
-                        name="maxElo"
-                        label="Max ELO"
-                        type="number"
-                        value={newTournament.maxElo}
-                        onChange={handleInputChange}
-                        fullWidth
-                        margin="dense"
-                        error={!!errors.maxElo}
-                        helperText={errors.maxElo}
-                    />
-                    <FormControl fullWidth error={!!errors.maxPlayers}>
-                        <InputLabel>Max Players</InputLabel>
-                        <Select
-                            name="maxPlayers"
-                            label="Max Players"
-                            value={newTournament.maxPlayers}
-                            onChange={handleInputChange}
-                            className="text-left"
-                        >
-                            {roundTypeOptions.map((optionId) => (
-                                <MenuItem key={optionId} value={optionId}>
-                                    {optionId}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        {errors.maxPlayers && (
-                            <Typography color="error" variant="caption">
-                                {errors.maxPlayers}
-                            </Typography>
-                        )}
-                    </FormControl>
+                    <Grid2 container spacing={2}>
+                        <Grid2 size={12}>
+                            <TextField
+                                name="name"
+                                label="Tournament Name"
+                                value={newTournament.name}
+                                onChange={handleInputChange}
+                                fullWidth
+                            />
+                        </Grid2>
+
+                        <Grid2 container spacing={4}>
+                            <Grid2 size={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker
+                                        name="startDate"
+                                        label="Start Date Time"
+                                        value={newTournament.startDate ? dayjs(newTournament.startDate) : null}
+                                        onAccept={(newValue) => handleDateChange("startDate", newValue)} />
+                                </LocalizationProvider>
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker
+                                        name="endDate"
+                                        label="End Date Time"
+                                        value={newTournament.endDate ? dayjs(newTournament.endDate) : null}
+                                        onAccept={(newValue) => handleDateChange("endDate", newValue)}  // Only update when accepted
+                                    />
+                                </LocalizationProvider>
+                            </Grid2>
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <FormControl fullWidth error={!!errors.timeControl}>
+                                <InputLabel>Time Control</InputLabel>
+                                <Select
+                                    name="timeControl"
+                                    label="Time Control"
+                                    value={newTournament.timeControl}
+                                    onChange={handleInputChange}
+                                    className="text-left"
+                                >
+                                    {timeControlOptions.map((option) => (
+                                        <MenuItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <TextField
+                                name="minElo"
+                                label="Min ELO"
+                                type="number"
+                                value={newTournament.minElo}
+                                onChange={handleInputChange}
+                                fullWidth
+                                error={newTournament.minElo < 0}
+                                helperText={newTournament.minElo < 0 ? "Min Elo must be more than 0." : ""}
+                            />
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <TextField
+                                name="maxElo"
+                                label="Max ELO"
+                                type="number"
+                                value={newTournament.maxElo}
+                                onChange={handleInputChange}
+                                fullWidth
+                                error={newTournament.maxElo < newTournament.minElo}
+                                helperText={newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
+                            />
+                        </Grid2>
+                        <Grid2 size={12}>
+                            <FormControl fullWidth error={!!errors.maxPlayers}>
+                                <InputLabel>Max Players</InputLabel>
+                                <Select
+                                    name="maxPlayers"
+                                    label="Max Players"
+                                    value={newTournament.maxPlayers}
+                                    onChange={handleInputChange}
+                                >
+                                    {roundTypeOptions.map((optionId) => (
+                                        <MenuItem key={optionId} value={optionId}>
+                                            {optionId}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {createFormError && (
+                                <Grid2 size={12}>
+                                    <h6 className={styles.errorMessage}>
+                                        {createFormError}
+                                    </h6>
+                                </Grid2>
+                            )}
+                        </Grid2>
+                    </Grid2>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCreateDialogClose} color="secondary">
@@ -552,124 +594,113 @@ export default function AdminTournamentView() {
             </Dialog>
 
             {/* Edit Tournament Dialog */}
-            {/* Edit Tournament Dialog */}
             <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
                 <DialogTitle>
-                    <Typography variant="h6" sx={{ mb: 2 }}>Edit Tournament</Typography>
+                    <Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography>
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        name="name"
-                        label="Name"
-                        value={updateTournament.name}
-                        onChange={handleEditInputChange}
-                        fullWidth
-                        margin="dense"
-                        error={!!errors.name}
-                        helperText={errors.name}
-                    />
-                    <TextField
-                        name="startDate"
-                        label="Start Date"
-                        type="date"
-                        value={updateTournament?.startDate ? updateTournament.startDate.split('T')[0] : ''}
-                        onChange={handleEditInputChange}
-                        fullWidth
-                        margin="dense"
-                        InputLabelProps={{ shrink: true }}
-                        error={!!errors.startDate}
-                        helperText={errors.startDate}
-                    />
-                    <TextField
-                        name="endDate"
-                        label="End Date"
-                        type="date"
-                        value={updateTournament?.endDate ? updateTournament.endDate.split('T')[0] : ''}
-                        onChange={handleEditInputChange}
-                        fullWidth
-                        margin="dense"
-                        InputLabelProps={{ shrink: true }}
-                        error={!!errors.endDate}
-                        helperText={errors.endDate}
-                    />
-                    <FormControl fullWidth margin="dense" error={!!errors.timeControl}>
-                        <InputLabel>Time Control</InputLabel>
-                        <Select
-                            name="timeControl"
-                            label="Time Control"
-                            value={updateTournament?.timeControl || ''}
-                            onChange={handleEditInputChange}
-                            sx={{ textAlign: 'left' }}
-                            MenuProps={{
-                                PaperProps: {
-                                    style: {
-                                        width: 'auto',
-                                    },
-                                },
-                            }}
-                        >
-                            {timeControlOptions.map((option) => (
-                                <MenuItem key={option.id} value={option.id}>
-                                    {option.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        {errors.timeControl && (
-                            <Typography color="error" variant="caption">
-                                {errors.timeControl}
-                            </Typography>
-                        )}
-                    </FormControl>
-                    <TextField
-                        name="minElo"
-                        label="Min ELO"
-                        type="number"
-                        value={updateTournament.minElo}
-                        onChange={handleEditInputChange}
-                        fullWidth
-                        margin="dense"
-                    />
-                    <TextField
-                        name="maxElo"
-                        label="Max ELO"
-                        type="number"
-                        value={updateTournament.maxElo}
-                        onChange={handleEditInputChange}
-                        fullWidth
-                        margin="dense"
-                        error={updateTournament.maxElo < updateTournament.minElo} // Validation logic
-                        helperText={updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
-                    />
+                    <Grid2 container spacing={2}>
+                        <Grid2 size={12}>
+                            <TextField
+                                name="name"
+                                label="Name"
+                                value={updateTournament.name}
+                                onChange={handleEditInputChange}
+                                fullWidth
+                            />
+                        </Grid2>
+                        <Grid2 container spacing={4}>
+                            <Grid2 size={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker
+                                        name="startDate"
+                                        label="Start Date Time"
+                                        value={updateTournament.startDate ? dayjs(updateTournament.startDate) : null}
+                                        onAccept={(newValue) => handleEditDateChange("startDate", newValue)} />
+                                </LocalizationProvider>
+                            </Grid2>
 
-                    <FormControl fullWidth margin="dense" error={!!errors.maxPlayers}>
-                        <InputLabel>Max Players</InputLabel>
-                        <Select
-                            name="maxPlayers"
-                            label="Max Players"
-                            value={updateTournament.maxPlayers || ''}
-                            onChange={handleEditInputChange}
-                            sx={{ textAlign: 'left' }}
-                            MenuProps={{
-                                PaperProps: {
-                                    style: {
-                                        maxHeight: 200,
-                                        width: 'auto',
-                                    },
-                                },
-                            }}
-                        >
-                            {roundTypeOptions.map((optionId) => (
-                                <MenuItem key={optionId} value={optionId}>
-                                    {optionId}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                        {errors.maxPlayers && (
-                            <Typography color="error" variant="caption">
-                                {errors.maxPlayers}
-                            </Typography>
-                        )}
-                    </FormControl>
+                            <Grid2 size={6}>
+                                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                                    <DateTimePicker
+                                        name="endDate"
+                                        label="End Date Time"
+                                        value={updateTournament.endDate ? dayjs(updateTournament.endDate) : null}
+                                        onAccept={(newValue) => handleEditDateChange("endDate", newValue)}  // Only update when accepted
+                                    />
+                                </LocalizationProvider>
+                            </Grid2>
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <FormControl fullWidth>
+                                <InputLabel>Time Control</InputLabel>
+                                <Select
+                                    name="timeControl"
+                                    label="Time Control"
+                                    value={updateTournament?.timeControl || ''}
+                                    onChange={handleEditInputChange}
+                                >
+                                    {timeControlOptions.map((option) => (
+                                        <MenuItem key={option.id} value={option.id}>
+                                            {option.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <TextField
+                                name="minElo"
+                                label="Min ELO"
+                                type="number"
+                                value={updateTournament.minElo}
+                                onChange={handleEditInputChange}
+                                fullWidth
+                                error={updateTournament.minElo < 0}
+                                helperText={updateTournament.minElo < 0 ? "Min Elo must be more than 0." : ""}
+                            />
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <TextField
+                                name="maxElo"
+                                label="Max ELO"
+                                type="number"
+                                value={updateTournament.maxElo}
+                                onChange={handleEditInputChange}
+                                fullWidth
+                                error={updateTournament.maxElo < updateTournament.minElo}
+                                helperText={updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
+                            />
+                        </Grid2>
+
+                        <Grid2 size={12}>
+                            <FormControl fullWidth margin="dense" error={!!errors.maxPlayers}>
+                                <InputLabel>Max Players</InputLabel>
+                                <Select
+                                    name="maxPlayers"
+                                    label="Max Players"
+                                    value={updateTournament.maxPlayers || ''}
+                                    onChange={handleEditInputChange}
+                                >
+                                    {roundTypeOptions.map((optionId) => (
+                                        <MenuItem key={optionId} value={optionId}>
+                                            {optionId}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            {createFormError && (
+                                <Grid2 size={12}>
+                                    <h6 className={styles.errorMessage}>
+                                        {createFormError}
+                                    </h6>
+                                </Grid2>
+                            )}
+                        </Grid2>
+                    </Grid2>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleEditDialogClose} color="secondary">
