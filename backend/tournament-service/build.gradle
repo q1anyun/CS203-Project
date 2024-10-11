@@ -46,16 +46,10 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
 
 	// Testing dependencies
-	testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit 5, Mockito, Spring Testing
-	testImplementation 'org.mockito:mockito-core'
-	testImplementation 'org.mockito:mockito-junit-jupiter'
-	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'com.github.tomakehurst:wiremock-jre8:2.35.0' // WireMock for mocking external APIs
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'  // JUnit 5, Mockito, Spring Testing
+	testImplementation 'org.springframework.security:spring-security-test'  // Spring Security Testing
 
-	// Testcontainers for integration testing
-	testImplementation 'org.testcontainers:testcontainers:1.19.0'
-	testImplementation 'org.testcontainers:mysql:1.19.0'
-	testImplementation 'org.testcontainers:junit-jupiter:1.19.0'
+	testImplementation 'com.h2database:h2:2.2.224'  // H2 in-memory database
 }
 
 dependencyManagement {
