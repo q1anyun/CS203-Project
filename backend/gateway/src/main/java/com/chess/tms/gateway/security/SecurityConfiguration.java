@@ -3,6 +3,7 @@ package com.chess.tms.gateway.security;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -68,7 +69,10 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/matches/**").permitAll()
                 .requestMatchers("/api/player/**").permitAll()
-                .requestMatchers("/api/tournaments/**").permitAll()
+                .requestMatchers(HttpMethod.GET,"/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST,"/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT,"/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE,"/api/tournaments/**").hasAuthority("ADMIN")
                 .requestMatchers("/api/tournament-players/**").permitAll()
                 .requestMatchers("/api/game-type/**").permitAll() 
                 .requestMatchers("/api/round-type/**").permitAll()
