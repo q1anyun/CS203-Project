@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import static org.hamcrest.Matchers.containsString;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -43,33 +44,53 @@ class TournamentControllerTest {
                 .build();
     }
 
+    @Test
+    void testCreateTournament() throws Exception {
+        String jsonPayload = """
+                {
+                    "name": "Test Tournament",
+                    "startDate": "2024-01-01T10:00:00",
+                    "endDate": "2024-01-02T10:00:00",
+                    "minElo": 1000,
+                    "maxElo": 2000,
+                    "maxPlayers": 16,
+                    "timeControl": 5
+                }
+                """;
+
+        when(tournamentService.createTournament(any(TournamentRegistrationDTO.class), eq(1L)))
+                .thenReturn("Tournament created successfully");
+
+        mockMvc.perform(post("/api/tournaments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonPayload)
+                .header("X-User-Id", "1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Tournament created successfully"));
+
+        verify(tournamentService, times(1)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
+    }
 
     @Test
-void testCreateTournament() throws Exception {
-    String jsonPayload = """
-        {
-            "name": "Test Tournament",
-            "startDate": "2024-01-01T10:00:00",
-            "endDate": "2024-01-02T10:00:00",
-            "minElo": 1000,
-            "maxElo": 2000,
-            "maxPlayers": 16,
-            "timeControl": 5
-        }
-        """;
+    void testCreateTournamentWithMissingName() throws Exception {
+        String jsonPayload = """
+                {
+                    "startDate": "2024-01-01T10:00:00",
+                    "endDate": "2024-01-02T10:00:00",
+                    "minElo": 1000,
+                    "maxElo": 2000,
+                    "maxPlayers": 16,
+                    "timeControl": 5
+                }
+                """;
 
-    when(tournamentService.createTournament(any(TournamentRegistrationDTO.class), eq(1L)))
-        .thenReturn("Tournament created successfully");
-
-    mockMvc.perform(post("/api/tournaments")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(jsonPayload)
-            .header("X-User-Id", "1"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("Tournament created successfully"));
-
-    verify(tournamentService, times(1)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
-}
+        mockMvc.perform(post("/api/tournaments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonPayload)
+                .header("X-User-Id", "1"))
+                .andExpect(status().isBadRequest());
+        verify(tournamentService, times(0)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
+    }
 
     @Test
     void testStartTournament() throws Exception {
@@ -117,23 +138,23 @@ void testCreateTournament() throws Exception {
     @Test
     void testUpdateTournament() throws Exception {
         String jsonPayload = """
-            {
-                "name": "Test Tournament",
-                "startDate": "2024-01-01T10:00:00",
-                "endDate": "2024-01-02T10:00:00",
-                "minElo": 1000,
-                "maxElo": 2000,
-                "maxPlayers": 16,
-                "timeControl": 5
-            }
-            """;
-    
+                {
+                    "name": "Test Tournament",
+                    "startDate": "2024-01-01T10:00:00",
+                    "endDate": "2024-01-02T10:00:00",
+                    "minElo": 1000,
+                    "maxElo": 2000,
+                    "maxPlayers": 16,
+                    "timeControl": 5
+                }
+                """;
+
         mockMvc.perform(put("/api/tournaments/1")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonPayload))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Tournament updated successfully"));
-    
+
         verify(tournamentService, times(1)).updateTournament(eq(1L), any(TournamentUpdateRequestDTO.class));
     }
 

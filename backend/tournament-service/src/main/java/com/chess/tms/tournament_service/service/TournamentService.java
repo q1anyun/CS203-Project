@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.chess.tms.tournament_service.dto.DTOUtil;
@@ -26,6 +29,7 @@ import com.chess.tms.tournament_service.repository.TournamentRepository;
 import jakarta.transaction.Transactional;
 
 import com.chess.tms.tournament_service.exception.GameTypeNotFoundException;
+import com.chess.tms.tournament_service.exception.MatchServiceException;
 import com.chess.tms.tournament_service.exception.MaxPlayersReachedException;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
 import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
@@ -61,7 +65,6 @@ public class TournamentService {
     private String playerServiceUrl;
 
     public String createTournament(TournamentRegistrationDTO dto, long creatorId) {
-
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
         tournament.setStatus(Status.UPCOMING);
         GameType gameType = gameTypeRepository.getGameTypeById(dto.getTimeControl())
@@ -81,18 +84,27 @@ public class TournamentService {
         }
 
         Tournament tournament = tournamentOptional.get();
+        ResponseEntity<Long> response;
 
-        ResponseEntity<Long> response = restTemplate.postForEntity(
-                matchServiceUrl + "/api/matches/" + tournamentId + "/" + tournament.getTimeControl().getId()
-                        + "/generate",
-                null,
-                Long.class);
+        try {
+            response = restTemplate.postForEntity(
+                    matchServiceUrl + "/api/matches/" + tournamentId + "/" + tournament.getTimeControl().getId()
+                            + "/generate",
+                    null,
+                    Long.class);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            throw new MatchServiceException("Failed to start tournament due to match service error: "
+                    + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
+        } catch (RestClientException ex) {
+            throw new MatchServiceException("Failed to start tournament due to match service communication error", ex);
+        }
 
         tournament.setStatus(Status.LIVE);
         Optional<RoundType> roundTypeOptional = roundTypeRepository.findById(response.getBody());
         if (roundTypeOptional.isEmpty()) {
             throw new RoundTypeNotFoundException("RoundType with id " + response.getBody() + " does not exist.");
         }
+
         tournament.setCurrentRound(roundTypeOptional.get());
         tournamentRepository.save(tournament);
 
@@ -182,32 +194,34 @@ public class TournamentService {
         tournamentRepository.save(tournament);
     }
 
-public void registerPlayer(long playerId, long tournamentId) {
-    Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
-    if (tournamentOptional.isEmpty()) {
-        throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
+    public void registerPlayer(long playerId, long tournamentId) {
+        Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
+        if (tournamentOptional.isEmpty()) {
+            throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
+        }
+
+        Tournament tournament = tournamentOptional.get();
+
+        if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
+            throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
+        }
+
+        Optional<TournamentPlayer> tp = tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(playerId, tournamentId);
+
+        if (tp.isPresent()) {
+            throw new PlayerAlreadyRegisteredException(
+                    "Player with id " + playerId + " is already registered for the tournament.");
+        }
+
+        TournamentPlayer player = new TournamentPlayer();
+        player.setPlayerId(playerId);
+        player.setTournament(tournament);
+
+        tournamentPlayerRepository.save(player);
+
+        tournament.setCurrentPlayers(tournament.getCurrentPlayers() + 1);
+        tournamentRepository.save(tournament);
     }
-
-    Tournament tournament = tournamentOptional.get();
-
-    if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
-        throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
-    }
-
-    boolean playerAlreadyRegistered = tournamentPlayerRepository.existsByPlayerIdAndId(playerId, tournamentId);
-    if (playerAlreadyRegistered) {
-        throw new PlayerAlreadyRegisteredException("Player with id " + playerId + " is already registered for the tournament.");
-    }
-
-    TournamentPlayer player = new TournamentPlayer();
-    player.setPlayerId(playerId);
-    player.setTournament(tournament);
-
-    tournamentPlayerRepository.save(player);
-
-    tournament.setCurrentPlayers(tournament.getCurrentPlayers() + 1);
-    tournamentRepository.save(tournament);
-}
 
     public List<PlayerDetailsDTO> getPlayersByTournament(long tournamentId) {
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
@@ -237,29 +251,19 @@ public void registerPlayer(long playerId, long tournamentId) {
         if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament does not exist.");
         }
-    
-        boolean exist = tournamentPlayerRepository.existsByPlayerIdAndId(winnerId, id);
-        if (!exist) {
+        Optional<TournamentPlayer> tp = tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(winnerId, id);
+
+        if (tp.isEmpty()) {
             throw new UserDoesNotExistException("Winner does not exist in this tournament.");
         }
-    
+
         Tournament tournament = tournamentOptional.get();
         tournament.setWinnerId(winnerId);
         tournament.setStatus(Status.COMPLETED);
         tournamentRepository.save(tournament);
-    
+
         return tournament.getName() + " has been completed";
     }
-
-    // public List<PlayerRegistrationDTO> getAllPlayers() {
-    // List<PlayerRegistrationDTO> list = new ArrayList<>();
-
-    // for (TournamentPlayer p : tournamentPlayerRepository.findAll()) {
-    // list.add(DTOUtil.convertPlayerEntrytoPlayerDTO(p));
-    // }
-
-    // return list;
-    // }
 
     @Transactional
     public void deletePlayerFromTournament(long id, long tournamentid) {

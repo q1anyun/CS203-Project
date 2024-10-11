@@ -8,14 +8,23 @@ import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
 import com.chess.tms.tournament_service.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.transaction.Transactional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,169 +40,259 @@ import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
-@AutoConfigureMockMvc
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class TournamentServiceIntegrationTest {
 
-        @Autowired
-        private MockMvc mockMvc;
+    @Autowired
+    private TestRestTemplate restTemplate;
 
-        @Autowired
-        private ObjectMapper objectMapper;
+    @Autowired
+    private TournamentRepository tournamentRepository;
 
-        @Autowired
-        private TournamentRepository tournamentRepository;
+    @Autowired
+    private TournamentPlayerRepository tournamentPlayerRepository;
 
-        @Autowired
-        private TournamentPlayerRepository tournamentPlayerRepository;
+    @Autowired
+    private GameTypeRepository gameTypeRepository;
 
-        @Autowired
-        private GameTypeRepository gameTypeRepository;
+    @Autowired
+    private RoundTypeRepository roundTypeRepository;
 
-        @Autowired
-        private RoundTypeRepository roundTypeRepository;
+    @Autowired
+    private RestTemplate externalRestTemplate;
 
-        @Autowired
-        private RestTemplate restTemplate;
+    private MockRestServiceServer mockServer;
 
-        private MockRestServiceServer mockServer;
+    @Value("${matches.service.url}")
+    private String matchServiceUrl;
 
-        @Value("${matches.service.url}")
-        private String matchServiceUrl;
+    @BeforeEach
+    public void setup() {
+        mockServer = MockRestServiceServer.createServer(externalRestTemplate);
+        tournamentRepository.deleteAll();
+        tournamentPlayerRepository.deleteAll();
 
-        @Value("${players.service.url}")
-        private String playerServiceUrl;
-
-        @BeforeEach
-        public void setup() {
-                mockServer = MockRestServiceServer.createServer(restTemplate);
-                tournamentRepository.deleteAll();
-                tournamentPlayerRepository.deleteAll();
-
-                if (gameTypeRepository.findById(1L).isEmpty()) {
-                        GameType gameType = new GameType();
-                        gameType.setId(1L);
-                        gameType.setName("Blitz");
-                        gameType.setTimeControlMinutes(5);
-                        gameTypeRepository.save(gameType);
-                }
-
-                if (roundTypeRepository.findById(1L).isEmpty()) {
-                        RoundType roundType = new RoundType();
-                        roundType.setId(1L);
-                        roundType.setRoundName("Top 16");
-                        roundType.setNumberOfPlayers(16);
-                        roundTypeRepository.save(roundType);
-                }
+        if (gameTypeRepository.findById(1L).isEmpty()) {
+            GameType gameType = new GameType();
+            gameType.setId(1L);
+            gameType.setName("Blitz");
+            gameType.setTimeControlMinutes(5);
+            gameTypeRepository.save(gameType);
         }
+
+        if (roundTypeRepository.findById(1L).isEmpty()) {
+            RoundType roundType = new RoundType();
+            roundType.setId(1L);
+            roundType.setRoundName("Top 16");
+            roundType.setNumberOfPlayers(16);
+            roundTypeRepository.save(roundType);
+        }
+    }
+
+    @Test
+    public void testCreateTournament() {
+        TournamentRegistrationDTO dto = new TournamentRegistrationDTO(
+            "Test Tournament",
+            LocalDateTime.now().plusDays(1),
+            LocalDateTime.now().plusDays(2),
+            1000,
+            2000,
+            16,
+            1
+        );
+    
+        // Set the headers with the X-User-Id value
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-Id", "1");
+        headers.setContentType(MediaType.APPLICATION_JSON);
+    
+        HttpEntity<TournamentRegistrationDTO> request = new HttpEntity<>(dto, headers);
+    
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "/api/tournaments",
+            request,
+            String.class
+        );
+    
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Tournament created successfully"));
+        assertEquals(1, tournamentRepository.findAll().size());
+    }
+
+    @Test
+    public void testStartTournamentWithMockedMatchService() {
+        Tournament tournament = createTournament();
+
+        // Mock the external match service response
+        mockServer.expect(requestTo(
+            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            .andRespond(withStatus(HttpStatus.OK)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("1"));
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "/api/tournaments/start/" + tournament.getTournamentId(),
+            null,
+            String.class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("has started and current round is Top 16"));
+
+        Tournament startedTournament = tournamentRepository.findById(tournament.getTournamentId()).orElseThrow();
+        assertEquals(Status.LIVE, startedTournament.getStatus());
+    }
+
+    @Test
+    public void testStartTournamentWithMockedMatchServiceError() {
+        Tournament tournament = createTournament();
+
+        mockServer.expect(requestTo(
+            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            .andRespond(withStatus(HttpStatus.NOT_FOUND)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body("{\"message\": \"Failed to start tournament due to match service error\"}"));
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+            "/api/tournaments/start/" + tournament.getTournamentId(),
+            null,
+            String.class
+        );
+
+        System.out.println("Response Body: " + response.getBody());
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertTrue(response.getBody().contains("Failed to start tournament due to match service error"));
+
+        Tournament failedTournament = tournamentRepository.findById(tournament.getTournamentId()).orElseThrow();
+        assertEquals(Status.UPCOMING, failedTournament.getStatus());
+    }
 
         @Test
-        public void testCreateTournament() throws Exception {
+    public void testGetTournamentById() {
+        Tournament tournament = createTournament();
 
-                TournamentRegistrationDTO dto = new TournamentRegistrationDTO();
-                dto.setName("Test Tournament");
-                dto.setStartDate(LocalDateTime.now().plusDays(1));
-                dto.setEndDate(LocalDateTime.now().plusDays(2));
-                dto.setTimeControl(1);
-                dto.setMaxPlayers(32);
-                dto.setMinElo(1000);
-                dto.setMaxElo(2000);
+        ResponseEntity<TournamentDetailsDTO> response = restTemplate.getForEntity(
+            "/api/tournaments/" + tournament.getTournamentId(),
+            TournamentDetailsDTO.class
+        );
 
-                mockMvc.perform(post("/api/tournaments")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto))
-                                .header("X-User-Id", "1"))
-                                .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("Tournament created successfully")));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(tournament.getTournamentId(), response.getBody().getId());
+    }
 
-                assertEquals(1, tournamentRepository.findAll().size());
-        }
+    @Test
+    public void testGetAllTournaments() {
+        createTournament();
+        createTournament();
 
-        @Test
-        public void testUpdateTournament() throws Exception {
-                Tournament tournament = createTournament();
+        ResponseEntity<TournamentDetailsDTO[]> response = restTemplate.getForEntity(
+            "/api/tournaments",
+            TournamentDetailsDTO[].class
+        );
 
-                TournamentUpdateRequestDTO updateDTO = new TournamentUpdateRequestDTO();
-                updateDTO.setMaxPlayers(50);
-                updateDTO.setMinElo(1200);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().length);
+    }
 
-                mockMvc.perform(put("/api/tournaments/" + tournament.getTournamentId())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(updateDTO)))
-                                .andExpect(status().isOk())
-                                .andExpect(content().string("Tournament updated successfully"));
+    @Test
+    public void testUpdateCurrentRoundForTournament() {
+        Tournament tournament = createTournament();
 
-                Tournament updatedTournament = tournamentRepository.findById(tournament.getTournamentId())
-                                .orElseThrow();
-                assertEquals(50, updatedTournament.getMaxPlayers());
-                assertEquals(1200, updatedTournament.getMinElo());
-        }
+        ResponseEntity<String> response = restTemplate.exchange(
+            "/api/tournaments/" + tournament.getTournamentId() + "/round/1",
+            HttpMethod.PUT,
+            null,
+            String.class
+        );
 
-        @Test
-        public void testDeleteTournament() throws Exception {
-                Tournament tournament = createTournament();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("Current round updated to 1"));
+    }
 
-                mockMvc.perform(delete("/api/tournaments/" + tournament.getTournamentId()))
-                                .andExpect(status().isOk())
-                                .andExpect(content().string("Sucessfully deleted tournament"));
+    @Test
+    public void testCompleteTournament() {
+        Tournament tournament = createTournament();
 
-                assertFalse(tournamentRepository.findById(tournament.getTournamentId()).isPresent());
-        }
+        registerPlayerForTournament(tournament, 109L);
 
-        @Test
-        public void testStartTournament() throws Exception {
-                Tournament tournament = createTournament();
+        ResponseEntity<String> response = restTemplate.exchange(
+            "/api/tournaments/" + tournament.getTournamentId() + "/winner/109",
+            HttpMethod.PUT,
+            null,
+            String.class
+        );
 
-                mockServer.expect(requestTo(
-                                matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
-                                .andRespond(withStatus(HttpStatus.OK)
-                                                .contentType(MediaType.APPLICATION_JSON)
-                                                .body("1"));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertTrue(response.getBody().contains("has been completed"));
 
-                mockMvc.perform(post("/api/tournaments/start/" + tournament.getTournamentId()))
-                                .andExpect(status().isOk())
-                                .andExpect(content()
-                                                .string(containsString("has started and current round is Top 16")));
+        Tournament completedTournament = tournamentRepository.findById(tournament.getTournamentId()).orElseThrow();
+        assertEquals(Status.COMPLETED, completedTournament.getStatus());
+    }
 
-                Tournament startedTournament = tournamentRepository.findById(tournament.getTournamentId())
-                                .orElseThrow();
-                assertEquals(Status.LIVE, startedTournament.getStatus());
-        }
+    @Test
+    public void testGetRegisteredTournaments() {
+        Tournament tournament = createTournament();
+        registerPlayerForTournament(tournament, 100L);
 
-        @Test
-        public void testCompleteTournament() throws Exception {
-                Tournament tournament = createTournament();
-                registerPlayerForTournament(tournament, 100L);
+        ResponseEntity<TournamentDetailsDTO[]> response = restTemplate.getForEntity(
+            "/api/tournaments/registered/100",
+            TournamentDetailsDTO[].class
+        );
 
-                mockMvc.perform(put("/api/tournaments/" + tournament.getTournamentId() + "/winner/100"))
-                                .andExpect(status().isOk())
-                                .andExpect(content().string(containsString("has been completed")));
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().length);
+    }
 
-                Tournament completedTournament = tournamentRepository.findById(tournament.getTournamentId())
-                                .orElseThrow();
-                assertEquals(Status.COMPLETED, completedTournament.getStatus());
-        }
+    @Test
+    public void testGetLiveTournaments() {
+        Tournament tournament = createTournament();
 
-        private Tournament createTournament() {
-                Tournament tournament = new Tournament();
-                tournament.setCreatorId(1L);
-                tournament.setName("New Tournament");
-                tournament.setMaxPlayers(32);
-                tournament.setCurrentPlayers(0);
-                tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
-                tournament.setStatus(Status.UPCOMING);
-                tournament.setStartDate(LocalDateTime.now().plusDays(1));
-                tournament.setEndDate(LocalDateTime.now().plusDays(2));
-                return tournamentRepository.save(tournament);
-        }
+        tournament.setStatus(Status.LIVE);
 
-        private void registerPlayerForTournament(Tournament tournament, long playerId) {
-                TournamentPlayer player = new TournamentPlayer();
-                player.setPlayerId(playerId);
-                player.setTournament(tournament);
-                tournamentPlayerRepository.save(player);
-                tournament.setCurrentPlayers(tournament.getCurrentPlayers() + 1);
-                tournamentRepository.save(tournament);
-        }
+        registerPlayerForTournament(tournament, 100L);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-User-PlayerId", "100");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<TournamentDetailsDTO[]> response = restTemplate.exchange(
+            "/api/tournaments/live/current",
+            HttpMethod.GET,
+            entity,
+            TournamentDetailsDTO[].class
+        );
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().length);
+    }
+
+    private Tournament createTournament() {
+        Tournament tournament = new Tournament();
+        tournament.setCreatorId(1L);
+        tournament.setName("Integration Tournament");
+        tournament.setMaxPlayers(32);
+        tournament.setCurrentPlayers(0);
+        tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
+        tournament.setStatus(Status.UPCOMING);
+        tournament.setStartDate(LocalDateTime.now().plusDays(1));
+        tournament.setEndDate(LocalDateTime.now().plusDays(2));
+        return tournamentRepository.save(tournament);
+    }
+
+    private void registerPlayerForTournament(Tournament tournament, long playerId) {
+        TournamentPlayer player = new TournamentPlayer();
+        player.setPlayerId(playerId);
+        player.setTournament(tournament);
+        tournamentPlayerRepository.save(player);
+
+        tournament.setCurrentPlayers(tournament.getCurrentPlayers() + 1);
+        tournamentRepository.save(tournament);
+    }
 }

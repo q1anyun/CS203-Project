@@ -189,13 +189,19 @@ void testGetTournamentDetailsByIdWithWinner() {
 
     @Test
     void testCompleteTournamentSuccess() {
-        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-        when(tournamentPlayerRepository.existsByPlayerIdAndId(1L, 1L)).thenReturn(true);
-
+        TournamentPlayer mockPlayer = new TournamentPlayer();
+        mockPlayer.setPlayerId(1L);
+        mockPlayer.setTournament(tournament);
+        
+        when(tournamentRepository.findById(eq(1L))).thenReturn(Optional.of(tournament));
+        when(tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(eq(1L), eq(1L)))
+            .thenReturn(Optional.of(mockPlayer));
+    
         String result = tournamentService.completeTournament(1L, 1L);
-
+    
         assertEquals("Test Tournament has been completed", result);
         assertEquals(Status.COMPLETED, tournament.getStatus());
+        
         verify(tournamentRepository, times(1)).save(tournament);
     }
 
@@ -207,7 +213,7 @@ void testCompleteTournamentWhenTournamentDoesNotExist() {
         tournamentService.completeTournament(1L, 100L);
     });
 
-    verify(tournamentPlayerRepository, never()).existsByPlayerIdAndId(anyLong(), anyLong());
+    verify(tournamentPlayerRepository, never()).findByPlayerIdAndTournament_TournamentId(anyLong(), anyLong());
     verify(tournamentRepository, never()).save(any(Tournament.class));
 }
 
@@ -404,9 +410,14 @@ void testRegisterPlayerToFullTournament() {
 
 @Test
 void testRegisterPlayerAlreadyRegistered() {
+
+    TournamentPlayer mockPlayer = new TournamentPlayer();
+mockPlayer.setPlayerId(100L);
+mockPlayer.setTournament(tournament);
+
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
     
-    when(tournamentPlayerRepository.existsByPlayerIdAndId(100L, 1L)).thenReturn(true);
+    when(tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(100L, 1L)).thenReturn(Optional.of(mockPlayer));
 
     assertThrows(PlayerAlreadyRegisteredException.class, () -> {
         tournamentService.registerPlayer(100L, 1L);
@@ -521,7 +532,8 @@ void testGetPlayersByTournamentNoPlayers() {
 @Test
 void testCompleteTournamentNoWinner() {
     when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-    when(tournamentPlayerRepository.existsByPlayerIdAndId(99L, 1L)).thenReturn(false);
+    when(tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(99L, 1L))
+    .thenReturn(Optional.empty());
 
     assertThrows(UserDoesNotExistException.class, () -> {
         tournamentService.completeTournament(1L, 99L);
