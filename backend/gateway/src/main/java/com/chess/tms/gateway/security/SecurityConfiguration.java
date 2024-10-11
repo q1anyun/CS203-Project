@@ -60,14 +60,22 @@ public class SecurityConfiguration {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
-               // .anyRequest().permitAll() 
-               .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
+                // .anyRequest().permitAll() 
+
+                // only permit the creation of admin by anotnher admin
+                .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
                 .requestMatchers("/api/auth/**", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
+                .requestMatchers("/api/matches/**").permitAll()
+                .requestMatchers("/api/player/**").permitAll()
+                .requestMatchers("/api/tournaments/**").permitAll()
+                .requestMatchers("/api/tournament-players/**").permitAll()
+                .requestMatchers("/api/game-type/**").permitAll() 
+                .requestMatchers("/api/round-type/**").permitAll()
                 // Only admins can access /admin/** endpoints
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 // Users and admins can access /user/** endpoints
-                .requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers("api/users/**").hasAuthority("Player")
                .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session
