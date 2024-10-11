@@ -61,87 +61,66 @@ function PlayerTournamentView() {
         const fetchTournaments = async () => {
             try {
                 // Fetch all tournaments
-                const response = await axios.get(`${baseURL}`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
+                const tournamentResponse = await axios.get(baseURL, {
+                    headers: { 'Authorization': `Bearer ${token}` },
                 });
-                setTournaments(response.data);
-                console.log(response.data);
-
-                // Fetch the tournaments that the user has registered for
-                const tournamentJoinedResponse = await axios.get(`${baseURL}/registered/current`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
+                setTournaments(tournamentResponse.data);
+    
+                // Fetch tournaments that the user has registered for
+                const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
                 });
-                setJoinedTournaments(tournamentJoinedResponse.data);
-                console.log(tournamentJoinedResponse.data);
-            } catch (error) {
-                setError(error.message);
+                setJoinedTournaments(registeredResponse.data);
+            } catch (err) {
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchTournaments();
     }, []);
-
-    const isJoined = (tournamentId) => {
-        return joinedTournaments.some(tournament => tournament.id === tournamentId);
-    };
-
-
+    
+    const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
+    
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
         setOpenDialog(true);
     };
-
+    
     const handleDialogClose = () => {
         setOpenDialog(false);
         setAgreedToTerms(false);
     };
-
+    
     const handleAgreeChange = (event) => {
         setAgreedToTerms(event.target.checked);
     };
-
+    
     const handleRegister = async () => {
-        console.log(token);
-
         try {
-            console.log(selectedTournament.id);
             const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-
-                },
+                headers: { 'Authorization': `Bearer ${token}` },
             });
+    
             if (response.status !== 200) {
                 throw new Error('Failed to enroll in the tournament');
             }
-
-            setJoinedTournaments((prevJoined) => [...prevJoined, selectedTournament]);
+    
+            setJoinedTournaments(prev => [...prev, selectedTournament]);
             setOpenDialog(false);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
         }
-
     };
-
+    
     const handleViewDetails = (tournamentId) => {
-        // Navigate to the tournament details page
-        navigate(`${tournamentId}`); // Adjust the route according to your routing setup
+        navigate(`${tournamentId}`);
     };
-
-
-    if (loading) {
-        return <Typography>Loading tournaments...</Typography>;
-    }
-
-    if (error) {
-        return <Typography>Error: {error}</Typography>;
-    }
+    
+    if (loading) return <Typography>Loading tournaments...</Typography>;
+    if (error) return <Typography>Error: {error}</Typography>;
+    
 
     return (
         <div>
@@ -219,7 +198,7 @@ function PlayerTournamentView() {
                 <DialogContent>
                     <DialogContentText align="center" variant='body4'>
                         Please agree to the following terms to join the tournament:
-                    </DialogContentText>
+                    </DialogContentText >
                     <Box sx={{ margin: '16px 0' }}>
                         <Typography variant="body4" gutterBottom display='block'>
                             • No use of chess bots or external assistance during matches.

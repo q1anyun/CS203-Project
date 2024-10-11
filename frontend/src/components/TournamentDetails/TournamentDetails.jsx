@@ -48,6 +48,7 @@ function TournamentDetails() {
     fetchTournamentDetails();
   }, [id, token]);
 
+  //To group the matches by the round type 
   const matchesByRound = matches.reduce((acc, match) => {
     const roundName = match.roundType.roundName;
     if (!acc[roundName]) {
@@ -68,9 +69,6 @@ function TournamentDetails() {
         </Typography>
         <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
       </Box>
-      {/* <Typography variant="body4" gutterBottom textAlign={'left'} marginLeft="40px" display="block">
-        Description of the event
-      </Typography> */}
 
 
       {/* Card for Tournament Rounds */}
@@ -90,15 +88,15 @@ function TournamentDetails() {
                       sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        p: 2, // padding: 20px, using theme spacing
-                        backgroundColor: 'background.paper', // use theme color
+                        p: 2, 
+                        backgroundColor: 'background.paper',
                         border: '1px solid',
-                        borderColor: 'divider', // use theme divider color
-                        borderRadius: 2, // borderRadius: 5px, using theme spacing
+                        borderColor: 'divider', 
+                        borderRadius: 2, 
                       }}
                     >
                       {/* Box for Date of the Event at the Top */}
-                      <Box sx={{ mb: 2 }}> {/* marginBottom: 20px, using theme spacing */}
+                      <Box sx={{ mb: 2 }}> 
                         <Typography
                           variant="body4"
                           textAlign={'left'}

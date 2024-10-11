@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-
-import './PlayerProfile.css';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -15,6 +13,7 @@ import defaultProfilePic from '../../assets/default_user.png'
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL3 = import.meta.env.VITE_ELO_SERVICE_URL;
+const baseURL4 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL; 
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -42,11 +41,11 @@ function PlayerProfile({ profilePic }) {
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
-  const options = useMemo(() => countryList().getData(), [])
+
+
+  const options = useMemo(() => countryList().getData(), []); 
   const navigate = useNavigate();
   profilePic = useProfilePic();
-
-
 
 
   useEffect(() => {
@@ -56,101 +55,78 @@ function PlayerProfile({ profilePic }) {
     }
   }, [profilePic]);
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
-
+  const handleChange = (event, newValue) => setValue(newValue);
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
 
   const handleDetailChange = (event) => {
-    const { name, value } = event.target; // Destructure name and value from the event
+    const { name, value } = event.target; 
 
     // Update the corresponding field in playerDetails
     setPlayerDetails((prevDetails) => ({
-      ...prevDetails,            // Keep the existing playerDetails fields
-      [name]: value              // Update only the field that triggered the change
+      ...prevDetails,            
+      [name]: value              
     }));
   };
 
+  
   useEffect(() => {
     const fetchPlayerAndMatchData = async () => {
       const token = localStorage.getItem('token');
-
       if (!token) {
-        navigate('/login');  // Redirect to login if no token
+        navigate('/login'); // Redirect to login if no token
         return;
       }
 
       try {
         // Fetch player details
         const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('player details:', playerResponse.data);
-        setPlayerDetails(playerResponse.data || []);
-
-
+        setPlayerDetails(playerResponse.data || {});
 
         // Fetch chart data
         const chartResponse = await axios.get(`${baseURL3}/chart/current`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('chart data:', chartResponse.data);
         setUData(chartResponse.data.map((data) => data.elo));
         setXLabels(chartResponse.data.map((data) => data.date));
 
-
-
         // Fetch recent matches
-        const matchResponse = await axios.get(`${baseURL}/recentMatches`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+        const matchResponse = await axios.get(`${baseURL4}/player/current/recent`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        console.log('past matches:', matchResponse.data);
-
-
         setRecentMatches(matchResponse.data || []);
-        console.log(`${baseURL2}/live/current`);
+
         // Fetch live tournaments
         const tournamentResponse = await axios.get(`${baseURL2}/live/current`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('Live Tournaments:', tournamentResponse.data);
-
         setLiveTournaments(tournamentResponse.data || []);
-
-
-
       } catch (err) {
-        // Handle errors
-        if (err.response) {
-          const statusCode = err.response.status;
-          const errorMessage = err.response.data.message || 'An error occurred';
-
-          if (statusCode === 404 || statusCode === 403) {
-            setError('Player details not found or access denied');
-          } else {
-            navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-          }
-        } else if (err.request) {
-          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-        }
+        handleFetchError(err);
       }
     };
 
     fetchPlayerAndMatchData();
   }, [navigate]);
+
+//handle the errors 
+  const handleFetchError = (err) => {
+    if (err.response) {
+      const statusCode = err.response.status;
+      const errorMessage = err.response.data.message || 'An error occurred';
+      if (statusCode === 404 || statusCode === 403) {
+        setError('Player details not found or access denied');
+      } else {
+        navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+      }
+    } else if (err.request) {
+      navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+    } else {
+      navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+    }
+  };
 
 
 
@@ -321,6 +297,8 @@ function PlayerProfile({ profilePic }) {
 
               </Tabs>
             </Box>
+
+            {/* tab for results statistics*/}
             {value === 0 && (
               <Box sx={{ p: 2 }}>
 
@@ -349,11 +327,10 @@ function PlayerProfile({ profilePic }) {
                     xAxis={[{ scaleType: 'point', data: xLabels, ticks: false }]}
                   />
                 </Box>
-                {/* Add more content for Tab 1 here */}
               </Box>
             )}
 
-
+          {/* tab for recent matches*/}
             {value === 1 && (
              <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2,justifyContent: 'center' }}>
              {recentMatches.length > 0 ? (
@@ -380,21 +357,21 @@ function PlayerProfile({ profilePic }) {
                        {/* Player 1 */}
                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
                          <Avatar
-                           alt={`Player ${match.winner.id}`}
-                           src={`../../../backend/player-service/profile-picture/player_${match.winner.id}.jpg`}
+                           alt={`Player ${match.winnerId}`}
+                           src={`../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`}
                            sx={{ mr: 1 }}
                          />
-                         <Typography variant="body4">{match.winner.firstName}</Typography>
+                         <Typography variant="body4">Player {match.winnerId}</Typography>
                        </Box>
            
                        {/* Player 2 */}
                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                          <Avatar
-                           alt={`Player ${match.loser.id}`}
-                           src={`../../../backend/player-service/profile-picture/player_${match.loser.id}.jpg`}
+                           alt={`Player ${match.loserId}`}
+                           src={`../../../backend/player-service/profile-picture/player_${match.loserId}.jpg`}
                            sx={{ mr: 1 }}
                          />
-                         <Typography variant="body4">{match.loser.firstName}</Typography>
+                         <Typography variant="body4">Player {match.loserId}</Typography>
                        </Box>
                      </Box>
            
@@ -406,10 +383,10 @@ function PlayerProfile({ profilePic }) {
                        <Typography variant="body4">Winner:</Typography>
                        <Box sx={{ mb: 2 }}>
                          <Avatar
-                           alt={`Winner ${match.winner.id}`}
+                           alt={`Winner ${match.winnerId}`}
                            src={
                              match.winnerId
-                               ? `../../../backend/player-service/profile-picture/player_${match.winner.id}.jpg`
+                               ? `../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`
                                : '/path/to/default-avatar.jpg'
                            }
                            sx={{
@@ -421,7 +398,7 @@ function PlayerProfile({ profilePic }) {
                          />
                        </Box>
                        <Typography variant="body4">
-                         {match.winner.id ? ` ${match.winner.firstName}` : 'Pending'}
+                         {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
                        </Typography>
                      </Box>
                    </CardContent>
@@ -435,7 +412,7 @@ function PlayerProfile({ profilePic }) {
            </Box>
             )}
 
-
+        {/* tab for ongoing tournaments */}
             {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
 
@@ -510,7 +487,7 @@ function PlayerProfile({ profilePic }) {
             />
           </Button>
 
-
+          {/* Edit text field  */}
           <TextField
             label="First Name"
             name="firstName"
