@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, Divider, Grid, Avatar } from '@mui/material';
+import { Card, CardContent, Typography, Box, Divider, Grid, Avatar, Chip } from '@mui/material';
 import { useParams } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
@@ -15,6 +15,12 @@ function TournamentDetails() {
 
   const token = localStorage.getItem('token');
   console.log(id);
+
+  const statusColorMap = {
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    EXPIRED: 'default',
+  };
 
   useEffect(() => {
     const fetchTournamentDetails = async () => {
@@ -56,12 +62,15 @@ function TournamentDetails() {
   return (
     <Box sx={{ padding: 2 }}>
       {/* Tournament Title */}
-      <Typography variant="header1" gutterBottom >
-        {tournament.name}
-      </Typography>
-      <Typography variant="body4" gutterBottom textAlign={'left'} marginLeft = '40px'  display="block">
+      <Box display="flex" alignItems="center" gap={2}>
+        <Typography variant="header1" gutterBottom>
+          {tournament.name}
+        </Typography>
+        <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
+      </Box>
+      {/* <Typography variant="body4" gutterBottom textAlign={'left'} marginLeft="40px" display="block">
         Description of the event
-      </Typography>
+      </Typography> */}
 
 
       {/* Card for Tournament Rounds */}
@@ -117,10 +126,10 @@ function TournamentDetails() {
                         </Box>
 
                         {/* Divider */}
-                        <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr:8 }} /> {/* marginLeft: 80px, marginRight: 40px */}
+                        <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} /> {/* marginLeft: 80px, marginRight: 40px */}
 
                         {/* Right Column for Winner */}
-                        <Box sx={{ flexShrink: 0, alignItems:'center' }}>
+                        <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
                           <Typography variant="body4">
                             Winner:
                           </Typography>
@@ -128,7 +137,7 @@ function TournamentDetails() {
                             <Avatar
                               alt={`Winner ${match.winnerId}`}
                               src={match.winnerId ? `../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg` : '/path/to/default-avatar.jpg'} // Fallback avatar
-                              sx={{ width: 56, height: 56, justifyContent: 'center' , alignContent: 'center'}} // Adjust size as needed
+                              sx={{ width: 56, height: 56, justifyContent: 'center', alignContent: 'center' }} // Adjust size as needed
                             />
                           </Box>
                           <Typography variant="header3">
