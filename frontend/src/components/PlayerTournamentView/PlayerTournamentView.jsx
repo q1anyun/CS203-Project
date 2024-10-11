@@ -19,9 +19,9 @@ const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
 
 const statusColorMap = {
-    Live: 'success',
-    Upcoming: 'warning',
-    Expired: 'default',
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    COMPLETED: 'default',
 };
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -155,7 +155,7 @@ function PlayerTournamentView() {
                                 <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
                                 <StyledTableCell>
-                                    <Chip label={tournament.status} variant="outlined" color={statusColorMap[tournament.status]} />
+                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
                                     {tournament.status === "Live" || tournament.status === "Expired" ? (
