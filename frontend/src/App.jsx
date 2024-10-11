@@ -8,7 +8,6 @@ import PlayerProfile from './components/PlayerProfile/PlayerProfile';
 import AdminProfile from './components/AdminProfile/AdminProfile';
 import PlayerTournamentView from './components/PlayerTournamentView/PlayerTournamentView';
 import AdminTournamentView from './components/AdminTournamentView/AdminTournamentView';
-import AdminMatchesView from './components/AdminMatchesView/AdminMatchesView';
 import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
