@@ -414,8 +414,6 @@ export default function AdminTournamentView() {
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                {/* <StyledTableCell><Typography variant="body4">{new Date(tournament.startDate).toLocaleString('en-GB', { timeZone: 'Asia/Singapore' })}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{new Date(tournament.endDate).toLocaleString('en-GB', { timeZone: 'Asia/Singapore' })}</Typography></StyledTableCell> */}
                                 <StyledTableCell>
                                     <Typography variant="body4">
                                         {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {

@@ -65,7 +65,7 @@ function PlayerTournamentView() {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setTournaments(tournamentResponse.data);
-    
+
                 // Fetch tournaments that the user has registered for
                 const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
                     headers: { 'Authorization': `Bearer ${token}` },
@@ -77,50 +77,50 @@ function PlayerTournamentView() {
                 setLoading(false);
             }
         };
-    
+
         fetchTournaments();
     }, []);
-    
+
     const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
-    
+
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
         setOpenDialog(true);
     };
-    
+
     const handleDialogClose = () => {
         setOpenDialog(false);
         setAgreedToTerms(false);
     };
-    
+
     const handleAgreeChange = (event) => {
         setAgreedToTerms(event.target.checked);
     };
-    
+
     const handleRegister = async () => {
         try {
             const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
-    
+
             if (response.status !== 200) {
                 throw new Error('Failed to enroll in the tournament');
             }
-    
+
             setJoinedTournaments(prev => [...prev, selectedTournament]);
             setOpenDialog(false);
         } catch (err) {
             console.error(err);
         }
     };
-    
+
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
     };
-    
+
     if (loading) return <Typography>Loading tournaments...</Typography>;
     if (error) return <Typography>Error: {error}</Typography>;
-    
+
 
     return (
         <div>
@@ -148,8 +148,31 @@ function PlayerTournamentView() {
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.startDate}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.endDate}</Typography></StyledTableCell>
+                                <StyledTableCell>
+                                    <Typography variant="body4">
+                                        {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
+                                            timeZone: 'Asia/Singapore',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </Typography>
+                                </StyledTableCell>
+
+                                <StyledTableCell>
+                                    <Typography variant="body4">
+                                        {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
+                                            timeZone: 'Asia/Singapore',
+                                            year: 'numeric',
+                                            month: '2-digit',
+                                            day: '2-digit',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </Typography>
+                                </StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
