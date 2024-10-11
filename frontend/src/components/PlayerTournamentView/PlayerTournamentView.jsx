@@ -67,6 +67,7 @@ function PlayerTournamentView() {
                     },
                 });
                 setTournaments(response.data);
+                console.log(response.data);
 
                 // Fetch the tournaments that the user has registered for
                 const tournamentJoinedResponse = await axios.get(`${baseURL}/registered/current`, {
@@ -185,10 +186,14 @@ function PlayerTournamentView() {
                                             <Button
                                                 variant="contained"
                                                 color={isJoined(tournament.id) ? 'secondary' : 'success'}
-                                                disabled={isJoined(tournament.id)}
+                                                disabled={isJoined(tournament.id) || tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
                                                 onClick={() => handleJoin(tournament)}
                                             >
-                                                {isJoined(tournament.id) ? 'Joined' : 'Join'}
+                                                {isJoined(tournament.id)
+                                                    ? 'Joined'  // Show "Joined" if the player has joined
+                                                    : tournament.currentPlayers >= tournament.maxPlayers
+                                                        ? 'Full'    // Show "Full" if the tournament is full
+                                                        : 'Join'}
                                             </Button>
                                             <Button
                                                 variant="outlined"
