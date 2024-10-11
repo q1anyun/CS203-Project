@@ -60,6 +60,12 @@ public class GlobalExceptionHandler {
         return createErrorResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    // Handle InsufficientPlayersException
+    @ExceptionHandler(InsufficientPlayersException.class)
+    public ResponseEntity<Map<String, Object>> handleInsufficientPlayersException(InsufficientPlayersException e) {
+        return createErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
