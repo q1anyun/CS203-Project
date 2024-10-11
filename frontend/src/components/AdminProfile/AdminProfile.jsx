@@ -87,7 +87,7 @@ function AdminProfile({ profilePic , onProfilePicUpdate}) {
 
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
-        height: '100%', // Full viewport height
+        height: 'auto', // Full viewport height
         backgroundColor: '#f0f0f0',// Optional: background color for the page
         justifyItems: 'center',
 
@@ -115,100 +115,9 @@ function AdminProfile({ profilePic , onProfilePicUpdate}) {
             <Typography variant="h4">{AdminName}</Typography>
           </CardContent>
         </Box>
-
-       
       </Card>
-      <Box sx={{ width: '80%', marginTop: '0px', marginBottom: '5%' }}>
-        <Card sx={{ padding: 2, height: '600px', overflowY: 'auto', }}>
-          <CardContent>
-            <Box sx={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 1 }}>
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="tabs example"
-                sx={{
-                  '& .MuiTabs-flexContainer': {
-                    justifyContent: 'center', // Center the tabs
-                  }
-                }}
-
-              >
-                <Tab
-                  label="Ongoing Tournaments"
-                  sx={{
-                    fontSize: '1.25rem',
-                    padding: '12px 24px',
-                    marginX: 20, // Add horizontal margin between tabs
-
-                  }}
-                />
-                <Tab
-                  label="Past Tournaments"
-                  sx={{
-                    fontSize: '1.25rem',
-                    padding: '12px 24px',
-                    marginX: 20, // Add horizontal margin between tabs
-
-                  }}
-                />
-
-              </Tabs>
-            </Box>
-            {value === 0 && (
-              <Box sx={{ p: 2 }}>
-                <Typography variant="body1">Content for Tab 1</Typography>
-               
-                
-                {/* Add more content for Tab 1 here */}
-              </Box>
-            )}
-
-
-            {value === 1 && (
-              <Box sx={{ p: 2, height: '100%' }}>
-                <Typography variant="h6" sx={{ mb: 2 }}>Tab 1 Content</Typography>
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 1</Typography>
-                      <Typography variant="body2">Details about Item 1</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 2</Typography>
-                      <Typography variant="body2">Details about Item 2</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 3</Typography>
-                      <Typography variant="body2">Details about Item 3</Typography>
-                    </CardContent>
-
-                  </Box>
-                  <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', padding: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-
-                    <CardContent>
-                      <Typography variant="h6">Item 1</Typography>
-                      <Typography variant="body2">Details about Item 1</Typography>
-                    </CardContent>
-
-                  </Box>
-                </Box>
-                {/* Add more content for Tab 2 here */}
-              </Box>
-            )}
-
-          </CardContent>
-        </Card>
-      </Box>
+     
+      
       {/*dialog to edit the profile*/}
       <Dialog open={openEdit} onClose={handleCloseEdit}
        sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
