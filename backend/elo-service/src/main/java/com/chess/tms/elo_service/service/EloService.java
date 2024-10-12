@@ -77,11 +77,11 @@ public class EloService {
         return deleted;
     }
 
-    public EloResponseDTO saveEloHistory(EloHistoryRequestDTO dto) {
+    public EloResponseDTO saveEloHistory(int oldElo, EloHistoryRequestDTO dto) {
         List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
         EloHistory newEloHistory = new EloHistory();
 
-        newEloHistory.setOldElo(dto.getNewElo());
+        newEloHistory.setOldElo(oldElo);
         if (!list.isEmpty()) {
             newEloHistory.setOldElo(list.get(0).getNewElo());
         }
@@ -156,8 +156,8 @@ public class EloService {
         // Save Elo History
         EloHistoryRequestDTO winnerHistory = new EloHistoryRequestDTO(winner.getPlayerId(), newWinnerElo, Reason.WIN);
         EloHistoryRequestDTO loserHistory = new EloHistoryRequestDTO(loser.getPlayerId(), newLoserElo, Reason.LOSS);
-        saveEloHistory(winnerHistory);
-        saveEloHistory(loserHistory);
+        saveEloHistory(winnerElo, winnerHistory);
+        saveEloHistory(loserElo, loserHistory);
     }
 
     public List<EloHistoryChartDTO> findPlayerEloHistoryForChart(long id) {
