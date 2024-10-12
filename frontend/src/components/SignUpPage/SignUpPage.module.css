@@ -46,15 +46,18 @@
 
 .cardContainer {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  height: 100vh; /* Ensures it fills the viewport height */
 }
 
 .card {
-  padding: 24px;
-  width: 100%;
-  border-radius: 16px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  border-radius: 20px;
   background-color: whitesmoke;
+  align-items: center; /* Center items horizontally */
 }
 
 .gradientButton {
