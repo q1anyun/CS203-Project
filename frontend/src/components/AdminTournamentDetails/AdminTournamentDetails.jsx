@@ -28,7 +28,6 @@ function AdminTournamentDetails() {
 
 
     const token = localStorage.getItem('token');
-    console.log(id);
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {

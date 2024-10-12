@@ -124,97 +124,98 @@ function PlayerTournamentView() {
 
     return (
         <div>
-            <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
-                All Tournaments
-            </Typography>
-            <TableContainer component={Paper} className={styles.table}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {tournaments.map((tournament) => (
-                            <StyledTableRow key={tournament.id}>
-                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
+            <div className={styles.container}>
+                <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
+                    All Tournaments
+                </Typography>
+                <TableContainer component={Paper} className={styles.table}>
+                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {tournaments.map((tournament) => (
+                                <StyledTableRow key={tournament.id}>
+                                    <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
+                                    <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
+                                    <StyledTableCell>
+                                        <Typography variant="body4">
+                                            {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
+                                                timeZone: 'Asia/Singapore',
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </Typography>
+                                    </StyledTableCell>
 
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    {tournament.status === "Live" || tournament.status === "Expired" ? (
-                                        <></>
-                                    ) : (
-                                        <div style={{ display: 'flex', alignItems: 'center' }}>
-                                            <Button
-                                                variant="contained"
-                                                color={isJoined(tournament.id) ? 'secondary' : 'success'}
-                                                disabled={isJoined(tournament.id) || tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
-                                                onClick={() => handleJoin(tournament)}
-                                            >
-                                                {isJoined(tournament.id)
-                                                    ? 'Joined'  // Show "Joined" if the player has joined
-                                                    : tournament.currentPlayers >= tournament.maxPlayers
-                                                        ? 'Full'    // Show "Full" if the tournament is full
-                                                        : 'Join'}
-                                            </Button>
-                                            <Button
-                                                variant="outlined"
-                                                color="primary"
-                                                onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
-                                                style={{ marginLeft: '8px' }}
-                                            >
-                                                <VisibilityIcon /> {/* Visibility Icon */}
-                                            </Button>
-                                        </div>
-                                    )}
+                                    <StyledTableCell>
+                                        <Typography variant="body4">
+                                            {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
+                                                timeZone: 'Asia/Singapore',
+                                                year: 'numeric',
+                                                month: '2-digit',
+                                                day: '2-digit',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </Typography>
+                                    </StyledTableCell>
+                                    <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
+                                    <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
+                                    <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
+                                    <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
+                                    <StyledTableCell>
+                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        {tournament.status === "Live" || tournament.status === "Expired" ? (
+                                            <></>
+                                        ) : (
+                                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                                <Button
+                                                    variant="contained"
+                                                    color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                                    disabled={isJoined(tournament.id) || tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
+                                                    onClick={() => handleJoin(tournament)}
+                                                >
+                                                    {isJoined(tournament.id)
+                                                        ? 'Joined'  // Show "Joined" if the player has joined
+                                                        : tournament.currentPlayers >= tournament.maxPlayers
+                                                            ? 'Full'    // Show "Full" if the tournament is full
+                                                            : 'Join'}
+                                                </Button>
+                                                <Button
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
+                                                    style={{ marginLeft: '8px' }}
+                                                >
+                                                    <VisibilityIcon /> {/* Visibility Icon */}
+                                                </Button>
+                                            </div>
+                                        )}
 
-                                </StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
+                                    </StyledTableCell>
+                                </StyledTableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </div>
             {/* Dialog for Terms of Agreement */}
             <Dialog open={openDialog} onClose={handleDialogClose}>
                 <DialogTitle variant='header4' align="center">Registration for Chess Tournament</DialogTitle>
