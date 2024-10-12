@@ -70,7 +70,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/matches/**").permitAll()
                 .requestMatchers("/api/player/**").permitAll()
                 .requestMatchers(HttpMethod.GET,"/api/tournaments/**").permitAll()
-                .requestMatchers(HttpMethod.POST,"/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST,"/api/tournaments/**").permitAll()
                 .requestMatchers(HttpMethod.PUT,"/api/tournaments/**").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE,"/api/tournaments/**").hasAuthority("ADMIN")
                 .requestMatchers("/api/tournament-players/**").permitAll()

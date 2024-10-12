@@ -141,10 +141,16 @@ public class EloService {
         EloRequestDTO winner = new EloRequestDTO(winnerId, winnerElo);
         EloRequestDTO loser = new EloRequestDTO(loserId, loserElo);
 
+        System.out.println("winnerelo" + winnerElo);
+        System.out.println("loserelo" +loserElo);
+
         // Elo Algorithm
         int[] changedElo = calculateEloChange(winner.getCurrentElo(), loser.getCurrentElo());
         int newWinnerElo = changedElo[0];
         int newLoserElo = changedElo[1];
+
+        System.out.println("new winnerelo" + newWinnerElo);
+        System.out.println("new loserelo" + newLoserElo);
 
         // Update Player's Elo
         String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
