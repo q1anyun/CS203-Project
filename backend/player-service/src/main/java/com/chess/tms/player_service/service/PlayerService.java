@@ -1,8 +1,5 @@
 package com.chess.tms.player_service.service;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -141,9 +138,15 @@ public class PlayerService {
     public List<RankingDTO> findTop100Players() {
         List<PlayerDetails> top100 = playerDetailsRepository.findByOrderByEloRatingDesc(Limit.of(100));
 
-        List<RankingDTO> dtoList = Arrays.stream(top100.toArray(new PlayerDetails[100]))
-        .map(this::convertToRankingDTO)
-        .collect(Collectors.toList());
+Iterator<PlayerDetails> iterator = top100.iterator();
+    
+List<RankingDTO> dtoList = new ArrayList<>();
+
+    while (iterator.hasNext()) {
+        PlayerDetails player = iterator.next();
+        RankingDTO dto = convertToRankingDTO(player);
+        dtoList.add(dto);
+    }
 
         return dtoList;
     }

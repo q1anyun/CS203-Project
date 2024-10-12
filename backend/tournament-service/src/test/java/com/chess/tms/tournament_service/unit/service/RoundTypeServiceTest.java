@@ -32,6 +32,7 @@ public class RoundTypeServiceTest {
         numberOfPlayersChoices = Arrays.asList(2, 4, 8, 16);
     }
 
+    
     @Test
     void testGetChoicesForNumberOfPlayers() {
         when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(numberOfPlayersChoices);
