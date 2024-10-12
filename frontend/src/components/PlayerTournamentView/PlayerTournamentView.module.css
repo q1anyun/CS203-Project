@@ -1,5 +1,4 @@
 .table {
-    margin: 20px auto;
     max-width: 1400px;
     border-radius: 8px; /* Rounded corners for the table */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
@@ -26,4 +25,11 @@
 .table td {
     border-bottom: none; /* Remove bottom border from data cells */
     text-align: center; /* Center align data text */
+}
+
+.container{
+    display: flex;
+    flex-direction: column;
+    margin: 20px auto;
+    max-width: 1400px;
 }

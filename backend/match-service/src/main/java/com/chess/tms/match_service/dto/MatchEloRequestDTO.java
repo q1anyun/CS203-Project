@@ -1,4 +1,4 @@
-package com.chess.tms.elo_service.dto;
+package com.chess.tms.match_service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -82,7 +82,7 @@ public class TournamentServiceTest {
         tournament.setName("Test Tournament");
         tournament.setStatus(Status.UPCOMING);
         tournament.setTimeControl(new GameType());
-        tournament.setCurrentPlayers(0);
+        tournament.setCurrentPlayers(2);
         tournament.setMaxPlayers(32);
         tournament.setMinElo(1000);
         tournament.setMaxElo(2000);
