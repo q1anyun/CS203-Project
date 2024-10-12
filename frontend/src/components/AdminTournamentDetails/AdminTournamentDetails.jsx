@@ -58,8 +58,8 @@ function AdminTournamentDetails() {
     const handleClick = async () => {
         console.log('Start button clicked');
 
-        if (tournament.currentPlayers < tournament.maxPlayers) {
-            setErrorMessage(`Not enough players to start the tournament.\nMinimum required: ${tournament.maxPlayers}\nCurrent players: ${tournament.currentPlayers}`);
+        if (tournament.currentPlayers < 2) {
+            setErrorMessage(`Not enough players to start the tournament.\nMinimum required: 2\nCurrent players: ${tournament.currentPlayers}`);
             setShowError(true); // Open the Snackbar
             return; // Prevent the function from proceeding
         }
