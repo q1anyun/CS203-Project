@@ -70,8 +70,9 @@ public class PlayerController {
     }
 
     @GetMapping("/elo/{id}")
-    public void getPlayerElo(@PathVariable("id") long id) {
-        playerService.getPlayerElo(id);
+    public ResponseEntity<Integer> getPlayerElo(@PathVariable("id") long id) {
+        Integer elo = playerService.getPlayerElo(id);
+        return ResponseEntity.ok(elo);
     }
 
     @PutMapping("/elo/{id}")

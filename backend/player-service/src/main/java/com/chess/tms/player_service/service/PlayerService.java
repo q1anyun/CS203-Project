@@ -173,7 +173,7 @@ List<RankingDTO> dtoList = new ArrayList<>();
         playerDetailsRepository.save(player);
     }
 
-    public int getPlayerElo(long id){
+    public Integer getPlayerElo(long id){
         PlayerDetails player = playerDetailsRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
         return player.getEloRating();
