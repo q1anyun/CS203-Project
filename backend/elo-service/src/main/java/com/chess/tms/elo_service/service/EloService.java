@@ -134,6 +134,7 @@ public class EloService {
         // Get Elo of Players
         int winnerElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + winnerId,
         Integer.class);
+        
         int loserElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + loserId,
                 Integer.class);
 
