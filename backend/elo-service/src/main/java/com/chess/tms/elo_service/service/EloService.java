@@ -128,8 +128,17 @@ public class EloService {
     }
 
     public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
-        EloRequestDTO winner = dto.getWinner();
-        EloRequestDTO loser = dto.getLoser();
+        long winnerId = dto.getWinner();
+        long loserId = dto.getLoser();
+
+        // Get Elo of Players
+        int winnerElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + winnerId,
+        Integer.class);
+        int loserElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + loserId,
+                Integer.class);
+
+        EloRequestDTO winner = new EloRequestDTO(winnerId, winnerElo);
+        EloRequestDTO loser = new EloRequestDTO(loserId, loserElo);
 
         // Elo Algorithm
         int[] changedElo = calculateEloChange(winner.getCurrentElo(), loser.getCurrentElo());

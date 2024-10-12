@@ -155,7 +155,16 @@ List<RankingDTO> dtoList = new ArrayList<>();
         PlayerDetails player = playerDetailsRepository.findById(playerId)
                 .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
 
+        player.setTotalMatches(player.getTotalMatches() + 1);
+        
+        if(newElo > player.getEloRating()) {
+            player.setTotalWins(player.getTotalWins() + 1);
+        } else {
+            player.setTotalLosses(player.getTotalLosses() + 1);
+        }
+
         player.setEloRating(newElo);
+    
 
         if(player.getHighestElo() == null || newElo > player.getHighestElo()) {
             player.setHighestElo(newElo);
@@ -163,6 +172,13 @@ List<RankingDTO> dtoList = new ArrayList<>();
 
         playerDetailsRepository.save(player);
     }
+
+    public int getPlayerElo(long id){
+        PlayerDetails player = playerDetailsRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
+        return player.getEloRating();
+    }
+
     public void uploadProfilePicture(Long playerId, MultipartFile file) throws IOException {
         // Create upload directory if it doesn't exist
         String uploadDir = "profile-picture"; // Change this to your desired path

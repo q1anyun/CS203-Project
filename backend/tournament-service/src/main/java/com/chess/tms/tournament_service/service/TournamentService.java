@@ -80,16 +80,20 @@ public class TournamentService {
 
     public String startTournament(long tournamentId) {
         Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
+        System.out.println("start tournament");
+        System.out.println("Tournament ID: " + tournamentId);
         if (tournamentOptional.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
         }
 
+        System.out.println("ran 1");
         Tournament tournament = tournamentOptional.get();
 
         if(tournament.getCurrentPlayers() < 2){
+            System.out.println("ran insufficient");
             throw new InsufficientPlayersException("Tournament cannot start with less than 2 players.");
         }
-        
+        System.out.println("ran 2");
         ResponseEntity<Long> response;
 
         try {
@@ -105,11 +109,15 @@ public class TournamentService {
             throw new MatchServiceException("Failed to start tournament due to match service communication error", ex);
         }
 
+        System.out.println("ran 3");
+
         tournament.setStatus(Status.LIVE);
         Optional<RoundType> roundTypeOptional = roundTypeRepository.findById(response.getBody());
         if (roundTypeOptional.isEmpty()) {
             throw new RoundTypeNotFoundException("RoundType with id " + response.getBody() + " does not exist.");
         }
+
+        System.out.println("ran 4");
 
         tournament.setCurrentRound(roundTypeOptional.get());
         tournamentRepository.save(tournament);

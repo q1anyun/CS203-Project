@@ -1,6 +1,7 @@
 package com.chess.tms.match_service.service;
 
 import com.chess.tms.match_service.dto.MatchDTO;
+import com.chess.tms.match_service.dto.MatchEloRequestDTO;
 import com.chess.tms.match_service.dto.TournamentDTO;
 import com.chess.tms.match_service.dto.TournamentPlayerEloDTO;
 import com.chess.tms.match_service.exception.GameTypeNotFoundException;
@@ -38,6 +39,9 @@ public class MatchService {
 
     @Value("${tournaments.service.url}")
     private String tournamentServiceUrl;
+
+    @Value("${elo.service.url}")
+    private String eloServiceUrl;
 
     public MatchService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -185,6 +189,17 @@ public class MatchService {
         match.setWinnerId(winnerId);
         match.setLoserId(match.getPlayer1Id().equals(winnerId) ? match.getPlayer2Id() : match.getPlayer1Id());
         match.setStatus(Match.MatchStatus.COMPLETED);
+
+                    // Update Elo of players
+
+                    eloServiceUrl = eloServiceUrl + "/api/elo/match";
+                    MatchEloRequestDTO winnerEloDto = new MatchEloRequestDTO();
+                    winnerEloDto.setWinner(match.getWinnerId());
+
+                    MatchEloRequestDTO loserEloDto = new MatchEloRequestDTO();
+                    loserEloDto.setLoser(match.getLoserId());
+                    
+                    restTemplate.put(eloServiceUrl, null);
 
         matchRepository.save(match);
 

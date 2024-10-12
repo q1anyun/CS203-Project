@@ -68,10 +68,17 @@ public class PlayerController {
     public ResponseEntity<List<RankingDTO>> findTop100Players() {
         return ResponseEntity.ok(playerService.findTop100Players());
     }
+
+    @GetMapping("/elo/{id}")
+    public void getPlayerElo(@PathVariable("id") long id) {
+        playerService.getPlayerElo(id);
+    }
+
     @PutMapping("/elo/{id}")
     public void updatePlayerElo(@PathVariable("id") long id, @RequestBody int newElo) {
         playerService.updatePlayerElo(id, newElo);
     }
+
     // for testing
     @PostMapping("/uploadProfile")
     public ResponseEntity<String> uploadProfilePicture(@RequestHeader("X-User-PlayerId") String id,

@@ -7,15 +7,11 @@ import com.chess.tms.tournament_service.model.RoundType;
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
 import com.chess.tms.tournament_service.repository.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
@@ -24,10 +20,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import org.springframework.web.client.RestTemplate;
@@ -35,10 +29,6 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -124,6 +114,9 @@ public class TournamentServiceIntegrationTest {
     public void testStartTournamentWithMockedMatchService() {
         Tournament tournament = createTournament();
 
+        registerPlayerForTournament(tournament, 100L);
+        registerPlayerForTournament(tournament, 101L);
+
         // Mock the external match service response
         mockServer.expect(requestTo(
             matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
@@ -147,6 +140,9 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void testStartTournamentWithMockedMatchServiceError() {
         Tournament tournament = createTournament();
+        registerPlayerForTournament(tournament, 100L);
+        registerPlayerForTournament(tournament, 101L);
+
 
         mockServer.expect(requestTo(
             matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
