@@ -54,11 +54,7 @@ public class EloController {
         return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
     }
 
-    @PostMapping("")
-    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
-        return ResponseEntity.ok(eloService.saveEloHistory(dto));
-    }
-
+ 
     @PutMapping("/match") 
     public void updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
         eloService.updateMatchPlayersElo(dto);
