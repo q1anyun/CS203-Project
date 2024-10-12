@@ -151,7 +151,7 @@ public class MatchService {
             }
         }
         return currentRoundType.getId();
-        //updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
+        // updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
     }
 
     // Get the RoundType based on the number of players
@@ -190,45 +190,43 @@ public class MatchService {
         match.setLoserId(match.getPlayer1Id().equals(winnerId) ? match.getPlayer2Id() : match.getPlayer1Id());
         match.setStatus(Match.MatchStatus.COMPLETED);
 
-                    // Update Elo of players
+        // Update Elo of players
 
-                    MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
-                    matchEloRequestDTO.setWinner(match.getWinnerId());
-                    matchEloRequestDTO.setLoser(match.getLoserId());
-                    
-                    restTemplate.put(eloServiceUrl + "/api/elo/match", matchEloRequestDTO);
+        MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
+        matchEloRequestDTO.setWinner(match.getWinnerId());
+        matchEloRequestDTO.setLoser(match.getLoserId());
+
+        restTemplate.put(eloServiceUrl + "/api/elo/match", matchEloRequestDTO);
 
         matchRepository.save(match);
 
         if (match.getNextMatchId() != null) {
             // Match nextMatch = matchRepository.findById(match.getNextMatchId())
-            //         .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
+            // .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
 
             // if (nextMatch.getPlayer1Id() == null) {
-            //     nextMatch.setPlayer1Id(winnerId);
+            // nextMatch.setPlayer1Id(winnerId);
             // } else if (nextMatch.getPlayer2Id() == null) {
-            //     nextMatch.setPlayer2Id(winnerId);
+            // nextMatch.setPlayer2Id(winnerId);
             // }
 
-            //matchRepository.save(nextMatch);
+            // matchRepository.save(nextMatch);
 
             // Check if round is completed
             RoundType roundType = roundTypeRepository.findById(match.getRoundType().getId())
                     .orElseThrow(
                             () -> new RoundTypeNotFoundException("Round type not found while checking next round"));
-                            System.out.println(roundType);
+            System.out.println(roundType);
 
             List<Match> roundMatches = matchRepository.findByTournamentIdAndRoundTypeId(match.getTournamentId(),
                     roundType.getId());
-                    
-            
+
             boolean roundCompleted = roundMatches.stream().allMatch(m -> m.getStatus() == Match.MatchStatus.COMPLETED);
-           
-            
+
             if (roundCompleted) {
                 Match nextMatch = matchRepository.findById(match.getNextMatchId())
-                .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
-                
+                        .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
+
                 updateCurrentRoundForTournament(match.getTournamentId(), nextMatch.getRoundType().getId());
                 // Assign matches for the next round
                 for (Match completedMatch : roundMatches) {
@@ -250,8 +248,9 @@ public class MatchService {
                 return "Tournament has advanced to the next round";
             }
             return "Winner advanced to the next round";
-        }else{
-            String updateTournamentUrl = tournamentServiceUrl + "/api/tournaments/" + match.getTournamentId()+"/winner/"+winnerId;
+        } else {
+            String updateTournamentUrl = tournamentServiceUrl + "/api/tournaments/" + match.getTournamentId()
+                    + "/winner/" + winnerId;
             restTemplate.put(updateTournamentUrl, null);
             return "Tournament completed";
         }
