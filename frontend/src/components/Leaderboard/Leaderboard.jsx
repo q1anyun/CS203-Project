@@ -41,7 +41,7 @@ function Leaderboard() {
                 firstName={profile.firstName}
                 lastName={profile.lastName}
                 eloRating={profile.eloRating}
-                profilePhoto={profile.photo}
+                profilePhoto={profile.profilePicture}
               />
             </Grid2>
           ))}
