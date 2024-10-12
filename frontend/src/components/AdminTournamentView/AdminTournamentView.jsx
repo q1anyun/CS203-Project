@@ -384,8 +384,8 @@ export default function AdminTournamentView() {
     }
 
     return (
-        <div>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <div className={styles.container}>
+            <Box sx={{ display: 'flex', alignItems: 'center'}}>
                 <Typography variant="header1" component="h2" className={styles.title}>
                     All Tournaments
                 </Typography>
