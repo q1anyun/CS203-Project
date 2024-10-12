@@ -79,7 +79,7 @@ public class SecurityConfiguration {
                 // Only admins can access /admin/** endpoints
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 // Users and admins can access /user/** endpoints
-                .requestMatchers("api/users/**").hasAuthority("Player")
+                .requestMatchers("/api/users/**").permitAll()
                .anyRequest().authenticated()  // All other requests require authentication
             )
             .sessionManagement(session -> session
