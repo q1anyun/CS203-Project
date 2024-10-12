@@ -43,6 +43,8 @@ public class AuthService {
             PlayerDetails playerDetails = playerDetailsRepository.findByUserId(user.getId())
                     .orElseThrow(() -> new UserNotFoundException("Player not found"));
             result.setPlayerId(playerDetails.getId());
+        } else{
+            result.setPlayerId(0L);
         }
 
         result.setEmail(user.getEmail());
