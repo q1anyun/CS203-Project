@@ -204,16 +204,16 @@ public class MatchService {
         matchRepository.save(match);
 
         if (match.getNextMatchId() != null) {
-            Match nextMatch = matchRepository.findById(match.getNextMatchId())
-                    .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
+            // Match nextMatch = matchRepository.findById(match.getNextMatchId())
+            //         .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
 
-            if (nextMatch.getPlayer1Id() == null) {
-                nextMatch.setPlayer1Id(winnerId);
-            } else if (nextMatch.getPlayer2Id() == null) {
-                nextMatch.setPlayer2Id(winnerId);
-            }
+            // if (nextMatch.getPlayer1Id() == null) {
+            //     nextMatch.setPlayer1Id(winnerId);
+            // } else if (nextMatch.getPlayer2Id() == null) {
+            //     nextMatch.setPlayer2Id(winnerId);
+            // }
 
-            matchRepository.save(nextMatch);
+            //matchRepository.save(nextMatch);
 
             // Check if round is completed
             RoundType roundType = roundTypeRepository.findById(match.getRoundType().getId())
@@ -229,6 +229,9 @@ public class MatchService {
            
             
             if (roundCompleted) {
+                Match nextMatch = matchRepository.findById(match.getNextMatchId())
+                .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
+                
                 updateCurrentRoundForTournament(match.getTournamentId(), nextMatch.getRoundType().getId());
                 // Assign matches for the next round
                 for (Match completedMatch : roundMatches) {
