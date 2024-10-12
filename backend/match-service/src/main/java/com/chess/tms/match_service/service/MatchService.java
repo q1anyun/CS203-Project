@@ -193,13 +193,11 @@ public class MatchService {
                     // Update Elo of players
 
                     eloServiceUrl = eloServiceUrl + "/api/elo/match";
-                    MatchEloRequestDTO winnerEloDto = new MatchEloRequestDTO();
-                    winnerEloDto.setWinner(match.getWinnerId());
-
-                    MatchEloRequestDTO loserEloDto = new MatchEloRequestDTO();
-                    loserEloDto.setLoser(match.getLoserId());
+                    MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
+                    matchEloRequestDTO.setWinner(match.getWinnerId());
+                    matchEloRequestDTO.setLoser(match.getLoserId());
                     
-                    restTemplate.put(eloServiceUrl, null);
+                    restTemplate.put(eloServiceUrl, matchEloRequestDTO);
 
         matchRepository.save(match);
 
