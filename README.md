@@ -1,8 +1,10 @@
 # Chess Tournament System
 
 ## Project Description 
-**CS203 Project 
-![System Diagram](frontend/src/assets/System%20Diagram.jpg)
+CS203 Project - Chess Tournament System built with SpringBoot and React.
+This project is currently working in progress.
+
+![System Diagram](frontend/src/assets/system_design.jpg)
 
 ## Team Members
 - [Philip](https://github.com/philipljh)  
