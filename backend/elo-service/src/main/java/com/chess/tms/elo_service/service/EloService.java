@@ -78,22 +78,15 @@ public class EloService {
     }
 
     public EloResponseDTO saveEloHistory(int oldElo, EloHistoryRequestDTO dto) {
-        List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
         EloHistory newEloHistory = new EloHistory();
 
         newEloHistory.setOldElo(oldElo);
-        if (!list.isEmpty()) {
-            newEloHistory.setOldElo(list.get(0).getNewElo());
-        }
         newEloHistory.setNewElo(dto.getNewElo());
         newEloHistory.setPlayerId(dto.getPlayerId());
         newEloHistory.setChangeReason(dto.getChangeReason());
         newEloHistory.setCreatedAt(LocalDateTime.now());
 
         eloRepository.save(newEloHistory);
-        // System.out.println(leaderboardServiceUrl + "/api/leaderboard/updateElo");
-        // restTemplate.put(leaderboardServiceUrl + "/api/leaderboard/updateElo", new
-        // EloUpdateDTO(dto.getPlayerId(), dto.getNewElo()));
 
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
@@ -128,6 +121,7 @@ public class EloService {
     }
 
     public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
+        System.out.println("Running updateMatchPlayersElo in Elo Service 2");
         long winnerId = dto.getWinner();
         long loserId = dto.getLoser();
 
@@ -152,18 +146,19 @@ public class EloService {
         System.out.println("new winnerelo" + newWinnerElo);
         System.out.println("new loserelo" + newLoserElo);
 
-        // Update Player's Elo
-        String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
-        String loserServiceUrl = playersServiceUrl + "/api/player/elo/" + loser.getPlayerId();
-
-        restTemplate.put(winnerServiceUrl, newWinnerElo);
-        restTemplate.put(loserServiceUrl, newLoserElo);
 
         // Save Elo History
         EloHistoryRequestDTO winnerHistory = new EloHistoryRequestDTO(winner.getPlayerId(), newWinnerElo, Reason.WIN);
         EloHistoryRequestDTO loserHistory = new EloHistoryRequestDTO(loser.getPlayerId(), newLoserElo, Reason.LOSS);
         saveEloHistory(winnerElo, winnerHistory);
         saveEloHistory(loserElo, loserHistory);
+
+        // Update Player's Elo
+        String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
+        String loserServiceUrl = playersServiceUrl + "/api/player/elo/" + loser.getPlayerId();
+
+        restTemplate.put(winnerServiceUrl, newWinnerElo);
+        restTemplate.put(loserServiceUrl, newLoserElo);
     }
 
     public List<EloHistoryChartDTO> findPlayerEloHistoryForChart(long id) {

@@ -77,6 +77,7 @@ public class PlayerController {
 
     @PutMapping("/elo/{id}")
     public void updatePlayerElo(@PathVariable("id") long id, @RequestBody int newElo) {
+        System.out.println("Updating player "+id+" elo:" + newElo);
         playerService.updatePlayerElo(id, newElo);
     }
 

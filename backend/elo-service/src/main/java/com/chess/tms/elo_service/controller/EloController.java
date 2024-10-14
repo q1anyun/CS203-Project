@@ -57,6 +57,7 @@ public class EloController {
  
     @PutMapping("/match") 
     public void updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
+        System.out.println("Running updateMatchPlayersElo in Elo Service");
         eloService.updateMatchPlayersElo(dto);
     }
 

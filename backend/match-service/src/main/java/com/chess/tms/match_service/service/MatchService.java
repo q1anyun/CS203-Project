@@ -195,7 +195,8 @@ public class MatchService {
         MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
         matchEloRequestDTO.setWinner(match.getWinnerId());
         matchEloRequestDTO.setLoser(match.getLoserId());
-
+        System.out.println("Running updateMatchPlayersElo");
+        System.out.println(matchEloRequestDTO);
         restTemplate.put(eloServiceUrl + "/api/elo/match", matchEloRequestDTO);
 
         matchRepository.save(match);
