@@ -69,89 +69,97 @@ function TournamentDetails() {
         </Typography>
         <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
       </Box>
-
-
       {/* Card for Tournament Rounds */}
-      <Card sx={{ marginBottom: 2 }}>
-        <CardContent>
 
-          {Object.entries(matchesByRound).map(([roundName, matches]) => (
-            <Box key={roundName} sx={{ marginBottom: 3 }}>
-              <Typography variant="header2" gutterBottom >
-                {roundName}
-                <span style={{ fontSize: '15px', fontWeight: 'medium', marginLeft: '10px', letterSpacing: '0.5px' }}>Tournament Bracket</span></Typography>
+      {Object.keys(matchesByRound).length > 0 ? (
 
-              <Grid container spacing={2} marginLeft='5px'>
-                {matches.map((match) => (
-                  <Grid item xs={4} key={match.id}>
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        p: 2, 
-                        backgroundColor: 'background.paper',
-                        border: '1px solid',
-                        borderColor: 'divider', 
-                        borderRadius: 2, 
-                      }}
-                    >
-                      {/* Box for Date of the Event at the Top */}
-                      <Box sx={{ mb: 2 }}> 
-                        <Typography
-                          variant="body4"
-                          textAlign={'left'}
-                        >
-                          Date of the Event
-                        </Typography>
-                      </Box>
+        <Card sx={{ marginBottom: 2 }}>
+          <CardContent>
 
-                      {/* Flexbox for Players and Winner */}
-                      <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                        {/* Left Column for Players */}
-                        <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                            <Avatar alt={`Player ${match.player1Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
-                            <Typography variant="header3" >
-                              Player {match.player1Id}
-                            </Typography>
+            {Object.entries(matchesByRound).map(([roundName, matches]) => (
+              <Box key={roundName} sx={{ marginBottom: 3 }}>
+                <Typography variant="header2" gutterBottom >
+                  {roundName}
+                  <span style={{ fontSize: '15px', fontWeight: 'medium', marginLeft: '10px', letterSpacing: '0.5px' }}>Tournament Bracket</span></Typography>
+
+                <Grid container spacing={2} marginLeft='5px'>
+                  {matches.map((match) => (
+                    <Grid item xs={4} key={match.id}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          p: 2,
+                          backgroundColor: 'background.paper',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          borderRadius: 2,
+                        }}
+                      >
+                        {/* Box for Date of the Event at the Top */}
+                        <Box sx={{ mb: 2 }}>
+                          <Typography
+                            variant="body4"
+                            textAlign={'left'}
+                          >
+                            Date of the Event
+                          </Typography>
+                        </Box>
+
+                        {/* Flexbox for Players and Winner */}
+                        <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                          {/* Left Column for Players */}
+                          <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                              <Avatar alt={`Player ${match.player1Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
+                              <Typography variant="header3" >
+                                Player {match.player1Id}
+                              </Typography>
+                            </Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                              <Avatar alt={`Player ${match.player2Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
+                              <Typography variant="header3" >
+                                Player {match.player2Id}
+                              </Typography>
+                            </Box>
                           </Box>
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Avatar alt={`Player ${match.player2Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
-                            <Typography variant="header3" >
-                              Player {match.player2Id}
+
+                          {/* Divider */}
+                          <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} /> {/* marginLeft: 80px, marginRight: 40px */}
+
+                          {/* Right Column for Winner */}
+                          <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
+                            <Typography variant="body4">
+                              Winner:
+                            </Typography>
+                            <Box sx={{ mb: 2 }}>
+                              <Avatar
+                                alt={`Winner ${match.winnerId}`}
+                                src={match.winnerId ? `../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg` : '/path/to/default-avatar.jpg'} // Fallback avatar
+                                sx={{ width: 56, height: 56, justifyContent: 'center', alignContent: 'center' }} // Adjust size as needed
+                              />
+                            </Box>
+                            <Typography variant="header3">
+                              {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
                             </Typography>
                           </Box>
                         </Box>
-
-                        {/* Divider */}
-                        <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} /> {/* marginLeft: 80px, marginRight: 40px */}
-
-                        {/* Right Column for Winner */}
-                        <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
-                          <Typography variant="body4">
-                            Winner:
-                          </Typography>
-                          <Box sx={{ mb: 2 }}>
-                            <Avatar
-                              alt={`Winner ${match.winnerId}`}
-                              src={match.winnerId ? `../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg` : '/path/to/default-avatar.jpg'} // Fallback avatar
-                              sx={{ width: 56, height: 56, justifyContent: 'center', alignContent: 'center' }} // Adjust size as needed
-                            />
-                          </Box>
-                          <Typography variant="header3">
-                            {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
-                          </Typography>
-                        </Box>
                       </Box>
-                    </Box>
 
-                  </Grid>
-                ))}
-              </Grid>
-            </Box>
-          ))}
-        </CardContent>
-      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            ))}
+          </CardContent>
+        </Card>
+      ) : (
+        <Typography variant="homePage2" marginLeft={'20px'}>
+          Matches not available yet as the tournament has not started.
+        </Typography>
+      )}
+
+
 
     </Box>
 

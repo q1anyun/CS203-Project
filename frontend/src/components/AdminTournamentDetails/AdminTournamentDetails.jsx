@@ -133,9 +133,9 @@ function AdminTournamentDetails() {
                         </DialogActions>
                     </Dialog>
 
-                    {/* <Typography variant="body4" gutterBottom marginLeft={'20px'}>
-                        Description of the event
-                    </Typography> */}
+                     <Typography variant="body4" gutterBottom marginLeft={'20px'}>
+                        Current number of registered players: {tournament.currentPlayers}
+                    </Typography> 
                 </Box>
 
                 {/* Start button on the right */}
