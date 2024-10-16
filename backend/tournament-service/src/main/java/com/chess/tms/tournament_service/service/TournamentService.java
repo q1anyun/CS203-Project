@@ -186,6 +186,9 @@ public class TournamentService {
 
         Tournament tournament = tournamentOptional.get();
 
+        if (dto.getName() != null) {
+            tournament.setName(dto.getName());
+        }
         if (dto.getStartDate() != null) {
             tournament.setStartDate(dto.getStartDate());
         }
