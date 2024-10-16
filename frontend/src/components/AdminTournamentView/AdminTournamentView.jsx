@@ -320,33 +320,32 @@ export default function AdminTournamentView() {
     };
 
     const handleEditSubmit = async () => {
-
+    
         if (validateForm(updateTournament)) {
-
-
             const updatedTournamentData = {
                 ...updateTournament,
-
             };
-            console.log(updatedTournamentData)
+            console.log(updatedTournamentData);
+    
             try {
-                // Send the update request to the backend (assuming PUT is for updating)
-
+                // Send the update request to the backend
                 const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Include JWT token
                     }
                 });
-
+                console.log(response.data); 
+    
                 // Update the tournaments list by replacing the updated tournament
                 const updatedTournaments = tournaments.map(t =>
-                    t.tournamentId === tournamentToEdit ? response.data : t
+                    t.tournamentId === tournamentToEdit.id ? response.data : t
                 );
-
+    
                 // Update the state with the new tournaments data
                 setTournaments(updatedTournaments);
-
-                // Reset to default values after successful edit
+                console.log(tournaments); 
+    
+                // Reset form values
                 setUpdateTournament({
                     name: '',
                     startDate: '',
@@ -356,22 +355,23 @@ export default function AdminTournamentView() {
                     maxElo: '',
                     maxPlayers: ''
                 });
-
+    
                 // Close the edit dialog
                 setEditDialogOpen(false);
+    
+                // Optionally reload the page, but not recommended
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
-                    console.error('Error data:', error.response.data); // Backend response
-                    console.error('Error status:', error.response.status); // HTTP status code
-                    console.error('Error headers:', error.response.headers); // Headers
+                    console.error('Error data:', error.response.data);
+                    console.error('Error status:', error.response.status);
+                    console.error('Error headers:', error.response.headers);
                 } else {
-                    console.error('Error message:', error.message); // General error
+                    console.error('Error message:', error.message);
                 }
             }
         }
     };
-
 
 
 
@@ -704,8 +704,8 @@ export default function AdminTournamentView() {
                     <Button onClick={handleEditDialogClose} color="secondary">
                         Cancel
                     </Button>
-                    <Button onClick={handleEditSubmit} color="primary" disabled={loading}> {/* Disable button if loading */}
-                        {loading ? 'Saving...' : 'Save'}
+                    <Button onClick={handleEditSubmit} color="primary" > {/* Disable button if loading */}
+                        Save
                     </Button>
                 </DialogActions>
             </Dialog>
