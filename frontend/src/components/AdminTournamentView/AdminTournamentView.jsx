@@ -132,6 +132,7 @@ export default function AdminTournamentView() {
         }
 
         // Clear error and return true if validation passes
+        setEloError('');
         setCreateFormError('');
         return true;
     };
@@ -510,8 +511,6 @@ export default function AdminTournamentView() {
                                 value={newTournament.minElo}
                                 onChange={handleInputChange}
                                 fullWidth
-                                error={newTournament.minElo < 0}
-                                helperText={newTournament.minElo < 0 ? "Min Elo must be more than 0." : ""}
                             />
                         </Grid2>
 
@@ -628,8 +627,6 @@ export default function AdminTournamentView() {
                                 value={updateTournament.minElo}
                                 onChange={handleEditInputChange}
                                 fullWidth
-                                error={updateTournament.minElo < 0}
-                                helperText={updateTournament.minElo < 0 ? "Min Elo must be more than 0." : ""}
                             />
                         </Grid2>
 
@@ -641,8 +638,8 @@ export default function AdminTournamentView() {
                                 value={updateTournament.maxElo}
                                 onChange={handleEditInputChange}
                                 fullWidth
-                                error={updateTournament.maxElo < updateTournament.minElo}
-                                helperText={updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
+                                error={!!eloError && updateTournament.maxElo < updateTournament.minElo}
+                                helperText={!!eloError && updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                             />
                         </Grid2>
 
