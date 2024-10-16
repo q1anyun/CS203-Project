@@ -52,6 +52,7 @@ export default function AdminTournamentView() {
     const [errors, setErrors] = useState({});
 
     const [createFormError, setCreateFormError] = useState('');
+    const [eloError, setEloError] = useState('');
 
 
     const token = localStorage.getItem('token');
@@ -124,7 +125,9 @@ export default function AdminTournamentView() {
         }
 
         const { minElo, maxElo } = tournament;
-        if (minElo < 0 || maxElo < minElo) {
+        if (maxElo < minElo) {
+            setEloError('Max ELO must be greater than Min ELO.');
+            setCreateFormError('');
             return false;
         }
 
@@ -385,7 +388,7 @@ export default function AdminTournamentView() {
 
     return (
         <div className={styles.container}>
-            <Box sx={{ display: 'flex', alignItems: 'center'}}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <Typography variant="header1" component="h2" className={styles.title}>
                     All Tournaments
                 </Typography>
@@ -551,8 +554,8 @@ export default function AdminTournamentView() {
                                 value={newTournament.maxElo}
                                 onChange={handleInputChange}
                                 fullWidth
-                                error={newTournament.maxElo < newTournament.minElo}
-                                helperText={newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
+                                error={!!eloError && newTournament.maxElo < newTournament.minElo}
+                                helperText={!!eloError && newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                             />
                         </Grid2>
                         <Grid2 size={12}>
