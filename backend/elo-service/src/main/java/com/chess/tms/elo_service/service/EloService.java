@@ -27,6 +27,7 @@ import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
+import com.chess.tms.elo_service.dto.WinLossUpdateDTO;
 
 @Service
 public class EloService {
@@ -89,6 +90,22 @@ public class EloService {
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
 
+    public EloResponseDTO saveEloHistory(EloHistoryRequestDTO dto) {
+        EloHistory newEloHistory = new EloHistory();
+        List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
+        if (!list.isEmpty()) {
+            newEloHistory.setOldElo(list.get(0).getNewElo());
+        }
+        newEloHistory.setNewElo(dto.getNewElo());
+        newEloHistory.setPlayerId(dto.getPlayerId());
+        newEloHistory.setChangeReason(dto.getChangeReason());
+        newEloHistory.setCreatedAt(LocalDateTime.now());
+
+        eloRepository.save(newEloHistory);
+
+        return DTOUtil.convertEntryToResponseDTO(newEloHistory);
+    }
+
     public List<EloResponseDTO> findByPlayerIdAndChangeReason(long playerId, String changeReason) {
         Reason reason = Reason.WIN;
         if (changeReason.equals("win")) {
@@ -106,14 +123,21 @@ public class EloService {
     }
 
     public int[] calculateEloChange(int winnerElo, int loserElo) {
-        double p1 = (1.0 / (1.0 + (Math.pow(10, (winnerElo - loserElo) / 400))));
-        double p2 = (1.0 / (1.0 + (Math.pow(10, (loserElo - winnerElo) / 400))));
-        int k = 30;
+        double winnerWinProb = 1.0 / (1.0 + (Math.pow(10, (loserElo - winnerElo) / 400)));
+        double loserWinProb = 1.0 / (1.0 + (Math.pow(10, (winnerElo - loserElo) / 400)));
+
+        // System.out.println("p1: " + winnerWinProb);
+        // System.out.println("p2: " + loserWinProb);
+
+        int k = 32;
 
         int[] changedElo = new int[2];
 
-        changedElo[0] = (int) (winnerElo + (1.0 - p1) * k);
-        changedElo[1] = (int) (loserElo + (0.0 - p2) * k);
+        changedElo[0] = (int) (winnerElo + (1.0 - winnerWinProb) * k);
+        changedElo[1] = (int) (loserElo + (0.0 - loserWinProb) * k);
+
+        if (changedElo[0] == winnerElo) changedElo[0] += 1;
+        if (changedElo[1] == loserElo) changedElo[1] -= 1;
 
         return changedElo;
     }
@@ -130,11 +154,15 @@ public class EloService {
         int loserElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + loserId,
                 Integer.class);
 
+        //testing
+        // int winnerElo = eloRepository.findByPlayerIdOrderByCreatedAtDesc(winnerId).get(0).getNewElo();
+        // int loserElo = eloRepository.findByPlayerIdOrderByCreatedAtDesc(loserId).get(0).getNewElo();
+
         EloRequestDTO winner = new EloRequestDTO(winnerId, winnerElo);
         EloRequestDTO loser = new EloRequestDTO(loserId, loserElo);
 
         System.out.println("winnerelo" + winnerElo);
-        System.out.println("loserelo" +loserElo);
+        System.out.println("loserelo" + loserElo);
 
         // Elo Algorithm
         int[] changedElo = calculateEloChange(winner.getCurrentElo(), loser.getCurrentElo());
@@ -152,11 +180,12 @@ public class EloService {
         saveEloHistory(loserElo, loserHistory);
 
         // Update Player's Elo
-        String winnerServiceUrl = playersServiceUrl + "/api/player/elo/" + winner.getPlayerId();
-        String loserServiceUrl = playersServiceUrl + "/api/player/elo/" + loser.getPlayerId();
-
-        restTemplate.put(winnerServiceUrl, newWinnerElo);
-        restTemplate.put(loserServiceUrl, newLoserElo);
+        String updateServiceUrl = playersServiceUrl + "/api/player/updateWinLossElo" ;
+    
+        WinLossUpdateDTO winDto = new WinLossUpdateDTO(winnerId, newWinnerElo, true);
+        WinLossUpdateDTO lossDto = new WinLossUpdateDTO(loserId, newLoserElo, false);
+        restTemplate.put(updateServiceUrl, winDto);
+        restTemplate.put(updateServiceUrl, lossDto);
     }
 
     public List<EloHistoryChartDTO> findPlayerEloHistoryForChart(long id) {

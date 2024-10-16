@@ -17,6 +17,7 @@ import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
 import com.chess.tms.player_service.dto.RankingDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
+import com.chess.tms.player_service.dto.WinLossUpdateDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.repository.PlayerDetailsRepository;
@@ -151,23 +152,23 @@ List<RankingDTO> dtoList = new ArrayList<>();
         return dtoList;
     }
     // Update player elo rating
-    public void updatePlayerElo(long playerId, int newElo) {
-        PlayerDetails player = playerDetailsRepository.findById(playerId)
-                .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+    public void updateWinLossElo(WinLossUpdateDTO dto) {
+        PlayerDetails player = playerDetailsRepository.findById(dto.getPlayerId())
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + dto.getPlayerId() + " not found"));
 
         player.setTotalMatches(player.getTotalMatches() + 1);
         
-        if(newElo > player.getEloRating()) {
+        
+        player.setEloRating(dto.getNewElo());
+
+        if(dto.isWinner()) {
             player.setTotalWins(player.getTotalWins() + 1);
         } else {
             player.setTotalLosses(player.getTotalLosses() + 1);
         }
 
-        player.setEloRating(newElo);
-    
-
-        if(player.getHighestElo() == null || newElo > player.getHighestElo()) {
-            player.setHighestElo(newElo);
+        if(player.getHighestElo() == null || dto.getNewElo() > player.getHighestElo()) {
+            player.setHighestElo(dto.getNewElo());
         }
 
         playerDetailsRepository.save(player);
@@ -205,5 +206,22 @@ List<RankingDTO> dtoList = new ArrayList<>();
 
         return player.getEloRating();
     }
+
+    // public Integer updateWinLoss(WinLossUpdateDTO dto) {
+    //     PlayerDetails player = playerDetailsRepository.findById(dto.getPlayerId())
+    //         .orElseThrow(() -> new UserNotFoundException("Player with id " + dto.getPlayerId() + " not found"));
+
+    //     int toReturn = player.getTotalLosses() - 1;
+    //     if(dto.isWinner()) {
+    //         toReturn = player.getTotalWins() + 1;
+    //         player.setTotalWins(toReturn);
+    //     } else {
+    //         player.setTotalLosses(toReturn);
+    //     }
+
+    //     playerDetailsRepository.save(player);
+
+    //     return toReturn;
+    // }
 
 }
