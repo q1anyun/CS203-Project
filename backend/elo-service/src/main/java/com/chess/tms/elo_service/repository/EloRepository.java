@@ -32,10 +32,10 @@ public interface EloRepository extends JpaRepository<EloHistory, Long>{
 
     public Optional<EloHistory> findByPlayerIdAndCreatedAt(long playerId, LocalDateTime createdAt);
 
-@Query(value = "SELECT * FROM elo_history e WHERE e.player_id = :playerId AND e.created_at IN " +
-       "(SELECT MAX(eh.created_at) FROM elo_history eh WHERE eh.player_id = :playerId " +
-       "GROUP BY DATE(eh.created_at)) " +
-       "ORDER BY e.created_at DESC LIMIT 5", nativeQuery = true)
-List<EloHistory> findLatestEloHistoryByPlayerId(@Param("playerId") Long playerId);
+    @Query(value = "SELECT * FROM elo_history e WHERE e.player_id = :playerId AND e.created_at IN " +
+        "(SELECT MAX(eh.created_at) FROM elo_history eh WHERE eh.player_id = :playerId " +
+        "GROUP BY DATE(eh.created_at)) " +
+        "ORDER BY e.created_at DESC LIMIT 5", nativeQuery = true)
+    List<EloHistory> findLatestEloHistoryByPlayerId(@Param("playerId") Long playerId);
     
 }

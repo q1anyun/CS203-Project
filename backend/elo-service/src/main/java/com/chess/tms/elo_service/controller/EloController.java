@@ -39,18 +39,18 @@ public class EloController {
     }
 
     @GetMapping("/{playerId}")
-    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerId(@PathVariable long playerId) {
+    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerId(@PathVariable("playerId") long playerId) {
         return ResponseEntity.ok(eloService.findEloHistoryByPlayerId(playerId));
     }
 
     @GetMapping("/{playerId}/{changeReason}")
-    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerId(@PathVariable long playerId, @PathVariable String changeReason) {
+    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable("changeReason") String changeReason) {
         return ResponseEntity.ok(eloService.findByPlayerIdAndChangeReason(playerId, changeReason));
     }
 
 
-    @DeleteMapping("/delete-{playerId}") 
-    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable long playerId) {
+    @DeleteMapping("/delete/{playerId}") 
+    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable("playerId") long playerId) {
         return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
     }
 
@@ -68,7 +68,7 @@ public class EloController {
     }
 
     @GetMapping("/chart/{id}")
-    public ResponseEntity<List<EloHistoryChartDTO>> findPlayerEloHistoryForChart(@PathVariable long id) {
+    public ResponseEntity<List<EloHistoryChartDTO>> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
 }

@@ -124,8 +124,8 @@ function AdminTournamentDetails() {
                         <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                     </Box>
                     <Dialog open={showError} onClose={() => setShowError(false)}>
-                        <DialogTitle variant= 'header3'>Error</DialogTitle>
-                        <DialogContent variant ='body4' style={{ whiteSpace: 'pre-line' }}>
+                        <DialogTitle variant='header3'>Error</DialogTitle>
+                        <DialogContent variant='body4' style={{ whiteSpace: 'pre-line' }}>
                             {errorMessage}
                         </DialogContent>
                         <DialogActions>
@@ -133,9 +133,9 @@ function AdminTournamentDetails() {
                         </DialogActions>
                     </Dialog>
 
-                     <Typography variant="body4" gutterBottom marginLeft={'20px'}>
+                    <Typography variant="body4" gutterBottom marginLeft={'20px'}>
                         Current number of registered players: {tournament.currentPlayers}
-                    </Typography> 
+                    </Typography>
                 </Box>
 
                 {/* Start button on the right */}
@@ -167,6 +167,7 @@ function AdminTournamentDetails() {
                                                     border: '1px solid',
                                                     borderColor: 'divider', // use theme divider color
                                                     borderRadius: 2, // borderRadius: 5px, using theme spacing
+                                                    height: '220px'
                                                 }}
                                             >
                                                 {/* Box for Date of the Event at the Top */}
@@ -177,32 +178,37 @@ function AdminTournamentDetails() {
                                                     >
                                                         Date of the Event
                                                     </Typography>
-                                                    <IconButton
-                                                        onClick={() => handleEditWinner(match)}
-                                                        disabled={match.player1Id == null || match.player2Id == null}  // Disable if match.winnerId exists
-                                                        aria-label="edit winner"
-                                                    >
-                                                        <EditIcon />
-                                                    </IconButton>
+                                                    {!match.winnerId && (
+                                                        <IconButton
+                                                            onClick={() => handleEditWinner(match)}
+                                                            aria-label="edit winner"
+                                                            sx={{ marginLeft: '8px' }}
+                                                        >
+                                                            <EditIcon />
+                                                        </IconButton>
+                                                    )}
                                                 </Box>
+
+
 
                                                 {/* Flexbox for Players and Winner */}
                                                 <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                                                    {/* Left Column for Players */}
-                                                    <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                                                            <Avatar alt={`Player ${match.player1Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
-                                                            <Typography variant="header3" >
-                                                                Player {match.player1Id}
-                                                            </Typography>
+                                                    {match.player1Id && match.player2Id ? (
+                                                        <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+                                                                <Avatar alt={`Player ${match.player1Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player1Id}.jpg`} sx={{ mr: 1 }} />
+                                                                <Typography variant="header3">Player {match.player1Id}</Typography>
+                                                            </Box>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                                                                <Avatar alt={`Player ${match.player2Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player2Id}.jpg`} sx={{ mr: 1 }} />
+                                                                <Typography variant="header3">Player {match.player2Id}</Typography>
+                                                            </Box>
                                                         </Box>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                                            <Avatar alt={`Player ${match.player2Id}`} src={`../../../backend/player-service/profile-picture/player_${match.player2Id}.jpg`} sx={{ mr: 1 }} />
-                                                            <Typography variant="header3" >
-                                                                Player {match.player2Id}
-                                                            </Typography>
-                                                        </Box>
-                                                    </Box>
+                                                    ) : (
+                                                        <Typography variant="header3" sx={{ mb: 2 }}>
+                                                            Advance Player
+                                                        </Typography>
+                                                    )}
 
                                                     {/* Divider */}
                                                     <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} />
@@ -258,9 +264,10 @@ function AdminTournamentDetails() {
                 <Typography variant="homePage2" marginLeft={'20px'}>
                     Matches not available yet as the tournament has not started.
                 </Typography>
-            )}
+            )
+            }
 
-        </Box>
+        </Box >
     );
 }
 

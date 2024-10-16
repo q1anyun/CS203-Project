@@ -15,7 +15,6 @@ import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.repository.EloRepository;
 import com.chess.tms.elo_service.enums.Reason;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import jakarta.transaction.Transactional;
@@ -27,7 +26,6 @@ import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
-import com.chess.tms.elo_service.dto.EloUpdateDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 
 @Service

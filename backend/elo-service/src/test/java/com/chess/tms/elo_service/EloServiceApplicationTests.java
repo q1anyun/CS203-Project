@@ -1,4 +1,4 @@
-package com.chess.tms.result_service;
+package com.chess.tms.elo_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
