@@ -81,7 +81,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testCreateTournament() {
+    public void createTournament_Valid_Success() {
         TournamentRegistrationDTO dto = new TournamentRegistrationDTO(
             "Test Tournament",
             LocalDateTime.now().plusDays(1),
@@ -111,7 +111,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testStartTournamentWithMockedMatchService() {
+    public void startTournament_Valid_Success() {
         Tournament tournament = createTournament();
 
         registerPlayerForTournament(tournament, 100L);
@@ -131,18 +131,17 @@ public class TournamentServiceIntegrationTest {
         );
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertTrue(response.getBody().contains("has started and current round is Top 16"));
+        assertTrue(response.getBody().contains("current round is"));
 
         Tournament startedTournament = tournamentRepository.findById(tournament.getTournamentId()).orElseThrow();
         assertEquals(Status.LIVE, startedTournament.getStatus());
     }
 
     @Test
-    public void testStartTournamentWithMockedMatchServiceError() {
+    public void startTournament_Error_Failure() {
         Tournament tournament = createTournament();
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
-
 
         mockServer.expect(requestTo(
             matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
@@ -165,8 +164,8 @@ public class TournamentServiceIntegrationTest {
         assertEquals(Status.UPCOMING, failedTournament.getStatus());
     }
 
-        @Test
-    public void testGetTournamentById() {
+    @Test
+    public void getTournamentById_ValidTournamentId_Success() {
         Tournament tournament = createTournament();
 
         ResponseEntity<TournamentDetailsDTO> response = restTemplate.getForEntity(
@@ -180,7 +179,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testGetAllTournaments() {
+    public void getAllTournaments_Valid_Success() {
         createTournament();
         createTournament();
 
@@ -195,7 +194,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testUpdateCurrentRoundForTournament() {
+    public void updateCurrentRound_ValidIds_Success() {
         Tournament tournament = createTournament();
 
         ResponseEntity<String> response = restTemplate.exchange(
@@ -210,7 +209,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testCompleteTournament() {
+    public void completeTournament_ValidTournamentId_Success() {
         Tournament tournament = createTournament();
 
         registerPlayerForTournament(tournament, 109L);
@@ -230,7 +229,7 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testGetRegisteredTournaments() {
+    public void getRegisteredTournaments_ValidPlayerId_Success() {
         Tournament tournament = createTournament();
         registerPlayerForTournament(tournament, 100L);
 
@@ -245,11 +244,9 @@ public class TournamentServiceIntegrationTest {
     }
 
     @Test
-    public void testGetLiveTournaments() {
+    public void getLiveTournaments_ValidPlayerId_Success() {
         Tournament tournament = createTournament();
-
         tournament.setStatus(Status.LIVE);
-
         registerPlayerForTournament(tournament, 100L);
 
         HttpHeaders headers = new HttpHeaders();

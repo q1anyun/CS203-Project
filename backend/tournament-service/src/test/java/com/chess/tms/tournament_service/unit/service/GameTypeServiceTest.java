@@ -44,7 +44,7 @@ public class GameTypeServiceTest {
     }
 
     @Test
-    void testGetGameTypes() {
+    void getGameTypes_Valid_ReturnListOfGameTypes() {
         when(gameTypeRepository.findAll()).thenReturn(gameTypes);
 
         List<GameType> result = gameTypeService.getGameTypes();

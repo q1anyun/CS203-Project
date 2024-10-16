@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ class GameTypeControllerTest {
     }
 
     @Test
-    void testGetGameTypes() throws Exception {
+    void getGameTypes_Valid_ReturnListOfGameTypes() throws Exception {
         GameType gameType1 = new GameType();
         gameType1.setId(1L);
         gameType1.setName("Blitz");

@@ -44,7 +44,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testCreateTournament() throws Exception {
+    void createTournament_ValidInput_ReturnSuccess() throws Exception {
         String jsonPayload = """
                 {
                     "name": "Test Tournament",
@@ -71,7 +71,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testCreateTournamentWithMissingName() throws Exception {
+    void createTournament_MissingFields_ReturnBadRequest() throws Exception {
         String jsonPayload = """
                 {
                     "startDate": "2024-01-01T10:00:00",
@@ -88,11 +88,12 @@ class TournamentControllerTest {
                 .content(jsonPayload)
                 .header("X-User-Id", "1"))
                 .andExpect(status().isBadRequest());
+
         verify(tournamentService, times(0)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
     }
 
     @Test
-    void testStartTournament() throws Exception {
+    void startTournament_ValidTournamentId_ReturnSuccess() throws Exception {
         when(tournamentService.startTournament(1L)).thenReturn("Tournament started successfully");
 
         mockMvc.perform(post("/api/tournaments/start/1"))
@@ -103,7 +104,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testGetTournament() throws Exception {
+    void getTournament_ValidTournamentId_ReturnsTournamentDetails() throws Exception {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(1L);
         dto.setName("Test Tournament");
@@ -119,7 +120,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testGetAllTournaments() throws Exception {
+    void getAllTournaments_Valid_ReturnTournaments() throws Exception {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(1L);
         dto.setName("Test Tournament");
@@ -135,7 +136,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testUpdateTournament() throws Exception {
+    void updateTournament_ValidInputs_ReturnSuccess() throws Exception {
         String jsonPayload = """
                 {
                     "name": "Test Tournament",
@@ -158,16 +159,16 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testDeleteTournament() throws Exception {
+    void deleteTournament_ValidTournamentId_ReturnSuccess() throws Exception {
         mockMvc.perform(delete("/api/tournaments/1"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Sucessfully deleted tournament"));
+                .andExpect(content().string("Successfully deleted tournament"));
 
         verify(tournamentService, times(1)).deleteTournament(1L);
     }
 
     @Test
-    void testUpdateCurrentRoundForTournament() throws Exception {
+    void updateCurrentRoundForTournament_ValidRoundId_ReturnSuccess() throws Exception {
         mockMvc.perform(put("/api/tournaments/1/round/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Current round updated to 2"));
@@ -176,7 +177,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testCompleteTournament() throws Exception {
+    void completeTournament_ValidIds_ReturnSuccess() throws Exception {
         when(tournamentService.completeTournament(1L, 2L)).thenReturn("Tournament has been completed");
 
         mockMvc.perform(put("/api/tournaments/1/winner/2"))
@@ -187,7 +188,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testGetRegisteredTournaments() throws Exception {
+    void getRegisteredTournaments_ValidPlayerId_ReturnTournaments() throws Exception {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(1L);
         dto.setName("Test Tournament");
@@ -203,7 +204,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testGetRegisteredTournamentsCurrent() throws Exception {
+    void getRegisteredTournamentsCurrentPlayer_ValidPlayerId_ReturnTournaments() throws Exception {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(1L);
         dto.setName("Test Tournament");
@@ -220,7 +221,7 @@ class TournamentControllerTest {
     }
 
     @Test
-    void testGetLiveTournamentsCurrent() throws Exception {
+    void getLiveTournamentsCurrent_ValidPlayerId_ReturnLiveTournaments() throws Exception {
         TournamentDetailsDTO dto = new TournamentDetailsDTO();
         dto.setId(1L);
         dto.setName("Live Tournament");

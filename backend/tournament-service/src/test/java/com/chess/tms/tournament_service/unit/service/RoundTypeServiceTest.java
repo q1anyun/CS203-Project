@@ -29,12 +29,11 @@ public class RoundTypeServiceTest {
 
     @BeforeEach
     void setup() {
-        numberOfPlayersChoices = Arrays.asList(2, 4, 8, 16);
+        numberOfPlayersChoices = Arrays.asList(2, 4, 8, 16, 32, 64);
     }
 
-    
     @Test
-    void testGetChoicesForNumberOfPlayers() {
+    void getChoicesForNumberOfPlayers_Valid_ReturnChoices() {
         when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(numberOfPlayersChoices);
 
         List<Integer> result = roundTypeService.getChoicesForNumberOfPlayers();

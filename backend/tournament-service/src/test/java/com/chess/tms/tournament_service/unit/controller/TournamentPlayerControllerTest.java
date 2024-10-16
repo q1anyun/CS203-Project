@@ -48,7 +48,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testGetTournamentPlayersByTournamentId() throws Exception {
+    void getTournamentPlayersByTournamentId_ValidTournamentId_ReturnPlayerDetails() throws Exception {
         List<PlayerDetailsDTO> playerDetails = Arrays.asList(
                 new PlayerDetailsDTO(1L, 100L, 1500, "John", "Doe", "https://example.com/image1.jpg", 10, 2, 12, 1600, 1400, "USA"),
                 new PlayerDetailsDTO(2L, 101L, 1400, "Jane", "Doe", "https://example.com/image2.jpg", 8, 3, 11, 1450, 1350, "Canada")
@@ -65,7 +65,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testDeletePlayerFromTournament() throws Exception {
+    void deletePlayerFromTournament_ValidTournamentId_Success() throws Exception {
         doNothing().when(tournamentService).deletePlayerFromTournament(100L, 1L);
 
         mockMvc.perform(delete("/api/tournament-players/100/1"))
@@ -76,7 +76,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testRegisterPlayer() throws Exception {
+    void registerPlayer_ValidIds_Success() throws Exception {
         doNothing().when(tournamentService).registerPlayer(100L, 1L);
 
         mockMvc.perform(post("/api/tournament-players/register/100/1"))
@@ -87,7 +87,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testDeleteCurrentPlayerFromTournament() throws Exception {
+    void deleteCurrentPlayerFromTournament_ValidTournamentId_Success() throws Exception {
         doNothing().when(tournamentService).deletePlayerFromTournament(100L, 1L);
 
         mockMvc.perform(delete("/api/tournament-players/current/1")
@@ -99,7 +99,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testRegisterCurrentPlayer() throws Exception {
+    void registerCurrentPlayer_ValidTournamentId_Success() throws Exception {
         doNothing().when(tournamentService).registerPlayer(100L, 1L);
 
         mockMvc.perform(post("/api/tournament-players/register/current/1")
@@ -111,7 +111,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testGetTournamentPlayersByNonExistentTournament() throws Exception {
+    void getTournamentPlayersByTournament_InvalidTournamentId_ThrowsTournamentDoesNotExistException() throws Exception {
         when(tournamentService.getPlayersByTournament(anyLong()))
                 .thenThrow(new TournamentDoesNotExistException("Tournament does not exist."));
 
@@ -123,7 +123,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testRegisterPlayerWhenPlayerAlreadyRegistered() throws Exception {
+    void registerPlayer_InvalidTournamentPlayerId_ThrowsPlayerAlreadyRegisteredException() throws Exception {
         doThrow(new PlayerAlreadyRegisteredException("Player is already registered."))
                 .when(tournamentService).registerPlayer(100L, 1L);
 
@@ -135,7 +135,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testDeletePlayerFromNonExistentTournament() throws Exception {
+    void deletePlayerFromTournament_InvalidTournamentId_ThrowsTournamentDoesNotExistException() throws Exception {
         doThrow(new TournamentDoesNotExistException("Tournament does not exist."))
                 .when(tournamentService).deletePlayerFromTournament(100L, 99L);
     
@@ -147,16 +147,7 @@ class TournamentPlayerControllerTest {
     }
 
     @Test
-    void testRegisterPlayerSuccess() throws Exception {
-        mockMvc.perform(post("/api/tournament-players/register/100/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Player registered successfully"));
-
-        verify(tournamentService, times(1)).registerPlayer(100L, 1L);
-    }
-
-    @Test
-    void testDeletePlayerSuccess() throws Exception {
+    void deletePlayer_ValidTournamentPlayerId_Success() throws Exception {
         mockMvc.perform(delete("/api/tournament-players/100/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Player deleted successfully"));

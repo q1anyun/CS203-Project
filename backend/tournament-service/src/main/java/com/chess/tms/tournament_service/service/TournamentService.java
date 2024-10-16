@@ -87,7 +87,6 @@ public class TournamentService {
         Tournament tournament = tournamentOptional.get();
 
         if(tournament.getCurrentPlayers() < 2){
-            System.out.println("ran insufficient");
             throw new InsufficientPlayersException("Tournament cannot start with less than 2 players.");
         }
         ResponseEntity<Long> response;

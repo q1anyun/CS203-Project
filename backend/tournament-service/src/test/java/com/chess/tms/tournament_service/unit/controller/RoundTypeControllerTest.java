@@ -43,8 +43,8 @@ class RoundTypeControllerTest {
     }
 
     @Test
-    void testGetChoicesForNumberOfPlayers() throws Exception {
-        List<Integer> choices = Arrays.asList(2, 4, 8, 16);
+    void getChoicesForNumberOfPlayers_Valid_ReturnListOfChoices() throws Exception {
+        List<Integer> choices = Arrays.asList(2, 4, 8, 16, 32, 64);
 
         when(roundTypeService.getChoicesForNumberOfPlayers()).thenReturn(choices);
 
@@ -54,7 +54,9 @@ class RoundTypeControllerTest {
                 .andExpect(jsonPath("$[0]").value(2))
                 .andExpect(jsonPath("$[1]").value(4))
                 .andExpect(jsonPath("$[2]").value(8))
-                .andExpect(jsonPath("$[3]").value(16));
+                .andExpect(jsonPath("$[3]").value(16))
+                .andExpect(jsonPath("$[4]").value(32))
+                .andExpect(jsonPath("$[5]").value(64));
 
         verify(roundTypeService, times(1)).getChoicesForNumberOfPlayers();
     }
