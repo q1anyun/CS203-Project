@@ -49,7 +49,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [joinedTournaments, setJoinedTournaments] = useState([]);
-    const [openDialog, setOpenDialog] = useState(false);
+    const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
+    const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState({});
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -85,12 +86,21 @@ function PlayerTournamentView() {
 
     const handleJoin = (tournament) => {
         setSelectedTournament(tournament);
-        setOpenDialog(true);
+        setOpenRegisterDialog(true);
     };
 
-    const handleDialogClose = () => {
-        setOpenDialog(false);
+    const handleWithdraw = (tournament) => {
+        setSelectedTournament(tournament);
+        setOpenWithdrawDialog(true);
+    }
+
+    const handleRegisterDialogClose = () => {
+        setOpenRegisterDialog(false);
         setAgreedToTerms(false);
+    };
+
+    const handleWithdrawDialogClose = () => {
+        setOpenWithdrawDialog(false);
     };
 
     const handleAgreeChange = (event) => {
@@ -108,10 +118,30 @@ function PlayerTournamentView() {
             }
 
             setJoinedTournaments(prev => [...prev, selectedTournament]);
-            setOpenDialog(false);
+            setOpenRegisterDialog(false);
         } catch (err) {
             console.error(err);
         }
+    };
+
+    {/*WAITING FOR API TO WITHDRAW */ }
+    const handleWithdrawConfirmation = async () => {
+        // try {
+        //     const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
+        //         headers: { 'Authorization': `Bearer ${token}` },
+        //     });
+
+        //     if (response.status !== 200) {
+        //         throw new Error('Failed to enroll in the tournament');
+        //     }
+
+        //     setJoinedTournaments(prev => [...prev, selectedTournament]);
+        //     setOpenWithdrawDialog(false);
+        // } catch (err) {
+        //     console.error(err);
+        // }
+
+        setOpenWithdrawDialog(false);
     };
 
     const handleViewDetails = (tournamentId) => {
@@ -142,6 +172,7 @@ function PlayerTournamentView() {
                                 <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">View</Typography></StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -185,30 +216,37 @@ function PlayerTournamentView() {
                                         {tournament.status === "Live" || tournament.status === "Expired" ? (
                                             <></>
                                         ) : (
-                                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                                <Button
-                                                    variant="contained"
-                                                    color={isJoined(tournament.id) ? 'secondary' : 'success'}
-                                                    disabled={isJoined(tournament.id) || tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
-                                                    onClick={() => handleJoin(tournament)}
-                                                >
-                                                    {isJoined(tournament.id)
-                                                        ? 'Joined'  // Show "Joined" if the player has joined
-                                                        : tournament.currentPlayers >= tournament.maxPlayers
-                                                            ? 'Full'    // Show "Full" if the tournament is full
-                                                            : 'Join'}
-                                                </Button>
-                                                <Button
-                                                    variant="outlined"
-                                                    color="primary"
-                                                    onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
-                                                    style={{ marginLeft: '8px' }}
-                                                >
-                                                    <VisibilityIcon /> {/* Visibility Icon */}
-                                                </Button>
-                                            </div>
-                                        )}
+                                            <Button
+                                                variant="contained"
+                                                color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                                disabled={tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
+                                                onClick={() => {
+                                                    if (isJoined(tournament.id)) {
+                                                        handleWithdraw(tournament);  // Call handleWithdraw if the user has joined
+                                                    } else {
+                                                        handleJoin(tournament);      // Call handleJoin if the user has not joined
+                                                    }
+                                                }}
+                                                style={{ width: '120px' }}
+                                            >
+                                                {isJoined(tournament.id)
+                                                    ? 'Withdraw'  // Show "Joined" if the player has joined
+                                                    : tournament.currentPlayers >= tournament.maxPlayers
+                                                        ? 'Full'    // Show "Full" if the tournament is full
+                                                        : 'Join'}
+                                            </Button>
 
+                                        )}
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Button
+                                            variant="outlined"
+                                            color="primary"
+                                            onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
+                                            style={{ marginLeft: '8px' }}
+                                        >
+                                            <VisibilityIcon /> {/* Visibility Icon */}
+                                        </Button>
                                     </StyledTableCell>
                                 </StyledTableRow>
                             ))}
@@ -217,7 +255,7 @@ function PlayerTournamentView() {
                 </TableContainer>
             </div>
             {/* Dialog for Terms of Agreement */}
-            <Dialog open={openDialog} onClose={handleDialogClose}>
+            <Dialog open={openRegisterDialog} onClose={handleRegisterDialogClose}>
                 <DialogTitle variant='header4' align="center">Registration for Chess Tournament</DialogTitle>
                 <DialogContent>
                     <DialogContentText align="center" variant='body4'>
@@ -252,7 +290,7 @@ function PlayerTournamentView() {
                 <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
                     <Grid container justifyContent="center" spacing={2}>
                         <Grid item>
-                            <Button onClick={handleDialogClose} variant="outlined">
+                            <Button onClick={handleRegisterDialogClose} variant="outlined">
                                 Cancel
                             </Button>
                         </Grid>
@@ -263,6 +301,56 @@ function PlayerTournamentView() {
                                 disabled={!agreedToTerms}
                             >
                                 Register
+                            </Button>
+                        </Grid>
+                    </Grid>
+                </DialogActions>
+            </Dialog>
+
+            {/* Dialog for Withdraw */}
+            <Dialog open={openWithdrawDialog} onClose={handleWithdrawDialogClose}>
+                <DialogTitle variant='header4' align="center">Withdraw from Chess Tournament</DialogTitle>
+                <DialogContent>
+                    <DialogContentText align="center" variant='body4'>
+                        Are you sure you want to withdraw from the tournament?
+                    </DialogContentText >
+                    <Box sx={{ margin: '16px 0' }}>
+                        <Typography variant="body4" gutterBottom display='block'>
+                            • Withdrawal will be final and you might not be able to rejoin this tournament.
+                        </Typography>
+                        <Typography variant="body4" gutterBottom display='block'>
+                            • Depending on the tournament rules, frequent withdrawals may affect your ability to participate in future tournaments.
+                        </Typography>
+                        <Typography variant="body4" gutterBottom display='block'>
+                            • Please confirm your decision carefully.
+                        </Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+
+                        <FormControlLabel
+                            control={<Checkbox checked={agreedToTerms} onChange={handleAgreeChange} />}
+                            label={
+                                <Typography variant="body4">
+                                    I confirm my withdrawal from the tournament
+                                </Typography>
+                            }
+                        />
+                    </Box>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
+                    <Grid container justifyContent="center" spacing={2}>
+                        <Grid item>
+                            <Button onClick={handleWithdrawDialogClose} variant="outlined">
+                                Cancel
+                            </Button>
+                        </Grid>
+                        <Grid item>
+                            <Button
+                                onClick={handleWithdrawConfirmation}
+                                variant="contained"
+                                disabled={!agreedToTerms}
+                            >
+                                Withdraw
                             </Button>
                         </Grid>
                     </Grid>
