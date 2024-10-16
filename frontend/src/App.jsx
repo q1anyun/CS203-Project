@@ -15,6 +15,7 @@ import TournamentDetails from './components/TournamentDetails/TournamentDetails'
 import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
 
@@ -68,7 +69,9 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/error" element={<DefaultErrorPage />} />
-
+        
+        {/* For testing */}
+        <Route path="/profileview" element={<PlayerProfileView/>}/>
       </Routes>
     </>
   );
