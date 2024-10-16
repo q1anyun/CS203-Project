@@ -19,6 +19,7 @@ import com.chess.tms.player_service.dto.MatchResponseDTO;
 import com.chess.tms.player_service.dto.PlayerDetailsDTO;
 import com.chess.tms.player_service.dto.RankingDTO;
 import com.chess.tms.player_service.dto.UpdatePlayerDetailsDTO;
+import com.chess.tms.player_service.dto.WinLossUpdateDTO;
 import com.chess.tms.player_service.service.PlayerService;
 
 @RestController
@@ -75,10 +76,10 @@ public class PlayerController {
         return ResponseEntity.ok(elo);
     }
 
-    @PutMapping("/elo/{id}")
-    public void updatePlayerElo(@PathVariable("id") long id, @RequestBody int newElo) {
-        System.out.println("Updating player "+id+" elo:" + newElo);
-        playerService.updatePlayerElo(id, newElo);
+    @PutMapping("/updateWinLossElo")
+    public void updateWinLossElo(@RequestBody WinLossUpdateDTO dto) {
+        System.out.println("Updating player "+ dto.getPlayerId()+" elo:" + dto.getNewElo());
+        playerService.updateWinLossElo(dto);
     }
 
     // for testing
@@ -115,6 +116,5 @@ public class PlayerController {
     public ResponseEntity<Integer> getRankingForCurrentPlayer(@RequestHeader("X-User-PlayerId") String id) {
         return ResponseEntity.ok(playerService.getRankingForCurrentPlayer(Long.parseLong(id)));
     }
-
 
 }

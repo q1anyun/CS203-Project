@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.chess.tms.elo_service.service.EloService;
 import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
-import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
+import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 import com.chess.tms.elo_service.enums.Reason;
 
@@ -71,4 +71,10 @@ public class EloController {
     public ResponseEntity<List<EloHistoryChartDTO>> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
+
+    @PostMapping("")
+    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
+        return ResponseEntity.ok(eloService.saveEloHistory(dto));
+    }
+    
 }
