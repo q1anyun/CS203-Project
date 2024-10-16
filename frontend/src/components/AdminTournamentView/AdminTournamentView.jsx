@@ -13,6 +13,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 
+import DeleteConfirmationDialog from './DeleteConfirmationDialog';
+
+
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
@@ -50,11 +53,8 @@ export default function AdminTournamentView() {
     const [timeControlOptions, setTimeControlOptions] = useState([]);
     const [roundTypeOptions, setRoundTypeOptions] = useState([]);
     const [errors, setErrors] = useState({});
-
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
-
-
     const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
@@ -206,37 +206,6 @@ export default function AdminTournamentView() {
         } catch (error) {
             console.error('Error fetching tournament data:', error);
         }
-    };
-
-    {/* DELETE TOURNAMENT */ }
-    const handleDeleteConfirm = async () => {
-        try {
-            console.log(baseURL);
-            const response = await axios.delete(`${baseURL}/${tournamentToDelete}`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            });
-
-            // Check if the deletion was successful
-            if (response.status === 200) {
-                const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
-                setTournaments(updatedTournaments);
-                setDeleteDialogOpen(false);
-                setTournamentToDelete(null);
-                console.log('Tournament deleted successfully.');
-                window.location.reload();
-            } else {
-                console.warn('Delete request did not return a success status:', response.status);
-            }
-        } catch (error) {
-            console.error('Error deleting tournament:', error);
-        }
-    };
-
-    const handleDeleteCancel = () => {
-        setDeleteDialogOpen(false);
-        setTournamentToDelete(null);
     };
 
     const handleCreate = () => {
@@ -713,19 +682,16 @@ export default function AdminTournamentView() {
                 </DialogActions>
             </Dialog>
 
-
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteDialogOpen} onClose={handleDeleteCancel}>
-                <DialogTitle>Confirm Delete</DialogTitle>
-                <DialogActions>
-                    <Button onClick={handleDeleteCancel} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleDeleteConfirm} color="primary">
-                        Delete
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <DeleteConfirmationDialog
+                open={deleteDialogOpen}
+                baseURL={baseURL}
+                token={token}
+                tournamentToDelete={tournamentToDelete}
+                setTournaments={setTournaments}
+                setDeleteDialogOpen={setDeleteDialogOpen}
+                setTournamentToDelete={setTournamentToDelete}
+                tournaments={tournaments}
+            />
         </div>
     );
 }
