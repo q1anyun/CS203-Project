@@ -495,8 +495,11 @@ export default function AdminTournamentView() {
                 timeControlOptions={timeControlOptions}
                 roundTypeOptions={roundTypeOptions}
                 errors={errors}
+                setErrors={setErrors}
                 eloError={eloError}
                 createFormError={createFormError}
+                setCreateFormError={setCreateFormError}
+                validateForm={validateForm}
                 editDialogOpen={editDialogOpen}
                 setUpdateTournament={setUpdateTournament}
                 setEditDialogOpen={setEditDialogOpen}

@@ -13,8 +13,11 @@ function EditTournamentDialog({
     timeControlOptions,
     roundTypeOptions,
     errors,
+    setErrors,
     eloError,
     createFormError,
+    setCreateFormError,
+    validateForm,
     editDialogOpen,
     setUpdateTournament,
     setEditDialogOpen,
@@ -199,7 +202,7 @@ function EditTournamentDialog({
                 <Button onClick={handleEditDialogClose} color="secondary">
                     Cancel
                 </Button>
-                <Button onClick={handleEditSubmit} color="primary" > 
+                <Button onClick={handleEditSubmit} color="primary"> 
                     Save
                 </Button>
             </DialogActions>
