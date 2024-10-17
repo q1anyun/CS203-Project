@@ -176,7 +176,6 @@ export default function AdminTournamentView() {
     const handleEditClick = async (tournamentId) => {
         // Set the tournament ID to edit
 
-
         try {
             // Fetch tournament data using axios
             const response = await axios.get(`${baseURL}/${tournamentId}`);
@@ -214,66 +213,6 @@ export default function AdminTournamentView() {
     const handleCreate = () => {
         setCreateDialogOpen(true);
     };
-
-    const handleCreateDialogClose = () => {
-        setCreateFormError('');
-        resetNewTournament();
-        setCreateDialogOpen(false);
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewTournament({
-            ...newTournament,
-            [name]: value,
-        });
-    };
-
-    const handleDateChange = (name, newValue) => {
-        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
-        const localISOString = localDate ? localDate.toISOString() : '';
-        setNewTournament({
-            ...newTournament,
-            [name]: localISOString,
-        });
-    };
-
-    const handleCreateSubmit = async () => {
-
-        if (validateForm(newTournament)) {
-            const newTournamentData = {
-                ...newTournament,
-            };
-
-            console.log("New Tournament Data:", newTournamentData);
-
-            try {
-                const response = await axios.post(`${baseURL}`, newTournamentData, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    }
-                });
-                setTournaments([response.data, ...tournaments]);
-                setCreateDialogOpen(false);
-                window.location.reload();
-            } catch (error) {
-                if (error.response) {
-                    console.error('Error data:', error.response.data); // Response from the backend
-                    console.error('Error status:', error.response.status); // Status code (e.g., 400)
-                    console.error('Error headers:', error.response.headers); // Response headers
-                } else {
-                    console.error('Error message:', error.message);
-                }
-                // console.error('Error creating tournament:', error);
-            }
-        }
-
-
-    };
-
-   
-
-
 
     if (loading) {
         return <CircularProgress />;
@@ -371,19 +310,22 @@ export default function AdminTournamentView() {
 
             <CreateTournamentDialog
                 createDialogOpen={createDialogOpen}
+                setCreateDialogOpen={setCreateDialogOpen}
                 newTournament={newTournament}
+                setNewTournament={setNewTournament}
+                resetNewTournament={resetNewTournament}
                 timeControlOptions={timeControlOptions}
                 roundTypeOptions={roundTypeOptions}
+                validateForm={validateForm}
                 errors={errors}
                 eloError={eloError}
                 createFormError={createFormError}
-                handleCreateSubmit={handleCreateSubmit}
-                handleCreateDialogClose={handleCreateDialogClose}
-                handleInputChange={handleInputChange}
-                handleDateChange={handleDateChange}
+                setCreateFormError={setCreateFormError}
+                setTournaments={setTournaments}
+                baseURL={baseURL}
+                token={token}
             />
           
-
             <EditTournamentDialog
                 baseURL={baseURL}
                 token={token}

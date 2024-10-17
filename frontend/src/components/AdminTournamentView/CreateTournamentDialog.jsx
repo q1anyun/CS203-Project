@@ -1,25 +1,81 @@
-import React from 'react'; // Import React
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid } from '@mui/material'; // Ensure to import necessary MUI components
+import React from 'react';
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid } from '@mui/material'; // Import necessary MUI components
 import axios from 'axios';
-import styles from './AdminTournamentView.module.css';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import styles from './AdminTournamentView.module.css'; 
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'; 
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; 
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; 
 import dayjs from 'dayjs';
+
+
 
 function CreateTournamentDialog({
     createDialogOpen,
+    setCreateDialogOpen,
     newTournament,
+    setNewTournament,
+    resetNewTournament,
     timeControlOptions,
     roundTypeOptions,
+    validateForm,
     errors,
     eloError,
     createFormError,
-    handleCreateSubmit,
-    handleCreateDialogClose,
-    handleInputChange,
-    handleDateChange,
+    setCreateFormError,
+    setTournaments,
+    baseURL,
+    token,
 }) {
+    const handleCreateDialogClose = () => {
+        setCreateFormError('');
+        resetNewTournament();
+        setCreateDialogOpen(false);
+    };
+
+    const handleCreateSubmit = async () => {
+        if (validateForm(newTournament)) {
+            const newTournamentData = {
+                ...newTournament,
+            };
+            console.log("New Tournament Data:", newTournamentData);
+            try {
+                const response = await axios.post(`${baseURL}`, newTournamentData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
+                setTournaments((prevTournaments) => [response.data, ...prevTournaments]);
+                setCreateDialogOpen(false);
+                window.location.reload();
+            } catch (error) {
+                if (error.response) {
+                    console.error('Error data:', error.response.data); // Response from the backend
+                    console.error('Error status:', error.response.status); // Status code (e.g., 400)
+                    console.error('Error headers:', error.response.headers); // Response headers
+                } else {
+                    console.error('Error message:', error.message);
+                }
+            }
+        }
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNewTournament({
+            ...newTournament,
+            [name]: value,
+        });
+    };
+
+    const handleDateChange = (name, newValue) => {
+        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
+        const localISOString = localDate ? localDate.toISOString() : '';
+        setNewTournament({
+            ...newTournament,
+            [name]: localISOString,
+        });
+    };
+
     return (
         <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
             <DialogTitle>
