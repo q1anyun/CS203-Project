@@ -5,10 +5,28 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add'; 
 import styles from './TournamentTable.module.css'; 
-import StyledTableCell from './StyledTableCell'; 
-import StyledTableRow from './StyledTableRow'; 
 
-const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, statusColorMap }) => {
+const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails}) => {
+    const statusColorMap = {
+        LIVE: 'success',
+        UPCOMING: 'warning',
+        EXPIRED: 'default',
+    };
+
+    const StyledTableCell = styled(TableCell)(({ theme }) => ({
+        '&:first-of-type': {
+            textAlign: 'center',
+        },
+        '&:last-of-type': {
+            textAlign: 'center',
+        },
+    }));
+
+    const StyledTableRow = styled(TableRow)(({ theme }) => ({
+        '&:nth-of-type(odd)': {
+            backgroundColor: theme.palette.action.hover,
+        },
+    }));
     return (
         <div>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>

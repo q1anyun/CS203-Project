@@ -17,26 +17,7 @@ const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
-const statusColorMap = {
-    LIVE: 'success',
-    UPCOMING: 'warning',
-    EXPIRED: 'default',
-};
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    '&:first-of-type': {
-        textAlign: 'center',
-    },
-    '&:last-of-type': {
-        textAlign: 'center',
-    },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-}));
 
 export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
