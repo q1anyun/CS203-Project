@@ -22,6 +22,7 @@ function EditTournamentDialog({
     setUpdateTournament,
     setEditDialogOpen,
     tournamentToEdit,
+    tournaments,
     setTournaments
 }) {
     const handleEditSubmit = async () => {

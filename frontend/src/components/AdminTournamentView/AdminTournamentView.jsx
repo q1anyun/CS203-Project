@@ -504,6 +504,7 @@ export default function AdminTournamentView() {
                 setUpdateTournament={setUpdateTournament}
                 setEditDialogOpen={setEditDialogOpen}
                 tournamentToEdit={tournamentToEdit}
+                tournaments={tournaments}
                 setTournaments={setTournaments}
             />
 
