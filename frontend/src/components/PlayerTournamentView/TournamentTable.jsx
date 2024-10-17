@@ -14,8 +14,12 @@ import styles from './PlayerTournamentView.module.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function TournamentTable(tournaments) {
+function TournamentTable(token, baseURL, handleJoin, handleWithdraw, handleViewDetails, isJoined) {
 
+    const [joinedTournaments, setJoinedTournaments] = useState([]);
+    const [error, setError] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [tournaments, setTournaments] = useState([]);
     const statusColorMap = {
         LIVE: 'success',
         UPCOMING: 'warning',
@@ -59,6 +63,34 @@ function TournamentTable(tournaments) {
         }
     };
 
+    useEffect(() => {
+        const fetchTournaments = async () => {
+            try {
+                // Fetch all tournaments
+                const tournamentResponse = await axios.get(baseURL, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                setTournaments(tournamentResponse.data);
+
+                // Fetch tournaments that the user has registered for
+                const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                setJoinedTournaments(registeredResponse.data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTournaments();
+    }, []);
+
+    if (loading) return <Typography>Loading tournaments...</Typography>;
+    if (error) return <Typography>Error: {error}</Typography>;
+
+    console.log(tournaments);
     return (
         <div className={styles.container}>
             <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
