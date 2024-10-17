@@ -1,13 +1,19 @@
 import React from 'react';
-import { Table, TableBody, TableContainer, TableHead, TableRow, Typography, Chip, IconButton, Box, Fab, Paper } from '@mui/material';
+import { Table, TableCell, TableBody, TableContainer, TableHead, TableRow, Typography, Chip, IconButton, Box, Fab, Paper } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
 import { styled } from '@mui/material/styles';
-import styles from './TournamentTable.module.css'; 
+import styles from './AdminTournamentView.module.css';
 
-function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
+function TournamentTable({
+    tournaments,
+    handleCreate,
+    handleEditClick,
+    handleDeleteClick,
+    handleViewDetails
+}) {
     const statusColorMap = {
         LIVE: 'success',
         UPCOMING: 'warning',

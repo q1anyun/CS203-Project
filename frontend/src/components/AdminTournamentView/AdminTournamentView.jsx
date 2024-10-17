@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl, Box, Grid2 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import { Typography, CircularProgress} from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
+import TournamentTable from './TournamentTable';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
@@ -41,7 +37,6 @@ export default function AdminTournamentView() {
 
         fetchTimeControls();
     }, []);
-
     useEffect(() => {
         const fetchRoundType = async () => {
             const response = await axios.get(`${roundTypeURL}/choices`);
@@ -215,8 +210,6 @@ export default function AdminTournamentView() {
                 tournaments={tournaments}
                 setTournaments={setTournaments}
             />
-
-           
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}
