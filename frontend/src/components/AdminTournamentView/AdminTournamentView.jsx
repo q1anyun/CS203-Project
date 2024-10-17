@@ -8,7 +8,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
-
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
@@ -193,89 +192,9 @@ export default function AdminTournamentView() {
 
     return (
         <div className={styles.container}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="header1" component="h2" className={styles.title}>
-                    All Tournaments
-                </Typography>
-                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }} >
-                    <AddIcon />
-                </Fab>
-            </Box>
-            <TableContainer component={Paper} className={styles.table}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {tournaments.map((tournament, rowIndex) => (
-                            <StyledTableRow key={tournament.id}>
-                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
-
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <>
-                                        <IconButton
-                                            onClick={() => handleEditClick(tournament.id)}
-                                            disabled={tournament.status !== "UPCOMING"} // Disable if status is "Live"
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-
-                                        <IconButton onClick={() => handleDeleteClick(tournament.id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleViewDetails(tournament.id)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                    </>
-                                </StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <TournamentTable
+              
+            /> 
 
             <CreateTournamentDialog
                 createDialogOpen={createDialogOpen}
