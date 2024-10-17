@@ -182,7 +182,7 @@ function PlayerTournamentView() {
                         ),
                     }}
                 />
-                <FormControl variant="outlined" size="small" sx={{ flexShrink: 0,width:'130px'} }>
+                <FormControl variant="outlined" size="small" labelProps={{ shrink: true }} sx={{ flexShrink: 0, width:'125px'}} >
                     <InputLabel>Status</InputLabel>
                     <Select
                         value={selectedStatus}
@@ -361,7 +361,7 @@ function PlayerTournamentView() {
                                             <VisibilityIcon /> {/* Visibility Icon */}
                                         </Button>
                                     </StyledTableCell>
-                                </StyledTableRow>
+                            </StyledTableRow>
                         ))}
                     </TableBody>
                 </Table>
