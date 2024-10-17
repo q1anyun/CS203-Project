@@ -162,7 +162,7 @@ function PlayerTournamentView() {
 
     return (
         <div className={styles.container}>
-            <Typography variant="h4" gutterBottom margin="0px 0px 10px 20px">
+            <Typography variant="header1" gutterBottom>
                 All Tournaments
             </Typography>
 

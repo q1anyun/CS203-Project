@@ -165,6 +165,7 @@ export default function AdminTournamentView() {
 
     return (
         <div className={styles.container}>
+
             <TournamentTable
                 tournaments={tournaments}
                 handleCreate={handleCreate}
