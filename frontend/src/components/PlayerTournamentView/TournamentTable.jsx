@@ -14,7 +14,7 @@ import styles from './PlayerTournamentView.module.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-function TournamentTable(token, baseURL, tournaments) {
+function TournamentTable(tournaments) {
 
     const statusColorMap = {
         LIVE: 'success',
@@ -57,22 +57,6 @@ function TournamentTable(token, baseURL, tournaments) {
         if (currentPage > 1) {
             setCurrentPage(prevPage => prevPage - 1);
         }
-    };
-
-    const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
-
-    const handleJoin = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenRegisterDialog(true);
-    };
-
-    const handleWithdraw = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenWithdrawDialog(true);
-    }
-
-    const handleViewDetails = (tournamentId) => {
-        navigate(`${tournamentId}`);
     };
 
     return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -11,10 +11,11 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 
-function WithdrawDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openRegisterDialog, setOpenRegisterDialog}) {
+function WithdrawDialog({ openWithdrawDialog, setOpenWithdrawDialog, handleWithdrawConfirmation }) {
+    const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-    const handleRegisterDialogClose = () => {
-        setOpenRegisterDialog(false);
+    const handleWithdrawDialogClose = () => {
+        setOpenWithdrawDialog(false);
         setAgreedToTerms(false);
     };
 
@@ -23,28 +24,12 @@ function WithdrawDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openR
     };
 
     return (
-      import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
-
-function WithdrawDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openRegisterDialog, setOpenRegisterDialog}) {
-
-    return (
         <Dialog open={openWithdrawDialog} onClose={handleWithdrawDialogClose}>
             <DialogTitle variant='header4' align="center">Withdraw from Chess Tournament</DialogTitle>
             <DialogContent>
                 <DialogContentText align="center" variant='body4'>
                     Are you sure you want to withdraw from the tournament?
-                </DialogContentText >
+                </DialogContentText>
                 <Box sx={{ margin: '16px 0' }}>
                     <Typography variant="body4" gutterBottom display='block'>
                         • Withdrawal will be final and you might not be able to rejoin this tournament.
@@ -57,7 +42,6 @@ function WithdrawDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openR
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-
                     <FormControlLabel
                         control={<Checkbox checked={agreedToTerms} onChange={handleAgreeChange} />}
                         label={
