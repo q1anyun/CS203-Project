@@ -210,6 +210,7 @@ export default function AdminTournamentView() {
                 tournaments={tournaments}
                 setTournaments={setTournaments}
             />
+           
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}

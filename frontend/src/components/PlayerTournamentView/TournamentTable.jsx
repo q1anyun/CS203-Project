@@ -1,33 +1,25 @@
-import React, { useState } from 'react';
-import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button } from '@mui/material';
+import * as React from 'react';
+import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import AddIcon from '@mui/icons-material/Add';
-import styles from './AdminTournamentView.module.css';
+import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
+import styles from './PlayerTournamentView.module.css';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 7;  
-    const totalPages = Math.ceil(tournaments.length / itemsPerPage);
-
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(prevPage => prevPage + 1);
-        }
-    };
-
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(prevPage => prevPage - 1);
-        }
-    };
+function TournamentTable(token, baseURL, tournaments) {
 
     const statusColorMap = {
         LIVE: 'success',
         UPCOMING: 'warning',
-        EXPIRED: 'default',
+        COMPLETED: 'default',
     };
 
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -42,7 +34,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
             textAlign: 'center',
         },
     }));
-    
+
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.action.hover,
@@ -52,26 +44,47 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
         },
     }));
 
-    const tournamentsToShow = tournaments.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 7;  
+    const totalPages = Math.ceil(tournaments.length / itemsPerPage);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prevPage => prevPage - 1);
+        }
+    };
+
+    const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
+
+    const handleJoin = (tournament) => {
+        setSelectedTournament(tournament);
+        setOpenRegisterDialog(true);
+    };
+
+    const handleWithdraw = (tournament) => {
+        setSelectedTournament(tournament);
+        setOpenWithdrawDialog(true);
+    }
+
+    const handleViewDetails = (tournamentId) => {
+        navigate(`${tournamentId}`);
+    };
 
     return (
-        <div>
-            <Box sx={{ display: 'flex', alignItems: 'center', margin:'0px'}}>
-                <Typography variant="header1" component="h2" className={styles.title}>
-                    All Tournaments
-                </Typography>
-                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }}>
-                    <AddIcon />
-                </Fab>
-            </Box>
+        <div className={styles.container}>
+            <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
+                All Tournaments
+            </Typography>
             <TableContainer component={Paper} className={styles.table}>
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell><Typography variant="header4">ID</Typography></StyledTableCell>
+                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
@@ -81,15 +94,16 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                             <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
                             <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">View</Typography></StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tournamentsToShow.map((tournament) => (
+                        {tournaments.map((tournament) => (
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
                                 <StyledTableCell>
-                                    <Typography variant="body1">
+                                    <Typography variant="body4">
                                         {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
                                             timeZone: 'Asia/Singapore',
                                             year: 'numeric',
@@ -102,7 +116,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                 </StyledTableCell>
 
                                 <StyledTableCell>
-                                    <Typography variant="body1">
+                                    <Typography variant="body4">
                                         {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
                                             timeZone: 'Asia/Singapore',
                                             year: 'numeric',
@@ -121,17 +135,40 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-                                        <IconButton onClick={() => handleEditClick(tournament.id)}>
-                                            <EditIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleDeleteClick(tournament.id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleViewDetails(tournament.id)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                    </Box>
+                                    {tournament.status === "Live" || tournament.status === "Expired" ? (
+                                        <></>
+                                    ) : (
+                                        <Button
+                                            variant="contained"
+                                            color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                            disabled={tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
+                                            onClick={() => {
+                                                if (isJoined(tournament.id)) {
+                                                    handleWithdraw(tournament);  // Call handleWithdraw if the user has joined
+                                                } else {
+                                                    handleJoin(tournament);      // Call handleJoin if the user has not joined
+                                                }
+                                            }}
+                                            style={{ width: '120px' }}
+                                        >
+                                            {isJoined(tournament.id)
+                                                ? 'Withdraw'  // Show "Joined" if the player has joined
+                                                : tournament.currentPlayers >= tournament.maxPlayers
+                                                    ? 'Full'    // Show "Full" if the tournament is full
+                                                    : 'Join'}
+                                        </Button>
+
+                                    )}
+                                </StyledTableCell>
+                                <StyledTableCell>
+                                    <Button
+                                        variant="outlined"
+                                        color="primary"
+                                        onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
+                                        style={{ marginLeft: '8px' }}
+                                    >
+                                        <VisibilityIcon /> {/* Visibility Icon */}
+                                    </Button>
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
