@@ -3,10 +3,11 @@ import { Table, TableBody, TableContainer, TableHead, TableRow, Typography, Chip
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import AddIcon from '@mui/icons-material/Add'; 
+import AddIcon from '@mui/icons-material/Add';
+import { styled } from '@mui/material/styles';
 import styles from './TournamentTable.module.css'; 
 
-const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails}) => {
+function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
     const statusColorMap = {
         LIVE: 'success',
         UPCOMING: 'warning',
@@ -27,6 +28,7 @@ const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDel
             backgroundColor: theme.palette.action.hover,
         },
     }));
+
     return (
         <div>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -54,7 +56,7 @@ const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDel
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tournaments.map((tournament, rowIndex) => (
+                        {tournaments.map((tournament) => (
                             <StyledTableRow key={tournament.id}>
                                 <StyledTableCell><Typography variant="body1">{tournament.id}</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="body1">{tournament.name}</Typography></StyledTableCell>
@@ -70,7 +72,6 @@ const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDel
                                         })}
                                     </Typography>
                                 </StyledTableCell>
-
                                 <StyledTableCell>
                                     <Typography variant="body1">
                                         {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
@@ -98,7 +99,6 @@ const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDel
                                         >
                                             <EditIcon />
                                         </IconButton>
-
                                         <IconButton onClick={() => handleDeleteClick(tournament.id)}>
                                             <DeleteIcon />
                                         </IconButton>
@@ -114,6 +114,6 @@ const TournamentTable = ({ tournaments, handleCreate, handleEditClick, handleDel
             </TableContainer> 
         </div>
     );
-};
+}
 
 export default TournamentTable;

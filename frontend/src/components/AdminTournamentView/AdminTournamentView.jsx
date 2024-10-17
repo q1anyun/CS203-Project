@@ -12,12 +12,9 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
 
-
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
-
-
 
 export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
@@ -174,8 +171,12 @@ export default function AdminTournamentView() {
     return (
         <div className={styles.container}>
             <TournamentTable
-              
-            /> 
+                tournaments={tournaments}
+                handleCreate={handleCreate}
+                handleEditClick={handleEditClick}
+                handleDeleteClick={handleDeleteClick}
+                handleViewDetails={handleViewDetails}
+            />
 
             <CreateTournamentDialog
                 createDialogOpen={createDialogOpen}
