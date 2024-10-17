@@ -160,13 +160,7 @@ export default function AdminTournamentView() {
         };
 
         fetchTournaments();
-    }, []); // Empty dependency array to run the effect only once when the component mounts
-
-    const handleChange = (e, rowIndex, field) => {
-        const newTournaments = [...tournaments];
-        newTournaments[rowIndex][field] = e.target.value;
-        setTournaments(newTournaments);
-    };
+    }, []); 
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -174,18 +168,11 @@ export default function AdminTournamentView() {
     };
 
     const handleEditClick = async (tournamentId) => {
-        // Set the tournament ID to edit
-
         try {
-            // Fetch tournament data using axios
             const response = await axios.get(`${baseURL}/${tournamentId}`);
-
-
-            // Log the fetched data
             console.log(response.data);
             setTournamentToEdit(response.data);
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
-
             setUpdateTournament({
                 name: response.data.name || '',
                 startDate: response.data.startDate
@@ -199,12 +186,7 @@ export default function AdminTournamentView() {
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
             });
-
-
-
-            // Open the edit dialog after fetching the data
             setEditDialogOpen(true);
-
         } catch (error) {
             console.error('Error fetching tournament data:', error);
         }
