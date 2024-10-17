@@ -1,80 +1,140 @@
-import React from 'react';
-import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Grid,
-    TextField,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    Button,
-    Typography,
-} from '@mui/material';
-import { LocalizationProvider, DateTimePicker } from '@mui/x-date-pickers';
+import { Typography, TextField, Select, MenuItem,Dialog, DialogActions, DialogContent, DialogTitle, Button,InputLabel, FormControl, Grid2 } from '@mui/material';
+import axios from 'axios';
+import styles from './AdminTournamentView.module.css';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
-import styles from './YourStyles.module.css'; // Adjust the path as needed
 
-const EditTournamentDialog = ({
-    open,
-    onClose,
-    tournament,
-    onChange,
+function EditTournamentDialog({
+    baseURL,
+    token,
+    updateTournament,
     timeControlOptions,
+    roundTypeOptions,
+    errors,
+    eloError,
     createFormError,
-    onSubmit,
-}) => {
+    editDialogOpen,
+    setUpdateTournament,
+    setEditDialogOpen,
+    tournamentToEdit,
+    setTournaments
+}) {
+    const handleEditSubmit = async () => {
+    
+        if (validateForm(updateTournament)) {
+            const updatedTournamentData = {
+                ...updateTournament,
+            };
+            console.log(updatedTournamentData);
+    
+            try {
+                const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Include JWT token
+                    }
+                });
+                console.log(response.data); 
+    
+                const updatedTournaments = tournaments.map(t =>
+                    t.tournamentId === tournamentToEdit.id ? response.data : t
+                );
+    
+                setTournaments(updatedTournaments);
+                console.log(tournaments); 
+    
+                setUpdateTournament({
+                    name: '',
+                    startDate: '',
+                    endDate: '',
+                    timeControl: '',
+                    minElo: '',
+                    maxElo: '',
+                    maxPlayers: ''
+                });
+    
+                setEditDialogOpen(false);
+    
+                window.location.reload();
+            } catch (error) {
+                if (error.response) {
+                    console.error('Error data:', error.response.data);
+                    console.error('Error status:', error.response.status);
+                    console.error('Error headers:', error.response.headers);
+                } else {
+                    console.error('Error message:', error.message);
+                }
+            }
+        }
+    };
+    const handleEditDialogClose = () => {
+        setCreateFormError('');
+        setErrors({});
+        setEditDialogOpen(false);
+    };
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setUpdateTournament(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+    const handleEditDateChange = (name, newValue) => {
+        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
+        const localISOString = localDate ? localDate.toISOString() : '';
+        setUpdateTournament((prevState) => ({
+            ...prevState,
+            [name]: localISOString,
+        }));
+    };
     return (
-        <Dialog open={open} onClose={onClose}>
+        <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
             <DialogTitle>
                 <Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography>
             </DialogTitle>
             <DialogContent>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                <Grid2 container spacing={2}>
+                    <Grid2 size={12}>
                         <TextField
                             name="name"
                             label="Name"
-                            value={tournament.name}
-                            onChange={onChange}
+                            value={updateTournament.name}
+                            onChange={handleEditInputChange}
                             fullWidth
                         />
-                    </Grid>
-                    <Grid container spacing={4}>
-                        <Grid item xs={6}>
+                    </Grid2>
+                    <Grid2 container spacing={4}>
+                        <Grid2 size={6}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     name="startDate"
                                     label="Start Date Time"
-                                    value={tournament.startDate ? dayjs(tournament.startDate) : null}
-                                    onAccept={(newValue) => onChange({ target: { name: 'startDate', value: newValue } })} 
-                                />
+                                    value={updateTournament.startDate ? dayjs(updateTournament.startDate) : null}
+                                    onAccept={(newValue) => handleEditDateChange("startDate", newValue)} />
                             </LocalizationProvider>
-                        </Grid>
+                        </Grid2>
 
-                        <Grid item xs={6}>
+                        <Grid2 size={6}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     name="endDate"
                                     label="End Date Time"
-                                    value={tournament.endDate ? dayjs(tournament.endDate) : null}
-                                    onAccept={(newValue) => onChange({ target: { name: 'endDate', value: newValue } })}  
+                                    value={updateTournament.endDate ? dayjs(updateTournament.endDate) : null}
+                                    onAccept={(newValue) => handleEditDateChange("endDate", newValue)}  // Only update when accepted
                                 />
                             </LocalizationProvider>
-                        </Grid>
-                    </Grid>
+                        </Grid2>
+                    </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <FormControl fullWidth>
                             <InputLabel>Time Control</InputLabel>
                             <Select
                                 name="timeControl"
                                 label="Time Control"
-                                value={tournament.timeControl || ''}
-                                onChange={onChange}
+                                value={updateTournament?.timeControl || ''}
+                                onChange={handleEditInputChange}
                             >
                                 {timeControlOptions.map((option) => (
                                     <MenuItem key={option.id} value={option.id}>
@@ -83,44 +143,41 @@ const EditTournamentDialog = ({
                                 ))}
                             </Select>
                         </FormControl>
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="minElo"
                             label="Min ELO"
                             type="number"
-                            value={tournament.minElo}
-                            onChange={onChange}
+                            value={updateTournament.minElo}
+                            onChange={handleEditInputChange}
                             fullWidth
-                            error={tournament.minElo < 0}
-                            helperText={tournament.minElo < 0 ? "Min Elo must be more than 0." : ""}
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="maxElo"
                             label="Max ELO"
                             type="number"
-                            value={tournament.maxElo}
-                            onChange={onChange}
+                            value={updateTournament.maxElo}
+                            onChange={handleEditInputChange}
                             fullWidth
-                            error={tournament.maxElo < tournament.minElo}
-                            helperText={tournament.maxElo < tournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
+                            error={!!eloError && updateTournament.maxElo < updateTournament.minElo}
+                            helperText={!!eloError && updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12}>
-                        <FormControl fullWidth margin="dense">
+                    <Grid2 size={12}>
+                        <FormControl fullWidth margin="dense" error={!!errors.maxPlayers}>
                             <InputLabel>Max Players</InputLabel>
                             <Select
                                 name="maxPlayers"
                                 label="Max Players"
-                                value={tournament.maxPlayers || ''}
-                                onChange={onChange}
+                                value={updateTournament.maxPlayers || ''}
+                                onChange={handleEditInputChange}
                             >
-                                {/* Assuming roundTypeOptions is available in props */}
                                 {roundTypeOptions.map((optionId) => (
                                     <MenuItem key={optionId} value={optionId}>
                                         {optionId}
@@ -129,25 +186,24 @@ const EditTournamentDialog = ({
                             </Select>
                         </FormControl>
                         {createFormError && (
-                            <Grid item xs={12}>
+                            <Grid2 size={12}>
                                 <h6 className={styles.errorMessage}>
                                     {createFormError}
                                 </h6>
-                            </Grid>
+                            </Grid2>
                         )}
-                    </Grid>
-                </Grid>
+                    </Grid2>
+                </Grid2>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
+                <Button onClick={handleEditDialogClose} color="secondary">
                     Cancel
                 </Button>
-                <Button onClick={onSubmit} color="primary"> 
+                <Button onClick={handleEditSubmit} color="primary" > 
                     Save
                 </Button>
             </DialogActions>
         </Dialog>
     );
-};
-
+}
 export default EditTournamentDialog;
