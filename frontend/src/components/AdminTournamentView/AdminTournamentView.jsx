@@ -8,10 +8,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
@@ -45,8 +41,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 
 export default function AdminTournamentView() {
     const [tournaments, setTournaments] = useState([]);
-    const [loading, setLoading] = useState(true); // Loading state
-    const [error, setError] = useState(null); // Error state
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
@@ -78,7 +74,6 @@ export default function AdminTournamentView() {
         fetchRoundType();
     }, []);
 
-    // for create new table
     const [newTournament, setNewTournament] = useState({
         name: '',
         startDate: null,
@@ -89,7 +84,6 @@ export default function AdminTournamentView() {
         maxPlayers: '',
     });
 
-    // for edit 
     const [updateTournament, setUpdateTournament] = useState({
         name: '',
         startDate: '',
@@ -112,15 +106,11 @@ export default function AdminTournamentView() {
         });
     };
 
-    //set errors
-
     const validateForm = (tournament) => {
-        // Check if any required field is empty
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
-            return !tournament[key];  // Returns true if any field is empty
+            return !tournament[key];
         });
 
-        // If any required field is missing, set the error message
         if (isAnyFieldEmpty) {
             setCreateFormError('Please fill up all required fields');
             return false;
@@ -133,29 +123,26 @@ export default function AdminTournamentView() {
             return false;
         }
 
-        // Clear error and return true if validation passes
         setEloError('');
         setCreateFormError('');
         return true;
     };
 
     const handleViewDetails = (id) => {
-        // Navigate to /tournament/id route
         navigate(`/admin/tournaments/${id}`);
     };
 
     useEffect(() => {
-        // Fetch all tournaments from the backend
         const fetchTournaments = async () => {
             try {
                 const response = await axios.get(`${baseURL}`);
                 console.log(response.data);
-                setTournaments(response.data); // Populate tournaments with the fetched data
-                setLoading(false); // Turn off loading
+                setTournaments(response.data); 
+                setLoading(false); 
             } catch (error) {
                 console.error('Error fetching tournaments:', error);
-                setError(error); // Capture the error
-                setLoading(false); // Turn off loading even if there's an error
+                setError(error);
+                setLoading(false); 
             }
         };
 
