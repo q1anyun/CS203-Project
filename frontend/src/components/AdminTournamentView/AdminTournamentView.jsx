@@ -15,6 +15,7 @@ import dayjs from 'dayjs';
 
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
+import CreateTournamentDialog from './CreateTournamentDialog';
 
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -368,125 +369,20 @@ export default function AdminTournamentView() {
                 </Table>
             </TableContainer>
 
-
-            {/* Create Tournament Dialog */}
-            <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
-                <DialogTitle>
-                    <Typography variant="header3">
-                        Create New Tournament
-                    </Typography>
-                </DialogTitle>
-                <DialogContent>
-                    <Grid2 container spacing={2}>
-                        <Grid2 size={12}>
-                            <TextField
-                                name="name"
-                                label="Tournament Name"
-                                value={newTournament.name}
-                                onChange={handleInputChange}
-                                fullWidth
-                            />
-                        </Grid2>
-
-                        <Grid2 container spacing={4}>
-                            <Grid2 size={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DateTimePicker
-                                        name="startDate"
-                                        label="Start Date Time"
-                                        value={newTournament.startDate ? dayjs(newTournament.startDate) : null}
-                                        onAccept={(newValue) => handleDateChange("startDate", newValue)} />
-                                </LocalizationProvider>
-                            </Grid2>
-
-                            <Grid2 size={6}>
-                                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                    <DateTimePicker
-                                        name="endDate"
-                                        label="End Date Time"
-                                        value={newTournament.endDate ? dayjs(newTournament.endDate) : null}
-                                        onAccept={(newValue) => handleDateChange("endDate", newValue)}  // Only update when accepted
-                                    />
-                                </LocalizationProvider>
-                            </Grid2>
-                        </Grid2>
-                        <Grid2 size={12}>
-                            <FormControl fullWidth error={!!errors.timeControl}>
-                                <InputLabel>Time Control</InputLabel>
-                                <Select
-                                    name="timeControl"
-                                    label="Time Control"
-                                    value={newTournament.timeControl}
-                                    onChange={handleInputChange}
-                                    className="text-left"
-                                >
-                                    {timeControlOptions.map((option) => (
-                                        <MenuItem key={option.id} value={option.id}>
-                                            {option.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Grid2>
-
-                        <Grid2 size={12}>
-                            <TextField
-                                name="minElo"
-                                label="Min ELO"
-                                type="number"
-                                value={newTournament.minElo}
-                                onChange={handleInputChange}
-                                fullWidth
-                            />
-                        </Grid2>
-
-                        <Grid2 size={12}>
-                            <TextField
-                                name="maxElo"
-                                label="Max ELO"
-                                type="number"
-                                value={newTournament.maxElo}
-                                onChange={handleInputChange}
-                                fullWidth
-                                error={!!eloError && newTournament.maxElo < newTournament.minElo}
-                                helperText={!!eloError && newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
-                            />
-                        </Grid2>
-                        <Grid2 size={12}>
-                            <FormControl fullWidth error={!!errors.maxPlayers}>
-                                <InputLabel>Max Players</InputLabel>
-                                <Select
-                                    name="maxPlayers"
-                                    label="Max Players"
-                                    value={newTournament.maxPlayers}
-                                    onChange={handleInputChange}
-                                >
-                                    {roundTypeOptions.map((optionId) => (
-                                        <MenuItem key={optionId} value={optionId}>
-                                            {optionId}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            {createFormError && (
-                                <Grid2 size={12}>
-                                    <h6 className={styles.errorMessage}>
-                                        {createFormError}
-                                    </h6>
-                                </Grid2>
-                            )}
-                        </Grid2>
-                    </Grid2>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCreateDialogClose} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleCreateSubmit} color="primary">
-                        Create
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <CreateTournamentDialog
+                createDialogOpen={createDialogOpen}
+                newTournament={newTournament}
+                timeControlOptions={timeControlOptions}
+                roundTypeOptions={roundTypeOptions}
+                errors={errors}
+                eloError={eloError}
+                createFormError={createFormError}
+                handleCreateSubmit={handleCreateSubmit}
+                handleCreateDialogClose={handleCreateDialogClose}
+                handleInputChange={handleInputChange}
+                handleDateChange={handleDateChange}
+            />
+          
 
             <EditTournamentDialog
                 baseURL={baseURL}
