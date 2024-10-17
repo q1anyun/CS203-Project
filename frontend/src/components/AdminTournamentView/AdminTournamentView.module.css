@@ -8,7 +8,7 @@
 .title {
     padding-top: 24px;
     font-weight: bold;
-    /* text-align: center; */
+    text-align: center; /* Center the title */
     color: #333; /* Darker color for better readability */
 }
 
@@ -25,10 +25,6 @@
 .table td {
     border-bottom: none; /* Remove bottom border from data cells */
     text-align: center; /* Center align data text */
-}
-
-.errorMessage {
-    color: red;
 }
 
 .container{

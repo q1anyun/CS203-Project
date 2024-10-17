@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, Typography, Chip, IconButton, Box, Fab, Paper, Button } from '@mui/material';
+import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -9,7 +9,7 @@ import styles from './AdminTournamentView.module.css';
 
 function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5;  
+    const itemsPerPage = 7;  
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
 
     const handleNextPage = () => {
@@ -31,17 +31,24 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
     };
 
     const StyledTableCell = styled(TableCell)(({ theme }) => ({
-        '&:first-of-type': {
+        [`&.${tableCellClasses.head}`]: {
+            backgroundColor: theme.palette.common.black,
+            color: theme.palette.common.white,
             textAlign: 'center',
+            variant: 'header1'
         },
-        '&:last-of-type': {
+        [`&.${tableCellClasses.body}`]: {
+            fontSize: 14,
             textAlign: 'center',
         },
     }));
-
+    
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.action.hover,
+        },
+        '&:last-child td, &:last-child th': {
+            border: 0,
         },
     }));
 
@@ -52,8 +59,8 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
 
     return (
         <div>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="h4" component="h2" className={styles.title}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent:'center', margin:'0px'}}>
+                <Typography variant="header1" component="h2" className={styles.title}>
                     All Tournaments
                 </Typography>
                 <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }}>
@@ -64,23 +71,23 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                 <Table sx={{ minWidth: 700 }} aria-label="customized table">
                     <TableHead>
                         <TableRow>
-                            <StyledTableCell><Typography variant="h6">ID</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Start DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">End DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Time Control</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Min ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Max ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Players</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Status</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="h6">Actions</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">ID</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
+                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {tournamentsToShow.map((tournament) => (
                             <StyledTableRow key={tournament.id}>
-                                <StyledTableCell><Typography variant="body1">{tournament.id}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body1">{tournament.name}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
                                 <StyledTableCell>
                                     <Typography variant="body1">
                                         {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
@@ -106,15 +113,15 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         })}
                                     </Typography>
                                 </StyledTableCell>
-                                <StyledTableCell><Typography variant="body1">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body1">{tournament.minElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body1">{tournament.maxElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body1">{tournament.maxPlayers}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
                                 <StyledTableCell>
                                     <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </StyledTableCell>
                                 <StyledTableCell>
-                                    <>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
                                         <IconButton onClick={() => handleEditClick(tournament.id)}>
                                             <EditIcon />
                                         </IconButton>
@@ -124,7 +131,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         <IconButton onClick={() => handleViewDetails(tournament.id)}>
                                             <VisibilityIcon />
                                         </IconButton>
-                                    </>
+                                    </Box>
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}

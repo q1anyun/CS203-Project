@@ -58,6 +58,21 @@ function PlayerTournamentView() {
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 7;  
+    const totalPages = Math.ceil(tournaments.length / itemsPerPage);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prevPage => prevPage - 1);
+        }
+    };
+
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
@@ -155,7 +170,7 @@ function PlayerTournamentView() {
     return (
         <div>
             <div className={styles.container}>
-                <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
+                <Typography variant="header1" align='center' component="h2" gutterBottom className={styles.title}>
                     All Tournaments
                 </Typography>
                 <TableContainer component={Paper} className={styles.table}>
@@ -164,8 +179,8 @@ function PlayerTournamentView() {
                             <TableRow>
                                 <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
+                                <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
                                 <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
@@ -253,6 +268,17 @@ function PlayerTournamentView() {
                         </TableBody>
                     </Table>
                 </TableContainer>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+                    <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="contained" sx={{ mr: 2 }}>
+                        Previous
+                    </Button>
+                    <Typography variant="body1">
+                        Page {currentPage} of {totalPages}
+                    </Typography>
+                    <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="contained" sx={{ ml: 2 }}>
+                        Next
+                    </Button>
+                </Box>
             </div>
             {/* Dialog for Terms of Agreement */}
             <Dialog open={openRegisterDialog} onClose={handleRegisterDialogClose}>
