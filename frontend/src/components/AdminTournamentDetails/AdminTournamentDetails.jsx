@@ -11,20 +11,48 @@ const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 const CustomSeed = ({ seed, handleEditWinner }) => {
     const winnerId = seed.winnerId;
 
+    // Check if both player1Id and player2Id are null and winnerId exists (auto-advance case)
+    const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
+
     return (
-        <Seed style={{ fontSize: 20 }}>
+        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center' }}>
             <SeedItem>
                 <div>
-                    <SeedTeam style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black', backgroundColor: 'white' }}>
-                        {seed.teams[0]?.name || 'pending'}
-                    </SeedTeam>
-                    <SeedTeam style={{ color: winnerId === seed.teams[1]?.id ? 'green' : 'black', backgroundColor: 'white' }}>
-                        {seed.teams[1]?.name || 'pending'}
-                    </SeedTeam>
+                    {isAutoAdvance ? (
+                        <SeedTeam style={{ color: 'green', backgroundColor: 'white' }}>
+                            
+                            <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
+                            Auto Advance PLAYER {winnerId}
+                                </Typography>
+                        </SeedTeam>
+                    ) : (
+                        <>
+                            <SeedTeam
+                                style={{
+                                    color: winnerId === seed.teams[0]?.id ? 'green' : 'black',
+                                    backgroundColor: 'white'
+                                }}
+                            >
+                                <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
+                                    {seed.teams[0]?.name || 'Pending'}
+                                </Typography>
+                            </SeedTeam>
+                            <SeedTeam
+                                style={{
+                                    color: winnerId === seed.teams[1]?.id ? 'green' : 'black',
+                                    backgroundColor: 'white',
+                                }}
+                            >
+                                <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
+                                    {seed.teams[1]?.name || 'Pending'}
+                                </Typography>
+                            </SeedTeam>
 
-                    <IconButton onClick={() => handleEditWinner(seed.id, seed.teams)} aria-label="edit winner" sx={{ color: 'white' }}>
-                        <EditIcon />
-                    </IconButton>
+                            <IconButton onClick={() => handleEditWinner(seed.id, seed.teams)} aria-label="edit winner" sx={{ color: 'white' }}>
+                                <EditIcon />
+                            </IconButton>
+                        </>
+                    )}
                 </div>
             </SeedItem>
         </Seed>
@@ -41,6 +69,12 @@ function AdminTournamentDetails() {
     const [open, setOpen] = useState(false);
 
     const token = localStorage.getItem('token');
+
+    const statusColorMap = {
+        LIVE: 'success',
+        UPCOMING: 'warning',
+        EXPIRED: 'default',
+    };
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -85,6 +119,9 @@ function AdminTournamentDetails() {
         }));
     };
 
+
+
+
     const handleEditWinner = (matchId, teams) => {
         setSelectedMatchId(matchId); // Store match id
         setSelectedTeams(teams); // Store teams for the selected match
@@ -101,6 +138,7 @@ function AdminTournamentDetails() {
     };
 
     const handleSaveWinner = async () => {
+        console.log("start button clicked");
         try {
             await axios.put(`${baseURL2}/${selectedMatchId}/winner/${winner}`, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -112,14 +150,43 @@ function AdminTournamentDetails() {
         }
     };
 
+    const handleStart = async () => {
+        if (tournament.currentPlayers < 2) {
+            alert("Not enough players to start the tournament. Minimum required: 2");
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${baseURL}/start/${tournament.id}`, null, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (response.status === 200) {
+                alert("Tournament started successfully!");
+                window.location.reload();
+            }
+        } catch (error) {
+            console.error("Error starting the tournament:", error);
+            alert("Failed to start the tournament.");
+        }
+    };
+
+
+
     return (
         <Box sx={{ padding: 2 }}>
             {/* Tournament Header */}
-            <Typography variant="header1">{tournament.name}</Typography>
-            <Chip label={tournament.status} color="success" />
-            <Button variant="contained" color="primary" disabled={tournament.status !== 'UPCOMING'}>
-                Start Tournament
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
+                <Typography variant="header1" sx={{ display: 'inline-flex' }}>{tournament.name}</Typography>
+                <Chip label={tournament.status} color="success" sx={{ marginLeft: '10px' }} />
+                <Button variant="contained" color="primary" onClick={handleStart} disabled={tournament.status !== 'UPCOMING'} sx={{ marginLeft: '10px' }}>
+                    Start Tournament
+                </Button>
+            </Box>
+
+
+
+
 
             {/* Tournament Bracket */}
             <Bracket
@@ -129,6 +196,11 @@ function AdminTournamentDetails() {
                         {...props}
                         handleEditWinner={handleEditWinner}
                     />
+                )}
+                roundTitleComponent={(title) => (
+                    <Typography variant="header3" align="center" >
+                        {title}
+                    </Typography>
                 )}
             />
 
