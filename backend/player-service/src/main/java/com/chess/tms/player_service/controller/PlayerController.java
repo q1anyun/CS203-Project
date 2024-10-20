@@ -31,6 +31,12 @@ public class PlayerController {
         this.playerService = playerService;
     }
 
+    @GetMapping("")
+    public ResponseEntity<List<PlayerDetailsDTO>> getAllPlayers() {
+        List<PlayerDetailsDTO> allPlayers = playerService.getAllPlayers();
+        return ResponseEntity.ok(allPlayers);
+    }
+
     @GetMapping("/currentPlayerById")
     public ResponseEntity<PlayerDetailsDTO> getCurrentPlayerDetails(@RequestHeader("X-User-PlayerId") String id) {
         Long playerId = Long.parseLong(id);

@@ -39,6 +39,14 @@ public class PlayerService {
     @Autowired
     private RestTemplate restTemplate;
 
+    // Fetch all player details
+    public List<PlayerDetailsDTO> getAllPlayers() {
+        List<PlayerDetails> players = playerDetailsRepository.findAll();
+        return players.stream()
+                .map(this::convertToPlayerDetailsDTO)
+                .collect(Collectors.toList());
+    }
+
     // Fetch player details by player ID
     public PlayerDetailsDTO getPlayerDetailsById(Long id) {
 

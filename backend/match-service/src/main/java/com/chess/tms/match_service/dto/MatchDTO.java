@@ -9,8 +9,8 @@ import lombok.Data;
 public class MatchDTO {
     private Long id;
     private TournamentDTO tournament;
-    private Long winnerId;
-    private Long loserId;
+    private PlayerDetailsDTO winnerId;
+    private PlayerDetailsDTO loserId;
     private RoundType roundType;
     private GameType gameType;
     private LocalDateTime date;

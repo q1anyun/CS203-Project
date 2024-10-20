@@ -2,11 +2,13 @@ package com.chess.tms.match_service.service;
 
 import com.chess.tms.match_service.dto.MatchDTO;
 import com.chess.tms.match_service.dto.MatchEloRequestDTO;
+import com.chess.tms.match_service.dto.PlayerDetailsDTO;
 import com.chess.tms.match_service.dto.TournamentDTO;
 import com.chess.tms.match_service.dto.TournamentPlayerEloDTO;
 import com.chess.tms.match_service.exception.GameTypeNotFoundException;
 import com.chess.tms.match_service.exception.MatchDoesNotExistException;
 import com.chess.tms.match_service.exception.PlayerDoesNotExistInMatchException;
+import com.chess.tms.match_service.exception.MatchAlreadyCompletedException;
 import com.chess.tms.match_service.exception.RoundTypeNotFoundException;
 import com.chess.tms.match_service.model.*;
 import com.chess.tms.match_service.repository.GameTypeRepository;
@@ -42,6 +44,9 @@ public class MatchService {
 
     @Value("${elo.service.url}")
     private String eloServiceUrl;
+
+    @Value("${players.service.url}")
+    private String playerServiceUrl;
 
     public MatchService(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -167,24 +172,32 @@ public class MatchService {
         restTemplate.put(updateRoundUrl, null);
     }
 
-    public List<Match> getMatchesByTournament(Long tournamentId) {
-        return matchRepository.findByTournamentId(tournamentId);
+    public List<MatchDTO> getMatchesByTournament(Long tournamentId) {
+        List<Match> matches = matchRepository.findByTournamentId(tournamentId);
+        return matches.stream()
+                      .map(this::convertMatchToMatchDTO)
+                      .collect(Collectors.toList());
     }
 
-    public Match getMatch(Long matchId) {
+    public MatchDTO getMatch(Long matchId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
-
-        return match;
+        return convertMatchToMatchDTO(match);
     }
 
     public String advanceWinner(Long matchId, Long winnerId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
+
+        if(match.getWinnerId() != null) {
+            throw new MatchAlreadyCompletedException("Match has already been completed");
+        }
+
         if (!match.getPlayer1Id().equals(winnerId) && !match.getPlayer2Id().equals(winnerId)) {
             throw new PlayerDoesNotExistInMatchException(
                     "Player with id " + winnerId + " is not recognised in the match.");
         }
+
 
         match.setWinnerId(winnerId);
         match.setLoserId(match.getPlayer1Id().equals(winnerId) ? match.getPlayer2Id() : match.getPlayer1Id());
@@ -195,8 +208,6 @@ public class MatchService {
         MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
         matchEloRequestDTO.setWinner(match.getWinnerId());
         matchEloRequestDTO.setLoser(match.getLoserId());
-        System.out.println("Running updateMatchPlayersElo");
-        System.out.println(matchEloRequestDTO);
         restTemplate.put(eloServiceUrl + "/api/elo/match", matchEloRequestDTO);
 
         matchRepository.save(match);
@@ -217,7 +228,6 @@ public class MatchService {
             RoundType roundType = roundTypeRepository.findById(match.getRoundType().getId())
                     .orElseThrow(
                             () -> new RoundTypeNotFoundException("Round type not found while checking next round"));
-            System.out.println(roundType);
 
             List<Match> roundMatches = matchRepository.findByTournamentIdAndRoundTypeId(match.getTournamentId(),
                     roundType.getId());
@@ -271,8 +281,10 @@ public class MatchService {
     private MatchDTO convertMatchToMatchDTO(Match match) {
         MatchDTO matchDTO = new MatchDTO();
         matchDTO.setId(match.getId());
-        matchDTO.setWinnerId(match.getWinnerId());
-        matchDTO.setLoserId(match.getLoserId());
+        PlayerDetailsDTO winner = getPlayerDetails(match.getWinnerId());
+        PlayerDetailsDTO loser = getPlayerDetails(match.getLoserId());
+        matchDTO.setWinnerId(winner);
+        matchDTO.setLoserId(loser);
         matchDTO.setRoundType(match.getRoundType());
         matchDTO.setGameType(match.getGameType());
         matchDTO.setDate(match.getUpdatedAt());
@@ -286,5 +298,13 @@ public class MatchService {
     private TournamentDTO getTournamentDetails(Long tournamentId) {
         String tournamentUrl = tournamentServiceUrl + "/api/tournaments/" + tournamentId;
         return restTemplate.getForObject(tournamentUrl, TournamentDTO.class);
+    }
+
+    private PlayerDetailsDTO getPlayerDetails(long playerId) {
+        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+            playerServiceUrl + "/api/player/" + playerId,
+            PlayerDetailsDTO.class);
+        
+        return response.getBody();
     }
 }

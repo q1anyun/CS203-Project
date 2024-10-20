@@ -32,6 +32,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    //Handle GameTypeNotFoundException
     @ExceptionHandler(GameTypeNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleGameTypeNotFoundException(GameTypeNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -41,6 +42,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    //Handle RoundTypeNotFoundException
     @ExceptionHandler(RoundTypeNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleRoundTypeNotFoundException(RoundTypeNotFoundException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -48,5 +50,15 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         response.put("status", HttpStatus.NOT_FOUND.value());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+    
+    //Handle MatchAlreadyCompleted
+    @ExceptionHandler(MatchAlreadyCompletedException.class)
+    public ResponseEntity<Map<String, Object>> handleMatchAlreadyCompleted(MatchAlreadyCompletedException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }

@@ -1,10 +1,15 @@
 package com.chess.tms.user_service.service;
 
 import com.chess.tms.user_service.dto.UpdateUserRequestDTO;
+import com.chess.tms.user_service.dto.UserResponseDTO;
 import com.chess.tms.user_service.exception.UserAlreadyExistsException;
 import com.chess.tms.user_service.exception.UserNotFoundException;
 import com.chess.tms.user_service.model.User;
 import com.chess.tms.user_service.repository.UsersRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,21 +25,30 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public UserResponseDTO getUser(Long userId) {
+        User user = usersRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found."));
+        return new UserResponseDTO(user.getUsername(), user.getEmail(), user.getRole());
+    }
+
+    public List<UserResponseDTO> getAllUsers() {
+        List<User> users = usersRepository.findAll();
+        return users.stream()
+                .map(user -> new UserResponseDTO(user.getUsername(), user.getEmail(), user.getRole()))
+                .collect(Collectors.toList());
+    }
+
      public void updateUser(Long userId, UpdateUserRequestDTO updateUserRequestDTO) {
         User user = usersRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User with ID " + userId + " not found."));
-
-        // // Check if username is the same or already exists
-        // if (updateUserRequestDTO.getUsername() != null && 
-        //     !updateUserRequestDTO.getUsername().isEmpty()) {
-        //     if (updateUserRequestDTO.getUsername().equals(user.getUsername())) {
-        //         throw new UserAlreadyExistsException("Username is the same as the current username.");
-        //     }
-        //     if (usersRepository.findByUsername(updateUserRequestDTO.getUsername()).isPresent()) {
-        //         throw new UserAlreadyExistsException("Username " + updateUserRequestDTO.getUsername() + " is already taken.");
-        //     }
-        //     user.setUsername(updateUserRequestDTO.getUsername());
-        // }
+        
+        // Check if old password is correct
+        if (updateUserRequestDTO.getOldPassword() != null && 
+            !updateUserRequestDTO.getOldPassword().isEmpty()) {
+            if (!passwordEncoder.matches(updateUserRequestDTO.getOldPassword(), user.getPassword())) {
+                throw new UserNotFoundException("Old password is incorrect");
+            }
+        }
 
         // Check if email is the same or already exists
         if (updateUserRequestDTO.getEmail() != null && 
@@ -49,12 +63,12 @@ public class UserService {
         }
 
         // Check if the password is the same
-        if (updateUserRequestDTO.getPassword() != null && 
-            !updateUserRequestDTO.getPassword().isEmpty()) {
-            if (passwordEncoder.matches(updateUserRequestDTO.getPassword(), user.getPassword())) {
+        if (updateUserRequestDTO.getNewPassword() != null && 
+            !updateUserRequestDTO.getNewPassword().isEmpty()) {
+            if (passwordEncoder.matches(updateUserRequestDTO.getNewPassword(), user.getPassword())) {
                 throw new UserAlreadyExistsException("Password is the same as the current password.");
             }
-            user.setPassword(passwordEncoder.encode(updateUserRequestDTO.getPassword()));
+            user.setPassword(passwordEncoder.encode(updateUserRequestDTO.getNewPassword()));
         }
 
         // Update role if provided
