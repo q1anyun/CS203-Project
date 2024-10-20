@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -67,14 +69,18 @@ public class TournamentServiceTest {
 
     private Tournament tournament;
     private TournamentRegistrationDTO registrationDTO;
+    private PlayerDetailsDTO playerDetails;
+
+    @Value("${players.service.url}")
+    private String playerServiceUrl;
 
     @BeforeEach
     void setup() {
         registrationDTO = new TournamentRegistrationDTO();
         registrationDTO.setName("Test Tournament");
         registrationDTO.setTimeControl(1);
-        registrationDTO.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
-        registrationDTO.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        registrationDTO.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
+        registrationDTO.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
         registrationDTO.setMaxPlayers(16);
 
         tournament = new Tournament();
@@ -86,8 +92,11 @@ public class TournamentServiceTest {
         tournament.setMaxPlayers(32);
         tournament.setMinElo(1000);
         tournament.setMaxElo(2000);
-        tournament.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
-        tournament.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        tournament.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
+        tournament.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
+
+        playerDetails = new PlayerDetailsDTO();
+        playerDetails.setEloRating(1500);
     }
 
     @Test
@@ -183,9 +192,14 @@ public class TournamentServiceTest {
     void registerPlayer_ValidPlayerId_Success() {
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
 
+        when(restTemplate.getForEntity(playerServiceUrl+"/api/player/100", PlayerDetailsDTO.class))
+                .thenReturn(new ResponseEntity<>(playerDetails, HttpStatus.OK));
+
         tournamentService.registerPlayer(100L, 1L);
 
         verify(tournamentPlayerRepository, times(1)).save(any(TournamentPlayer.class));
+
+        assertEquals(3, tournament.getCurrentPlayers());
     }
 
     @Test
@@ -255,8 +269,8 @@ public class TournamentServiceTest {
         updateDTO.setMaxPlayers(32);
         updateDTO.setMinElo(1300);
         updateDTO.setMaxElo(2200);
-        updateDTO.setStartDate(LocalDateTime.parse("2024-01-05T00:00:00"));
-        updateDTO.setEndDate(LocalDateTime.parse("2024-02-01T00:00:00"));
+        updateDTO.setStartDate(LocalDateTime.parse("2024-01-05T00:00:00").toLocalDate());
+        updateDTO.setEndDate(LocalDateTime.parse("2024-02-01T00:00:00").toLocalDate());
         updateDTO.setTimeControl(2);
 
         GameType gameType = new GameType();
@@ -271,8 +285,8 @@ public class TournamentServiceTest {
         assertEquals(32, tournament.getMaxPlayers());
         assertEquals(1300, tournament.getMinElo());
         assertEquals(2200, tournament.getMaxElo());
-        assertEquals(LocalDateTime.parse("2024-01-05T00:00:00"), tournament.getStartDate());
-        assertEquals(LocalDateTime.parse("2024-02-01T00:00:00"), tournament.getEndDate());
+        assertEquals(LocalDate.parse("2024-01-05"), tournament.getStartDate());
+        assertEquals(LocalDate.parse("2024-02-01"), tournament.getEndDate());
         assertEquals(gameType, tournament.getTimeControl());
         verify(tournamentRepository, times(1)).save(tournament);
     }
@@ -320,11 +334,11 @@ public class TournamentServiceTest {
         tournamentPlayer.setTournament(tournament);
 
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-        when(tournamentPlayerRepository.findById(1L)).thenReturn(Optional.of(tournamentPlayer));
+        when(tournamentPlayerRepository.findByPlayerIdAndTournament(100L, tournament)).thenReturn(Optional.of(tournamentPlayer));
 
-        tournamentService.deletePlayerFromTournament(1L, 1L);
+        tournamentService.deletePlayerFromTournament(100L, 1L);
 
-        verify(tournamentPlayerRepository, times(1)).deleteByPlayerId(1L);
+        verify(tournamentPlayerRepository, times(1)).deleteById(1L);
     }
 
     @Test

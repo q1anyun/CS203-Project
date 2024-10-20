@@ -28,7 +28,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -84,11 +84,18 @@ public class TournamentServiceIntegrationTest {
     public void createTournament_Valid_Success() {
         TournamentRegistrationDTO dto = new TournamentRegistrationDTO(
             "Test Tournament",
-            LocalDateTime.now().plusDays(1),
-            LocalDateTime.now().plusDays(2),
+            LocalDate.now().plusDays(1),
+            LocalDate.now().plusDays(2),
             1000,
             2000,
             16,
+            1,
+            "Test Description",
+            "Test Photo",
+            "ONLINE",
+            "Singapore",
+            "Test Address",
+            1,
             1
         );
     
@@ -274,8 +281,8 @@ public class TournamentServiceIntegrationTest {
         tournament.setCurrentPlayers(0);
         tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
         tournament.setStatus(Status.UPCOMING);
-        tournament.setStartDate(LocalDateTime.now().plusDays(1));
-        tournament.setEndDate(LocalDateTime.now().plusDays(2));
+        tournament.setStartDate(LocalDate.now().plusDays(1));
+        tournament.setEndDate(LocalDate.now().plusDays(2));
         return tournamentRepository.save(tournament);
     }
 

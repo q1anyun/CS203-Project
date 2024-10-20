@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chess.tms.tournament_service.dto.PlayerDetailsDTO;
+import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.service.TournamentService;
 
 
@@ -34,17 +35,17 @@ public class TournamentPlayerController {
         return ResponseEntity.ok("Player deleted successfully");
     }
 
-    @PostMapping("/register/{playerid}/{tournamentid}") 
-    public ResponseEntity<String> registerPlayer(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
-        tournamentService.registerPlayer(playerid, tournamentid);
-        return ResponseEntity.ok("Player registered successfully");
-    }
-
     @DeleteMapping("/current/{tournamentid}")
     public ResponseEntity<String> deleteCurrentPlayerFromTournament(@RequestHeader("X-User-PlayerId") String id, @PathVariable("tournamentid") long tournamentid) {
         Long playerId = Long.parseLong(id);
         tournamentService.deletePlayerFromTournament(playerId, tournamentid);
         return ResponseEntity.ok("Player deleted successfully");
+    }
+
+    @PostMapping("/register/{playerid}/{tournamentid}") 
+    public ResponseEntity<String> registerPlayer(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
+        tournamentService.registerPlayer(playerid, tournamentid);
+        return ResponseEntity.ok("Player registered successfully");
     }
 
     @PostMapping("/register/current/{tournamentid}") 

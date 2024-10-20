@@ -50,6 +50,12 @@ public class TournamentController {
     public ResponseEntity<List<TournamentDetailsDTO>> getAllTournaments() {
         return ResponseEntity.ok(tournamentService.getAllTournaments());
     }
+
+    @GetMapping("/recommended")
+    public ResponseEntity<List<TournamentDetailsDTO>> getRecommendedTournaments() {
+        return ResponseEntity.ok(tournamentService.getRecommendedTournaments(25));
+    }
+
     
     @PutMapping("/{id}")
     public ResponseEntity<String> updateTournament(@PathVariable ("id") long id, @RequestBody TournamentUpdateRequestDTO updatedDTO) {
@@ -60,7 +66,7 @@ public class TournamentController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteTournament(@PathVariable("id") long id) {
         tournamentService.deleteTournament(id);
-        return ResponseEntity.ok("Sucessfully deleted tournament");
+        return ResponseEntity.ok("Successfully deleted tournament");
     }
 
     @PutMapping("/{id}/round/{round_type}")

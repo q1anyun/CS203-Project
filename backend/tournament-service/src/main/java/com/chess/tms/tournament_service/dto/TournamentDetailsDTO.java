@@ -1,5 +1,6 @@
 package com.chess.tms.tournament_service.dto;
 
+import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
@@ -8,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -22,9 +23,23 @@ public class TournamentDetailsDTO {
 
     private String name;
 
-    private LocalDateTime startDate;
+    private Format format;
 
-    private LocalDateTime endDate;
+    private String description;
+
+    private String photo;
+
+    private String country;
+
+    private String locationAddress;
+
+    private Integer locationLongitude;
+
+    private Integer locationLatitude;
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
 
     private Integer minElo;
 
