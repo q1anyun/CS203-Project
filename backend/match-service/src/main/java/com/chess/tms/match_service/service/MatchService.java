@@ -53,48 +53,32 @@ public class MatchService {
     }
 
     public Long createInitialMatches(Long tournamentId, Long gameTypeId) {
+        // Get the list of players with Elo ratings from the tournament service
         ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
                 tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
                 TournamentPlayerEloDTO[].class);
-
+    
         TournamentPlayerEloDTO[] players = response.getBody();
         int totalPlayers = players.length;
-
+    
         // Calculate the next power of 2 for the knockout stage
         int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));
         int byes = nextPowerOfTwo - totalPlayers;
-
+    
         RoundType currentRoundType = getRoundType(nextPowerOfTwo);
-
+    
         // Sort players by their Elo rating (descending order for best players first)
         Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
-
+    
         // Prepare the matches for all rounds (create all rounds in advance)
         List<Match> allMatches = new ArrayList<>();
         Map<Integer, List<Match>> roundMatchesMap = new HashMap<>();
-
-        // Create first round matches
-        List<Match> firstRoundMatches = new ArrayList<>();
-        for (int i = 0; i < totalPlayers - byes; i += 2) {
-            TournamentPlayerEloDTO player1 = players[i];
-            TournamentPlayerEloDTO player2 = players[i + 1];
-
-            Match match = new Match();
-            match.setTournamentId(tournamentId);
-            match.setPlayer1Id(player1.getId());
-            match.setPlayer2Id(player2.getId());
-            match.setRoundType(currentRoundType);
-            match.setGameType(gameTypeRepository.findById(gameTypeId)
-                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
-            match.setStatus(Match.MatchStatus.PENDING);
-            firstRoundMatches.add(match);
-            allMatches.add(match);
-        }
-
-        // Handle byes for top players
+    
+        // Handle byes for top players first
+        System.out.println("Handle Byes");
         List<Match> byeMatches = new ArrayList<>();
         for (int i = 0; i < byes; i++) {
-            TournamentPlayerEloDTO playerWithBye = players[totalPlayers - 1 - i];
+            TournamentPlayerEloDTO playerWithBye = players[i];  // Top player gets a bye
             Match byeMatch = new Match();
             byeMatch.setTournamentId(tournamentId);
             byeMatch.setPlayer1Id(null);
@@ -106,28 +90,59 @@ public class MatchService {
             byeMatch.setStatus(Match.MatchStatus.COMPLETED);
             byeMatches.add(byeMatch);
             allMatches.add(byeMatch);
+
+            System.out.println("Player with bye: " + playerWithBye.getId());
+            System.out.println("Player with bye: " + playerWithBye.getEloRating());
         }
-
-        List<Match> combinedFirstRoundMatches = new ArrayList<>();
-
-        combinedFirstRoundMatches.addAll(firstRoundMatches);
+        System.out.println();
+    
+        // Create first round matches with the remaining players after the byes
+        List<Match> firstRoundMatches = new ArrayList<>();
+        int lowIndex = byes; // Start pairing from the players after the byes
+        int highIndex = totalPlayers - 1;
+    
+        System.out.println("Generate First Round Matches");
+        // Pair the remaining players based on highest vs lowest elo
+        while (lowIndex < highIndex) {
+            TournamentPlayerEloDTO player1 = players[lowIndex]; // Higher Elo
+            TournamentPlayerEloDTO player2 = players[highIndex]; // Lower Elo
+    
+            Match match = new Match();
+            match.setTournamentId(tournamentId);
+            match.setPlayer1Id(player1.getId());
+            match.setPlayer2Id(player2.getId());
+            match.setRoundType(currentRoundType);
+            match.setGameType(gameTypeRepository.findById(gameTypeId)
+                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+            match.setStatus(Match.MatchStatus.PENDING);
+            firstRoundMatches.add(match);
+            allMatches.add(match);
+    
+            lowIndex++;
+            highIndex--;
+            System.out.println("Player 1: " + player1.getId() + " vs Player 2: " + player2.getId());
+            System.out.println("Player 1: " + player1.getEloRating() + " vs Player 2: " + player2.getEloRating());
+        }
+    
+        // Combine first-round matches and bye matches
+        List<Match> combinedFirstRoundMatches = new ArrayList<>(firstRoundMatches);
         combinedFirstRoundMatches.addAll(byeMatches);
-
         roundMatchesMap.put(1, combinedFirstRoundMatches);
-
-        // Generate the remaining rounds
+    
+        // Generate matches for subsequent rounds
         int currentRoundSize = (firstRoundMatches.size() + byeMatches.size()) / 2;
         int roundNumber = 2;
-
+        System.out.println();
+        System.out.println("Generate Subsequent Rounds");
         while (currentRoundSize >= 1) {
             List<Match> currentRoundMatches = new ArrayList<>();
             for (int i = 0; i < currentRoundSize; i++) {
+                System.out.println("Round " + roundNumber + " Match " + i);
                 Match nextRoundMatch = new Match();
                 nextRoundMatch.setTournamentId(tournamentId);
                 nextRoundMatch.setRoundType(getRoundType(currentRoundSize * 2));
                 nextRoundMatch.setGameType(gameTypeRepository.findById(gameTypeId)
-                        .orElseThrow(
-                                () -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+                        .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
                 nextRoundMatch.setStatus(Match.MatchStatus.PENDING);
                 currentRoundMatches.add(nextRoundMatch);
                 allMatches.add(nextRoundMatch);
@@ -136,27 +151,28 @@ public class MatchService {
             currentRoundSize /= 2;
             roundNumber++;
         }
-
+    
+        // Save all the matches (both regular and bye matches)
         matchRepository.saveAll(allMatches);
-
-        // Update next_match_id for each match
+    
+        // Update next_match_id for each match in subsequent rounds
         for (int round = 1; round < roundNumber - 1; round++) {
             List<Match> previousRoundMatches = roundMatchesMap.get(round);
             List<Match> nextRoundMatches = roundMatchesMap.get(round + 1);
-
+    
             for (int i = 0; i < previousRoundMatches.size(); i += 2) {
                 Match previousMatch1 = previousRoundMatches.get(i);
                 Match previousMatch2 = previousRoundMatches.get(i + 1);
                 Match nextRoundMatch = nextRoundMatches.get(i / 2);
-
+    
                 previousMatch1.setNextMatchId(nextRoundMatch.getId());
                 previousMatch2.setNextMatchId(nextRoundMatch.getId());
                 matchRepository.save(previousMatch1);
                 matchRepository.save(previousMatch2);
             }
         }
+    
         return currentRoundType.getId();
-        // updateCurrentRoundForTournament(tournamentId, currentRoundType.getId());
     }
 
     // Get the RoundType based on the number of players
