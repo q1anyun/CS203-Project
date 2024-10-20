@@ -5,7 +5,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.time.LocalDate;
 
+import java.util.Comparator;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +23,7 @@ import com.chess.tms.tournament_service.dto.PlayerDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
+import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.repository.GameTypeRepository;
 import com.chess.tms.tournament_service.repository.RoundTypeRepository;
@@ -28,6 +32,7 @@ import com.chess.tms.tournament_service.repository.TournamentRepository;
 
 import jakarta.transaction.Transactional;
 
+import com.chess.tms.tournament_service.exception.EloNotInRangeException;
 import com.chess.tms.tournament_service.exception.GameTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.InsufficientPlayersException;
 import com.chess.tms.tournament_service.exception.MatchServiceException;
@@ -171,8 +176,32 @@ public class TournamentService {
                 tournamentDTOs.get(tournamentDTOs.size() - 1).setWinner(winner);
             }
         }
+        return tournamentDTOs;
+    }
+
+    public List<TournamentDetailsDTO> getRecommendedTournaments(long playerId){
+        List<Tournament> tournaments = tournamentRepository.findAll();
+        List<TournamentDetailsDTO> tournamentDTOs = new ArrayList<>();
 
 
+        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+            playerServiceUrl + "/api/player/" + playerId,
+            PlayerDetailsDTO.class);
+
+        PlayerDetailsDTO currentPlayer = response.getBody();
+
+        // Filter out tournaments that are not upcoming, is full, or are in the past
+        for (Tournament tournament : tournaments) {
+            if(currentPlayer.getEloRating() > tournament.getMinElo() 
+                && currentPlayer.getEloRating() < tournament.getMaxElo()
+                && tournament.getStatus() == Status.UPCOMING
+                && tournament.getCurrentPlayers() < tournament.getMaxPlayers()
+                && tournament.getStartDate().isAfter(LocalDate.now())){
+                tournamentDTOs.add(DTOUtil.convertEntryToDTO(tournament));
+            }
+        }
+
+        tournamentDTOs.sort(Comparator.comparing(TournamentDetailsDTO::getStartDate));
 
         return tournamentDTOs;
     }
@@ -210,6 +239,37 @@ public class TournamentService {
             tournament.setTimeControl(gameType);
         }
 
+        if(dto.getDescription() != null){
+            tournament.setDescription(dto.getDescription());
+        }
+
+        if(dto.getPhoto() != null){
+            tournament.setPhoto(dto.getPhoto());
+        }
+
+        if(dto.getFormat() != null){
+            if(dto.getFormat().toUpperCase().equals("ONLINE") || dto.getFormat().toUpperCase().equals("HYBRID") || dto.getFormat().toUpperCase().equals("PHYSICAL"))
+                tournament.setFormat(Format.valueOf(dto.getFormat().toUpperCase()));
+            else 
+                tournament.setFormat(Format.ONLINE);
+        }
+
+        if(dto.getCountry() != null){
+            tournament.setCountry(dto.getCountry());
+        }
+    
+        if(dto.getLocationAddress() != null){
+            tournament.setLocationAddress(dto.getLocationAddress());
+        }
+
+        if(dto.getLocationLatitude() != null){
+            tournament.setLocationLatitude(dto.getLocationLatitude());
+        }
+
+        if(dto.getLocationLongitude() != null){
+            tournament.setLocationLongitude(dto.getLocationLongitude());
+        }
+
         // Save the updated tournament
         tournamentRepository.save(tournament);
     }
@@ -220,11 +280,27 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
         }
 
+        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+            playerServiceUrl + "/api/player/" + playerId,
+            PlayerDetailsDTO.class);
+
+        PlayerDetailsDTO registeringPlayer = response.getBody();
+
+        if(registeringPlayer == null){
+            throw new UserDoesNotExistException("Player with id " + playerId + " does not exist.");
+        }
+
+        if(registeringPlayer.getEloRating() < tournamentOptional.get().getMinElo() || registeringPlayer.getEloRating() > tournamentOptional.get().getMaxElo()){
+            throw new EloNotInRangeException("Player with id " + playerId + " does not meet the Elo requirements for this tournament.");
+        }
+
         Tournament tournament = tournamentOptional.get();
 
         if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
             throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
         }
+
+
 
         Optional<TournamentPlayer> tp = tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(playerId, tournamentId);
 
@@ -262,7 +338,9 @@ public class TournamentService {
 
         PlayerDetailsDTO[] playerDetailsArray = response.getBody();
 
-        return Arrays.asList(playerDetailsArray);
+        return Arrays.stream(playerDetailsArray)
+            .sorted(Comparator.comparing(PlayerDetailsDTO::getEloRating).reversed()) 
+            .collect(Collectors.toList());
 
     }
 
@@ -288,16 +366,18 @@ public class TournamentService {
     @Transactional
     public void deletePlayerFromTournament(long id, long tournamentid) {
         Optional<Tournament> tournament = tournamentRepository.findById(tournamentid);
-        Optional<TournamentPlayer> player = tournamentPlayerRepository.findById(id);
+
         if (tournament.isEmpty()) {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentid + " does not exist.");
         }
 
+        Optional<TournamentPlayer> player = tournamentPlayerRepository.findByPlayerIdAndTournament(id, tournament.get());
+
         if (player.isEmpty()) {
-            throw new UserDoesNotExistException("Tournament Player with id " + id + " does not exist.");
+            throw new UserDoesNotExistException("Player was not registered for this tournament.");
         }
 
-        tournamentPlayerRepository.deleteByPlayerId(id);
+        tournamentPlayerRepository.deleteById(player.get().getId());
     }
 
     public void updateCurrentRoundForTournament(long tournamentId, long roundTypeId) {

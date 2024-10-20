@@ -66,6 +66,12 @@ public class GlobalExceptionHandler {
         return createErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    // Handle EloNotInRangeException
+    @ExceptionHandler(EloNotInRangeException.class)
+    public ResponseEntity<Map<String, Object>> handleEloNotInRangeException(EloNotInRangeException e) {
+        return createErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     private ResponseEntity<Map<String, Object>> createErrorResponse(String message, HttpStatus status) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
