@@ -52,8 +52,9 @@ public class TournamentController {
     }
 
     @GetMapping("/recommended")
-    public ResponseEntity<List<TournamentDetailsDTO>> getRecommendedTournaments() {
-        return ResponseEntity.ok(tournamentService.getRecommendedTournaments(25));
+    public ResponseEntity<List<TournamentDetailsDTO>> getRecommendedTournaments(@RequestHeader("X-User-PlayerId") String id) {
+        long playerId = Long.parseLong(id);
+        return ResponseEntity.ok(tournamentService.getRecommendedTournaments(playerId));
     }
 
     
@@ -87,13 +88,13 @@ public class TournamentController {
     }
 
     @GetMapping("/registered/current")
-    public ResponseEntity<List<TournamentDetailsDTO>> getRegisteredTournaments( @RequestHeader("X-User-PlayerId") String id) {
+    public ResponseEntity<List<TournamentDetailsDTO>> getRegisteredTournaments(@RequestHeader("X-User-PlayerId") String id) {
         long playerId = Long.parseLong(id);
         return ResponseEntity.ok(tournamentService.getRegisteredTournaments(playerId));
     }
 
     @GetMapping("/live/current")
-    public ResponseEntity<List<TournamentDetailsDTO>> getLiveTournaments( @RequestHeader("X-User-PlayerId") String id) {
+    public ResponseEntity<List<TournamentDetailsDTO>> getLiveTournaments(@RequestHeader("X-User-PlayerId") String id) {
         long playerId = Long.parseLong(id);
         return ResponseEntity.ok(tournamentService.getLiveTournaments(playerId));
     }
