@@ -1,0 +1,20 @@
+.tournament-bracket {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+}
+
+.bracket-match-horizontal {
+    position: relative;
+    margin-bottom: 50px;
+    margin-right: 50px; /* Add spacing between matches horizontally */
+}
+
+.horizontal-bracket-line {
+    position: absolute;
+    top: 50%;
+    right: -25px; /* Adjust this to control the line length */
+    width: 50px;
+    height: 1px;
+    background-color: black;
+}

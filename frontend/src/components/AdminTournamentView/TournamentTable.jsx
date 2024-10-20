@@ -1,4 +1,4 @@
-import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button } from '@mui/material';
+import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button, Card, Grid, CardActions, CardContent, Divider } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -7,13 +7,13 @@ import styles from './AdminTournamentView.module.css';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import {TextField, FormControl, InputLabel, Select, MenuItem} from '@mui/material';
+import { TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 
 function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 7;  
+    const itemsPerPage = 7;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
@@ -54,7 +54,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
             textAlign: 'center',
         },
     }));
-    
+
     const StyledTableRow = styled(TableRow)(({ theme }) => ({
         '&:nth-of-type(odd)': {
             backgroundColor: theme.palette.action.hover,
@@ -71,7 +71,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
 
     return (
         <div>
-            <Box sx={{ display: 'flex', alignItems: 'center', margin:'0px'}}>
+            <Box sx={{ display: 'flex', alignItems: 'center', margin: '0px' }}>
                 <Typography variant="header1" component="h2" className={styles.title}>
                     All Tournaments
                 </Typography>
@@ -79,14 +79,14 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     <AddIcon />
                 </Fab>
             </Box>
-            <Box display="flex" flexDirection="row" gap={1} margin="0px 0px 20px 20px"flexWrap="wrap">
+            <Box display="flex" flexDirection="row" gap={1} margin="0px 0px 20px 20px" flexWrap="wrap">
                 <TextField
                     label="Search Tournaments"
                     variant="outlined"
                     size="small"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    sx={{ flexShrink: 0, width:'300px'}}
+                    sx={{ flexShrink: 0, width: '300px' }}
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
@@ -95,7 +95,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                         ),
                     }}
                 />
-                <FormControl variant="outlined" size="small" labelProps={{ shrink: true }} sx={{ flexShrink: 0, width:'125px'}} >
+                <FormControl variant="outlined" size="small" labelProps={{ shrink: true }} sx={{ flexShrink: 0, width: '125px' }} >
                     <InputLabel>Status</InputLabel>
                     <Select
                         value={selectedStatus}
@@ -115,7 +115,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     size="small"
                     value={minElo}
                     onChange={(e) => setMinElo(e.target.value)}
-                    sx={{ flexShrink: 0, width:'100px'}}
+                    sx={{ flexShrink: 0, width: '100px' }}
                 />
                 <TextField
                     label="Max ELO"
@@ -124,7 +124,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     size="small"
                     value={maxElo}
                     onChange={(e) => setMaxElo(e.target.value)}
-                    sx={{ flexShrink: 0, width:'100px'}}
+                    sx={{ flexShrink: 0, width: '100px' }}
                 />
                 <TextField
                     label="Start Date"
@@ -134,7 +134,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     InputLabelProps={{ shrink: true }}
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    sx={{ flexShrink: 0, width:'140px'}}
+                    sx={{ flexShrink: 0, width: '140px' }}
                 />
                 <TextField
                     label="End Date"
@@ -144,7 +144,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     InputLabelProps={{ shrink: true }}
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    sx={{ flexShrink: 0, width:'140px'}}
+                    sx={{ flexShrink: 0, width: '140px' }}
                 />
                 <TextField
                     label="Time Control"
@@ -153,9 +153,9 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     size="small"
                     value={timeControl}
                     onChange={(e) => setTimeControl(e.target.value)}
-                    sx={{ flexShrink: 0, width:'120px'}}
+                    sx={{ flexShrink: 0, width: '120px' }}
                 />
-              <Button
+                <Button
                     variant="outlined"
                     color="primary"
                     onClick={() => {
@@ -170,101 +170,108 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     }}
                 >
                     Reset Filters
-                </Button> 
+                </Button>
             </Box>
-            <TableContainer component={Paper} className={styles.table}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell><Typography variant="header4">ID</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                    {tournaments
-                            .filter(tournament => 
-                                tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-                                (selectedStatus ? tournament.status === selectedStatus : true) &&
-                                (minElo ? tournament.minElo >= minElo : true) &&
-                                (maxElo ? tournament.maxElo <= maxElo : true) &&
-                                (startDate ? new Date(tournament.startDate) >= new Date(startDate) : true) &&
-                                (endDate ? new Date(tournament.endDate) <= new Date(endDate) : true) &&
-                                (timeControl ? tournament.timeControl.timeControlMinutes.toString() === timeControl : true) &&
-                                (maxPlayers ? tournament.maxPlayers.toString() === maxPlayers : true)
-                            )
-                            .map((tournament) => (
-                                <StyledTableRow key={tournament.id}>
-                                    <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                    <StyledTableCell>
-                                        <Typography variant="body4">
-                                            {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
-                                                timeZone: 'Asia/Singapore',
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
+            <Grid container spacing={3} padding={'8px'}>
+                {tournaments
+                    .filter(tournament =>
+                        tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                        (selectedStatus ? tournament.status === selectedStatus : true) &&
+                        (minElo ? tournament.minElo >= minElo : true) &&
+                        (maxElo ? tournament.maxElo <= maxElo : true) &&
+                        (startDate ? new Date(tournament.startDate) >= new Date(startDate) : true) &&
+                        (endDate ? new Date(tournament.endDate) <= new Date(endDate) : true) &&
+                        (timeControl ? tournament.timeControl.timeControlMinutes.toString() === timeControl : true) &&
+                        (maxPlayers ? tournament.maxPlayers.toString() === maxPlayers : true)
+                    )
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((tournament) => (
+                        <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+                            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                                <img
+                                    src={`https://via.placeholder.com/300x200?text=${tournament.name}`} // get the tournament upload photo (to be updated at another date)
+                                    alt={tournament.name}
+                                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                                />
+                                <CardContent sx={{ flexGrow: 1 }}>
+                                    <Typography variant="header2">
+                                        <span style={{ marginRight: '16px' }}>{tournament.name}</span> {/* Tournament name with margin-right to create space */}
+                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} /> {/* Chip next to the name */}
+                                    </Typography>
+                                    <Divider sx={{ margin: '8px 0' }} /> {/* Divider after the title */}
+
+                                    <Typography variant="header3">Start: </Typography>
+                                    <Typography variant="playerProfile2">
+                                        {new Date(tournament.startDate + "Z").toLocaleString()}
+                                    </Typography> {/* Body for the Start date */}
+
+                                    <Box display="flex" flexDirection="row" alignItems="center">
+                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>End:</Typography>
+                                        <Typography variant="playerProfile2">
+                                            {new Date(tournament.endDate + "Z").toLocaleString()}
+                                        </Typography> {/* Body for the End date */}
+                                    </Box>
+
+                                    <Box display="flex" flexDirection="row" alignItems="center">
+                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Min ELO:</Typography>
+                                        <Typography variant="playerProfile2">
+                                            {tournament.minElo}
                                         </Typography>
-                                    </StyledTableCell>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" alignItems="center">
+                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Max ELO:</Typography>
 
-                                    <StyledTableCell>
-                                        <Typography variant="body4">
-                                            {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
-                                                timeZone: 'Asia/Singapore',
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
+                                        <Typography variant="playerProfile2">
+                                            {tournament.maxElo}
                                         </Typography>
-                                    </StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
-                                    <StyledTableCell>
-                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                                    </StyledTableCell>
-                                    <StyledTableCell>
-                                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-                                            <IconButton 
-                                                onClick={() => handleEditClick(tournament.id)} 
-                                                sx={{ color: 'primary.main' }}  
-                                            >
-                                                <EditIcon />
-                                            </IconButton>
+                                    </Box>
+                                    <Box display="flex" flexDirection="row" alignItems="center">
+                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Time Control:</Typography>
 
-                                            <IconButton 
-                                                onClick={() => handleDeleteClick(tournament.id)} 
-                                                sx={{ color: 'error.main' }}  
-                                            >
-                                                <DeleteIcon />
-                                            </IconButton>
+                                        <Typography variant="playerProfile2">
+                                            {tournament.timeControl.timeControlMinutes} minutes
+                                        </Typography>
+                                    </Box>
 
-                                            <IconButton 
-                                                onClick={() => handleViewDetails(tournament.id)} 
-                                                sx={{ color: 'secondary.main' }}  
-                                            >
-                                                <VisibilityIcon />
-                                            </IconButton>
-                                        </Box>
-                                        </StyledTableCell>
-                                </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+
+                                </CardContent>
+
+                                <CardActions>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                                        <IconButton
+                                            onClick={() => handleEditClick(tournament.id)}
+                                            sx={{ color: 'primary.main', mr: 4 }}
+                                        >
+                                            <EditIcon />
+                                        </IconButton>
+
+                                        <IconButton
+                                            onClick={() => handleDeleteClick(tournament.id)}
+                                            sx={{ color: 'error.main', mr: 4 }}
+                                        >
+                                            <DeleteIcon />
+                                        </IconButton>
+
+                                        <IconButton
+                                            onClick={() => handleViewDetails(tournament.id)}
+                                            sx={{ color: 'secondary.main', mr: 4 }}
+                                        >
+                                            <VisibilityIcon />
+                                        </IconButton>
+
+
+                                    </Box>
+
+
+
+
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+            </Grid>
+
+
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
                 <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="contained" sx={{ mr: 2 }}>
                     Previous
