@@ -300,17 +300,26 @@ public class MatchService {
         PlayerDetailsDTO player1 = new PlayerDetailsDTO();
         PlayerDetailsDTO player2 = new PlayerDetailsDTO();
         
-            player1 = getPlayerDetails(match.getWinnerId());
+
+        if(match.getPlayer1Id() != null){
+            player1 = getPlayerDetails(match.getPlayer1Id());
             matchDTO.setPlayer1(player1);
+        } else{
+            matchDTO.setPlayer1(player1);
+        }
 
-            player2 = getPlayerDetails(match.getLoserId());
+        if(match.getPlayer2Id() != null){
+            player2 = getPlayerDetails(match.getPlayer2Id());
             matchDTO.setPlayer2(player2);
-
+        } else{
+            matchDTO.setPlayer2(null);
+        }
         if(match.getWinnerId() != null){
             matchDTO.setWinnerId(match.getWinnerId());
         } else{
             matchDTO.setWinnerId(null);
         }
+
         if(match.getLoserId() != null){
             matchDTO.setLoserId(match.getLoserId());
         } else{
