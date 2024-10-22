@@ -13,6 +13,7 @@ import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
 import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
+import TournamentLeaderboard from './components/TournamentLeaderboard/TournamentLeaderboard';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
 import Settings from './components/Settings/Settings'
@@ -53,6 +54,11 @@ function AppContent() {
             <Settings />
           </ProtectedRoute>} />
 
+          <Route path="/admin/settings"
+          element={<ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>} />
+
 
         <Route path="/admin/profile"
           element={<ProtectedRoute>
@@ -62,6 +68,11 @@ function AppContent() {
         <Route path="/admin/tournaments/:id"
           element={<ProtectedRoute>
             <AdminTournamentDetails />
+          </ProtectedRoute>} />
+
+          <Route path="/admin/tournaments/:id/leaderboard"
+          element={<ProtectedRoute>
+            <TournamentLeaderboard />
           </ProtectedRoute>} />
 
           <Route path="/player/tournaments/:id"

@@ -305,7 +305,7 @@ public class MatchService {
             player1 = getPlayerDetails(match.getPlayer1Id());
             matchDTO.setPlayer1(player1);
         } else{
-            matchDTO.setPlayer1(player1);
+            matchDTO.setPlayer1(null);
         }
 
         if(match.getPlayer2Id() != null){

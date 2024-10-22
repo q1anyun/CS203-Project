@@ -1,7 +1,10 @@
-import React, { useState }  from 'react';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import React, { useState, useEffect}  from 'react';
 import { styled } from '@mui/material/styles';
 import { Card, CardContent, Typography, Avatar, Box,  Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
+import useProfilePic from '../ProfilePicture/UseProfilePicture';
+import defaultProfilePic from '../../assets/default_user.png'
+import axios from 'axios';
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL; // Base URL for API calls
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -16,13 +19,18 @@ const VisuallyHiddenInput = styled('input')({
 });
 
 function AdminProfile({ profilePic }) {
- 
-  const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
-  const [AdminName, setAdminName] = useState('Magnus Carlsen');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
+
+  const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
+  const [adminDetails, setAdminDetails] = useState([]); 
+  profilePic = useProfilePic();
+
+
+  useEffect(() => {
+    if (profilePic) {
+      setLocalProfilePic(profilePic);
+      // Update localProfilePic when profilePic changes
+    }
+  }, [profilePic]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,69 +42,20 @@ function AdminProfile({ profilePic }) {
 
     
         // Fetch player details
-        const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
+        const adminResponse = await axios.get(`${baseURL}/current`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setPlayerDetails(playerResponse.data || {});
+        setAdminDetails(adminResponse.data || {});
 
       };
 
-      fetchPlayerAndMatchData();
-    }, [navigate]);
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+      fetchUserData();
+    }, );
 
-  const handleOpenEdit = () => setOpenEdit(true);
-  const handleCloseEdit = () => setOpenEdit(false);
-
-  const handleNameChange = (event) => setAdminName(event.target.value);
-  const handleFirstNameChange = (event) => setFirstName(event.target.value);
-  const handleLastNameChange = (event) => setLastName(event.target.value);
-  const handleEmailChange = (event) => setEmail(event.target.value);
-  const handlePasswordChange = (event) => setPassword(event.target.value);
-
-  const handleFileAndImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setLocalProfilePic(imageUrl);
-      onProfilePicUpdate(imageUrl);
-    }
-  };
+    //in progress will add the profile pic upload when i set up bucket 3 
   
+ 
 
-  const handleSave = async () => {
-    const formData = new FormData();
-    formData.append('AdminName', AdminName);
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('email', email);
-    formData.append('password', password);
-
-    if (selectedFile) {
-      formData.append('profilePic', selectedFile);
-    }
-
-    try {
-      const response = await fetch('/api/update-profile', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        console.log('Profile updated successfully');
-        // Optionally, refresh the UI with the new data
-      } else {
-        console.error('Error updating profile');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-
-    handleCloseEdit();
-  };
 
   return (
     <Box
@@ -116,7 +75,7 @@ function AdminProfile({ profilePic }) {
           {/* Profile Card Section */}
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
-            alt={AdminName}
+            alt={adminDetails.username}
             src={localProfilePic}
           />
 
@@ -124,99 +83,18 @@ function AdminProfile({ profilePic }) {
             className="button"
             variant="contained"
             color="primary"
-            onClick={handleOpenEdit}
+            // onClick={handleOpenEdit}
           >
             Edit Profile
           </Button>
           <CardContent>
-            <Typography variant="h4">{AdminName}</Typography>
+            <Typography variant="h4">{adminDetails.username}</Typography>
           </CardContent>
         </Box>
       </Card>
      
       
-      {/*dialog to edit the profile*/}
-      <Dialog open={openEdit} onClose={handleCloseEdit}
-       sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
-        <DialogTitle>Edit Profile</DialogTitle>
-        <DialogContent
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            
-          }}>
-          
-          {/* Display Existing Profile Picture */}
-
-          <Avatar
-            sx={{ width: 200, height: 200, marginTop: 1 }}
-            alt={AdminName}
-            src={localProfilePic}  // Use current profile picture
-          />
-
-
-        
-
-        {/* Label to Trigger File Input */}
-        <Button
-      component="label"
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-    >
-      Upload files
-      <VisuallyHiddenInput
-        type="file"
-        onChange={handleFileAndImageUpload}
       
-      />
-    </Button>
-
-          <TextField
-            margin="dense"
-            label="Username"
-            fullWidth
-            value={AdminName}
-            onChange={handleNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="First Name"
-            fullWidth
-            value={firstName}
-            onChange={handleFirstNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="Last Name"
-            fullWidth
-            value={lastName}
-            onChange={handleLastNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            fullWidth
-            value={email}
-            onChange={handleEmailChange}
-          />
-          <TextField
-            margin="dense"
-            label="Password"
-            fullWidth
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-
-
-          <Button onClick={handleSave} color="primary">
-            Save
-          </Button>
-        </DialogContent>
-      </Dialog>
 
     </Box>
   );

@@ -63,7 +63,7 @@ function NavBar({profilePic}) {
             {userRole === 'ADMIN' && (
               <>
                 <NavDropdown.Item as={Link} to="/admin/profile">View Profile</NavDropdown.Item>
-                <NavDropdown.Item as={Link} to="/player/profile">Settings</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/admin/settings">Settings</NavDropdown.Item>
               </>
             )}
 

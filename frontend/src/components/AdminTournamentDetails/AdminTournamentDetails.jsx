@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
-import { Typography, Box, Button, IconButton, Dialog, Select, MenuItem, DialogTitle, DialogContent, DialogActions, Chip } from '@mui/material';
+import { Typography, Box, Button, IconButton, Dialog, Select, MenuItem, DialogTitle, DialogContent, DialogActions, Chip, Divider } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
+import TournamentDescription from './TournamentDescription';
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
@@ -19,31 +21,32 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
             <SeedItem>
                 <div>
                     {isAutoAdvance ? (
-                        <SeedTeam style={{ color: 'green', backgroundColor: 'white' }}>
-                            
-                            <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
-                            Auto Advance PLAYER {winnerId}
-                                </Typography>
+                        <SeedTeam style={{  backgroundColor: 'green' }}>
+
+                            <Typography variant="header3" component="span" style={{ color: 'white' }}>
+                                Auto Advance PLAYER {winnerId}
+                            </Typography>
                         </SeedTeam>
                     ) : (
                         <>
                             <SeedTeam
                                 style={{
-                                    color: winnerId === seed.teams[0]?.id ? 'green' : 'black',
-                                    backgroundColor: 'white'
+                                  
+                                    backgroundColor: winnerId == seed.teams[0]?.id ? 'green' : 'white'
                                 }}
                             >
-                                <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
+                                
+                                <Typography variant="playerProfile2" component="span" style={{color: winnerId == seed.teams[0]?.id ? 'white' : 'black' }}>
                                     {seed.teams[0]?.name || 'Pending'}
                                 </Typography>
                             </SeedTeam>
                             <SeedTeam
                                 style={{
-                                    color: winnerId === seed.teams[1]?.id ? 'green' : 'black',
-                                    backgroundColor: 'white',
+                                  
+                                     backgroundColor: winnerId == seed.teams[1]?.id ? 'green' : 'white'
                                 }}
                             >
-                                <Typography variant="header3" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'green' : 'black' }}>
+                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId == seed.teams[1]?.id ? 'white' : 'black' }}>
                                     {seed.teams[1]?.name || 'Pending'}
                                 </Typography>
                             </SeedTeam>
@@ -69,12 +72,7 @@ function AdminTournamentDetails() {
     const [open, setOpen] = useState(false);
 
     const token = localStorage.getItem('token');
-
-    const statusColorMap = {
-        LIVE: 'success',
-        UPCOMING: 'warning',
-        EXPIRED: 'default',
-    };
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -83,10 +81,13 @@ function AdminTournamentDetails() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setTournament(response.data);
+                console.log(response.data); 
 
                 const matchesResponse = await axios.get(`${baseURL2}/tournament/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                console.log(matchesResponse.data);
+             
                 const formattedRounds = formatRounds(matchesResponse.data);
                 setRounds(formattedRounds);
 
@@ -98,34 +99,57 @@ function AdminTournamentDetails() {
         fetchTournamentDetails();
     }, [id]);
 
+
     const formatRounds = (matches) => {
-        const groupedMatches = matches.reduce((acc, match) => {
+    
+        const groupedMatches = matches.reduce((acc, match, index) => {
+    
+            // Check if match and roundType are not null before accessing roundName
+            if (!match || !match.roundType) {
+                return acc;  // Skip this match if roundType is undefined or null
+            }
+    
             const round = match.roundType.roundName;
-            if (!acc[round]) acc[round] = [];
+            if (!acc[round]) {
+                acc[round] = [];
+            }
+    
             acc[round].push({
                 id: match.id,
                 winnerId: match.winnerId,
                 teams: [
-                    { id: match.player1Id, name: match.player1Id ? `Player ${match.player1Id}` : null },
-                    { id: match.player2Id, name: match.player2Id ? `Player ${match.player2Id}` : null },
+                    { id: match.player1? match.player1.id : 0 , name: match.player1? match.player1.firstName : "Pending" },  // Provide fallback for firstName
+                     {id: match.player2? match.player2.id : 0, name : match.player2? match.player2.firstName : "Pending" }  // Provide fallback for firstName
                 ],
             });
+            
+    
             return acc;
         }, {});
 
-        return Object.keys(groupedMatches).map((round) => ({
+    
+        const formattedRounds = Object.keys(groupedMatches).map((round) => ({
             title: round,
             seeds: groupedMatches[round],
         }));
+    
+  
+    
+        return formattedRounds;
     };
 
-
+    const handleWinnerChange = (winnerId) => {
+        setWinner(winnerId);  // Update the state with the new winner's ID
+    };
+    
 
 
     const handleEditWinner = (matchId, teams) => {
+        handleOpenEdit(); 
         setSelectedMatchId(matchId); // Store match id
+        console.log("the button is clicked ")
         setSelectedTeams(teams); // Store teams for the selected match
-        
+
     };
 
     const handleSaveWinner = async () => {
@@ -161,24 +185,27 @@ function AdminTournamentDetails() {
             alert("Failed to start the tournament.");
         }
     };
-    const handleClose = () => {
+    const handleCloseEdit = () => {
         setOpen(false);
+    };
+
+    const handleOpenEdit = () => {
+        setOpen(true);
     };
 
 
     return (
         <Box sx={{ padding: 2 }}>
-            {/* Tournament Header */}
-            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: '30px' }}>
-                <Typography variant="header1" sx={{ display: 'inline-flex' }}>{tournament.name}</Typography>
-                <Chip label={tournament.status} color="success" sx={{ marginLeft: '10px' }} />
-                <Button variant="contained" color="primary" onClick={handleStart} disabled={tournament.status !== 'UPCOMING'} sx={{ marginLeft: '10px' }}>
-                    Start Tournament
+          
+            <TournamentDescription tournament={tournament} handleStart={handleStart} />
+   
+            {/* Divider added here */}
+            <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
+            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/${tournament.id}/leaderboard`)}>
+                       <Typography variant="body4" >Check Leaderboard</Typography>
                 </Button>
-            </Box>
-
-
-
+            <Divider sx={{ width: '80%', margin: '20px 0' }} />
+          
 
 
             {/* Tournament Bracket */}
@@ -198,7 +225,7 @@ function AdminTournamentDetails() {
             />
 
             {/* Modal for editing winner */}
-            <Dialog open={open} onClose={handleClose}>
+            <Dialog open={open} onClose={handleCloseEdit}>
                 <DialogTitle>Edit Winner</DialogTitle>
                 <DialogContent>
                     <Select value={winner} onChange={(e) => handleWinnerChange(e.target.value)}
@@ -213,7 +240,7 @@ function AdminTournamentDetails() {
                     </Select>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
+                    <Button onClick={handleCloseEdit}>Cancel</Button>
                     <Button onClick={handleSaveWinner} color="primary">Save</Button>
                 </DialogActions>
             </Dialog>
