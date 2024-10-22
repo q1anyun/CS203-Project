@@ -15,6 +15,7 @@ import TournamentDetails from './components/TournamentDetails/TournamentDetails'
 import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+import Settings from './components/Settings/Settings'
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
 
@@ -46,6 +47,12 @@ function AppContent() {
           element={<ProtectedRoute>
             <PlayerProfile profilePic={profilePic} />
           </ProtectedRoute>} />
+
+          <Route path="/player/settings"
+          element={<ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>} />
+
 
         <Route path="/admin/profile"
           element={<ProtectedRoute>

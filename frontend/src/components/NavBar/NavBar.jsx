@@ -63,13 +63,15 @@ function NavBar({profilePic}) {
             {userRole === 'ADMIN' && (
               <>
                 <NavDropdown.Item as={Link} to="/admin/profile">View Profile</NavDropdown.Item>
+                <NavDropdown.Item as={Link} to="/player/profile">Settings</NavDropdown.Item>
               </>
             )}
 
             {userRole === 'PLAYER' && (
               <>
                 <NavDropdown.Item as={Link} to="/player/profile">View Profile</NavDropdown.Item>
-              </>
+              <NavDropdown.Item as={Link} to="/player/settings">Settings</NavDropdown.Item>
+            </>
             )}
      
             <NavDropdown.Divider />

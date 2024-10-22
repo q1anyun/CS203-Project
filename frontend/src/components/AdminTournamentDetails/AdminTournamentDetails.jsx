@@ -125,16 +125,7 @@ function AdminTournamentDetails() {
     const handleEditWinner = (matchId, teams) => {
         setSelectedMatchId(matchId); // Store match id
         setSelectedTeams(teams); // Store teams for the selected match
-        setWinner(''); // Reset winner selection
-        setOpen(true);
-    };
-
-    const handleWinnerChange = (newWinnerId) => {
-        setWinner(newWinnerId);
-    };
-
-    const handleClose = () => {
-        setOpen(false); // Close modal without saving
+        
     };
 
     const handleSaveWinner = async () => {
@@ -170,7 +161,9 @@ function AdminTournamentDetails() {
             alert("Failed to start the tournament.");
         }
     };
-
+    const handleClose = () => {
+        setOpen(false);
+    };
 
 
     return (
