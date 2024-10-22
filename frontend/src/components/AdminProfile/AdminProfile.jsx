@@ -15,17 +15,34 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-function AdminProfile({ profilePic , onProfilePicUpdate}) {
-  const [value, setValue] = useState(0); // State for managing tab selection
+function AdminProfile({ profilePic }) {
+ 
   const [openEdit, setOpenEdit] = useState(false);
   const [localProfilePic, setLocalProfilePic] = useState(profilePic);
   const [AdminName, setAdminName] = useState('Magnus Carlsen');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login'); // Redirect to login if no token
+        return;
+      }
+
+    
+        // Fetch player details
+        const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPlayerDetails(playerResponse.data || {});
+
+      };
+
+      fetchPlayerAndMatchData();
+    }, [navigate]);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
