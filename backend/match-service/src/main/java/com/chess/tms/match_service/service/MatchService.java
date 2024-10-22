@@ -297,10 +297,23 @@ public class MatchService {
     private MatchDTO convertMatchToMatchDTO(Match match) {
         MatchDTO matchDTO = new MatchDTO();
         matchDTO.setId(match.getId());
-        PlayerDetailsDTO winner = getPlayerDetails(match.getWinnerId());
-        PlayerDetailsDTO loser = getPlayerDetails(match.getLoserId());
-        matchDTO.setWinnerId(winner);
-        matchDTO.setLoserId(loser);
+        PlayerDetailsDTO winner = new PlayerDetailsDTO();
+        PlayerDetailsDTO loser = new PlayerDetailsDTO();
+        
+        if(match.getWinnerId() != null){
+            winner = getPlayerDetails(match.getWinnerId());
+            matchDTO.setWinnerId(winner);
+        }else{
+            matchDTO.setWinnerId(null);
+        }
+
+        if(match.getLoserId() != null){
+            loser = getPlayerDetails(match.getLoserId());
+            matchDTO.setLoserId(loser);
+        }else{
+            matchDTO.setLoserId(null);
+        }
+
         matchDTO.setRoundType(match.getRoundType());
         matchDTO.setGameType(match.getGameType());
         matchDTO.setDate(match.getUpdatedAt());
