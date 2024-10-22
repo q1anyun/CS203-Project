@@ -46,7 +46,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
+                .requestMatchers("/api/auth/**", "/api/otp/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/auth/**").authenticated()
                 // .requestMatchers("/api/auth/login", "/api/auth/register/player").permitAll()  // Permit login and registration to everyone
                 // .requestMatchers("/api/auth/register/admin").hasRole("ADMIN") // Only allow ADMINs to access /api/auth/register/admin

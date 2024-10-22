@@ -65,7 +65,7 @@ public class SecurityConfiguration {
 
                 // only permit the creation of admin by anotnher admin
                 .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
-                .requestMatchers("/api/auth/**", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
+                .requestMatchers("/api/auth/**", "/api/users/register/**", "/api/otp/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/matches/**").permitAll()
                 .requestMatchers("/api/player/**").permitAll()
@@ -79,10 +79,15 @@ public class SecurityConfiguration {
                 // Only admins can access /admin/** endpoints
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 // Users and admins can access /user/** endpoints
+<<<<<<< Updated upstream
                 .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/api/elo/**").permitAll()
 
                .anyRequest().authenticated()  // All other requests require authentication
+=======
+                .requestMatchers("/api/users/**").permitAll()
+                .anyRequest().authenticated()  // All other requests require authentication
+>>>>>>> Stashed changes
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)

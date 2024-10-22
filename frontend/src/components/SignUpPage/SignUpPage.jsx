@@ -1,7 +1,6 @@
 import { React, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle, Select, MenuItem, FormControl, InputLabel, Box, Button } from '@mui/material';
 import countryList from 'react-select-country-list'
 
 // Icons
@@ -159,8 +158,8 @@ function SignUpPage() {
                                                 MenuProps={{
                                                     PaperProps: {
                                                         style: {
-                                                            maxHeight: 200, 
-                                                            width: 'auto', 
+                                                            maxHeight: 200,
+                                                            width: 'auto',
                                                         },
                                                     },
                                                 }}
@@ -233,17 +232,17 @@ function SignUpPage() {
                                         />
                                     </Grid2>
 
-                                    <Grid2 size={12} className={styles.toLoginLink}>
-                                        <Link onClick={() => navigate('/login')} className={styles.link}>
-                                            Already have an account? Sign In
-                                        </Link>
-                                    </Grid2>
-
                                     <Grid2 size={12}>
                                         <button type="submit" className={styles.gradientButton}
                                             onClick={(e) => handleSubmit(e, formData, setFormData, setErrors, setShowAlert, navigate)}>
                                             Sign Up
                                         </button>
+                                    </Grid2>
+
+                                    <Grid2 size={12} className={styles.toLoginLink}>
+                                        <Link onClick={() => navigate('/login')} className={styles.link}>
+                                            Already have an account? Sign In
+                                        </Link>
                                     </Grid2>
                                 </Grid2>
                             </Card>

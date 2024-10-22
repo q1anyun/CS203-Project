@@ -11,7 +11,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ForgotPasswordDialog from './ForgotPasswordDialog';
 
 // js
-import { handleClickShowPassword, handleDialogOpen, handleDialogClose, handleSubmit } from './LoginFunctions';
+import { handleClickShowPassword, handleDialogClose, handleSubmit } from './LoginFunctions';
 
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
@@ -90,13 +90,6 @@ function LoginPage() {
                 </h6>
               </Grid2>
             )}
-
-            {/*This is not functional yet
-            <Grid2 size={12} className={styles.rightContainer}>
-              <Link onClick={() => handleDialogOpen(setOpenDialog)} className={styles.forgotPasswordLinkStyle}>
-                Forgot password?
-              </Link>
-            </Grid2> */}
 
             <Grid2 size={12}>
               <button type="submit" className={styles.gradientButton}

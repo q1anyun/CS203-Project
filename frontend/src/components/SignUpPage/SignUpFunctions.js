@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
+const baseURL = import.meta.env.VITE_OTP_SERVICE_URL;
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
@@ -44,14 +44,15 @@ export const handleSubmit = async (e, formData, setFormData, setErrors, setShowA
     if (Object.keys(formErrors).length > 0) return;
 
     try {
-        const response = await axios.post(`${baseURL}/register/player`, formData);
-        setShowAlert(true);
+        const otpResponse = await axios.post(`${baseURL}/send`, { username: formData.username, email: formData.email });
+        if (otpResponse.status === 200) {
+            navigate('/verification');
+            sessionStorage.setItem('pendingRegistration', JSON.stringify(formData));
+        }
     } catch (err) {
         if (err.response) {
             const statusCode = err.response.status;
             const errorMessage = err.response.data.message;
-
-            console.log(`Status Code: ${statusCode}, Message: ${errorMessage}`);
 
             if (statusCode === 409) {
                 if (errorMessage.includes('Username')) {

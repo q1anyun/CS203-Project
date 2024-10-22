@@ -16,13 +16,20 @@ import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTou
 import TournamentLeaderboard from './components/TournamentLeaderboard/TournamentLeaderboard';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+<<<<<<< Updated upstream
 import Settings from './components/Settings/Settings'
+=======
+import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
+import TournamentRegistrationDetails from './components/TournamentRegistrationDetails/TournamentRegistrationDetails.jsx';
+import AllUsersView from './components/AllUsersView/AllUsersView.jsx';
+import AuthPage from './components/AuthPage/AuthPage.jsx';
+>>>>>>> Stashed changes
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
 
 function AppContent() {
   const location = useLocation();
-  const hideNavBarPaths = ['/login', '/signup', '/error'];
+  const hideNavBarPaths = ['/login', '/signup', '/error', '/verification'];
   // State to store the current profile picture, initialized with the default image
   const profilePic = useProfilePic(); 
 
@@ -86,7 +93,16 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/error" element={<DefaultErrorPage />} />
+<<<<<<< Updated upstream
 
+=======
+        
+        {/* For testing */}
+        <Route path="/profileview" element={<PlayerProfileView/>}/>
+        <Route path="/TRview" element={<TournamentRegistrationDetails/>}/>
+        <Route path="admin/allplayers" element={<AllUsersView/>}/>
+        <Route path="verification" element={<AuthPage/>}/>
+>>>>>>> Stashed changes
       </Routes>
     </>
   );

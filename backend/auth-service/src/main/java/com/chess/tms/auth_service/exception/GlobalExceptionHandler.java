@@ -45,4 +45,10 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    // Handle OtpValidationException
+    @ExceptionHandler(OtpValidationException.class)
+    public ResponseEntity<String> handleOtpValidationException(OtpValidationException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 }

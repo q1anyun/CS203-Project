@@ -28,7 +28,8 @@ public class ApiGatewayConfig {
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
         return GatewayRouterFunctions.route("auth-service")
-                .route(RequestPredicates.path("/api/auth/**"), HandlerFunctions.http("http://localhost:8081")).build();
+                .route(RequestPredicates.path("/api/auth/**"), HandlerFunctions.http("http://localhost:8081")).build()
+                .andRoute(RequestPredicates.path("/api/otp/**"), HandlerFunctions.http("http://localhost:8081"));
     }
     
     @Bean

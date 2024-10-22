@@ -19,7 +19,6 @@ export const handleSubmit = async (e, username, password, navigate, setError) =>
     try {
         const response = await axios.post(`${baseURL}/login`, { username, password });
         
-        console.log('Response Data:', response.data);
         const { role, jwtResponse } = response.data;
         const { token, expiresIn } = jwtResponse;
     
