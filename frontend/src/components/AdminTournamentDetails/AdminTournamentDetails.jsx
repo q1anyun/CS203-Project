@@ -21,7 +21,7 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
             <SeedItem>
                 <div>
                     {isAutoAdvance ? (
-                        <SeedTeam style={{  backgroundColor: 'green' }}>
+                        <SeedTeam style={{ backgroundColor: 'green' }}>
 
                             <Typography variant="header3" component="span" style={{ color: 'white' }}>
                                 Auto Advance PLAYER {winnerId}
@@ -31,19 +31,19 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
                         <>
                             <SeedTeam
                                 style={{
-                                  
+
                                     backgroundColor: winnerId == seed.teams[0]?.id ? 'green' : 'white'
                                 }}
                             >
-                                
-                                <Typography variant="playerProfile2" component="span" style={{color: winnerId == seed.teams[0]?.id ? 'white' : 'black' }}>
+
+                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId == seed.teams[0]?.id ? 'white' : 'black' }}>
                                     {seed.teams[0]?.name || 'Pending'}
                                 </Typography>
                             </SeedTeam>
                             <SeedTeam
                                 style={{
-                                  
-                                     backgroundColor: winnerId == seed.teams[1]?.id ? 'green' : 'white'
+
+                                    backgroundColor: winnerId == seed.teams[1]?.id ? 'green' : 'white'
                                 }}
                             >
                                 <Typography variant="playerProfile2" component="span" style={{ color: winnerId == seed.teams[1]?.id ? 'white' : 'black' }}>
@@ -71,6 +71,11 @@ function AdminTournamentDetails() {
     const [winner, setWinner] = useState('');
     const [open, setOpen] = useState(false);
 
+    const statusColorMap = {
+        LIVE: 'success',
+        UPCOMING: 'warning',
+        EXPIRED: 'default',
+    };
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
@@ -82,13 +87,13 @@ function AdminTournamentDetails() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setTournament(response.data);
-                console.log(response.data); 
+                console.log(response.data);
 
                 const matchesResponse = await axios.get(`${baseURL2}/tournament/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 console.log(matchesResponse.data);
-             
+
                 const formattedRounds = formatRounds(matchesResponse.data);
                 setRounds(formattedRounds);
 
@@ -102,51 +107,51 @@ function AdminTournamentDetails() {
 
 
     const formatRounds = (matches) => {
-    
+
         const groupedMatches = matches.reduce((acc, match, index) => {
-    
+
             // Check if match and roundType are not null before accessing roundName
             if (!match || !match.roundType) {
                 return acc;  // Skip this match if roundType is undefined or null
             }
-    
+
             const round = match.roundType.roundName;
             if (!acc[round]) {
                 acc[round] = [];
             }
-    
+
             acc[round].push({
                 id: match.id,
                 winnerId: match.winnerId,
                 teams: [
-                    { id: match.player1? match.player1.id : 0 , name: match.player1? match.player1.firstName : "Pending" },  // Provide fallback for firstName
-                     {id: match.player2? match.player2.id : 0, name : match.player2? match.player2.firstName : "Pending" }  // Provide fallback for firstName
+                    { id: match.player1 ? match.player1.id : 0, name: match.player1 ? match.player1.firstName : "Pending" },  // Provide fallback for firstName
+                    { id: match.player2 ? match.player2.id : 0, name: match.player2 ? match.player2.firstName : "Pending" }  // Provide fallback for firstName
                 ],
             });
-            
-    
+
+
             return acc;
         }, {});
 
-    
+
         const formattedRounds = Object.keys(groupedMatches).map((round) => ({
             title: round,
             seeds: groupedMatches[round],
         }));
-    
-  
-    
+
+
+
         return formattedRounds;
     };
 
     const handleWinnerChange = (winnerId) => {
         setWinner(winnerId);  // Update the state with the new winner's ID
     };
-    
+
 
 
     const handleEditWinner = (matchId, teams) => {
-        handleOpenEdit(); 
+        handleOpenEdit();
         setSelectedMatchId(matchId); // Store match id
         console.log("the button is clicked ")
         setSelectedTeams(teams); // Store teams for the selected match
@@ -194,6 +199,9 @@ function AdminTournamentDetails() {
         setOpen(true);
     };
 
+    const handleViewRegisteredPlayers = () => {
+        navigate(`${window.location.pathname}/registeredplayers`);
+    };
 
     return (
         <Box sx={{ padding: 2 }}>
@@ -208,45 +216,78 @@ function AdminTournamentDetails() {
             <Divider sx={{ width: '80%', margin: '20px 0' }} />
           
 
+                        {/* Error Dialog */}
+                        {/* <Dialog open={showError} onClose={() => setShowError(false)}>
+                            <DialogTitle variant='header3'>Error</DialogTitle>
+                            <DialogContent variant='body4' style={{ whiteSpace: 'pre-line' }}>
+                                {errorMessage}
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={() => setShowError(false)}>Close</Button>
+                            </DialogActions>
+                        </Dialog> */}
 
-            {/* Tournament Bracket */}
-            <Bracket
-                rounds={rounds}
-                renderSeedComponent={(props) => (
-                    <CustomSeed
-                        {...props}
-                        handleEditWinner={handleEditWinner}
-                    />
-                )}
-                roundTitleComponent={(title) => (
-                    <Typography variant="header3" align="center" >
-                        {title}
-                    </Typography>
-                )}
-            />
+                        <Typography variant="body3" marginLeft={'20px'}>
+                            Current number of registered players:
+                            <Button onClick={handleViewRegisteredPlayers}>
+                                {tournament.currentPlayers}
+                            </Button>
+                        </Typography>
+                    </Box>
 
-            {/* Modal for editing winner */}
-            <Dialog open={open} onClose={handleCloseEdit}>
-                <DialogTitle>Edit Winner</DialogTitle>
-                <DialogContent>
-                    <Select value={winner} onChange={(e) => handleWinnerChange(e.target.value)}
-                        sx={{
-                            width: '300px',
-                            height: '50px',
-                            fontSize: '18px',
-                            padding: '10px',
-                        }}>
-                        <MenuItem value={selectedTeams[0]?.id}>{selectedTeams[0]?.name}</MenuItem>
-                        <MenuItem value={selectedTeams[1]?.id}>{selectedTeams[1]?.name}</MenuItem>
-                    </Select>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseEdit}>Cancel</Button>
-                    <Button onClick={handleSaveWinner} color="primary">Save</Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+                    {/* Start button on the right */}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        size='medium'
+                        onClick={handleStart}
+                        disabled={tournament.status !== "UPCOMING"}>
+                        Start
+                    </Button>
+                </Box>
+                <Divider sx={{ width: '80%', margin: '20px 0' }} />
+
+                {/* Tournament Bracket */}
+                <Bracket
+                    rounds={rounds}
+                    renderSeedComponent={(props) => (
+                        <CustomSeed
+                            {...props}
+                            handleEditWinner={handleEditWinner}
+                        />
+                    )}
+                    roundTitleComponent={(title) => (
+                        <Typography variant="header3" align="center">
+                            {title}
+                        </Typography>
+                    )}
+                />
+
+                {/* Modal for editing winner */}
+                <Dialog open={open} onClose={handleCloseEdit}>
+                    <DialogTitle>Edit Winner</DialogTitle>
+                    <DialogContent>
+                        <Select
+                            value={winner}
+                            onChange={(e) => handleWinnerChange(e.target.value)}
+                            sx={{
+                                width: '300px',
+                                height: '50px',
+                                fontSize: '18px',
+                                padding: '10px',
+                            }}>
+                            <MenuItem value={selectedTeams[0]?.id}>{selectedTeams[0]?.name}</MenuItem>
+                            <MenuItem value={selectedTeams[1]?.id}>{selectedTeams[1]?.name}</MenuItem>
+                        </Select>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseEdit}>Cancel</Button>
+                        <Button onClick={handleSaveWinner} color="primary">Save</Button>
+                    </DialogActions>
+                </Dialog>
+            </Box>
+        </>
     );
-}
 
-export default AdminTournamentDetails;
+}
+    export default AdminTournamentDetails;
