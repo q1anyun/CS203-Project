@@ -16,9 +16,8 @@ import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTou
 import TournamentLeaderboard from './components/TournamentLeaderboard/TournamentLeaderboard';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import useProfilePic from './components/ProfilePicture/UseProfilePicture';
-// import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
+import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
 import TournamentRegistrationDetails from './components/TournamentRegistrationDetails/TournamentRegistrationDetails.jsx';
-import AllUsersView from './components/AllUsersView/AllUsersView.jsx';
 import AuthPage from './components/AuthPage/AuthPage.jsx';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
@@ -92,9 +91,8 @@ function AppContent() {
         <Route path="/error" element={<DefaultErrorPage />} />
         
         {/* For testing */}
-        {/* <Route path="/profileview" element={<PlayerProfileView/>}/> */}
+        <Route path="/profileview/:id" element={<PlayerProfileView/>}/>
         <Route path="/admin/tournaments/:id/registeredPlayers" element={<TournamentRegistrationDetails/>}/>
-        <Route path="admin/allplayers" element={<AllUsersView/>}/>
         <Route path="verification" element={<AuthPage/>}/>
       </Routes>
     </>

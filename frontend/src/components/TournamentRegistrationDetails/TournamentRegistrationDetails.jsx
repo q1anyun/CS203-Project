@@ -11,7 +11,7 @@ import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, Dialo
 import styles from './TournamentRegistrationDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -34,8 +34,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-function createData(userId, firstName, lastName, country, eloRating, totalMatches) {
-    return { userId, firstName, lastName, country, eloRating, totalMatches };
+function createData(id, firstName, lastName, country, eloRating, totalMatches) {
+    return { id, firstName, lastName, country, eloRating, totalMatches };
 }
 
 function TournamentRegistrationDetails() {
@@ -51,7 +51,7 @@ function TournamentRegistrationDetails() {
                 const data = response.data;
                 console.log(data);
                 const formattedData = data.map((participant) =>
-                    createData(participant.userId, participant.firstName, participant.lastName, participant.country, participant.eloRating, participant.totalMatches)
+                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating, participant.totalMatches)
                 );
                 setParticipants(formattedData);
             } catch (error) {
@@ -65,9 +65,9 @@ function TournamentRegistrationDetails() {
     const deregisterParticipant = async () => {
         if (selectedParticipant) {
             try {
-                await axios.delete(`${baseURL}/${selectedParticipant.userId}/${id}`);
+                await axios.delete(`${baseURL}/${selectedParticipant.id}/${id}`);
                 setParticipants((prevParticipants) =>
-                    prevParticipants.filter((participant) => participant.userId !== selectedParticipant.userId)
+                    prevParticipants.filter((participant) => participant.id !== selectedParticipant.id)
                 );
                 handleCloseDialog();
             } catch (error) {
@@ -108,16 +108,21 @@ function TournamentRegistrationDetails() {
                         </TableHead>
                         <TableBody>
                             {participants.map((row) => (
-                                <StyledTableRow key={row.userId}>
-                                    <StyledTableCell>
-                                        <Avatar alt="Profile" src={row.profilePhoto} sx={{ width: 56, height: 56, border: '1px solid' }} />
-                                    </StyledTableCell>
-                                    <StyledTableCell>{row.userId}</StyledTableCell>
-                                    <StyledTableCell>{row.firstName}</StyledTableCell>
-                                    <StyledTableCell>{row.lastName}</StyledTableCell>
-                                    <StyledTableCell>{row.country}</StyledTableCell>
-                                    <StyledTableCell>{row.eloRating}</StyledTableCell>
-                                    <StyledTableCell>{row.totalMatches}</StyledTableCell>
+                                <StyledTableRow key={row.id} hover>
+                                    <Link
+                                        to={`/profileview/${row.id}`}
+                                        style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}
+                                    >
+                                        <StyledTableCell>{row.id}</StyledTableCell>
+                                        <StyledTableCell>
+                                            <Avatar alt="Profile" src={row.profilePhoto} sx={{ width: 56, height: 56, border: '1px solid' }} />
+                                        </StyledTableCell>
+                                        <StyledTableCell>{row.firstName}</StyledTableCell>
+                                        <StyledTableCell>{row.lastName}</StyledTableCell>
+                                        <StyledTableCell>{row.country}</StyledTableCell>
+                                        <StyledTableCell>{row.eloRating}</StyledTableCell>
+                                        <StyledTableCell>{row.totalMatches}</StyledTableCell>
+                                    </Link>
                                     <StyledTableCell align="left">
                                         <Button
                                             variant="outlined"
