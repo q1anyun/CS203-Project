@@ -345,12 +345,15 @@ function PlayerTournamentView() {
                                         color={isJoined(tournament.id) ? 'secondary' : 'success'}
                                         onClick={() => isJoined(tournament.id) ? handleWithdraw(tournament) : handleJoin(tournament)}
                                         disabled={
+                                            tournament.status === 'COMPLETED' ||  // Disable if tournament is completed
+                                            (tournament.status === 'LIVE' && true) ||  // Disable if tournament is live
                                             elo < tournament.minElo ||
                                             elo > tournament.maxElo ||
                                             tournament.currentPlayers >= tournament.maxPlayers
                                         }
                                     >
-                                        {tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
+                                        {tournament.status === 'COMPLETED'
+                                            ? 'OVER' : tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
                                     </Button>
                                     <Button variant="outlined" onClick={() => handleViewDetails(tournament.id)}>
                                         <VisibilityIcon /> View

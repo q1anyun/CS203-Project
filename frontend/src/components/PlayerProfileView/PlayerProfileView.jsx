@@ -170,7 +170,7 @@ function PlayerProfileView({ profilePic }) {
                   sx={{
 
                     padding: '12px 24px',
-                    marginX: 'auto', // Add horizontal margin between tabs
+                    marginX: 'auto', 
 
                   }}
                 />
@@ -185,7 +185,7 @@ function PlayerProfileView({ profilePic }) {
                   sx={{
 
                     padding: '12px 24px',
-                    marginX: 'auto', // Add horizontal margin between tabs
+                    marginX: 'auto', 
 
                   }}
                 />
@@ -322,7 +322,7 @@ function PlayerProfileView({ profilePic }) {
                           border: '1px solid #ddd',
                           borderRadius: 2,
                         }}
-                        onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
+                        onClick={() => navigate(`/admin/tournaments/${tournament.id}`)} // Navigate to tournament details
                       >
                         <CardContent>
                           <Typography variant="header2">{tournament.name}</Typography>
