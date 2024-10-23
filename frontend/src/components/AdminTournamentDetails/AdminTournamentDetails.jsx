@@ -17,7 +17,7 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
     const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
 
     return (
-        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center' }}>
+        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center', color:'white'}}>
             <SeedItem>
                 <div>
                     {isAutoAdvance ? (
@@ -70,6 +70,7 @@ function AdminTournamentDetails() {
     const [selectedTeams, setSelectedTeams] = useState([]); // Store selected match teams
     const [winner, setWinner] = useState('');
     const [open, setOpen] = useState(false);
+
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
@@ -201,7 +202,7 @@ function AdminTournamentDetails() {
    
             {/* Divider added here */}
             <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
-            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/${tournament.id}/leaderboard`)}>
+            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
                        <Typography variant="body4" >Check Leaderboard</Typography>
                 </Button>
             <Divider sx={{ width: '80%', margin: '20px 0' }} />

@@ -77,7 +77,7 @@ function AppContent() {
             <AdminTournamentDetails />
           </ProtectedRoute>} />
 
-          <Route path="/admin/tournaments/:id/leaderboard"
+          <Route path="/admin/tournaments/leaderboard/:id"
           element={<ProtectedRoute>
             <TournamentLeaderboard />
           </ProtectedRoute>} />
