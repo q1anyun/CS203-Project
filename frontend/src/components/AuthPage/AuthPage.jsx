@@ -29,6 +29,8 @@ function AuthPage() {
             if (otpResponse.status === 200) {
                 const registerResponse = await axios.post(`${authURL}/register/player`, pendingRegistration);
                 if (registerResponse.status === 200) {
+                    sessionStorage.removeItem('pendingRegistration');
+                    
                     setError('');
                     setLoading(true);
 
