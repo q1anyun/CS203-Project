@@ -79,15 +79,8 @@ public class SecurityConfiguration {
                 // Only admins can access /admin/** endpoints
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 // Users and admins can access /user/** endpoints
-<<<<<<< Updated upstream
-                .requestMatchers("/api/user/**").permitAll()
-                .requestMatchers("/api/elo/**").permitAll()
-
-               .anyRequest().authenticated()  // All other requests require authentication
-=======
                 .requestMatchers("/api/users/**").permitAll()
                 .anyRequest().authenticated()  // All other requests require authentication
->>>>>>> Stashed changes
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)
