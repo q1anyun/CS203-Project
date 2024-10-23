@@ -371,11 +371,19 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentid + " does not exist.");
         }
 
+        if (tournament.get().getStatus() == Status.LIVE) {
+            throw new TournamentDoesNotExistException("Tournament is Live.");
+        }
+
         Optional<TournamentPlayer> player = tournamentPlayerRepository.findByPlayerIdAndTournament(id, tournament.get());
 
         if (player.isEmpty()) {
             throw new UserDoesNotExistException("Player was not registered for this tournament.");
         }
+
+        tournament.get().setCurrentPlayers(tournament.get().getCurrentPlayers() - 1);
+
+        tournamentRepository.save(tournament.get());
 
         tournamentPlayerRepository.deleteById(player.get().getId());
     }
