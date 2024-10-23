@@ -98,4 +98,9 @@ public class TournamentController {
         long playerId = Long.parseLong(id);
         return ResponseEntity.ok(tournamentService.getLiveTournaments(playerId));
     }
+
+    @GetMapping("/live/{playerId}")
+    public ResponseEntity<List<TournamentDetailsDTO>> getLiveTournaments(@PathVariable ("playerId") long playerId) {
+        return ResponseEntity.ok(tournamentService.getLiveTournaments(playerId));
+    }
 }
