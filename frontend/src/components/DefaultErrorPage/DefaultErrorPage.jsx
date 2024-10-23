@@ -10,8 +10,8 @@ function DefaultErrorPage() {
     const navigate = useNavigate();
     
     useEffect(() => {
-        // Redirect to /login page if error is 401 (Unauthorized) due to JWT expiration
-        if (statusCode === '401') {
+        // Redirect to /login page if error is 403 (Forbidden) due to JWT expiration
+        if (statusCode === '403') {
             navigate('/login');
         }
     }, [statusCode, navigate]);
