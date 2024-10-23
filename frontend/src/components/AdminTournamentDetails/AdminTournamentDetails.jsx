@@ -17,7 +17,7 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
     const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
 
     return (
-        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center' }}>
+        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center', color:'white'}}>
             <SeedItem>
                 <div>
                     {isAutoAdvance ? (
@@ -204,18 +204,17 @@ function AdminTournamentDetails() {
     };
 
     return (
-        <>
-            <Box sx={{ padding: 2 }}>
-                {/* Tournament Title */}
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                    {/* Box to stack name and description */}
-                    <Box display="flex" flexDirection="column">
-                        <Box display="flex" alignItems="center" gap={2}>
-                            <Typography variant="header1" gutterBottom>
-                                {tournament.name}
-                            </Typography>
-                            <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                        </Box>
+        <Box sx={{ padding: 2 }}>
+          
+            <TournamentDescription tournament={tournament} handleStart={handleStart} />
+   
+            {/* Divider added here */}
+            <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
+            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
+                       <Typography variant="body4" >Check Leaderboard</Typography>
+                </Button>
+            <Divider sx={{ width: '80%', margin: '20px 0' }} />
+          
 
                         {/* Error Dialog */}
                         {/* <Dialog open={showError} onClose={() => setShowError(false)}>
