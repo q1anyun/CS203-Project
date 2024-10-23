@@ -20,7 +20,8 @@ import RegisterDialog from './RegisterDialog';
 import WithdrawDialog from './WithdrawDialog';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL; 
+const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const playerServiceURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const statusColorMap = {
     LIVE: 'success',
@@ -66,6 +67,7 @@ function PlayerTournamentView() {
     const [endDate, setEndDate] = useState('');
     const [timeControl, setTimeControl] = useState('');
     const [maxPlayers, setMaxPlayers] = useState('');
+    const [elo, setElo] = useState('');
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
@@ -84,6 +86,27 @@ function PlayerTournamentView() {
             setCurrentPage(prevPage => prevPage - 1);
         }
     };
+
+    const getPlayerElo = async () => {
+        try {
+            const response = await axios.get(`${playerServiceURL}/currentPlayerById`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+            setElo(response.data.eloRating);
+        } catch (error) {
+            console.error('Failed to fetch player ELO:', error);
+        }
+    };
+
+    useEffect(() => {
+        if (token) {
+            getPlayerElo();
+
+        }
+    }, [token]);
+
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
@@ -117,15 +140,14 @@ function PlayerTournamentView() {
         setSelectedTournament(tournament);
         setOpenWithdrawDialog(true);
     }
+    {/* DOESNT ACCOUNT min max elo*/ }
     const handleRegister = async () => {
         try {
+            console.log(token);
+            console.log(selectedTournament.id);
             const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
-
-            if (response.status !== 200) {
-                throw new Error('Failed to enroll in the tournament');
-            }
 
             setJoinedTournaments(prev => [...prev, selectedTournament]);
             setOpenRegisterDialog(false);
@@ -136,27 +158,22 @@ function PlayerTournamentView() {
 
     {/*WAITING FOR API TO WITHDRAW */ }
     const handleWithdrawConfirmation = async () => {
-        // try {
-        //     const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
-        //         headers: { 'Authorization': `Bearer ${token}` },
-        //     });
+        try {
+            const response = await axios.delete(`${baseURL2}/current/${selectedTournament.id}`, {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
 
-        //     if (response.status !== 200) {
-        //         throw new Error('Failed to enroll in the tournament');
-        //     }
-
-        //     setJoinedTournaments(prev => [...prev, selectedTournament]);
-        //     setOpenWithdrawDialog(false);
-        // } catch (err) {
-        //     console.error(err);
-        // }
-
-        setOpenWithdrawDialog(false);
+            setJoinedTournaments(prev => prev.filter(tournament => tournament.id !== selectedTournament.id));
+            setOpenWithdrawDialog(false);
+        } catch (err) {
+            console.error(err);
+        }
     };
 
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
     };
+
 
     if (loading) return <Typography>Loading tournaments...</Typography>;
     if (error) return <Typography>Error: {error}</Typography>;
@@ -327,8 +344,13 @@ function PlayerTournamentView() {
                                         variant="contained"
                                         color={isJoined(tournament.id) ? 'secondary' : 'success'}
                                         onClick={() => isJoined(tournament.id) ? handleWithdraw(tournament) : handleJoin(tournament)}
+                                        disabled={
+                                            elo < tournament.minElo ||
+                                            elo > tournament.maxElo ||
+                                            tournament.currentPlayers >= tournament.maxPlayers
+                                        }
                                     >
-                                        {isJoined(tournament.id) ? 'Withdraw' : 'Join'}
+                                        {tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
                                     </Button>
                                     <Button variant="outlined" onClick={() => handleViewDetails(tournament.id)}>
                                         <VisibilityIcon /> View
