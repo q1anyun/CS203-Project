@@ -18,7 +18,9 @@ const statusColorMap = {
     EXPIRED: 'default',
 };
 
-function TournamentDescription({ tournament, handleStart }) {
+
+
+function TournamentDescription({ tournament, handleStart, handleViewRegisteredPlayers}) {
     const[backgroundImage, setBackgroundImage] = useState(defaultbackgroundImage); 
     return (
         
@@ -77,6 +79,9 @@ function TournamentDescription({ tournament, handleStart }) {
                 <Grid item xs={12} sm={4}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Current Players</strong></Typography>
+                        <Button onClick={handleViewRegisteredPlayers}>
+                                {tournament.currentPlayers}
+                            </Button>
                         <Typography variant="body2">{tournament.currentPlayers} / {tournament.maxPlayers}</Typography>
                     </DetailBox>
                 </Grid>

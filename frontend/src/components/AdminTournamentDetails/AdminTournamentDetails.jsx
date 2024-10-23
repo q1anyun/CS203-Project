@@ -203,10 +203,12 @@ function AdminTournamentDetails() {
         navigate(`${window.location.pathname}/registeredplayers`);
     };
 
+
+
     return (
         <Box sx={{ padding: 2 }}>
           
-            <TournamentDescription tournament={tournament} handleStart={handleStart} />
+            <TournamentDescription tournament={tournament} handleStart={handleStart} handleViewRegisteredPlayers={handleViewRegisteredPlayers}/>
    
             {/* Divider added here */}
             <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
@@ -226,25 +228,9 @@ function AdminTournamentDetails() {
                                 <Button onClick={() => setShowError(false)}>Close</Button>
                             </DialogActions>
                         </Dialog> */}
+                        
 
-                        <Typography variant="body3" marginLeft={'20px'}>
-                            Current number of registered players:
-                            <Button onClick={handleViewRegisteredPlayers}>
-                                {tournament.currentPlayers}
-                            </Button>
-                        </Typography>
-                    </Box>
-
-                    {/* Start button on the right */}
-                    <Button
-                        variant="contained"
-                        color="primary"
-                        size='medium'
-                        onClick={handleStart}
-                        disabled={tournament.status !== "UPCOMING"}>
-                        Start
-                    </Button>
-                </Box>
+                       
                 <Divider sx={{ width: '80%', margin: '20px 0' }} />
 
                 {/* Tournament Bracket */}
@@ -286,7 +272,8 @@ function AdminTournamentDetails() {
                     </DialogActions>
                 </Dialog>
             </Box>
-        </>
+            
+        
     );
 
 }
