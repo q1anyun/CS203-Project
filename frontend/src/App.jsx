@@ -19,6 +19,7 @@ import useProfilePic from './components/ProfilePicture/UseProfilePicture';
 import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
 import TournamentRegistrationDetails from './components/TournamentRegistrationDetails/TournamentRegistrationDetails.jsx';
 import AuthPage from './components/AuthPage/AuthPage.jsx';
+import PageNotFound from './components/PageNotFound/PageNotFound.jsx';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
 import Settings from './components/Settings/Settings.jsx'
@@ -27,9 +28,9 @@ function AppContent() {
   const location = useLocation();
   const hideNavBarPaths = ['/login', '/signup', '/error', '/verification'];
   // State to store the current profile picture, initialized with the default image
-  const profilePic = useProfilePic(); 
+  const profilePic = useProfilePic();
 
- 
+
 
   return (
     <>
@@ -52,12 +53,12 @@ function AppContent() {
             <PlayerProfile profilePic={profilePic} />
           </ProtectedRoute>} />
 
-          <Route path="/player/settings"
+        <Route path="/player/settings"
           element={<ProtectedRoute>
             <Settings />
           </ProtectedRoute>} />
 
-          <Route path="/admin/settings"
+        <Route path="/admin/settings"
           element={<ProtectedRoute>
             <Settings />
           </ProtectedRoute>} />
@@ -73,27 +74,32 @@ function AppContent() {
             <AdminTournamentDetails />
           </ProtectedRoute>} />
 
-          <Route path="/admin/tournaments/leaderboard/:id"
+        <Route path="/admin/tournaments/leaderboard/:id"
           element={<ProtectedRoute>
             <TournamentLeaderboard />
           </ProtectedRoute>} />
 
-          <Route path="/player/tournaments/:id"
+        <Route path="/player/tournaments/:id"
           element={<ProtectedRoute>
             <TournamentDetails />
           </ProtectedRoute>} />
-       
+
+        <Route path="/admin/tournaments/:id/registeredPlayers"
+          element={<ProtectedRoute>
+            <TournamentRegistrationDetails />
+          </ProtectedRoute>} />
+
         {/* General Routes */}
         <Route path="/home" element={<Home />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/error" element={<DefaultErrorPage />} />
-        
-        {/* For testing */}
-        <Route path="/profileview/:id" element={<PlayerProfileView/>}/>
-        <Route path="/admin/tournaments/:id/registeredPlayers" element={<TournamentRegistrationDetails/>}/>
-        <Route path="verification" element={<AuthPage/>}/>
+        <Route path="/profileview/:id" element={<PlayerProfileView />} />
+        <Route path="verification" element={<AuthPage />} />
+
+        {/* Catch-all route for undefined paths */}
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
   );
@@ -103,9 +109,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
 
-    <Router>
-      <AppContent />
-    </Router>
+      <Router>
+        <AppContent />
+      </Router>
     </ThemeProvider>
   );
 }
