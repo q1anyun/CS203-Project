@@ -29,6 +29,10 @@ import java.nio.file.StandardCopyOption;
 
 @Service
 public class PlayerService {
+  
+
+    @Value("${s3.upload.service.url}")
+    private String s3UploadServiceUrl;
 
     @Value("${matches.service.url}")
     private String matchesServiceUrl;
