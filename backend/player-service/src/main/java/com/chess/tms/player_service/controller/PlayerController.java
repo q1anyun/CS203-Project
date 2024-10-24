@@ -1,11 +1,14 @@
 package com.chess.tms.player_service.controller;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -102,20 +105,47 @@ public class PlayerController {
         return ResponseEntity.ok("Profile uploaded successfully");
     }
 
-    @GetMapping("profilePicture")
-    public ResponseEntity<Resource> getProfilePicture(@RequestHeader("X-User-PlayerId") String id) {
-        // Assuming you saved the file as player_{playerId}.jpg
-        Long playerId = Long.parseLong(id);
-        Path filePath = Paths.get("profile-picture/player_" + playerId + ".jpg"); // Adjust based on your naming convention
-        Resource resource = new FileSystemResource(filePath.toFile());
+    // @GetMapping("profilePicture")
+    // public ResponseEntity<Resource> getProfilePicture(@RequestHeader("X-User-PlayerId") String id) {
+    //     // Assuming you saved the file as player_{playerId}.jpg
+    //     Long playerId = Long.parseLong(id);
+    //     Path filePath = Paths.get("profile-picture/player_" + playerId + ".jpg"); // Adjust based on your naming convention
+    //     Resource resource = new FileSystemResource(filePath.toFile());
         
-        if (!resource.exists()) {
-            return ResponseEntity.notFound().build();
-        }
+    //     if (!resource.exists()) {
+    //         return ResponseEntity.notFound().build();
+    //     }
     
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG) // Change if using a different format
-                .body(resource);
+    //     return ResponseEntity.ok()
+    //             .contentType(MediaType.IMAGE_JPEG) // Change if using a different format
+    //             .body(resource);
+    // }
+
+     @GetMapping("/photo") // Accept filename as a path variable
+    public ResponseEntity<InputStreamResource> getPhoto(@RequestHeader("X-User-PlayerId") String id) {
+        try {
+            String filename = "player_" + id; 
+            byte[] photoData = playerService.getProfilePicture(filename); // Retrieve the photo data
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(determineMediaType(filename)); // Set the correct media type
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new InputStreamResource(new ByteArrayInputStream(photoData))); // Return as InputStreamResource
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if photo not found
+        }
+    }
+    // Method to determine media type based on filename
+    private MediaType determineMediaType(String filename) {
+        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        } else if (filename.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        } else if (filename.endsWith(".gif")) {
+            return MediaType.IMAGE_GIF;
+        }
+        // Default media type
+        return MediaType.APPLICATION_OCTET_STREAM;
     }
 
     @GetMapping("/getRanking")

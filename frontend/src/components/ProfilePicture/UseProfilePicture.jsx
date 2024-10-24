@@ -18,7 +18,7 @@ const useProfilePic = () => {
       }
 
       try {
-        const response = await axios.get(`${baseURL}/profilePicture`, {
+        const response = await axios.get(`${baseURL}/photo`, {
           headers: {
             Authorization: `Bearer ${token}`, // Include the token in the headers
           },

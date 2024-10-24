@@ -6,11 +6,21 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Limit;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 
 import com.chess.tms.player_service.dto.MatchDTO;
 import com.chess.tms.player_service.dto.MatchResponseDTO;
@@ -29,10 +39,9 @@ import java.nio.file.StandardCopyOption;
 
 @Service
 public class PlayerService {
-  
 
-    @Value("${s3.upload.service.url}")
-    private String s3UploadServiceUrl;
+    // @Value("${s3.upload.service.url}")
+    // private String s3UploadServiceUrl;
 
     @Value("${matches.service.url}")
     private String matchesServiceUrl;
@@ -90,7 +99,7 @@ public class PlayerService {
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
         dto.setProfilePicture(playerDetails.getProfilePicture());
-        
+
         return dto;
     }
 
@@ -151,89 +160,126 @@ public class PlayerService {
     public List<RankingDTO> findTop100Players() {
         List<PlayerDetails> top100 = playerDetailsRepository.findByOrderByEloRatingDesc(Limit.of(100));
 
-Iterator<PlayerDetails> iterator = top100.iterator();
-    
-List<RankingDTO> dtoList = new ArrayList<>();
+        Iterator<PlayerDetails> iterator = top100.iterator();
 
-    while (iterator.hasNext()) {
-        PlayerDetails player = iterator.next();
-        RankingDTO dto = convertToRankingDTO(player);
-        dtoList.add(dto);
-    }
+        List<RankingDTO> dtoList = new ArrayList<>();
+
+        while (iterator.hasNext()) {
+            PlayerDetails player = iterator.next();
+            RankingDTO dto = convertToRankingDTO(player);
+            dtoList.add(dto);
+        }
 
         return dtoList;
     }
+
     // Update player elo rating
     public void updateWinLossElo(WinLossUpdateDTO dto) {
         PlayerDetails player = playerDetailsRepository.findById(dto.getPlayerId())
                 .orElseThrow(() -> new UserNotFoundException("Player with id " + dto.getPlayerId() + " not found"));
 
         player.setTotalMatches(player.getTotalMatches() + 1);
-        
-        
+
         player.setEloRating(dto.getNewElo());
 
-        if(dto.isWinner()) {
+        if (dto.isWinner()) {
             player.setTotalWins(player.getTotalWins() + 1);
         } else {
             player.setTotalLosses(player.getTotalLosses() + 1);
         }
 
-        if(player.getHighestElo() == null || dto.getNewElo() > player.getHighestElo()) {
+        if (player.getHighestElo() == null || dto.getNewElo() > player.getHighestElo()) {
             player.setHighestElo(dto.getNewElo());
         }
 
         playerDetailsRepository.save(player);
     }
 
-    public Integer getPlayerElo(long id){
+    public Integer getPlayerElo(long id) {
         PlayerDetails player = playerDetailsRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
         return player.getEloRating();
     }
 
+    // Method to upload a player's profile picture using RestTemplate
     public void uploadProfilePicture(Long playerId, MultipartFile file) throws IOException {
-        // Create upload directory if it doesn't exist
-        String uploadDir = "profile-picture"; // Change this to your desired path
-        Files.createDirectories(Paths.get(uploadDir));
-        
-        // Rename the file using playerId
-        String fileExtension = file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-        String newFileName = "player_" + playerId + fileExtension; // e.g., player_123.jpg
-        Path filePath = Paths.get(uploadDir, newFileName);
-    
-        // Save the file
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        
-        // Update the player record with the new file path
-        PlayerDetails player = playerDetailsRepository.findById(playerId)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-        player.setProfilePicture(filePath.toString());
-        playerDetailsRepository.save(player);
+        String url = "http://localhost:8088" + "/api/s3/upload"; // Adjust based on your actual endpoint
+
+        // Create headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.set("X-User-PlayerId", String.valueOf(playerId)); // Add custom header for player ID
+
+        // Create a multi-value map for the request body
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", file.getResource()); // Directly use the MultipartFile
+        body.add("filename", "player_" + playerId); // Include the filename as a separate part
+
+        // Create the request entity
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Make the request
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+        // Check response status
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to upload profile picture: " + response.getBody());
+        }
+
+    }
+
+    // Method to determine media type based on filename
+    private MediaType determineMediaType(String filename) {
+        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+            return MediaType.IMAGE_JPEG;
+        } else if (filename.endsWith(".png")) {
+            return MediaType.IMAGE_PNG;
+        } else if (filename.endsWith(".gif")) {
+            return MediaType.IMAGE_GIF;
+        }
+        // Default media type
+        return MediaType.APPLICATION_OCTET_STREAM;
+    }
+
+    // Method to retrieve a player's profile picture by filename
+    public byte[] getProfilePicture(String filename) throws IOException {
+        String url = "http://localhost:8088" + "/api/s3/find/" + filename; // Construct the find URL
+
+        // Make the request to retrieve the file
+        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
+
+        // Check response status
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to retrieve profile picture: " + response.getBody());
+        }
+
+        // Return the byte array
+        return response.getBody();
     }
 
     public Integer getRankingForCurrentPlayer(Long playerId) {
         PlayerDetails player = playerDetailsRepository.findById(playerId)
-            .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("Player with id " + playerId + " not found"));
 
         return player.getEloRating();
     }
 
     // public Integer updateWinLoss(WinLossUpdateDTO dto) {
-    //     PlayerDetails player = playerDetailsRepository.findById(dto.getPlayerId())
-    //         .orElseThrow(() -> new UserNotFoundException("Player with id " + dto.getPlayerId() + " not found"));
+    // PlayerDetails player = playerDetailsRepository.findById(dto.getPlayerId())
+    // .orElseThrow(() -> new UserNotFoundException("Player with id " +
+    // dto.getPlayerId() + " not found"));
 
-    //     int toReturn = player.getTotalLosses() - 1;
-    //     if(dto.isWinner()) {
-    //         toReturn = player.getTotalWins() + 1;
-    //         player.setTotalWins(toReturn);
-    //     } else {
-    //         player.setTotalLosses(toReturn);
-    //     }
+    // int toReturn = player.getTotalLosses() - 1;
+    // if(dto.isWinner()) {
+    // toReturn = player.getTotalWins() + 1;
+    // player.setTotalWins(toReturn);
+    // } else {
+    // player.setTotalLosses(toReturn);
+    // }
 
-    //     playerDetailsRepository.save(player);
+    // playerDetailsRepository.save(player);
 
-    //     return toReturn;
+    // return toReturn;
     // }
 
 }
