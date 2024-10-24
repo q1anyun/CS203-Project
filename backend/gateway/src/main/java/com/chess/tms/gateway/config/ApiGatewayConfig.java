@@ -70,6 +70,15 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
     }
 
     @Bean
+    public RouterFunction<ServerResponse> eloServiceRoute() {
+        return GatewayRouterFunctions.route("elo-service")
+                .route(RequestPredicates.path("/api/elo/**"), request ->
+                    processRequestWithJwtClaims(request, "http://localhost:8086"))
+                .build();
+    }
+
+
+    @Bean
     public RouterFunction<ServerResponse> leaderboardServiceRoute() {
         return GatewayRouterFunctions.route("leaderboard-service")
                 .route(RequestPredicates.path("/api/leaderboard/**"), request ->
@@ -78,10 +87,10 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> eloServiceRoute() {
-        return GatewayRouterFunctions.route("elo-service")
-                .route(RequestPredicates.path("/api/elo/**"), request ->
-                    processRequestWithJwtClaims(request, "http://localhost:8086"))
+    public RouterFunction<ServerResponse> s3UploadServiceRoute() {
+        return GatewayRouterFunctions.route("s3-upload-service")
+                .route(RequestPredicates.path("/api/s3/**"), request ->
+                    processRequestWithJwtClaims(request, "http://localhost:8088"))
                 .build();
     }
 

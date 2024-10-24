@@ -7,7 +7,7 @@ import com.chess.tms.s3_upload_service.service.S3FileUploadService;
 import java.io.IOException;
  
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/s3")
 public class FileUploadController {
  
     @Autowired

@@ -63,7 +63,7 @@ public class SecurityConfiguration {
             .authorizeHttpRequests(auth -> auth
                 // .anyRequest().permitAll() 
 
-                // only permit the creation of admin by anotnher admin
+                // only permit the creation of admin by another admin
                 .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
                 .requestMatchers("/api/auth/**", "/api/users/register/**", "/api/otp/**").permitAll()  // Permit login and registration to everyone
                 .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
@@ -76,6 +76,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/tournament-players/**").permitAll()
                 .requestMatchers("/api/game-type/**").permitAll() 
                 .requestMatchers("/api/round-type/**").permitAll()
+                .requestMatchers("/api/s3/**").permitAll()
                 // Only admins can access /admin/** endpoints
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
                 // Users and admins can access /user/** endpoints
