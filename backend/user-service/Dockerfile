@@ -1,18 +1,14 @@
-#Stage 1: Build the application
-FROM gradle:8.10-jdk21-alpine AS build
-WORKDIR /user-service
-COPY . .
-RUN gradle build --no-daemon
+# Start with a base image containing OpenJDK
+FROM gradle:8.10-jdk21-alpine
 
-#Stage 2: run the app
-FROM openjdk:21-jdk-slim
-WORKDIR /user-service
+# Create a directory inside the container for the application
+WORKDIR /app
 
-# Copy compiled class files from the build stage 
-COPY --from=build /user-service/build/libs/*.jar user-service.jar
+# Copy the built JAR file to the container
+COPY build/libs/*.jar user-service.jar
 
-# Copy resource files from the build stage
-# COPY --from=build /tournament-service/build/resources/main /tournament-service/resources
+# Expose the port
+EXPOSE 8082
 
-# Set entrypoint for application
-ENTRYPOINT ["java", "-jar",  user-service.jar]
+# Define the entry point to run the JAR
+ENTRYPOINT ["java", "-jar", "/app/user-service.jar"]

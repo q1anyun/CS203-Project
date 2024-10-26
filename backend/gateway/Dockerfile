@@ -1,21 +1,14 @@
+# Start with a base image containing OpenJDK
+FROM gradle:8.10-jdk21-alpine
 
-#Stage 1: Build the application
-FROM gradle:8.10-jdk21-alpine AS build
-WORKDIR /gateway
-COPY . .
-RUN gradle build --no-daemon -x test
+# Create a directory inside the container for the application
+WORKDIR /app
 
-# Copy only the Gradle configuration files first
-COPY --chown=gradle:gradle build.gradle settings.gradle /gateway/
-    
-#Stage 2: run the app
-FROM openjdk:21-jdk-slim
-WORKDIR /gateway
-    
-# Copy compiled class files from the build stage 
-COPY --from=build /gateway/build/libs/*.jar gateway.jar
+# Copy the built JAR file to the container
+COPY build/libs/*.jar gateway.jar
 
+# Expose the port
 EXPOSE 8080
-	
-# Set entrypoint for application
-ENTRYPOINT exec /usr/local/openjdk-21/bin/java -jar gateway.jar
+
+# Define the entry point to run the JAR
+ENTRYPOINT ["java", "-jar", "/app/gateway.jar"]

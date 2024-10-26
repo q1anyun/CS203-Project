@@ -17,6 +17,12 @@ public class UserController {
     }
 
     // Update User Endpoint
+    @GetMapping("")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("User Service is up and running");
+    }
+
+    // Update User Endpoint
     @PutMapping("/update")
     public ResponseEntity<String> updateUser(
             @RequestHeader("X-User-Id") String id,
