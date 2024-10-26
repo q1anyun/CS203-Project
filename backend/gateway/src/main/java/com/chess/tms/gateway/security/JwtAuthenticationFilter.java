@@ -22,13 +22,11 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtility jwtUtility;
     private final UserDetailsService userDetailsService;
-    private final HandlerExceptionResolver handlerExceptionResolver;
 
     public JwtAuthenticationFilter(JwtUtility jwtUtility, UserDetailsService userDetailsService,
             HandlerExceptionResolver handlerExceptionResolver) {
         this.jwtUtility = jwtUtility;
         this.userDetailsService = userDetailsService;
-        this.handlerExceptionResolver = handlerExceptionResolver;
     }
 
     @Override
@@ -37,11 +35,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        System.out.println("Authentication Filter for: "+request.getRequestURI());
+            // Getting the full base URL (protocol + hostname + port)
+            String baseUrl = request.getScheme() + "://" + 
+                            request.getServerName() + 
+                            ":" + request.getServerPort();
+
+            System.out.println("Base URL: " + baseUrl);
+            System.out.println("Request URI: " + request.getRequestURI());
+            System.out.println("Client IP Address: " + request.getRemoteAddr());
+            System.out.println("Local Port: " + request.getLocalPort());
+            System.out.println();
 
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("No Token found, process anyways");
             filterChain.doFilter(request, response);
             return;
         }

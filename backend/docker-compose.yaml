@@ -1,0 +1,129 @@
+# name:  chesstms
+
+# services:
+#   config-server:
+#     build: 
+#       context: ./config-server
+#     container_name: config-server
+#     ports:
+#       - "8888:8888" 
+#     environment:
+#       SPRING_PROFILES_ACTIVE: git
+#       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${GIT_URI}
+#       SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: ${GIT_USERNAME}
+#       SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${GIT_PASSWORD}
+#     healthcheck:
+#         test: ["CMD-SHELL", "curl -f http://localhost:8888/ || exit 1"]
+#         interval: 30s
+#         timeout: 10s
+#         retries: 5
+#         start_period: 60s
+#     networks: 
+#       - default
+
+#   gateway:
+#     build: 
+#       context: ./gateway
+#     container_name: gateway
+#     depends_on:
+#       - config-server
+#     ports:
+#       - "8080:8080"
+#     environment:
+#       SPRING_PROFILES_ACTIVE: git
+#       SPRING_CONFIG_IMPORT: optional:http://config-server:8888/
+#       SPRING_CLOUD_CONFIG_RETRY_INITIALINTERVAL: 1000  # Retry after 1 second
+#       SPRING_CLOUD_CONFIG_RETRY_MAXINTERVAL: 5000      # Max retry interval of 5 seconds
+#       SPRING_CLOUD_CONFIG_RETRY_MAXATTEMPTS: 10        # Retry up to 10 times
+#     restart: always
+#     links:
+#       - config-server
+
+# # networks: 
+# #   my-network:
+# #     driver: bridge
+
+name: chess-tms
+
+version: '3'
+services:
+  config-server:
+    build:
+      context: ./config-server
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    networks:
+      - spring-network
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - config-server
+      - db
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    env_file:
+      - ./gateway/.env
+    networks:
+      - spring-network
+    restart: unless-stopped
+
+  db:
+    image: mysql:latest   # MySQL Docker image
+    env_file:
+      - ./.env
+    ports:
+      - "3307:3306"
+    networks:
+      - spring-network
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db:/docker-entrypoint-initdb.d/  # Mount your SQL scripts
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8082"
+    depends_on:
+      - config-server
+      - db
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+    env_file:
+      - ./user-service/.env
+    networks:
+      - spring-network
+    restart: unless-stopped
+
+  # tournament-service:
+  #   build:
+  #     context: ./tournament-service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8084:8084"
+  #   depends_on:
+  #     - config-server
+  #     - db
+  #   environment:
+  #     SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+  #   env_file:
+  #     - ./tournament-service/.env
+  #   networks:
+  #     - spring-network
+  #   restart: unless-stopped
+
+networks:
+  spring-network:
+    driver: bridge
+
+volumes:
+  db_data:

@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.function.RequestPredicates;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -36,7 +35,7 @@ public class ApiGatewayConfig {
     public RouterFunction<ServerResponse> userServiceRoute() {
         return GatewayRouterFunctions.route("user-service")
                 .route(RequestPredicates.path("/api/user/**"), request -> 
-                    processRequestWithJwtClaims(request, "http://localhost:8082"))
+                    processRequestWithJwtClaims(request, "http://user-service:8082"))
                 .build();
     }
 
@@ -95,6 +94,7 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
     }
 
     private ServerResponse processRequestWithJwtClaims(ServerRequest request, String forwardUri) {
+        System.out.println("Running processRequestWithJwtClaims");
         // Extract the Authorization header
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -119,6 +119,7 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
         }
         // If Authorization header is missing or invalid, just forward without headers
         try {
+            System.out.println("No token found, forwarding without headers");
             return HandlerFunctions.http(forwardUri).handle(request);
         } catch (Exception e) {
             System.out.println("Error forwarding request: " + e.getMessage());

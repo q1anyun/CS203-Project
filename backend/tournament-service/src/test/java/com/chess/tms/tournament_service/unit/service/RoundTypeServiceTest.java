@@ -38,7 +38,7 @@ public class RoundTypeServiceTest {
 
         List<Integer> result = roundTypeService.getChoicesForNumberOfPlayers();
 
-        assertEquals(4, result.size());
+        assertEquals(6, result.size());
         assertEquals(2, result.get(0));
         assertEquals(16, result.get(3));
     }
