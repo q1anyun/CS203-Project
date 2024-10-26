@@ -61,4 +61,14 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.BAD_REQUEST.value());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
+
+    // Handle SwissBracketNotFoundException
+    @ExceptionHandler(SwissBracketNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleSwissBracketNotFoundException(SwissBracketNotFoundException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", LocalDateTime.now());
+        response.put("message", ex.getMessage());
+        response.put("status", HttpStatus.NOT_FOUND.value());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }

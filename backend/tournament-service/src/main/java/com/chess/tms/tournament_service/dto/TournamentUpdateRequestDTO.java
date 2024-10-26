@@ -29,7 +29,7 @@ public class TournamentUpdateRequestDTO {
 
     private String locationAddress;
 
-    private Integer locationLatitude;
+    private Double locationLatitude;
 
-    private Integer locationLongitude; 
+    private Double locationLongitude; 
 }

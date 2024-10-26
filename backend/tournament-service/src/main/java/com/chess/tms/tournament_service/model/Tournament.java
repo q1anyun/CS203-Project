@@ -61,10 +61,10 @@ public class Tournament {
     private String locationAddress;
 
     @Column 
-    private Integer locationLongitude;
+    private Double locationLongitude;
 
     @Column 
-    private Integer locationLatitude;
+    private Double locationLatitude;
 
     @Column
     private LocalDate startDate;
@@ -95,6 +95,10 @@ public class Tournament {
     @ManyToOne
     @JoinColumn(name = "time_control", nullable = false) 
     private GameType timeControl;
+
+    @ManyToOne
+    @JoinColumn(name = "tournament_type", nullable = false) 
+    private TournamentType tournamentType;
 
     @OneToMany(mappedBy = "tournament",
                 cascade = CascadeType.ALL)

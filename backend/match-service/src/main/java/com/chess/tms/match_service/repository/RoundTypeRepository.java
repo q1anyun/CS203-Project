@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface RoundTypeRepository extends JpaRepository<RoundType, Long> {
     Optional<RoundType> findByNumberOfPlayers(int numberOfPlayers);
 
+    Optional<RoundType> findByRoundName(String roundName);
+
     @Query("SELECT r FROM RoundType r WHERE r.numberOfPlayers = (SELECT MIN(r2.numberOfPlayers) FROM Match m JOIN m.roundType r2 WHERE m.status = 'COMPLETED' AND m.tournamentId = :tournamentId)")
     Optional<RoundType> findMostRecentCompletedRound(@Param("tournamentId") Long tournamentId);
 }

@@ -1,7 +1,6 @@
 package com.chess.tms.match_service.controller;
 
 import com.chess.tms.match_service.dto.MatchDTO;
-import com.chess.tms.match_service.model.Match;
 import com.chess.tms.match_service.service.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +15,16 @@ public class MatchController {
     @Autowired
     private MatchService matchService;
 
-    // Generate initial matches for a tournament
-    @PostMapping("/{tournamentId}/{gameTypeId}/generate")
-    public ResponseEntity<Long> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
-        return ResponseEntity.ok(matchService.createInitialMatches(tournamentId, gameTypeId));
+    // Generate knockout matches for a tournament
+    @PostMapping("/knockout/{tournamentId}/{gameTypeId}")
+    public ResponseEntity<Long> createKnockoutMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+        return ResponseEntity.ok(matchService.createKnockoutMatches(tournamentId, gameTypeId, null));
+    }
+
+    // Generate swiss matches for a tournament
+    @PostMapping("/swiss/{tournamentId}/{gameTypeId}")
+    public void createSwissMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+        matchService.createSwissMatches(tournamentId, gameTypeId);
     }
 
     // Get all matches for a tournament

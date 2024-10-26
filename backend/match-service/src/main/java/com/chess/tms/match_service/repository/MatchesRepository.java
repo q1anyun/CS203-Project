@@ -18,4 +18,6 @@ public interface MatchesRepository extends JpaRepository<Match, Long> {
     List<Match> findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(Long player1Id, Long player2Id);
 
     List<Match> findByTournamentIdAndRoundTypeId(Long tournamentId, Long roundTypeId);
+
+    List<Match> findByTournamentIdAndSwissRoundNumber(Long tournamentId, Integer swissRoundNumber);
 }
