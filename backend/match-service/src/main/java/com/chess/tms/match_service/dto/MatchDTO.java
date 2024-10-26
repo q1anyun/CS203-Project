@@ -13,6 +13,7 @@ public class MatchDTO {
     private Long loserId;
     private PlayerDetailsDTO player1;
     private PlayerDetailsDTO player2;
+    private Integer swissRoundNumber;
     private RoundType roundType;
     private GameType gameType;
     private LocalDateTime date;

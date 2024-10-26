@@ -39,6 +39,9 @@ public class Match {
     @Column(name = "loser_id")
     private Long loserId;
 
+    @Column(name = "swiss_round_number")
+    private Integer swissRoundNumber;
+
     @ManyToOne
     @JoinColumn(name = "round_type_id", referencedColumnName = "id", nullable = false)
     private RoundType roundType;

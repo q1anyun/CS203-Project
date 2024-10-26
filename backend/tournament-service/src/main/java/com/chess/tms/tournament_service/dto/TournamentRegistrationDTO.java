@@ -32,6 +32,9 @@ public class TournamentRegistrationDTO {
     @NotNull(message = "Missing game type")
     private Integer timeControl;
 
+    @NotNull(message = "Missing tournament type")
+    private Long tournamentType;
+
     private String description;
 
     private String photo;
@@ -42,7 +45,7 @@ public class TournamentRegistrationDTO {
 
     private String locationAddress;
 
-    private Integer locationLatitude;
+    private Double locationLatitude;
 
-    private Integer locationLongitude;    
+    private Double locationLongitude;    
 }

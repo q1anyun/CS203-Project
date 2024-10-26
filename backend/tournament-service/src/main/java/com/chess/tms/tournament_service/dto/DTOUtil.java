@@ -26,6 +26,7 @@ public class DTOUtil {
         dto.setTimeControl(tournament.getTimeControl());
         dto.setCurrentRound(tournament.getCurrentRound());
         dto.setCreatorId(tournament.getCreatorId());
+        dto.setTournamentType(tournament.getTournamentType());
 
         return dto;
     }

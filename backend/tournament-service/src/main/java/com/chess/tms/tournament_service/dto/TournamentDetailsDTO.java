@@ -4,6 +4,7 @@ import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
+import com.chess.tms.tournament_service.model.TournamentType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,9 +34,9 @@ public class TournamentDetailsDTO {
 
     private String locationAddress;
 
-    private Integer locationLongitude;
+    private Double locationLongitude;
 
-    private Integer locationLatitude;
+    private Double locationLatitude;
 
     private LocalDate startDate;
 
@@ -54,4 +55,6 @@ public class TournamentDetailsDTO {
     private RoundType currentRound;
 
     private GameType timeControl;
+
+    private TournamentType tournamentType;
 }
