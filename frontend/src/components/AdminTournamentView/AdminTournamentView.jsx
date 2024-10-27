@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, CircularProgress} from '@mui/material';
+import { Typography, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -13,10 +13,10 @@ const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
 export default function AdminTournamentView() {
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-    const [tournaments, setTournaments] = useState([]); 
+    const [tournaments, setTournaments] = useState([]);
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -57,6 +57,9 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
+        tournamentType: '',
+        description: '',
+        format: ''
     });
 
     const [updateTournament, setUpdateTournament] = useState({
@@ -67,6 +70,9 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
+        tournamentType: '',
+        description: '',
+        format: ''
     });
 
     const resetNewTournament = () => {
@@ -82,6 +88,7 @@ export default function AdminTournamentView() {
     };
 
     const validateForm = (tournament) => {
+        console.log(newTournament);
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
             return !tournament[key];
         });
@@ -112,31 +119,31 @@ export default function AdminTournamentView() {
             try {
                 const response = await axios.get(`${baseURL}`);
                 console.log(response.data);
-                setTournaments(response.data); 
-                setLoading(false); 
-                
+                setTournaments(response.data);
+                setLoading(false);
+
             } catch (error) {
                 console.error('Error fetching tournaments:', error);
                 setError(error);
-                setLoading(false); 
-                
-                
+                setLoading(false);
+
+
             }
-           
+
         };
 
         fetchTournaments();
-    }, []); 
+    }, []);
 
     const handleUploadClick = (tournamentId) => {
         // Logic to handle file upload interaction
         console.log("Upload button clicked for tournament ID:", tournamentId);
         // You can extend this to actually show a dialog or direct file input
     };
-    
 
 
-   
+
+
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -151,16 +158,15 @@ export default function AdminTournamentView() {
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
             setUpdateTournament({
                 name: response.data.name || '',
-                startDate: response.data.startDate
-                    ? new Date(response.data.startDate + 'Z')
-                    : null,
-                endDate: response.data.endDate
-                    ? new Date(response.data.endDate + 'Z')
-                    : null,
+                startDate: response.data.startDate || '',
+                endDate: response.data.endDate || '',
                 timeControl: timeControlOption.id || '',
                 minElo: response.data.minElo || '',
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
+                description: response.data.description || '',
+                tournamentType: response.data.tournamentType.id || '',
+                format: response.data.format || ''
             });
             setEditDialogOpen(true);
         } catch (error) {
@@ -209,7 +215,7 @@ export default function AdminTournamentView() {
                 baseURL={baseURL}
                 token={token}
             />
-          
+
             <EditTournamentDialog
                 baseURL={baseURL}
                 token={token}
@@ -229,7 +235,7 @@ export default function AdminTournamentView() {
                 tournaments={tournaments}
                 setTournaments={setTournaments}
             />
-           
+
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}
@@ -240,7 +246,7 @@ export default function AdminTournamentView() {
                 setDeleteDialogOpen={setDeleteDialogOpen}
                 setTournamentToDelete={setTournamentToDelete}
                 tournaments={tournaments}
-               
+
             />
         </div>
     );

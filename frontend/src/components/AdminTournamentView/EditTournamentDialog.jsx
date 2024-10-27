@@ -1,10 +1,6 @@
-import { Typography, TextField, Select, MenuItem,Dialog, DialogActions, DialogContent, DialogTitle, Button,InputLabel, FormControl, Grid2 } from '@mui/material';
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2 } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs from 'dayjs';
 
 function EditTournamentDialog({
     baseURL,
@@ -26,28 +22,28 @@ function EditTournamentDialog({
     setTournaments
 }) {
     const handleEditSubmit = async () => {
-    
+
         if (validateForm(updateTournament)) {
             const updatedTournamentData = {
                 ...updateTournament,
             };
             console.log(updatedTournamentData);
-    
+
             try {
                 const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Include JWT token
                     }
                 });
-                console.log(response.data); 
-    
+                console.log(response.data);
+
                 const updatedTournaments = tournaments.map(t =>
                     t.tournamentId === tournamentToEdit.id ? response.data : t
                 );
-    
+
                 setTournaments(updatedTournaments);
-                console.log(tournaments); 
-    
+                console.log(tournaments);
+
                 setUpdateTournament({
                     name: '',
                     startDate: '',
@@ -57,9 +53,9 @@ function EditTournamentDialog({
                     maxElo: '',
                     maxPlayers: ''
                 });
-    
+
                 setEditDialogOpen(false);
-    
+
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
@@ -94,7 +90,7 @@ function EditTournamentDialog({
     };
     return (
         <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
-            
+
             <DialogTitle>
                 <Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography>
             </DialogTitle>
@@ -109,27 +105,44 @@ function EditTournamentDialog({
                             fullWidth
                         />
                     </Grid2>
-                    <Grid2 container spacing={4}>
-                        <Grid2 size={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="startDate"
-                                    label="Start Date Time"
-                                    value={updateTournament.startDate ? dayjs(updateTournament.startDate) : null}
-                                    onAccept={(newValue) => handleEditDateChange("startDate", newValue)} />
-                            </LocalizationProvider>
-                        </Grid2>
 
-                        <Grid2 size={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="endDate"
-                                    label="End Date Time"
-                                    value={updateTournament.endDate ? dayjs(updateTournament.endDate) : null}
-                                    onAccept={(newValue) => handleEditDateChange("endDate", newValue)}  // Only update when accepted
-                                />
-                            </LocalizationProvider>
-                        </Grid2>
+                    <Grid2 size={12}>
+                        <TextField
+                            name="description"
+                            label="Description"
+                            value={updateTournament.description}
+                            onChange={handleEditInputChange}
+                            multiline
+                            rows={3}
+                            fullWidth
+                        />
+                    </Grid2>
+
+                    <Grid2 size={6}>
+                        <TextField
+                            name="startDate"
+                            label="Start Date"
+                            type="date"
+                            value={updateTournament.startDate}
+                            onChange={handleEditInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </Grid2>
+                    <Grid2 size={6}>
+                        <TextField
+                            name="endDate"
+                            label="End Date"
+                            type="date"
+                            value={updateTournament.endDate}
+                            onChange={handleEditInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
                     </Grid2>
 
                     <Grid2 size={12}>
@@ -190,21 +203,51 @@ function EditTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                        {createFormError && (
-                            <Grid2 size={12}>
-                                <h6 className={styles.errorMessage}>
-                                    {createFormError}
-                                </h6>
-                            </Grid2>
-                        )}
+
                     </Grid2>
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Format</InputLabel>
+                            <Select
+                                name="format"
+                                label="Format"
+                                value={updateTournament.format}
+                                onChange={handleEditInputChange}
+                            >
+                                <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="PHYSICAL">Physical</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
+                            <Select
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={updateTournament.tournamentType}
+                                onChange={handleEditInputChange}
+                            >
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+                    {createFormError && (
+                        <Grid2 size={12}>
+                            <h6 className={styles.errorMessage}>
+                                {createFormError}
+                            </h6>
+                        </Grid2>
+                    )}
                 </Grid2>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleEditDialogClose} color="secondary">
                     Cancel
                 </Button>
-                <Button onClick={handleEditSubmit} color="primary"> 
+                <Button onClick={handleEditSubmit} color="primary">
                     Save
                 </Button>
             </DialogActions>
