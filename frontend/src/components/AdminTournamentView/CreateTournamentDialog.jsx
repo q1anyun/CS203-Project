@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid } from '@mui/material'; // Import necessary MUI components
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2 } from '@mui/material'; // Import necessary MUI components
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css'; 
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'; 
@@ -84,8 +84,8 @@ function CreateTournamentDialog({
                 </Typography>
             </DialogTitle>
             <DialogContent>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
+            <Grid2 container spacing={2}>
+                <Grid2 size={12}>
                         <TextField
                             name="name"
                             label="Tournament Name"
@@ -93,10 +93,10 @@ function CreateTournamentDialog({
                             onChange={handleInputChange}
                             fullWidth
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid container spacing={4}>
-                        <Grid item xs={6}>
+                    <Grid2 container spacing={4}>
+                    <Grid2 size={6}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     name="startDate"
@@ -104,9 +104,9 @@ function CreateTournamentDialog({
                                     value={newTournament.startDate ? dayjs(newTournament.startDate) : null}
                                     onAccept={(newValue) => handleDateChange("startDate", newValue)} />
                             </LocalizationProvider>
-                        </Grid>
+                         </Grid2>
 
-                        <Grid item xs={6}>
+                        <Grid2 size={6}>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
                                 <DateTimePicker
                                     name="endDate"
@@ -115,9 +115,9 @@ function CreateTournamentDialog({
                                     onAccept={(newValue) => handleDateChange("endDate", newValue)}  // Only update when accepted
                                 />
                             </LocalizationProvider>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
+                            </Grid2>
+                         </Grid2>
+                    <Grid2 size={12}>
                         <FormControl fullWidth error={!!errors.timeControl}>
                             <InputLabel>Time Control</InputLabel>
                             <Select
@@ -134,9 +134,9 @@ function CreateTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                    </Grid>
+                        </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="minElo"
                             label="Min ELO"
@@ -145,9 +145,9 @@ function CreateTournamentDialog({
                             onChange={handleInputChange}
                             fullWidth
                         />
-                    </Grid>
+                   </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="maxElo"
                             label="Max ELO"
@@ -158,8 +158,8 @@ function CreateTournamentDialog({
                             error={!!eloError && newTournament.maxElo < newTournament.minElo}
                             helperText={!!eloError && newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                         />
-                    </Grid>
-                    <Grid item xs={12}>
+                    </Grid2>
+                    <Grid2 size={12}>
                         <FormControl fullWidth error={!!errors.maxPlayers}>
                             <InputLabel>Max Players</InputLabel>
                             <Select
@@ -176,14 +176,14 @@ function CreateTournamentDialog({
                             </Select>
                         </FormControl>
                         {createFormError && (
-                            <Grid item xs={12}>
+                             <Grid2 size={12}>
                                 <h6 className={styles.errorMessage}>
                                     {createFormError}
                                 </h6>
-                            </Grid>
+                                </Grid2>
                         )}
-                    </Grid>
-                </Grid>
+                   </Grid2>
+                   </Grid2>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCreateDialogClose} color="secondary">

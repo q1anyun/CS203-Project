@@ -5,18 +5,26 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.io.IOException;
 import java.time.LocalDate;
 
 import java.util.Comparator;
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.chess.tms.tournament_service.dto.DTOUtil;
 import com.chess.tms.tournament_service.dto.PlayerDetailsDTO;
@@ -75,6 +83,10 @@ public class TournamentService {
 
     @Value("${players.service.url}")
     private String playerServiceUrl;
+
+    
+    @Value("${s3.upload.service.url}")
+    private String s3UploadServiceUrl;
 
     public String createTournament(TournamentRegistrationDTO dto, long creatorId) {
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
@@ -478,4 +490,50 @@ public class TournamentService {
 
         return liveTournaments;
     }
+
+
+     // Method to upload a tournament's image
+    public void uploadTournamentImage(Long tournamentId, MultipartFile file) throws IOException {
+        String url = s3UploadServiceUrl + "/api/s3/upload"; // Adjust based on your actual endpoint
+
+        // Create headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+        // Create a multi-value map for the request body
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", file.getResource()); // Directly use the MultipartFile
+        body.add("filename", "tournament_" + tournamentId); // Include the filename as a separate part
+        body.add("tournamentId", tournamentId.toString()); // Include the tournament ID in the body if needed
+
+        // Create the request entity
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        // Make the request
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+
+        // Check response status
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to upload tournament image: " + response.getBody());
+        }
+    }
+
+
+     // Method to retrieve a tournament's image by filename
+     public byte[] getTournamentImage(String filename) throws IOException {
+        String url = s3UploadServiceUrl + "/api/s3/find/" + filename; // Adjust the endpoint to match the server configuration for finding tournament images
+
+        // Make the request to retrieve the file
+        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
+
+        // Check response status
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to retrieve tournament image: " + response.getStatusCode());
+        }
+
+        // Return the byte array
+        return response.getBody();
+    }
+
+    
 }

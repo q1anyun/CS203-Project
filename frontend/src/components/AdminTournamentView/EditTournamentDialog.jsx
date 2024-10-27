@@ -94,6 +94,7 @@ function EditTournamentDialog({
     };
     return (
         <Dialog open={editDialogOpen} onClose={handleEditDialogClose}>
+            
             <DialogTitle>
                 <Typography variant="header3" sx={{ mb: 2 }}>Edit Tournament</Typography>
             </DialogTitle>

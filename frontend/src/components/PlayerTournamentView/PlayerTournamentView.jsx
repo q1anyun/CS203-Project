@@ -1,15 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider } from '@mui/material';
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';
@@ -18,6 +11,10 @@ import { InputAdornment } from '@mui/material'
 
 import RegisterDialog from './RegisterDialog';
 import WithdrawDialog from './WithdrawDialog';
+import TournamentItem from '../TournamentItem/TournamentItem';
+
+ 
+
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
@@ -29,26 +26,7 @@ const statusColorMap = {
     COMPLETED: 'default',
 };
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-        textAlign: 'center',
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-        textAlign: 'center',
-    },
-}));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}));
 
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
@@ -294,59 +272,16 @@ function PlayerTournamentView() {
                     .map((tournament) => (
                         <Grid item xs={12} sm={6} md={4} key={tournament.id}>
                             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                <img
-                                    src={`https://via.placeholder.com/300x200?text=${tournament.name}`} // get the tournament upload photo (to be updated at another date)
-                                    alt={tournament.name}
-                                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
-                                />
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Typography variant="header2">{tournament.name}</Typography> {/* Header for the tournament name */}
-                                    <Divider sx={{ margin: '8px 0' }} /> {/* Divider after the title */}
-
-                                    <Typography variant="header3">Start: </Typography>
-                                    <Typography variant="playerProfile2">
-                                        {new Date(tournament.startDate + "Z").toLocaleString()}
-                                    </Typography> {/* Body for the Start date */}
-
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>End:</Typography>
-                                        <Typography variant="playerProfile2">
-                                            {new Date(tournament.endDate + "Z").toLocaleString()}
-                                        </Typography> {/* Body for the End date */}
-                                    </Box>
-
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Min ELO:</Typography>
-                                        <Typography variant="playerProfile2">
-                                            {tournament.minElo}
-                                        </Typography>
-                                    </Box>
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Max ELO:</Typography>
-
-                                        <Typography variant="playerProfile2">
-                                            {tournament.maxElo}
-                                        </Typography>
-                                    </Box>
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Time Control:</Typography>
-
-                                        <Typography variant="playerProfile2">
-                                            {tournament.timeControl.timeControlMinutes} minutes
-                                        </Typography>
-                                    </Box>
-
-
-                                </CardContent>
-
+                                
+                             <TournamentItem key={tournament.id} tournament={tournament} />
                                 <CardActions>
                                     <Button
                                         variant="contained"
-                                        color={isJoined(tournament.id) ? 'secondary' : 'success'}
+                                        color={isJoined(tournament.id) ? 'secondary' : 'primary'}
                                         onClick={() => isJoined(tournament.id) ? handleWithdraw(tournament) : handleJoin(tournament)}
                                         disabled={
-                                            tournament.status === 'COMPLETED' ||  // Disable if tournament is completed
-                                            (tournament.status === 'LIVE' && true) ||  // Disable if tournament is live
+                                            tournament.status === 'COMPLETED' ||
+                                            (tournament.status === 'LIVE' && true) ||
                                             elo < tournament.minElo ||
                                             elo > tournament.maxElo ||
                                             tournament.currentPlayers >= tournament.maxPlayers
@@ -356,9 +291,9 @@ function PlayerTournamentView() {
                                             ? 'OVER' : tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
                                     </Button>
                                     <Button variant="outlined" onClick={() => handleViewDetails(tournament.id)}>
-                                        <VisibilityIcon /> View
+                                        View
                                     </Button>
-                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} /> {/* Chip for the tournament status */}
+                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
                                 </CardActions>
                             </Card>
                         </Grid>

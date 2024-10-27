@@ -5,7 +5,7 @@ import useTournamentDetails from "../Hooks/useTournamentDetails";
 import { useParams } from "react-router-dom";
 import Profile from '../Leaderboard/Profile';
 import Container from '@mui/material/Container';
-import {Grid, Typography} from '@mui/material'; // Assuming you're using MUI Grid
+import {Grid, Typography, Box} from '@mui/material'; // Assuming you're using MUI Grid
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -41,6 +41,7 @@ function TournamentLeaderboard() {
 
     return (
         <div>
+              <Box sx={{ padding: 2 }}>
             <TournamentDescription tournament={tournament} />
             <Typography variant="header1" component="h2" align="center"> 
                     Leaderboard
@@ -61,6 +62,7 @@ function TournamentLeaderboard() {
                 </Grid>
                 {/* To create specific leaderboard position for player */}
             </Container>
+            </Box>
         </div>
     );
 }

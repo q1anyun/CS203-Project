@@ -6,6 +6,18 @@ import tournamentImage from '../../assets/tournament-icon.png';
 import leaderboardImage from '../../assets/leaderboard-icon.png';
 import profileImage from '../../assets/profile-icon.png';
 import { Link } from 'react-router-dom';
+import { styled } from '@mui/system';
+
+const CustomButton = styled(Button)({
+  backgroundColor: '#000000',
+  color: 'white',
+  '&:hover': {
+      backgroundColor: '#808080'
+  },
+  padding: '10px 20px',
+  borderRadius: '4px',
+  boxShadow: '0 3px 5px rgba(0, 0, 0, 0.1)'
+});
 
 function Home() {
   const [userRole, setUserRole] = useState(null);
@@ -28,6 +40,9 @@ function Home() {
     }
     return '/player/profile';
   };
+
+
+
 
   return (
 
@@ -53,7 +68,7 @@ function Home() {
               <Typography variant="homePage3" className={styles.cardTitle} display="block">Leaderboard</Typography>
               <Typography variant="homePage2" className={styles.cardContent} display="block">Check out the latest rankings and see where you stand among your peers.</Typography>
               <img src={leaderboardImage} alt="leaderboard" className={styles.cardImage} />
-              <Button component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium"  sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</Button>
+              <CustomButton component={Link} to="/leaderboard" variant="contained" color="secondary" size="medium"  sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Leaderboard</CustomButton>
             </div>
           </Grid2>
 
@@ -63,7 +78,7 @@ function Home() {
             <Typography variant="homePage2" className={styles.cardContent} display="block">Register for upcoming knockout chess tournaments and compete against players.</Typography>
 
               <img src={tournamentImage} alt="Tournaments" className={styles.cardImage} />
-              <Button component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</Button>
+              <CustomButton component={Link} to={getTournamentLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Tournaments</CustomButton>
             </div>
           </Grid2>
 
@@ -72,7 +87,7 @@ function Home() {
             <Typography variant="homePage3" className={styles.cardTitle} display="block">Profile</Typography>
             <Typography variant="homePage2" className={styles.cardContent} display="block">View and manage your personal chess profile, check your statistics.</Typography>
               <img src={profileImage} alt="leaderboard" className={styles.cardImage} />
-              <Button component={Link} to={getProfileLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</Button>
+              <CustomButton component={Link} to={getProfileLink()} variant="contained" color="secondary" size="medium" sx={{ fontFamily: "Chewy, system-ui", fontSize: "20px" }}>View Profile</CustomButton>
             </div>
           </Grid2>
         </Grid2>

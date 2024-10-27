@@ -40,8 +40,8 @@ import java.nio.file.StandardCopyOption;
 @Service
 public class PlayerService {
 
-    // @Value("${s3.upload.service.url}")
-    // private String s3UploadServiceUrl;
+    @Value("${s3.upload.service.url}")
+    private String s3UploadServiceUrl;
 
     @Value("${matches.service.url}")
     private String matchesServiceUrl;
@@ -203,7 +203,7 @@ public class PlayerService {
 
     // Method to upload a player's profile picture using RestTemplate
     public void uploadProfilePicture(Long playerId, MultipartFile file) throws IOException {
-        String url = "http://localhost:8088" + "/api/s3/upload"; // Adjust based on your actual endpoint
+        String url =  s3UploadServiceUrl + "/api/s3/upload"; // Adjust based on your actual endpoint
 
         // Create headers
         HttpHeaders headers = new HttpHeaders();
@@ -228,22 +228,10 @@ public class PlayerService {
 
     }
 
-    // Method to determine media type based on filename
-    private MediaType determineMediaType(String filename) {
-        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-            return MediaType.IMAGE_JPEG;
-        } else if (filename.endsWith(".png")) {
-            return MediaType.IMAGE_PNG;
-        } else if (filename.endsWith(".gif")) {
-            return MediaType.IMAGE_GIF;
-        }
-        // Default media type
-        return MediaType.APPLICATION_OCTET_STREAM;
-    }
-
+   
     // Method to retrieve a player's profile picture by filename
     public byte[] getProfilePicture(String filename) throws IOException {
-        String url = "http://localhost:8088" + "/api/s3/find/" + filename; // Construct the find URL
+        String url = s3UploadServiceUrl + "/api/s3/find/" + filename; // Construct the find URL
 
         // Make the request to retrieve the file
         ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
