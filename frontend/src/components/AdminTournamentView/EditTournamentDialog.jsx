@@ -112,8 +112,8 @@ function EditTournamentDialog({
                             label="Description"
                             value={updateTournament.description}
                             onChange={handleEditInputChange}
-                            multiline 
-                            rows={4} 
+                            multiline
+                            rows={3}
                             fullWidth
                         />
                     </Grid2>
@@ -203,14 +203,44 @@ function EditTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                        {createFormError && (
-                            <Grid2 size={12}>
-                                <h6 className={styles.errorMessage}>
-                                    {createFormError}
-                                </h6>
-                            </Grid2>
-                        )}
+
                     </Grid2>
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Format</InputLabel>
+                            <Select
+                                name="format"
+                                label="Format"
+                                value={updateTournament.format}
+                                onChange={handleEditInputChange}
+                            >
+                                <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="PHYSICAL">Physical</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
+                            <Select
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={updateTournament.tournamentType}
+                                onChange={handleEditInputChange}
+                            >
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+                    {createFormError && (
+                        <Grid2 size={12}>
+                            <h6 className={styles.errorMessage}>
+                                {createFormError}
+                            </h6>
+                        </Grid2>
+                    )}
                 </Grid2>
             </DialogContent>
             <DialogActions>

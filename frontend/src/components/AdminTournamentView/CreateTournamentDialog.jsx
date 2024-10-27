@@ -63,7 +63,7 @@ function CreateTournamentDialog({
     };
 
     return (
-        <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
+        <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm">
             <DialogTitle>
                 <Typography variant="header3">
                     Create New Tournament
@@ -87,8 +87,8 @@ function CreateTournamentDialog({
                             label="Description"
                             value={newTournament.description}
                             onChange={handleInputChange}
-                            multiline 
-                            rows={4} 
+                            multiline
+                            rows={3}
                             fullWidth
                         />
                     </Grid2>
@@ -179,14 +179,43 @@ function CreateTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                        {createFormError && (
-                            <Grid2 size={12}>
-                                <h6 className={styles.errorMessage}>
-                                    {createFormError}
-                                </h6>
-                            </Grid2>
-                        )}
                     </Grid2>
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Format</InputLabel>
+                            <Select
+                                name="format"
+                                label="Format"
+                                value={newTournament.format}
+                                onChange={handleInputChange}
+                            >
+                                <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="PHYSICAL">Physical</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
+                            <Select
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={newTournament.tournamentType}
+                                onChange={handleInputChange}
+                            >
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+
+                    {createFormError && (
+                        <Grid2 size={12}>
+                            <h6 className={styles.errorMessage}>
+                                {createFormError}
+                            </h6>
+                        </Grid2>
+                    )}
                 </Grid2>
             </DialogContent>
             <DialogActions>
