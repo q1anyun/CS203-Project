@@ -1,13 +1,7 @@
 import React from 'react';
 import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2 } from '@mui/material'; // Import necessary MUI components
 import axios from 'axios';
-import styles from './AdminTournamentView.module.css'; 
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'; 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; 
-import dayjs from 'dayjs';
-
-
+import styles from './AdminTournamentView.module.css';
 
 function CreateTournamentDialog({
     createDialogOpen,
@@ -52,6 +46,7 @@ function CreateTournamentDialog({
                     console.error('Error data:', error.response.data); // Response from the backend
                     console.error('Error status:', error.response.status); // Status code (e.g., 400)
                     console.error('Error headers:', error.response.headers); // Response headers
+                    console.error('Error message:', error.message);
                 } else {
                     console.error('Error message:', error.message);
                 }
@@ -67,15 +62,6 @@ function CreateTournamentDialog({
         });
     };
 
-    const handleDateChange = (name, newValue) => {
-        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
-        const localISOString = localDate ? localDate.toISOString() : '';
-        setNewTournament({
-            ...newTournament,
-            [name]: localISOString,
-        });
-    };
-
     return (
         <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
             <DialogTitle>
@@ -84,8 +70,8 @@ function CreateTournamentDialog({
                 </Typography>
             </DialogTitle>
             <DialogContent>
-            <Grid2 container spacing={2}>
-                <Grid2 size={12}>
+                <Grid2 container spacing={2}>
+                    <Grid2 size={12}>
                         <TextField
                             name="name"
                             label="Tournament Name"
@@ -95,28 +81,34 @@ function CreateTournamentDialog({
                         />
                     </Grid2>
 
-                    <Grid2 container spacing={4}>
                     <Grid2 size={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="startDate"
-                                    label="Start Date Time"
-                                    value={newTournament.startDate ? dayjs(newTournament.startDate) : null}
-                                    onAccept={(newValue) => handleDateChange("startDate", newValue)} />
-                            </LocalizationProvider>
-                         </Grid2>
+                        <TextField
+                            name="startDate"
+                            label="Start Date"
+                            type="date"
+                            value={newTournament.startDate}
+                            onChange={handleInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </Grid2>
+                    
+                    <Grid2 size={6}>
+                        <TextField
+                            name="endDate"
+                            label="End Date"
+                            type="date"
+                            value={newTournament.endDate}
+                            onChange={handleInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </Grid2>
 
-                        <Grid2 size={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="endDate"
-                                    label="End Date Time"
-                                    value={newTournament.endDate ? dayjs(newTournament.endDate) : null}
-                                    onAccept={(newValue) => handleDateChange("endDate", newValue)}  // Only update when accepted
-                                />
-                            </LocalizationProvider>
-                            </Grid2>
-                         </Grid2>
                     <Grid2 size={12}>
                         <FormControl fullWidth error={!!errors.timeControl}>
                             <InputLabel>Time Control</InputLabel>
@@ -134,7 +126,7 @@ function CreateTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                        </Grid2>
+                    </Grid2>
 
                     <Grid2 size={12}>
                         <TextField
@@ -145,7 +137,7 @@ function CreateTournamentDialog({
                             onChange={handleInputChange}
                             fullWidth
                         />
-                   </Grid2>
+                    </Grid2>
 
                     <Grid2 size={12}>
                         <TextField
@@ -176,14 +168,14 @@ function CreateTournamentDialog({
                             </Select>
                         </FormControl>
                         {createFormError && (
-                             <Grid2 size={12}>
+                            <Grid2 size={12}>
                                 <h6 className={styles.errorMessage}>
                                     {createFormError}
                                 </h6>
-                                </Grid2>
+                            </Grid2>
                         )}
-                   </Grid2>
-                   </Grid2>
+                    </Grid2>
+                </Grid2>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCreateDialogClose} color="secondary">
