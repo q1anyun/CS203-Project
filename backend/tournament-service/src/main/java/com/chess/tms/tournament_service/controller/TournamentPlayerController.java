@@ -54,4 +54,7 @@ public class TournamentPlayerController {
         tournamentService.registerPlayer(playerId, tournamentid);
         return ResponseEntity.ok("Player registered successfully");
     }
+
+
+    
 }

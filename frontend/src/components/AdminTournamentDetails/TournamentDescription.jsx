@@ -10,6 +10,7 @@ const DetailBox = styled(Box)({
     marginBottom: '10px', // Space between boxes
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', 
  
+ 
 });
 
 const statusColorMap = {
@@ -60,6 +61,9 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
             >
                 Start Tournament
             </Button>
+            <Button onClick={handleViewRegisteredPlayers}>
+                                click to view registered players
+                            </Button>
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
 
 
@@ -79,9 +83,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
                 <Grid item xs={12} sm={4}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Current Players</strong></Typography>
-                        <Button onClick={handleViewRegisteredPlayers}>
-                                {tournament.currentPlayers}
-                            </Button>
+                        
                         <Typography variant="body2">{tournament.currentPlayers} / {tournament.maxPlayers}</Typography>
                     </DetailBox>
                 </Grid>

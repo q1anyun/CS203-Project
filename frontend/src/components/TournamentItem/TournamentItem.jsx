@@ -1,12 +1,54 @@
-import React from 'react';
-import { Grid, Card, CardContent, Typography, Divider, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Grid, Card, CardContent, Typography, Divider, Box, Chip } from '@mui/material';
+import axios from 'axios'; 
+import defaultbackgroundImage from '../../assets/welcome.jpg';
+
+const statusColorMap = {
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    COMPLETED: 'default',
+};
+
+
+const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 
 const TournamentItem = ({ tournament }) => {
+    const [localTournamentPic, setLocalTournamentPic] = useState(defaultbackgroundImage)
+      // useTournamentPic hook should return the URL of the image
+
+      useEffect(() => {
+        const fetchTournamentPic = async () => {
+         try {
+
+            
+            const response = await axios.get(`${baseURL}/getTournamentImage/${tournament.id}`, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                responseType: 'blob', // Important for handling images
+            });
+            
+            console.log(response.data); 
+
+            if (response.data) {
+                const imageUrl = URL.createObjectURL(response.data);
+                setLocalTournamentPic(imageUrl);
+            }
+            
+         } catch (error) {
+                    console.error('Profile picture not found, using default.');
+                    setLocalTournamentPic(defaultbackgroundImage); // Use default profile picture if no data
+                  }
+               
+          
+        };
+
+        fetchTournamentPic(); 
+    }, []);
+   
     return (
       
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <img
-                    src={`https://via.placeholder.com/300x200?text=${tournament.name}`} // get the tournament upload photo (to be updated at another date)
+                    src={localTournamentPic} // get the tournament upload photo (to be updated at another date)
                     alt={tournament.name}
                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                 />

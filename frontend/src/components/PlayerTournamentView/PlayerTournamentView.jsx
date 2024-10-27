@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider } from '@mui/material';
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';

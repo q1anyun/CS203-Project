@@ -128,6 +128,13 @@ export default function AdminTournamentView() {
         fetchTournaments();
     }, []); 
 
+    const handleUploadClick = (tournamentId) => {
+        // Logic to handle file upload interaction
+        console.log("Upload button clicked for tournament ID:", tournamentId);
+        // You can extend this to actually show a dialog or direct file input
+    };
+    
+
 
    
 
@@ -182,6 +189,7 @@ export default function AdminTournamentView() {
                 handleEditClick={handleEditClick}
                 handleDeleteClick={handleDeleteClick}
                 handleViewDetails={handleViewDetails}
+                handleUploadClick={handleUploadClick}
             />
 
             <CreateTournamentDialog
@@ -232,6 +240,7 @@ export default function AdminTournamentView() {
                 setDeleteDialogOpen={setDeleteDialogOpen}
                 setTournamentToDelete={setTournamentToDelete}
                 tournaments={tournaments}
+               
             />
         </div>
     );

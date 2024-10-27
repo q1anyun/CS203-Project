@@ -10,9 +10,18 @@ import { TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/mater
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 import TournamentItem from '../TournamentItem/TournamentItem';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 
-function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
+
+const statusColorMap = {
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    COMPLETED: 'default',
+};
+
+
+function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleUploadClick}) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 7;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
@@ -157,8 +166,8 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     .map((tournament) => (
                         <Grid item xs={12} sm={6} md={4} key={tournament.id}>
                             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                              
-                            <TournamentItem key={tournament.id} tournament={tournament} />
+
+                                <TournamentItem key={tournament.id} tournament={tournament} />
                                 <CardActions>
                                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                         <IconButton
@@ -180,8 +189,16 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                             sx={{ color: 'secondary.main', mr: 4 }}
                                         >
                                             <VisibilityIcon />
+
                                         </IconButton>
 
+                                        <IconButton
+                                            onClick={() => handleUploadClick(tournament.id)}
+                                            sx={{ color: 'info.main', mr: 4 }}
+                                        >
+                                            <CloudUploadIcon />
+                                        </IconButton>
+                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
 
                                     </Box>
 
