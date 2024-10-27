@@ -76,6 +76,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/tournament-players/**").permitAll()
                 .requestMatchers("/api/game-type/**").permitAll() 
                 .requestMatchers("/api/round-type/**").permitAll()
+                .requestMatchers("/api/tournament-type/**").permitAll()
                 .requestMatchers("/api/s3/**").permitAll()
                 // Only admins can access /admin/** endpoints
                 .requestMatchers("/admin/**").hasAuthority("ADMIN")
