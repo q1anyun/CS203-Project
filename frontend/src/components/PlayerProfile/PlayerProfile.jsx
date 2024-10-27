@@ -7,13 +7,14 @@ import axios from 'axios';
 import countryList from 'react-select-country-list'
 import useProfilePic from '../ProfilePicture/UseProfilePicture';
 import defaultProfilePic from '../../assets/default_user.png'
+import EditProfileDialog from './EditProfileDialog';
 import { useNavigate } from 'react-router-dom';
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL3 = import.meta.env.VITE_ELO_SERVICE_URL;
-const baseURL4 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL; 
+const baseURL4 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
 const VisuallyHiddenInput = styled('input')({
   clip: 'rect(0 0 0 0)',
@@ -41,8 +42,8 @@ function PlayerProfile({ profilePic }) {
 
 
 
-  const options = useMemo(() => countryList().getData(), []); 
-  
+  const options = useMemo(() => countryList().getData(), []);
+
   profilePic = useProfilePic();
 
 
@@ -58,16 +59,16 @@ function PlayerProfile({ profilePic }) {
   const handleCloseEdit = () => setOpenEdit(false);
 
   const handleDetailChange = (event) => {
-    const { name, value } = event.target; 
+    const { name, value } = event.target;
 
     // Update the corresponding field in playerDetails
     setPlayerDetails((prevDetails) => ({
-      ...prevDetails,            
-      [name]: value              
+      ...prevDetails,
+      [name]: value
     }));
   };
 
-  
+
   useEffect(() => {
     const fetchPlayerAndMatchData = async () => {
       const token = localStorage.getItem('token');
@@ -91,7 +92,7 @@ function PlayerProfile({ profilePic }) {
     fetchPlayerAndMatchData();
   }, [navigate]);
 
-//handle the errors 
+  //handle the errors 
   const handleFetchError = (err) => {
     if (err.response) {
       const statusCode = err.response.status;
@@ -164,7 +165,7 @@ function PlayerProfile({ profilePic }) {
 
         display: 'grid',
         backgroundColor: '#f0f0f0',
-        height:'100vh',
+        height: '100vh',
         justifyItems: 'center',
 
       }}
@@ -197,7 +198,7 @@ function PlayerProfile({ profilePic }) {
 
         {/* Three Boxes Section */}
         <Grid container spacing={2} justifyContent="center">
-          
+
           <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
               <Typography variant="header3" display='block'>Country</Typography>
@@ -213,89 +214,17 @@ function PlayerProfile({ profilePic }) {
           </Grid>
         </Grid>
       </Card>
-      
-      {/*dialog to edit the profile*/}
-      <Dialog open={openEdit} onClose={handleCloseEdit}
-        sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
-        <DialogTitle>Edit Profile</DialogTitle>
-        <DialogContent
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-
-          }}>
-
-          {/* Display Existing Profile Picture */}
-
-          <Avatar
-            sx={{ width: 200, height: 200, marginTop: 1 }}
-            alt={playerDetails.firstName}
-            src={localProfilePic}  // Use current profile picture
-          />
+      <EditProfileDialog
+        open={openEdit}
+        handleClose={handleCloseEdit}
+        playerDetails={playerDetails}
+        handleDetailChange={handleDetailChange}
+        handleFileAndImageUpload={handleFileAndImageUpload}
+        handleSave={handleSave}
+        options={options}
+      />
 
 
-
-
-          {/* Label to Trigger File Input */}
-          <Button
-            component="label"
-            variant="contained"
-            tabIndex={-1}
-            startIcon={<CloudUploadIcon />}
-          >
-            Upload files
-            <VisuallyHiddenInput
-              type="file"
-              onChange={handleFileAndImageUpload}
-
-            />
-          </Button>
-
-          {/* Edit text field  */}
-          <TextField
-            label="First Name"
-            name="firstName"
-            value={playerDetails.firstName}
-            onChange={handleDetailChange}
-            variant="outlined"
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Last Name"
-            name="lastName"
-            value={playerDetails.lastName}
-            onChange={handleDetailChange}
-            variant="outlined"
-            fullWidth
-            margin="normal"
-          />
-
-          <FormControl fullWidth>
-            <InputLabel>Country</InputLabel>
-            <Select
-              name="country"
-              value={playerDetails.country}
-              label="Country"
-              onChange={handleDetailChange}
-              sx={{ textAlign: 'left' }}
-
-            >
-              {options.map((country) => (
-                <MenuItem key={country.value} value={country.value}>
-                  {country.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Button onClick={handleSave} color="primary">
-            Save
-          </Button>
-        </DialogContent>
-      </Dialog>
 
     </Box>
 
