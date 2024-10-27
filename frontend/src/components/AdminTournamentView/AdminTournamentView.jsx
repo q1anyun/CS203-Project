@@ -57,7 +57,8 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
-        tournamentType: 1
+        tournamentType: 1,
+        description: ''
     });
 
     const [updateTournament, setUpdateTournament] = useState({
@@ -68,6 +69,7 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
+        description: ''
     });
 
     const resetNewTournament = () => {
@@ -159,6 +161,7 @@ export default function AdminTournamentView() {
                 minElo: response.data.minElo || '',
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
+                description: response.data.description || ''
             });
             setEditDialogOpen(true);
         } catch (error) {

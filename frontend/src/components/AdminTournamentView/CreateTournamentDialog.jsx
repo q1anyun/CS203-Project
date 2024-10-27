@@ -81,6 +81,18 @@ function CreateTournamentDialog({
                         />
                     </Grid2>
 
+                    <Grid2 size={12}>
+                        <TextField
+                            name="description"
+                            label="Description"
+                            value={newTournament.description}
+                            onChange={handleInputChange}
+                            multiline 
+                            rows={4} 
+                            fullWidth
+                        />
+                    </Grid2>
+
                     <Grid2 size={6}>
                         <TextField
                             name="startDate"
@@ -94,7 +106,7 @@ function CreateTournamentDialog({
                             fullWidth
                         />
                     </Grid2>
-                    
+
                     <Grid2 size={6}>
                         <TextField
                             name="endDate"

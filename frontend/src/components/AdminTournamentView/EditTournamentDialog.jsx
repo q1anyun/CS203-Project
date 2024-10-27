@@ -105,6 +105,19 @@ function EditTournamentDialog({
                             fullWidth
                         />
                     </Grid2>
+
+                    <Grid2 size={12}>
+                        <TextField
+                            name="description"
+                            label="Description"
+                            value={updateTournament.description}
+                            onChange={handleEditInputChange}
+                            multiline 
+                            rows={4} 
+                            fullWidth
+                        />
+                    </Grid2>
+
                     <Grid2 size={6}>
                         <TextField
                             name="startDate"
