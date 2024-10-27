@@ -1,7 +1,7 @@
 .welcomeContainer {
     padding-top: 2%;
     overflow: hidden;
-    background-color: black;
+    background-color:white;
     height: 40vh;
 }
 
@@ -27,27 +27,26 @@
     font-family: "Chewy", system-ui;
     font-size: 5em;
     text-shadow: 0 0 0.8em rgb(255, 255, 255);
-    color: aliceblue;
+    color: rgb(0, 1, 2);
 }
 
 .description {
     font-family: "League Spartan", sans-serif;
     font-size: 1.5em;
-    color: aliceblue;
+    color: rgb(0, 0, 0);
 }
 
 .cardContainer {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    background: linear-gradient(179.4deg, black 0%, rgb(12, 20, 69) 20%, rgb(71, 30, 84) 100%);
-    min-height: 60vh;
+    background: white;
     padding: 5%;
     justify-content: center;
 }
 
 .card {
-    background-color: rgba(255, 255, 255, 0.7);
+    background-color: rgba(214, 214, 214, 0.7);
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);

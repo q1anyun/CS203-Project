@@ -6,10 +6,11 @@ import AddIcon from '@mui/icons-material/Add';
 import styles from './AdminTournamentView.module.css';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
 import { TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
+import TournamentItem from '../TournamentItem/TournamentItem';
+
 
 function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails }) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,38 +37,6 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
         }
     };
 
-    const statusColorMap = {
-        LIVE: 'success',
-        UPCOMING: 'warning',
-        EXPIRED: 'default',
-    };
-
-    const StyledTableCell = styled(TableCell)(({ theme }) => ({
-        [`&.${tableCellClasses.head}`]: {
-            backgroundColor: theme.palette.common.black,
-            color: theme.palette.common.white,
-            textAlign: 'center',
-            variant: 'header1'
-        },
-        [`&.${tableCellClasses.body}`]: {
-            fontSize: 14,
-            textAlign: 'center',
-        },
-    }));
-
-    const StyledTableRow = styled(TableRow)(({ theme }) => ({
-        '&:nth-of-type(odd)': {
-            backgroundColor: theme.palette.action.hover,
-        },
-        '&:last-child td, &:last-child th': {
-            border: 0,
-        },
-    }));
-
-    const tournamentsToShow = tournaments.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
 
     return (
         <div>
@@ -188,54 +157,8 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                     .map((tournament) => (
                         <Grid item xs={12} sm={6} md={4} key={tournament.id}>
                             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                <img
-                                    src={`https://via.placeholder.com/300x200?text=${tournament.name}`} // get the tournament upload photo (to be updated at another date)
-                                    alt={tournament.name}
-                                    style={{ width: '100%', height: '200px', objectFit: 'cover' }}
-                                />
-                                <CardContent sx={{ flexGrow: 1 }}>
-                                    <Typography variant="header2">
-                                        <span style={{ marginRight: '16px' }}>{tournament.name}</span> {/* Tournament name with margin-right to create space */}
-                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} /> {/* Chip next to the name */}
-                                    </Typography>
-                                    <Divider sx={{ margin: '8px 0' }} /> {/* Divider after the title */}
-
-                                    <Typography variant="header3">Start: </Typography>
-                                    <Typography variant="playerProfile2">
-                                        {new Date(tournament.startDate + "Z").toLocaleString()}
-                                    </Typography> {/* Body for the Start date */}
-
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>End:</Typography>
-                                        <Typography variant="playerProfile2">
-                                            {new Date(tournament.endDate + "Z").toLocaleString()}
-                                        </Typography> {/* Body for the End date */}
-                                    </Box>
-
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Min ELO:</Typography>
-                                        <Typography variant="playerProfile2">
-                                            {tournament.minElo}
-                                        </Typography>
-                                    </Box>
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Max ELO:</Typography>
-
-                                        <Typography variant="playerProfile2">
-                                            {tournament.maxElo}
-                                        </Typography>
-                                    </Box>
-                                    <Box display="flex" flexDirection="row" alignItems="center">
-                                        <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Time Control:</Typography>
-
-                                        <Typography variant="playerProfile2">
-                                            {tournament.timeControl.timeControlMinutes} minutes
-                                        </Typography>
-                                    </Box>
-
-
-                                </CardContent>
-
+                              
+                            <TournamentItem key={tournament.id} tournament={tournament} />
                                 <CardActions>
                                     <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                         <IconButton

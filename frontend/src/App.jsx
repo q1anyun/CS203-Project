@@ -22,7 +22,8 @@ import AuthPage from './components/AuthPage/AuthPage.jsx';
 import PageNotFound from './components/PageNotFound/PageNotFound.jsx';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
-import Settings from './components/Settings/Settings.jsx'
+import Settings from './components/Settings/Settings.jsx';
+import Dashboard from './components/PlayerDashboard/PlayerDashboard.jsx';
 
 function AppContent() {
   const location = useLocation();
@@ -88,6 +89,12 @@ function AppContent() {
           element={<ProtectedRoute>
             <TournamentRegistrationDetails />
           </ProtectedRoute>} />
+
+          <Route path="/dashboard"
+          element={<ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>} />
+
 
         {/* General Routes */}
         <Route path="/home" element={<Home />} />

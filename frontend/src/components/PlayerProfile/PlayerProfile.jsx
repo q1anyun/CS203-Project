@@ -3,11 +3,11 @@ import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs
 import { PieChart, LineChart } from '@mui/x-charts';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import countryList from 'react-select-country-list'
 import useProfilePic from '../ProfilePicture/UseProfilePicture';
 import defaultProfilePic from '../../assets/default_user.png'
+import { useNavigate } from 'react-router-dom';
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -35,16 +35,14 @@ function PlayerProfile({ profilePic }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
   const [playerDetails, setPlayerDetails] = useState([]);
-  const [uData, setUData] = useState([]);
-  const [xLabels, setXLabels] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(''); // Declare error state
-  const [recentMatches, setRecentMatches] = useState([]);
-  const [liveTournaments, setLiveTournaments] = useState([]);
+  const navigate = useNavigate();
+
 
 
   const options = useMemo(() => countryList().getData(), []); 
-  const navigate = useNavigate();
+  
   profilePic = useProfilePic();
 
 
@@ -85,24 +83,6 @@ function PlayerProfile({ profilePic }) {
         });
         setPlayerDetails(playerResponse.data || {});
 
-        // Fetch chart data
-        const chartResponse = await axios.get(`${baseURL3}/chart/current`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUData(chartResponse.data.map((data) => data.elo));
-        setXLabels(chartResponse.data.map((data) => data.date));
-
-        // Fetch recent matches
-        const matchResponse = await axios.get(`${baseURL4}/player/current/recent`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setRecentMatches(matchResponse.data || []);
-
-        // Fetch live tournaments
-        const tournamentResponse = await axios.get(`${baseURL2}/live/current`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setLiveTournaments(tournamentResponse.data || []);
       } catch (err) {
         handleFetchError(err);
       }
@@ -183,9 +163,8 @@ function PlayerProfile({ profilePic }) {
       sx={{
 
         display: 'grid',
-        gridTemplateRows: '1fr 1fr',
-        height: '100%', // Full viewport height
-        backgroundColor: '#f0f0f0',// Optional: background color for the page
+        backgroundColor: '#f0f0f0',
+        height:'100vh',
         justifyItems: 'center',
 
       }}
@@ -218,12 +197,7 @@ function PlayerProfile({ profilePic }) {
 
         {/* Three Boxes Section */}
         <Grid container spacing={2} justifyContent="center">
-          {/* <Grid item xs={4}>
-            <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
-              <Typography variant="body4">7</Typography>
-              <Typography variant="header3">Rank</Typography>
-            </Box>
-          </Grid> */}
+          
           <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
               <Typography variant="header3" display='block'>Country</Typography>
@@ -239,215 +213,7 @@ function PlayerProfile({ profilePic }) {
           </Grid>
         </Grid>
       </Card>
-      <Box sx={{ width: '80%', marginTop: '0px', marginBottom: '5%' }}>
-        <Card sx={{ padding: 2, height: '600px', overflowY: 'auto', }}>
-          <CardContent>
-            <Box sx={{ position: 'sticky', top: 0, backgroundColor: '#fff', zIndex: 1 }}>
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="tabs"
-                sx={{
-                  '& .MuiTabs-flexContainer': {
-                    justifyContent: 'center', // Center the tabs
-                  }
-                }}
-
-              >
-                <Tab
-                  label={
-                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
-                      Results Statistics
-                    </Typography>
-                  }
-                  sx={{
-                    padding: '12px 24px',
-                    marginX: 'auto',
-
-                  }}
-                />
-                <Tab
-                  label={
-                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
-                      Past Matches
-                    </Typography>
-                  }
-                  sx={{
-
-                    padding: '12px 24px',
-                    marginX: 'auto', // Add horizontal margin between tabs
-
-                  }}
-                />
-
-                <Tab
-                  label={
-                    <Typography variant="playerProfile2" sx={{ fontSize: '1.25rem' }}>
-                      Ongoing Tournaments
-                    </Typography>
-                  }
-
-                  sx={{
-
-                    padding: '12px 24px',
-                    marginX: 'auto', // Add horizontal margin between tabs
-
-                  }}
-                />
-
-              </Tabs>
-            </Box>
-
-            {/* tab for results statistics*/}
-            {value === 0 && (
-              <Box sx={{ p: 2 }}>
-
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
-                  <PieChart
-                    series={[
-                      {
-                        data: [
-                          { id: 0, value: playerDetails.totalWins, label: 'Wins', color: 'orange' },
-                          { id: 1, value: playerDetails.totalLosses, label: 'Losses', color: 'grey' },
-                        ]
-                      },
-                    ]}
-                    width={400}
-                    height={200}
-                    justifyContent='center'
-                    alignItems='center'
-                  />
-                  <LineChart
-                    width={500}
-                    height={300}
-                    series={[
-
-                      { data: uData, label: 'Elo Rating' },
-                    ]}
-                    xAxis={[{ scaleType: 'point', data: xLabels, ticks: false }]}
-                  />
-                </Box>
-              </Box>
-            )}
-
-          {/* tab for recent matches*/}
-            {value === 1 && (
-             <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2,justifyContent: 'center' }}>
-             {recentMatches.length > 0 ? (
-               recentMatches.map((match, index) => (
-                 <Card
-                   key={match.id}
-                   sx={{
-                     display: 'flex',
-                     flexDirection: 'column',
-                     p: 2,
-                     backgroundColor: 'background.paper',
-                     borderRadius: 2,
-                     flexGrow: 1,
-                     alignItems: 'center'
-                  
-                   }}
-                 >
-                   <Typography variant="header3">{match.tournament.name}</Typography>
-           
-                   {/* Flexbox for Players and Winner */}
-                   <CardContent sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                     {/* Left Column for Players */}
-                     <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
-                       {/* Player 1 */}
-                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                         <Avatar
-                           alt={`Player ${match.winnerId}`}
-                           src={`../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`}
-                           sx={{ mr: 1 }}
-                         />
-                         <Typography variant="body4">Player {match.winnerId}</Typography>
-                       </Box>
-           
-                       {/* Player 2 */}
-                       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                         <Avatar
-                           alt={`Player ${match.loserId}`}
-                           src={`../../../backend/player-service/profile-picture/player_${match.loserId}.jpg`}
-                           sx={{ mr: 1 }}
-                         />
-                         <Typography variant="body4">Player {match.loserId}</Typography>
-                       </Box>
-                     </Box>
-           
-                     {/* Divider */}
-                     <Divider orientation="vertical" sx={{ height: '100px', ml: 5, mr: 8 }} />
-           
-                     {/* Right Column for Winner */}
-                     <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
-                       <Typography variant="body4">Winner:</Typography>
-                       <Box sx={{ mb: 2 }}>
-                         <Avatar
-                           alt={`Winner ${match.winnerId}`}
-                           src={
-                             match.winnerId
-                               ? `../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`
-                               : '/path/to/default-avatar.jpg'
-                           }
-                           sx={{
-                             width: 56,
-                             height: 56,
-                             justifyContent: 'center',
-                             alignContent: 'center',
-                           }}
-                         />
-                       </Box>
-                       <Typography variant="body4">
-                         {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
-                       </Typography>
-                     </Box>
-                   </CardContent>
-                 </Card>
-               ))
-             ) : (
-              <Typography variant="playerProfile2" align="center">
-              No recent matches available.
-            </Typography>
-             )}
-           </Box>
-            )}
-
-        {/* tab for ongoing tournaments */}
-            {value === 2 && (
-              <Box sx={{ p: 2, height: '100%' }}>
-
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                  {liveTournaments.length > 0 ? (
-                    liveTournaments.map((tournament, index) => (
-                      <Box
-                        key={index}
-                        sx={{
-                          display: 'flex',
-                          flexDirection: 'row',
-                          alignItems: 'center',
-                          padding: 2,
-                          border: '1px solid #ddd',
-                          borderRadius: 2,
-                        }}
-                        onClick={() => navigate(`/player/tournaments/${tournament.id}`)} // Navigate to tournament details
-                      >
-                        <CardContent>
-                          <Typography variant="header2">{tournament.name}</Typography>
-                          <Typography variant="body4" display='block'>Click here to view details</Typography>
-                        </CardContent>
-                      </Box>
-                    ))
-                  ) : (
-                    <Typography variant="playerProfile2">No ongoing tournaments found.</Typography>
-                  )}
-                </Box>
-              </Box>
-            )}
-
-
-          </CardContent>
-        </Card>
-      </Box>
+      
       {/*dialog to edit the profile*/}
       <Dialog open={openEdit} onClose={handleCloseEdit}
         sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >

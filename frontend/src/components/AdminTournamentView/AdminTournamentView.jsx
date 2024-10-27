@@ -13,10 +13,10 @@ const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
 export default function AdminTournamentView() {
-    const [tournaments, setTournaments] = useState([]);
     const [loading, setLoading] = useState(true); 
     const [error, setError] = useState(null); 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [tournaments, setTournaments] = useState([]); 
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -27,6 +27,9 @@ export default function AdminTournamentView() {
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
     const token = localStorage.getItem('token');
+
+
+
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -111,15 +114,22 @@ export default function AdminTournamentView() {
                 console.log(response.data);
                 setTournaments(response.data); 
                 setLoading(false); 
+                
             } catch (error) {
                 console.error('Error fetching tournaments:', error);
                 setError(error);
                 setLoading(false); 
+                
+                
             }
+           
         };
 
         fetchTournaments();
     }, []); 
+
+
+   
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
