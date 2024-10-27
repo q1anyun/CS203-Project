@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.chess.tms.tournament_service.dto.PlayerDetailsDTO;
-import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.service.TournamentService;
 
 
@@ -23,6 +22,12 @@ public class TournamentPlayerController {
 
     @Autowired
     private TournamentService tournamentService;
+
+
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Tournament Players service is up and running");
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<List<PlayerDetailsDTO>> getTournamentPlayersByTournamentId(@PathVariable("id") long id) {

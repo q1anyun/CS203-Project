@@ -1,129 +1,222 @@
-# name:  chesstms
+# Live Volume Mouting for Development - Allows for live code changes without rebuilding the images while running containers
 
-# services:
-#   config-server:
-#     build: 
-#       context: ./config-server
-#     container_name: config-server
-#     ports:
-#       - "8888:8888" 
-#     environment:
-#       SPRING_PROFILES_ACTIVE: git
-#       SPRING_CLOUD_CONFIG_SERVER_GIT_URI: ${GIT_URI}
-#       SPRING_CLOUD_CONFIG_SERVER_GIT_USERNAME: ${GIT_USERNAME}
-#       SPRING_CLOUD_CONFIG_SERVER_GIT_PASSWORD: ${GIT_PASSWORD}
-#     healthcheck:
-#         test: ["CMD-SHELL", "curl -f http://localhost:8888/ || exit 1"]
-#         interval: 30s
-#         timeout: 10s
-#         retries: 5
-#         start_period: 60s
-#     networks: 
-#       - default
+# To remove, comment out the volumes section for each service
+# If Live Voume Mouting is disabled, manually build the images using ./gradlew clean build before running docker-compose up
 
-#   gateway:
-#     build: 
-#       context: ./gateway
-#     container_name: gateway
-#     depends_on:
-#       - config-server
-#     ports:
-#       - "8080:8080"
-#     environment:
-#       SPRING_PROFILES_ACTIVE: git
-#       SPRING_CONFIG_IMPORT: optional:http://config-server:8888/
-#       SPRING_CLOUD_CONFIG_RETRY_INITIALINTERVAL: 1000  # Retry after 1 second
-#       SPRING_CLOUD_CONFIG_RETRY_MAXINTERVAL: 5000      # Max retry interval of 5 seconds
-#       SPRING_CLOUD_CONFIG_RETRY_MAXATTEMPTS: 10        # Retry up to 10 times
-#     restart: always
-#     links:
-#       - config-server
+# Ensure db folder has the following files:
+# - db_setup.sql
 
-# # networks: 
-# #   my-network:
-# #     driver: bridge
+# Ensure env files are present in the following directories:
+# - ./gateway/.env
+# - ./user-service/.env
+# - ./tournament-service/.env
+# - ./.env
+
+## Access MySQL Database through: docker exec -it chess-tms-db-1 mysql -u root -p
+## Enter password from .env file
+## Use the following commands to view databases and tables:
+## - show databases;
+## - use chess_tms;
+## - show tables;
 
 name: chess-tms
 
+# Docker Compose version
 version: '3'
+
+# Services
 services:
   config-server:
     build:
-      context: ./config-server
-      dockerfile: Dockerfile
+      context: ./config-server # Build context
+      dockerfile: Dockerfile   # Dockerfile
     ports:
-      - "8888:8888"
+      - "8888:8888" # Expose port 8888
+    volumes:
+      - ./config-server:/app/config-server  # Mount local config-server directory to container
     networks:
-      - spring-network
-    restart: unless-stopped
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
 
-  gateway:
-    build:
-      context: ./gateway
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - user-service
-      - config-server
-      - db
-    environment:
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-    env_file:
-      - ./gateway/.env
-    networks:
-      - spring-network
-    restart: unless-stopped
-
+# Database
   db:
     image: mysql:latest   # MySQL Docker image
     env_file:
-      - ./.env
+      - ./.env # Environment variables
     ports:
-      - "3307:3306"
+      - "3307:3306"   # Expose port 3306 (Used 3307 to avoid conflict with local MySQL on 3306)
     networks:
-      - spring-network
+      - spring-network # Use spring-network
     volumes:
-      - db_data:/var/lib/mysql
-      - ./db:/docker-entrypoint-initdb.d/  # Mount your SQL scripts
+      - db_data:/var/lib/mysql # Mount MySQL data directory
+      # - ./db:/docker-entrypoint-initdb.d/  # Mount SQL scripts - Comment out when not needed to initialize database
+      - ./db/mysql:/var/lib/mysql-files    # Mount additional MySQL data directory
 
+# Gateway
+  gateway:
+    build:
+      context: ./gateway # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8080:8080" # Expose port 8080
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./gateway/.env # Environment variables
+    volumes:
+      - ./gateway:/app/gateway  # Mount local gateway directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+# Auth Service
+  auth-service:
+    build:
+      context: ./auth-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8081:8081" # Expose port 8081
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./auth-service/.env # Environment variables
+    volumes:
+      - ./auth-service:/app/auth-service  # Mount local auth-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+  # User Service
   user-service:
     build:
-      context: ./user-service
-      dockerfile: Dockerfile
+      context: ./user-service # Build context
+      dockerfile: Dockerfile # Dockerfile
     ports:
-      - "8082:8082"
+      - "8082:8082" # Expose port 8082
     depends_on:
-      - config-server
-      - db
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
     environment:
-      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
     env_file:
-      - ./user-service/.env
+      - ./user-service/.env # Environment variables
+    volumes:
+      - ./user-service:/app/user-service  # Mount local user-service directory to container
     networks:
-      - spring-network
-    restart: unless-stopped
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
 
-  # tournament-service:
-  #   build:
-  #     context: ./tournament-service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8084:8084"
-  #   depends_on:
-  #     - config-server
-  #     - db
-  #   environment:
-  #     SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-  #   env_file:
-  #     - ./tournament-service/.env
-  #   networks:
-  #     - spring-network
-  #   restart: unless-stopped
+  # Player Service
+  player-service:
+    build:
+      context: ./player-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8083:8083" # Expose port 8083
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./player-service/.env # Environment variables
+    volumes:
+      - ./player-service:/app/player-service  # Mount local player-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
 
+# Tournament Service
+  tournament-service:
+    build:
+      context: ./tournament-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8084:8084" # Expose port 8084
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./tournament-service/.env # Environment variables
+    volumes:
+      - ./tournament-service:/app/tournament-service  # Mount local tournament-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+# Match Service
+  match-service:
+    build:
+      context: ./match-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8085:8085" # Expose port 8085
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./match-service/.env # Environment variables
+    volumes:
+      - ./match-service:/app/match-service  # Mount local match-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+# Elo Service
+  elo-service:
+    build:
+      context: ./elo-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8086:8086" # Expose port 8086
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./elo-service/.env # Environment variables
+    volumes:
+      - ./elo-service:/app/elo-service  # Mount local elo-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+# S3 Upload Service
+  s3-upload-service:
+    build:
+      context: ./s3-upload-service # Build context
+      dockerfile: Dockerfile # Dockerfile
+    ports:
+      - "8088:8088" # Expose port 8088
+    depends_on:
+      - config-server # Wait for config-server to start
+      - db # Wait for db to start
+    environment:
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888 # Config server URI
+    env_file:
+      - ./s3-upload-service/.env # Environment variables
+    volumes:
+      - ./s3-upload-service:/app/s3-upload-service  # Mount local s3-upload-service directory to container
+    networks:
+      - spring-network # Use spring-network
+    restart: unless-stopped # Restart unless stopped
+
+# Networks
 networks:
   spring-network:
-    driver: bridge
+    driver: bridge # Use bridge driver
 
+# Volumes
 volumes:
   db_data:

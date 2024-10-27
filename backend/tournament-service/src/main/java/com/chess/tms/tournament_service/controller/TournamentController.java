@@ -37,6 +37,12 @@ public class TournamentController {
     @Autowired
     private TournamentService tournamentService;
 
+
+    @GetMapping("/test")
+    public ResponseEntity<String> testEndpoint() {
+        return ResponseEntity.ok("Tournament service is up and running");
+    }
+
     @PostMapping("")
     public ResponseEntity<String> createTournament(@Valid @RequestBody TournamentRegistrationDTO dto,
             @RequestHeader("X-User-Id") String id) {

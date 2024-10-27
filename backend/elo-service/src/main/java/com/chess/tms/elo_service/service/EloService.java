@@ -31,10 +31,6 @@ import com.chess.tms.elo_service.dto.WinLossUpdateDTO;
 
 @Service
 public class EloService {
-
-    @Value("${leaderboard.service.url}")
-    private String leaderboardServiceUrl;
-
     @Value("${players.service.url}")
     private String playersServiceUrl;
 

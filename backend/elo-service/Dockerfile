@@ -1,18 +1,3 @@
-# # Start with a base image containing OpenJDK
-# FROM gradle:8.10-jdk21-alpine
-
-# # Create a directory inside the container for the application
-# WORKDIR /app
-
-# # Copy the built JAR file to the container
-# COPY build/libs/*.jar tournament-service.jar
-
-# # Expose the port
-# EXPOSE 8084
-
-# # Define the entry point to run the JAR
-# ENTRYPOINT ["java", "-jar", "/app/tournament-service.jar"]
-
 # Build stage: use a Gradle image to build the application
 FROM gradle:8.10-jdk21-alpine AS build
 
@@ -39,7 +24,7 @@ RUN ./gradlew build --no-daemon --parallel --exclude-task test
 FROM openjdk:21-jdk-slim
 
 # Set environment variables for the JAR name and application directory
-ENV JAR_NAME=tournament-service.jar
+ENV JAR_NAME=elo-service.jar
 ENV APP_HOME=/usr/app/
 
 # Set the working directory inside the container
@@ -49,7 +34,7 @@ WORKDIR $APP_HOME
 COPY --from=build /app/build/libs/*.jar $APP_HOME/$JAR_NAME
 
 # Expose the port the application runs on
-EXPOSE 8084
+EXPOSE 8086
 
 # Define the entry point to run the JAR
-ENTRYPOINT ["java", "-jar", "/usr/app/tournament-service.jar"]
+ENTRYPOINT ["java", "-jar", "/usr/app/elo-service.jar"]

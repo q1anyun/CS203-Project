@@ -51,15 +51,15 @@ public class ApiGatewayConfig {
 public RouterFunction<ServerResponse> tournamentServiceRoute() {
     return GatewayRouterFunctions
         .route(RequestPredicates.path("/api/tournaments/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, "http://tournament-service:8084"))
         .andRoute(RequestPredicates.path("/api/tournament-players/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, "http://tournament-service:8084"))
             .andRoute(RequestPredicates.path("/api/round-type/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, "http://tournament-service:8084"))
             .andRoute(RequestPredicates.path("/api/game-type/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, "http://tournament-service:8084"))
             .andRoute(RequestPredicates.path("/api/tournament-type/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"));
+            request -> processRequestWithJwtClaims(request, "http://tournament-service:8084"));
 }
 
     @Bean
