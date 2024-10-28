@@ -60,9 +60,12 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
             .andRoute(RequestPredicates.path("/api/game-type/**"), 
             request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
             .andRoute(RequestPredicates.path("/api/tournament-type/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            .andRoute(RequestPredicates.path("/api/swiss-bracket/**"), 
+            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            .andRoute(RequestPredicates.path("/api/swiss-standing/**"), 
             request -> processRequestWithJwtClaims(request, "http://localhost:8084"));
 }
-
     @Bean
     public RouterFunction<ServerResponse> matchServiceRoute() {
         return GatewayRouterFunctions.route("match-service")

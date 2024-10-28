@@ -4,6 +4,7 @@ import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
+import com.chess.tms.tournament_service.model.SwissBracket;
 import com.chess.tms.tournament_service.model.TournamentType;
 
 import lombok.AllArgsConstructor;
@@ -57,4 +58,6 @@ public class TournamentDetailsDTO {
     private GameType timeControl;
 
     private TournamentType tournamentType;
+
+    private SwissBracket swissBracket;
 }
