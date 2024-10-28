@@ -23,8 +23,8 @@ public class MatchController {
 
     // Generate swiss matches for a tournament
     @PostMapping("/swiss/{tournamentId}/{gameTypeId}")
-    public void createSwissMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
-        matchService.createSwissMatches(tournamentId, gameTypeId);
+    public ResponseEntity<Long> createSwissMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+        return ResponseEntity.ok(matchService.createSwissMatches(tournamentId, gameTypeId));
     }
 
     // Get all matches for a tournament

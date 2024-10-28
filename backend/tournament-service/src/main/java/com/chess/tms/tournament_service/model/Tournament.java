@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -87,6 +88,10 @@ public class Tournament {
     @Column
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "swiss_bracket_id", referencedColumnName = "id") // Foreign key in "tournament" table
+    private SwissBracket swissBracket;
 
     @ManyToOne
     @JoinColumn(name = "current_round") 

@@ -1,4 +1,4 @@
-package com.chess.tms.match_service.model;
+package com.chess.tms.tournament_service.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -13,7 +13,7 @@ public class SwissStanding {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "bracket_id", nullable = false)
+    @JoinColumn(name = "bracket_id", nullable = false, insertable = false, updatable = false)
     private SwissBracket bracket;
 
     @Column(name = "tournament_player_id", nullable = false)
