@@ -63,6 +63,15 @@ function NavBar({ profilePic }) {
           </>
         )}
 
+        {userRole === 'ADMIN' && (
+          <>
+
+            <Nav.Link as={Link} to="/Users">
+              <Typography variant="navBar" marginLeft={'10px'}>Users</Typography></Nav.Link>
+
+          </>
+        )}
+
 
         <Navbar.Collapse className="justify-content-end">
           <NavDropdown

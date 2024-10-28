@@ -24,6 +24,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
 import Settings from './components/Settings/Settings.jsx';
 import Dashboard from './components/PlayerDashboard/PlayerDashboard.jsx';
+import Users from './components/AdminUserDetails/AdminUserDetails.jsx'; 
 
 function AppContent() {
   const location = useLocation();
@@ -103,6 +104,12 @@ function AppContent() {
           element={<ProtectedRoute>
             <Dashboard />
           </ProtectedRoute>} />
+
+          <Route path="/Users"
+          element={<ProtectedRoute>
+            <Users />
+          </ProtectedRoute>} />
+
 
 
         {/* General Routes */}
