@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Limit;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,7 +18,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 
 import com.chess.tms.player_service.dto.MatchDTO;
@@ -31,11 +29,6 @@ import com.chess.tms.player_service.dto.WinLossUpdateDTO;
 import com.chess.tms.player_service.exception.UserNotFoundException;
 import com.chess.tms.player_service.model.PlayerDetails;
 import com.chess.tms.player_service.repository.PlayerDetailsRepository;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 
 @Service
 public class PlayerService {
@@ -89,6 +82,7 @@ public class PlayerService {
         dto.setTotalLosses(playerDetails.getTotalLosses());
         dto.setTotalWins(playerDetails.getTotalWins());
         dto.setCountry(playerDetails.getCountry());
+        dto.setHighestElo(playerDetails.getHighestElo());
         return dto;
     }
 

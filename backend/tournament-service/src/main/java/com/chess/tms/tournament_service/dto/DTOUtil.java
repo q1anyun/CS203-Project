@@ -27,6 +27,7 @@ public class DTOUtil {
         dto.setCurrentRound(tournament.getCurrentRound());
         dto.setCreatorId(tournament.getCreatorId());
         dto.setTournamentType(tournament.getTournamentType());
+        dto.setSwissBracket(tournament.getSwissBracket());
 
         return dto;
     }

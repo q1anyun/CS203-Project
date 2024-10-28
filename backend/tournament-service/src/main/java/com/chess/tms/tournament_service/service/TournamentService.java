@@ -35,6 +35,7 @@ import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.repository.GameTypeRepository;
 import com.chess.tms.tournament_service.repository.RoundTypeRepository;
+import com.chess.tms.tournament_service.repository.SwissBracketRepository;
 import com.chess.tms.tournament_service.repository.TournamentPlayerRepository;
 import com.chess.tms.tournament_service.repository.TournamentRepository;
 import com.chess.tms.tournament_service.repository.TournamentTypeRepository;
@@ -48,11 +49,13 @@ import com.chess.tms.tournament_service.exception.MatchServiceException;
 import com.chess.tms.tournament_service.exception.MaxPlayersReachedException;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
 import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
+import com.chess.tms.tournament_service.exception.SwissBracketNotFoundException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
 import com.chess.tms.tournament_service.exception.TournamentTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.UserDoesNotExistException;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
+import com.chess.tms.tournament_service.model.SwissBracket;
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
 import com.chess.tms.tournament_service.model.TournamentType;
@@ -76,6 +79,10 @@ public class TournamentService {
     private TournamentTypeRepository tournamentTypeRepository;
 
     @Autowired
+    private SwissBracketRepository swissBracketRepository;
+
+
+    @Autowired
     private RestTemplate restTemplate;
 
     @Value("${matches.service.url}")
@@ -83,7 +90,6 @@ public class TournamentService {
 
     @Value("${players.service.url}")
     private String playerServiceUrl;
-
     
     @Value("${s3.upload.service.url}")
     private String s3UploadServiceUrl;
@@ -154,9 +160,18 @@ public class TournamentService {
         tournament.setCurrentRound(roundType);
 
         try {
-            restTemplate.postForEntity(
+            // Response entity with the Swiss bracket ID from Match Service after generating the matches
+            ResponseEntity<Long> responseEntity = restTemplate.postForEntity(
                     matchServiceUrl + "/api/matches/swiss/" + tournamentId + "/" + tournament.getTimeControl().getId(),
-                    null, null);
+                    null, Long.class);
+
+            // Set the Swiss bracket ID in the tournament
+            Long swissBracketId = responseEntity.getBody();
+
+            SwissBracket swissBracket = swissBracketRepository.findById(swissBracketId)
+                    .orElseThrow(() -> new SwissBracketNotFoundException("SwissBracket with id " + swissBracketId + " does not exist."));
+
+            tournament.setSwissBracket(swissBracket);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new MatchServiceException("Failed to start tournament due to match service error: "
                     + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
@@ -198,9 +213,7 @@ public class TournamentService {
 
         // If there's a winner, fetch winner details
         if (tournament.getWinnerId() != null) {
-            ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
-                    playerServiceUrl + "/api/player/" + tournament.getWinnerId(), PlayerDetailsDTO.class);
-            PlayerDetailsDTO winner = response.getBody();
+            PlayerDetailsDTO winner = fetchPlayerDetails(tournament.getWinnerId());
             returnDTO.setWinner(winner);
         }
 
@@ -229,11 +242,7 @@ public class TournamentService {
             tournamentDTOs.add(DTOUtil.convertEntryToDTO(tournament));
 
             if (tournament.getWinnerId() != null) {
-                ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
-                        playerServiceUrl + "/api/player/" + tournament.getWinnerId(),
-                        PlayerDetailsDTO.class);
-
-                PlayerDetailsDTO winner = response.getBody();
+                PlayerDetailsDTO winner = fetchPlayerDetails(tournament.getWinnerId());
                 tournamentDTOs.get(tournamentDTOs.size() - 1).setWinner(winner);
             }
         }
@@ -244,11 +253,7 @@ public class TournamentService {
         List<Tournament> tournaments = tournamentRepository.findAll();
         List<TournamentDetailsDTO> tournamentDTOs = new ArrayList<>();
 
-        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
-                playerServiceUrl + "/api/player/" + playerId,
-                PlayerDetailsDTO.class);
-
-        PlayerDetailsDTO currentPlayer = response.getBody();
+        PlayerDetailsDTO currentPlayer = fetchPlayerDetails(playerId);
 
         // Filter out tournaments that are not upcoming, is full, or are in the past
         for (Tournament tournament : tournaments) {
@@ -341,11 +346,7 @@ public class TournamentService {
             throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
         }
 
-        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
-                playerServiceUrl + "/api/player/" + playerId,
-                PlayerDetailsDTO.class);
-
-        PlayerDetailsDTO registeringPlayer = response.getBody();
+        PlayerDetailsDTO registeringPlayer = fetchPlayerDetails(playerId);
 
         if (registeringPlayer == null) {
             throw new UserDoesNotExistException("Player with id " + playerId + " does not exist.");
@@ -535,5 +536,11 @@ public class TournamentService {
         return response.getBody();
     }
 
+    // Helper method to fetch player details from the player service
+    private PlayerDetailsDTO fetchPlayerDetails(Long playerId) {
+        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+                playerServiceUrl + "/api/player/" + playerId, PlayerDetailsDTO.class);
+        return response.getBody();
+    }
     
 }

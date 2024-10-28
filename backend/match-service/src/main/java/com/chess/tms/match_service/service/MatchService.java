@@ -211,7 +211,7 @@ public class MatchService {
      * @param tournamentId the ID of the tournament
      * @param gameTypeId   the ID of the game type
      */
-    public void createSwissMatches(Long tournamentId, Long gameTypeId) {
+    public Long createSwissMatches(Long tournamentId, Long gameTypeId) {
         // Step 1: Fetch all players and initialize standings
         ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
                 tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
@@ -230,7 +230,7 @@ public class MatchService {
         // Initialize each player’s Swiss standing
         for (TournamentPlayerEloDTO player : players) {
             SwissStanding standing = new SwissStanding();
-            standing.setBracketId(bracket.getId());
+            standing.setBracket(bracket);
             standing.setTournamentPlayerId(player.getId());
             standing.setPlayerId(player.getId());
             standing.setWins(0);
@@ -240,6 +240,8 @@ public class MatchService {
 
         // Step 4: Generate matches for the first round
         createRoundMatches(players, tournamentId, gameTypeId, bracket.getCurrentRound());
+        System.out.println("Returning ID: " + bracket.getId());
+        return bracket.getId();
     }
 
     // Create matches between two groups, ensuring no players are left unpaired
