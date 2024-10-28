@@ -126,6 +126,12 @@ public class PlayerController {
         try {
             String filename = "player_" + id; 
             byte[] photoData = playerService.getProfilePicture(filename); // Retrieve the photo data
+            // Check if photoData is null
+            if (photoData == null || photoData.length == 0) {
+                System.out.println("Photo data is null or empty for ID: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if no photo found
+            }
+    
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(determineMediaType(filename)); // Set the correct media type
             return ResponseEntity.ok()
