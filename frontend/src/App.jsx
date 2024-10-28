@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Home from './components/Home/Home';
@@ -15,7 +15,7 @@ import TournamentDetails from './components/TournamentDetails/TournamentDetails'
 import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
 import TournamentLeaderboard from './components/TournamentLeaderboard/TournamentLeaderboard';
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+import {fetchProfilePic} from './components/ProfilePicture/fetchProfilePic.js';
 import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
 import TournamentRegistrationDetails from './components/TournamentRegistrationDetails/TournamentRegistrationDetails.jsx';
 import AuthPage from './components/AuthPage/AuthPage.jsx';
@@ -29,7 +29,16 @@ function AppContent() {
   const location = useLocation();
   const hideNavBarPaths = ['/login', '/signup', '/error', '/verification'];
   // State to store the current profile picture, initialized with the default image
-  const profilePic = useProfilePic();
+  const [profilePic, setProfilePic] = useState(null);
+
+  useEffect(() => {
+      const loadProfilePic = async () => {
+          const imageUrl = await fetchProfilePic();
+          setProfilePic(imageUrl);
+      };
+
+      loadProfilePic();
+  }, []);
 
 
 

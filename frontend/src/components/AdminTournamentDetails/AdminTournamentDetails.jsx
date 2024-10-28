@@ -71,6 +71,8 @@ function AdminTournamentDetails() {
     const [winner, setWinner] = useState('');
     const [open, setOpen] = useState(false);
 
+    
+
     const statusColorMap = {
         LIVE: 'success',
         UPCOMING: 'warning',

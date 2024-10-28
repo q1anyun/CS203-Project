@@ -110,8 +110,8 @@ export default function AdminTournamentView() {
         return true;
     };
 
-    const handleViewDetails = (id) => {
-        navigate(`/admin/tournaments/${id}`);
+    const handleViewDetails = (id, photoUrl) => {
+        navigate(`/admin/tournaments/${id}`, { state: { photoUrl } });
     };
 
     useEffect(() => {

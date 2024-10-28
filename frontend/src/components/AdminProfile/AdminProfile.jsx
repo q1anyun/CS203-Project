@@ -1,8 +1,6 @@
 import React, { useState, useEffect}  from 'react';
 import { styled } from '@mui/material/styles';
 import { Card, CardContent, Typography, Avatar, Box,  Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
-import useProfilePic from '../ProfilePicture/UseProfilePicture';
-import defaultProfilePic from '../../assets/default_user.png'
 import axios from 'axios';
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL; // Base URL for API calls
 
@@ -20,17 +18,11 @@ const VisuallyHiddenInput = styled('input')({
 
 function AdminProfile({ profilePic }) {
 
-  const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
   const [adminDetails, setAdminDetails] = useState([]); 
   profilePic = useProfilePic();
 
 
-  useEffect(() => {
-    if (profilePic) {
-      setLocalProfilePic(profilePic);
-      // Update localProfilePic when profilePic changes
-    }
-  }, [profilePic]);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -76,7 +68,7 @@ function AdminProfile({ profilePic }) {
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
             alt={adminDetails.username}
-            src={localProfilePic}
+            src={profilePic}
           />
 
           <Button

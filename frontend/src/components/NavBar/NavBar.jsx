@@ -7,18 +7,19 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import styles from './NavBar.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import Image from 'react-bootstrap/Image';
-import useProfilePic from '../ProfilePicture/UseProfilePicture';
 import { Typography } from '@mui/material';
 
 function NavBar({ profilePic }) {
   const [userRole, setUserRole] = useState(null);
-  profilePic = useProfilePic();
+
 
 
   useEffect(() => {
     const role = localStorage.getItem('role');
     setUserRole(role);
   }, []);
+
+
 
   return (
 

@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import { Box, Typography, Chip, Button, Divider, Grid} from '@mui/material';
 import { styled } from '@mui/system';
-import defaultbackgroundImage from '../../assets/playerbg.jpg';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
 
 const DetailBox = styled(Box)({
@@ -22,7 +21,7 @@ const statusColorMap = {
 
 
 
-function TournamentDescription({ tournament, handleStart, handleViewRegisteredPlayers}) {
+function TournamentDescription({ tournament}) {
     const [localTournamentPic, setLocalTournamentPic] = useState(null);
 
     useEffect(() => {
@@ -63,18 +62,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
 
             <Typography variant="header1" >{tournament.name}</Typography>
             <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-            <Button
-                variant="contained"
-                color="primary"
-                onClick={handleStart}
-                disabled={tournament.status !== 'UPCOMING'}
-                sx={{ marginLeft: '10px' }}
-            >
-                Start Tournament
-            </Button>
-            <Button onClick={handleViewRegisteredPlayers}>
-                                click to view registered players
-                            </Button>
+           
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
 
 
