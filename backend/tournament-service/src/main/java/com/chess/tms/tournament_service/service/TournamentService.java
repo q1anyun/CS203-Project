@@ -559,8 +559,7 @@ public class TournamentService {
 
         Optional<SwissBracket> bracket = swissBracketRepository.findByTournament(tournament);
 
-        dto.setSwissBracketId(bracket.get().getId());
-
+        bracket.ifPresent(b -> dto.setSwissBracketId(b.getId()));
         return dto;
     }
     
