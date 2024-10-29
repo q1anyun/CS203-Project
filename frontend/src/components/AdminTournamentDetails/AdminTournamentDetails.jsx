@@ -15,12 +15,13 @@ const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 function AdminTournamentDetails() {
     const { id } = useParams();
     const [tournament, setTournament] = useState({});
+    const [matches, setMatches] = useState([]);
     const [rounds, setRounds] = useState([]);
     const [selectedMatchId, setSelectedMatchId] = useState(null);
     const [selectedTeams, setSelectedTeams] = useState([]); // Store selected match teams
     const [winner, setWinner] = useState('');
     const [open, setOpen] = useState(false);
-    const [tabValue, setTabValue] = useState('Knockout'); // Default tab value
+
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
@@ -37,21 +38,23 @@ function AdminTournamentDetails() {
                 const matchesResponse = await axios.get(`${baseURL2}/tournament/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                console.log(matchesResponse.data); 
+                console.log(matchesResponse.data);
 
                 // Format rounds only if the tournament type is 'KNOCKOUT'
                 if (response.data.type === 'KNOCKOUT') {
                     const formattedRounds = formatRounds(matchesResponse.data);
                     setRounds(formattedRounds);
+                } else {
+                    setMatches(matchesResponse.data);
                 }
-                
-                } catch (error) {
-                    console.error('Error fetching tournament details:', error);
-                }
-            };
 
-            fetchTournamentDetails();
-        }, [id]);
+            } catch (error) {
+                console.error('Error fetching tournament details:', error);
+            }
+        };
+
+        fetchTournamentDetails();
+    }, [id]);
 
     const formatRounds = (matches) => {
         const groupedMatches = matches.reduce((acc, match) => {
@@ -127,9 +130,7 @@ function AdminTournamentDetails() {
         navigate(`${window.location.pathname}/registeredplayers`);
     };
 
-    const handleChangeTab = (event, newValue) => {
-        setTabValue(newValue);
-    };
+
 
     return (
         <Box sx={{ padding: 2 }}>
@@ -141,16 +142,10 @@ function AdminTournamentDetails() {
             </Button>
             <Divider sx={{ width: '80%', margin: '20px 0' }} />
 
-            {/* Tabs for Knockout and Swiss */}
-            <Tabs value={tabValue} onChange={handleChangeTab} textColor="primary" indicatorColor="primary">
-                <Tab label="Swiss" value="Swiss" />
-                <Tab label="Knockout" value="Knockout" />
-
-            </Tabs>
-
-
             {/* Conditional Rendering Based on Tournament Type */}
-            {tournament.type === 'KNOCKOUT' && (
+            {tournament?.tournamentType?.id === 1 && (
+                <>
+        {console.log("Rendering Knockout bracket")}
                 <Knockout
                     rounds={rounds}
                     handleEditWinner={handleEditWinner}
@@ -161,12 +156,22 @@ function AdminTournamentDetails() {
                     handleCloseEdit={handleCloseEdit}
                     handleSaveWinner={handleSaveWinner}
                 />
+                    </>
             )}
 
-            {tournament.type === 'SWISS' && (
-                <SwissBracket
-                    rounds={rounds}
-                />
+            {tournament?.tournamentType?.id === 2 && (
+                  <>
+        {console.log("Rendering Swiss bracket")}
+                <SwissBracket 
+                matches={matches}
+                handleEditWinner={handleEditWinner}
+                winner={winner}
+                selectedTeams={selectedTeams}
+                setWinner={setWinner}
+                open={open}
+                handleCloseEdit={handleCloseEdit}
+                handleSaveWinner={handleSaveWinner} />
+                </>
             )}
         </Box>
     );
