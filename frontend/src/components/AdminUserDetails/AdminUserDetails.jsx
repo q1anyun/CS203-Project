@@ -85,7 +85,7 @@ function AdminUserDetails() {
 
     // Calculate total pages
     const totalPages = Math.ceil(filteredParticipants.length / rowsPerPage);
-    
+
     // Paginate participants
     const paginatedParticipants = filteredParticipants.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -125,10 +125,10 @@ function AdminUserDetails() {
                 </Table>
             </TableContainer>
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
-                <Button 
-                    onClick={() => handleChangePage(page - 1)} 
-                    disabled={page === 0} 
-                    variant="contained" 
+                <Button
+                    onClick={() => handleChangePage(page - 1)}
+                    disabled={page === 0}
+                    variant="contained"
                     sx={{ mr: 2 }}
                 >
                     Previous
@@ -136,10 +136,10 @@ function AdminUserDetails() {
                 <Typography variant="body1">
                     Page {page + 1} of {totalPages}
                 </Typography>
-                <Button 
-                    onClick={() => handleChangePage(page + 1)} 
-                    disabled={page >= totalPages - 1} 
-                    variant="contained" 
+                <Button
+                    onClick={() => handleChangePage(page + 1)}
+                    disabled={page >= totalPages - 1}
+                    variant="contained"
                     sx={{ ml: 2 }}
                 >
                     Next
