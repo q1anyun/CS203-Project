@@ -50,8 +50,8 @@ class TournamentPlayerControllerTest {
     @Test
     void getTournamentPlayersByTournamentId_ValidTournamentId_ReturnPlayerDetails() throws Exception {
         List<PlayerDetailsDTO> playerDetails = Arrays.asList(
-                new PlayerDetailsDTO(1L, 100L, 1500, "John", "Doe", "https://example.com/image1.jpg", 10, 2, 12, 1600, 1400, "USA"),
-                new PlayerDetailsDTO(2L, 101L, 1400, "Jane", "Doe", "https://example.com/image2.jpg", 8, 3, 11, 1450, 1350, "Canada")
+                new PlayerDetailsDTO(1L, 100L, 1500, "John", "Doe", "https://example.com/image1.jpg", 10, 2, 12, 1600, "USA"),
+                new PlayerDetailsDTO(2L, 101L, 1400, "Jane", "Doe", "https://example.com/image2.jpg", 8, 3, 11, 1450, "Canada")
         );
         
         when(tournamentService.getPlayersByTournament(1L)).thenReturn(playerDetails);
