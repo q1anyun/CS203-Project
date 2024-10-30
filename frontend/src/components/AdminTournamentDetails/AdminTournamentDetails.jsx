@@ -106,6 +106,11 @@ function AdminTournamentDetails() {
     };
 
     const handleStart = async () => {
+        if (tournament.tournamentType.id === 2 && tournament.currentPlayers !== tournament.maxPlayers) {
+            alert("Swiss tournament must be full before it can be started.");
+            return;
+        }
+        
         if (tournament.currentPlayers < 2) {
             alert("Not enough players to start the tournament. Minimum required: 2");
             return;
