@@ -318,7 +318,11 @@ function PlayerProfileView({ profilePic }) {
                           border: '1px solid #ddd',
                           borderRadius: 2,
                         }}
-                        onClick={() => navigate(`/admin/tournaments/${tournament.id}`)} // Navigate to tournament details
+                        onClick={() => {
+                          const userRole = localStorage.getItem('role');
+                          const basePath = userRole === 'ADMIN' ? '/admin' : '/player';
+                          navigate(`${basePath}/tournaments/${tournament.id}`);
+                        }}
                       >
                         <CardContent>
                           <Typography variant="header2">{tournament.name}</Typography>

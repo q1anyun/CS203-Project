@@ -1,4 +1,4 @@
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2 } from '@mui/material';
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 
@@ -11,6 +11,7 @@ function EditTournamentDialog({
     errors,
     setErrors,
     eloError,
+    maxPlayerError,
     createFormError,
     setCreateFormError,
     validateForm,
@@ -42,7 +43,6 @@ function EditTournamentDialog({
                 );
 
                 setTournaments(updatedTournaments);
-                console.log(tournaments);
 
                 setUpdateTournament({
                     name: '',
@@ -51,12 +51,15 @@ function EditTournamentDialog({
                     timeControl: '',
                     minElo: '',
                     maxElo: '',
-                    maxPlayers: ''
+                    maxPlayers: '',
+                    description: '',
+                    tournamentType: '',
+                    format: ''
                 });
 
-                setEditDialogOpen(false);
+                // setEditDialogOpen(false);
 
-                window.location.reload();
+                // window.location.reload();
             } catch (error) {
                 if (error.response) {
                     console.error('Error data:', error.response.data);
@@ -202,6 +205,9 @@ function EditTournamentDialog({
                                     </MenuItem>
                                 ))}
                             </Select>
+                            {(!!maxPlayerError && updateTournament.tournamentType === "2" && updateTournament.maxPlayers < 8) && (
+                                <FormHelperText error={true}>Max Players must be greater than 8 for swiss tournaments.</FormHelperText>
+                            )}
                         </FormControl>
 
                     </Grid2>
