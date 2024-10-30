@@ -1,73 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import { Typography, Box, Button, IconButton, Dialog, Select, MenuItem, DialogTitle, DialogContent, DialogActions, Chip, Divider } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import TournamentDescription from './TournamentDescription';
 import { useNavigate } from 'react-router-dom';
+import Knockout from './Knockout';
+import SwissBracket from './SwissBracket';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
-const CustomSeed = ({ seed }) => {
-    const winnerId = seed.winnerId;
-
-    // Check if both player1Id and player2Id are null and winnerId exists (auto-advance case)
-    const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
-
-    return (
-        <Seed style={{ fontSize: 20, justifyContent: 'center', alignItems: 'center', color:'white'}}>
-            <SeedItem>
-                <div>
-                    {isAutoAdvance ? (
-                        <SeedTeam style={{ backgroundColor: 'green' }}>
-
-                            <Typography variant="header3" component="span" style={{ color: 'white' }}>
-                                Auto Advance PLAYER {winnerId}
-                            </Typography>
-                        </SeedTeam>
-                    ) : (
-                        <>
-                            <SeedTeam
-                                style={{
-
-                                    backgroundColor: winnerId == seed.teams[0]?.id ? 'green' : 'white'
-                                }}
-                            >
-
-                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId == seed.teams[0]?.id ? 'white' : 'black' }}>
-                                    {seed.teams[0]?.name || 'Pending'}
-                                </Typography>
-                            </SeedTeam>
-                            <SeedTeam
-                                style={{
-
-                                    backgroundColor: winnerId == seed.teams[1]?.id ? 'green' : 'white'
-                                }}
-                            >
-                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId == seed.teams[1]?.id ? 'white' : 'black' }}>
-                                    {seed.teams[1]?.name || 'Pending'}
-                                </Typography>
-                            </SeedTeam>
-
-                           
-                        </>
-                    )}
-                </div>
-            </SeedItem>
-        </Seed>
-    );
-};
 
 function TournamentDetails() {
     const { id } = useParams();
     const [tournament, setTournament] = useState({});
     const [rounds, setRounds] = useState([]);
     const [selectedTeams, setSelectedTeams] = useState([]); // Store selected match teams
+    const[matches, setMatches] = useState([]); 
 
 
-    
+
 
     const statusColorMap = {
         LIVE: 'success',
@@ -92,8 +44,13 @@ function TournamentDetails() {
                 });
                 console.log(matchesResponse.data);
 
-                const formattedRounds = formatRounds(matchesResponse.data);
-                setRounds(formattedRounds);
+                // Format rounds only if the tournament type is 'KNOCKOUT'
+                if (response.data.tournamentType.typeName === 'Knockout') {
+                    const formattedRounds = formatRounds(matchesResponse.data);
+                    setRounds(formattedRounds);
+                } else {
+                    setMatches(matchesResponse.data);
+                }
 
             } catch (error) {
                 console.error('Error fetching tournament details:', error);
@@ -142,43 +99,42 @@ function TournamentDetails() {
         return formattedRounds;
     };
 
-   
+
 
 
     return (
         <Box sx={{ padding: 2 }}>
-          
+
             <TournamentDescription tournament={tournament} />
-   
+
             {/* Divider added here */}
             <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
-            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/player/tournaments/leaderboard/${tournament.id}`)}>
-                       <Typography variant="body4" >Check Leaderboard</Typography>
-                </Button>
 
-                       
-                <Divider sx={{ width: '80%', margin: '20px 0' }} />
 
-                {/* Tournament Bracket */}
-                <Bracket
+            <Divider sx={{ width: '80%', margin: '10px 0' }} />
+
+            {/* Conditional Rendering Based on Tournament Type */}
+            {tournament?.tournamentType?.id === 1 ? (
+
+
+                <Knockout
                     rounds={rounds}
-                    renderSeedComponent={(props) => (
-                        <CustomSeed
-                            {...props}
-                        />
-                    )}
-                    roundTitleComponent={(title) => (
-                        <Typography variant="header3" align="center">
-                            {title}
-                        </Typography>
-                    )}
                 />
 
-              
-            </Box>
-            
-        
+
+            ) : tournament?.tournamentType?.id === 2 && tournament?.swissBracketId ? (
+                <SwissBracket
+                    matches={matches}
+                    SwissBracketID={tournament.swissBracketId}
+                />
+            ) : (
+                <Typography variant='playerProfile2'>No matches to display — Tournament has not started.</Typography>
+            )}
+
+        </Box>
+
+
     );
 
 }
-    export default TournamentDetails;
+export default TournamentDetails;

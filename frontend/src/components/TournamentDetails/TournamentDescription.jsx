@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { Box, Typography, Chip, Button, Divider, Grid} from '@mui/material';
 import { styled } from '@mui/system';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
+import { useNavigate } from 'react-router-dom';
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff', // White background for each detail box
@@ -23,6 +24,7 @@ const statusColorMap = {
 
 function TournamentDescription({ tournament}) {
     const [localTournamentPic, setLocalTournamentPic] = useState(null);
+    const navigate = useNavigate(); 
 
     useEffect(() => {
         const getTournamentImage = async () => {
@@ -111,6 +113,12 @@ function TournamentDescription({ tournament}) {
                         <Typography variant="body2">{tournament.maxElo}</Typography>
                     </DetailBox>
                 </Grid>
+                {/* <Button variant='contained' onClick={handleViewRegisteredPlayers} color='outlined'>
+            <Typography variant="body4">Click to view registered players</Typography>
+            </Button> */}
+            <Button variant="contained" color="outlined" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
+                <Typography variant="body4">Click to view Leaderboard</Typography>
+            </Button>
             </Grid>
 
         </Box>
