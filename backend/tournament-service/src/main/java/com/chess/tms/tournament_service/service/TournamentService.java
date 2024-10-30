@@ -327,6 +327,15 @@ public class TournamentService {
             tournament.setLocationLongitude(dto.getLocationLongitude());
         }
 
+        // Check if tournament type exists
+        if (dto.getTournamentType() != null) {
+            Optional<TournamentType> tournamentType = tournamentTypeRepository.findById(dto.getTournamentType());
+            if (tournamentType.isEmpty()) {
+                throw new TournamentTypeNotFoundException("TournamentType with id " + dto.getTournamentType() + " does not exist.");
+            }
+            tournament.setTournamentId(dto.getTournamentType());
+        }
+        
         // Save the updated tournament
         tournamentRepository.save(tournament);
     }
