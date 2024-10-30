@@ -26,10 +26,8 @@ export default function AdminTournamentView() {
     const [errors, setErrors] = useState({});
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
+    const [maxPlayerError, setMaxPlayerError] = useState('');
     const token = localStorage.getItem('token');
-
-
-
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -84,6 +82,9 @@ export default function AdminTournamentView() {
             minElo: '',
             maxElo: '',
             maxPlayers: '',
+            tournamentType: '',
+            description: '',
+            format: ''
         });
     };
 
@@ -98,10 +99,15 @@ export default function AdminTournamentView() {
             return false;
         }
 
-        const { minElo, maxElo } = tournament;
+        const { minElo, maxElo, tournamentType, maxPlayers } = tournament;
         if (maxElo < minElo) {
             setEloError('Max ELO must be greater than Min ELO.');
             setCreateFormError('');
+            return false;
+        }
+
+        if (tournamentType === '2' && maxPlayers < 8) {
+            setMaxPlayerError('For Swiss tournaments, Max Players must be more than 8.');
             return false;
         }
 
@@ -110,8 +116,8 @@ export default function AdminTournamentView() {
         return true;
     };
 
-    const handleViewDetails = (id) => {
-        navigate(`/admin/tournaments/${id}`);
+    const handleViewDetails = (id, photoUrl) => {
+        navigate(`/admin/tournaments/${id}`, { state: { photoUrl } });
     };
 
     useEffect(() => {
@@ -140,10 +146,6 @@ export default function AdminTournamentView() {
         console.log("Upload button clicked for tournament ID:", tournamentId);
         // You can extend this to actually show a dialog or direct file input
     };
-
-
-
-
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -209,6 +211,7 @@ export default function AdminTournamentView() {
                 validateForm={validateForm}
                 errors={errors}
                 eloError={eloError}
+                maxPlayerError={maxPlayerError}
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 setTournaments={setTournaments}
@@ -225,6 +228,7 @@ export default function AdminTournamentView() {
                 errors={errors}
                 setErrors={setErrors}
                 eloError={eloError}
+                maxPlayerError={maxPlayerError}
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 validateForm={validateForm}

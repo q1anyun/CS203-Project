@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2 } from '@mui/material'; // Import necessary MUI components
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material'; // Import necessary MUI components
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 
@@ -14,6 +14,7 @@ function CreateTournamentDialog({
     validateForm,
     errors,
     eloError,
+    maxPlayerError,
     createFormError,
     setCreateFormError,
     setTournaments,
@@ -178,6 +179,9 @@ function CreateTournamentDialog({
                                     </MenuItem>
                                 ))}
                             </Select>
+                            {(!!maxPlayerError && newTournament.tournamentType === "2" && newTournament.maxPlayers < 8) && (
+                                <FormHelperText error={true}>Max Players must be greater than 8 for swiss tournaments.</FormHelperText>
+                            )}
                         </FormControl>
                     </Grid2>
                     <Grid2 size={12}>

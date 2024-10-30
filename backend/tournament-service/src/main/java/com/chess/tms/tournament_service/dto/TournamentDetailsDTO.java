@@ -59,5 +59,5 @@ public class TournamentDetailsDTO {
 
     private TournamentType tournamentType;
 
-    private SwissBracket swissBracket;
+    private Long swissBracketId;
 }

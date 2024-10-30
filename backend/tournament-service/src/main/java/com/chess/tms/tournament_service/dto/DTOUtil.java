@@ -4,33 +4,6 @@ import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.model.Tournament;
 
 public class DTOUtil {
-        //helper functions
-    public static TournamentDetailsDTO convertEntryToDTO(Tournament tournament) {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(tournament.getTournamentId());
-        dto.setName(tournament.getName());
-        dto.setDescription(tournament.getDescription());
-        dto.setPhoto(tournament.getPhoto());
-        dto.setFormat(tournament.getFormat());
-        dto.setCountry(tournament.getCountry());
-        dto.setLocationAddress(tournament.getLocationAddress());
-        dto.setLocationLatitude(tournament.getLocationLatitude());
-        dto.setLocationLongitude(tournament.getLocationLongitude());
-        dto.setStartDate(tournament.getStartDate());
-        dto.setEndDate(tournament.getEndDate());
-        dto.setMinElo(tournament.getMinElo());
-        dto.setMaxElo(tournament.getMaxElo());
-        dto.setCurrentPlayers(tournament.getCurrentPlayers());
-        dto.setMaxPlayers(tournament.getMaxPlayers());
-        dto.setStatus(tournament.getStatus());
-        dto.setTimeControl(tournament.getTimeControl());
-        dto.setCurrentRound(tournament.getCurrentRound());
-        dto.setCreatorId(tournament.getCreatorId());
-        dto.setTournamentType(tournament.getTournamentType());
-        dto.setSwissBracket(tournament.getSwissBracket());
-
-        return dto;
-    }
 
     public static Tournament convertDTOToTournament(TournamentRegistrationDTO dto, long creatorId){
         Tournament tournament = new Tournament();

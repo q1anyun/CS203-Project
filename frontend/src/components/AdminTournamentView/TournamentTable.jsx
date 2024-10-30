@@ -23,7 +23,7 @@ const statusColorMap = {
 
 function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleUploadClick}) {
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 7;
+    const itemsPerPage = 9;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');

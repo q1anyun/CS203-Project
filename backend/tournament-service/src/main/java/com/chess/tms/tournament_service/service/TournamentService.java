@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 
 import java.util.Comparator;
-import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -164,14 +163,6 @@ public class TournamentService {
             ResponseEntity<Long> responseEntity = restTemplate.postForEntity(
                     matchServiceUrl + "/api/matches/swiss/" + tournamentId + "/" + tournament.getTimeControl().getId(),
                     null, Long.class);
-
-            // Set the Swiss bracket ID in the tournament
-            Long swissBracketId = responseEntity.getBody();
-
-            SwissBracket swissBracket = swissBracketRepository.findById(swissBracketId)
-                    .orElseThrow(() -> new SwissBracketNotFoundException("SwissBracket with id " + swissBracketId + " does not exist."));
-
-            tournament.setSwissBracket(swissBracket);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new MatchServiceException("Failed to start tournament due to match service error: "
                     + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
@@ -209,7 +200,7 @@ public class TournamentService {
     // Get detailed information about a tournament, including the winner (if any)
     public TournamentDetailsDTO getTournamentDetailsById(long id) {
         Tournament tournament = findTournamentById(id);
-        TournamentDetailsDTO returnDTO = DTOUtil.convertEntryToDTO(tournament);
+        TournamentDetailsDTO returnDTO = convertEntryToDTO(tournament);
 
         // If there's a winner, fetch winner details
         if (tournament.getWinnerId() != null) {
@@ -239,7 +230,7 @@ public class TournamentService {
         List<TournamentDetailsDTO> tournamentDTOs = new ArrayList<>();
 
         for (Tournament tournament : tournaments) {
-            tournamentDTOs.add(DTOUtil.convertEntryToDTO(tournament));
+            tournamentDTOs.add(convertEntryToDTO(tournament));
 
             if (tournament.getWinnerId() != null) {
                 PlayerDetailsDTO winner = fetchPlayerDetails(tournament.getWinnerId());
@@ -262,7 +253,7 @@ public class TournamentService {
                     && tournament.getStatus() == Status.UPCOMING
                     && tournament.getCurrentPlayers() < tournament.getMaxPlayers()
                     && tournament.getStartDate().isAfter(LocalDate.now())) {
-                tournamentDTOs.add(DTOUtil.convertEntryToDTO(tournament));
+                tournamentDTOs.add(convertEntryToDTO(tournament));
             }
         }
 
@@ -336,6 +327,15 @@ public class TournamentService {
             tournament.setLocationLongitude(dto.getLocationLongitude());
         }
 
+        // Check if tournament type exists
+        if (dto.getTournamentType() != null) {
+            Optional<TournamentType> tournamentType = tournamentTypeRepository.findById(dto.getTournamentType());
+            if (tournamentType.isEmpty()) {
+                throw new TournamentTypeNotFoundException("TournamentType with id " + dto.getTournamentType() + " does not exist.");
+            }
+            tournament.setTournamentId(dto.getTournamentType());
+        }
+        
         // Save the updated tournament
         tournamentRepository.save(tournament);
     }
@@ -471,7 +471,7 @@ public class TournamentService {
         List<TournamentDetailsDTO> tournamentDetails = new ArrayList<>();
 
         for (TournamentPlayer tp : tournamentPlayers) {
-            tournamentDetails.add(DTOUtil.convertEntryToDTO(tp.getTournament()));
+            tournamentDetails.add(convertEntryToDTO(tp.getTournament()));
         }
 
         return tournamentDetails;
@@ -485,7 +485,7 @@ public class TournamentService {
         for (TournamentPlayer tp : tournamentPlayers) {
             Tournament tournament = tp.getTournament();
             if (tournament.getStatus() == Status.LIVE) {
-                liveTournaments.add(DTOUtil.convertEntryToDTO(tournament));
+                liveTournaments.add(convertEntryToDTO(tournament));
             }
         }
 
@@ -541,6 +541,35 @@ public class TournamentService {
         ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
                 playerServiceUrl + "/api/player/" + playerId, PlayerDetailsDTO.class);
         return response.getBody();
+    }
+
+    public TournamentDetailsDTO convertEntryToDTO(Tournament tournament) {
+        TournamentDetailsDTO dto = new TournamentDetailsDTO();
+        dto.setId(tournament.getTournamentId());
+        dto.setName(tournament.getName());
+        dto.setDescription(tournament.getDescription());
+        dto.setPhoto(tournament.getPhoto());
+        dto.setFormat(tournament.getFormat());
+        dto.setCountry(tournament.getCountry());
+        dto.setLocationAddress(tournament.getLocationAddress());
+        dto.setLocationLatitude(tournament.getLocationLatitude());
+        dto.setLocationLongitude(tournament.getLocationLongitude());
+        dto.setStartDate(tournament.getStartDate());
+        dto.setEndDate(tournament.getEndDate());
+        dto.setMinElo(tournament.getMinElo());
+        dto.setMaxElo(tournament.getMaxElo());
+        dto.setCurrentPlayers(tournament.getCurrentPlayers());
+        dto.setMaxPlayers(tournament.getMaxPlayers());
+        dto.setStatus(tournament.getStatus());
+        dto.setTimeControl(tournament.getTimeControl());
+        dto.setCurrentRound(tournament.getCurrentRound());
+        dto.setCreatorId(tournament.getCreatorId());
+        dto.setTournamentType(tournament.getTournamentType());
+
+        Optional<SwissBracket> bracket = swissBracketRepository.findByTournament(tournament);
+
+        bracket.ifPresent(b -> dto.setSwissBracketId(b.getId()));
+        return dto;
     }
     
 }

@@ -32,4 +32,6 @@ public class TournamentUpdateRequestDTO {
     private Double locationLatitude;
 
     private Double locationLongitude; 
+
+    private Long tournamentType;
 }

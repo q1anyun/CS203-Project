@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
-import { useNavigate , useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import countryList from 'react-select-country-list'
-import useProfilePic from '../ProfilePicture/UseProfilePicture';
-import defaultProfilePic from '../../assets/default_user.png'
+// import countryList from 'react-select-country-list'
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -15,17 +13,15 @@ const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 function PlayerProfileView({ profilePic }) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
-  const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [uData, setUData] = useState([]);
   const [xLabels, setXLabels] = useState([]);
   const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
-  const { id } = useParams(); 
+  const { id } = useParams();
 
   const navigate = useNavigate();
-  profilePic = useProfilePic();
 
   const handleChange = (event, newValue) => setValue(newValue);
 
@@ -106,7 +102,7 @@ function PlayerProfileView({ profilePic }) {
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
             alt={playerDetails.firstName}
-            src={localProfilePic}
+            src={profilePic}
           />
 
           <CardContent>
@@ -170,7 +166,7 @@ function PlayerProfileView({ profilePic }) {
                   sx={{
 
                     padding: '12px 24px',
-                    marginX: 'auto', 
+                    marginX: 'auto',
 
                   }}
                 />
@@ -185,7 +181,7 @@ function PlayerProfileView({ profilePic }) {
                   sx={{
 
                     padding: '12px 24px',
-                    marginX: 'auto', 
+                    marginX: 'auto',
 
                   }}
                 />
@@ -322,7 +318,11 @@ function PlayerProfileView({ profilePic }) {
                           border: '1px solid #ddd',
                           borderRadius: 2,
                         }}
-                        onClick={() => navigate(`/admin/tournaments/${tournament.id}`)} // Navigate to tournament details
+                        onClick={() => {
+                          const userRole = localStorage.getItem('role');
+                          const basePath = userRole === 'ADMIN' ? '/admin' : '/player';
+                          navigate(`${basePath}/tournaments/${tournament.id}`);
+                        }}
                       >
                         <CardContent>
                           <Typography variant="header2">{tournament.name}</Typography>

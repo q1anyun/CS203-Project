@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { PieChart, LineChart } from '@mui/x-charts';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import countryList from 'react-select-country-list'
-import useProfilePic from '../ProfilePicture/UseProfilePicture';
 import defaultProfilePic from '../../assets/default_user.png'
 import EditProfileDialog from './EditProfileDialog';
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +31,6 @@ function PlayerProfile({ profilePic }) {
 
   const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(defaultProfilePic);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState(''); // Declare error state
@@ -44,15 +40,6 @@ function PlayerProfile({ profilePic }) {
 
   const options = useMemo(() => countryList().getData(), []);
 
-  profilePic = useProfilePic();
-
-
-  useEffect(() => {
-    if (profilePic) {
-      setLocalProfilePic(profilePic);
-      // Update localProfilePic when profilePic changes
-    }
-  }, [profilePic]);
 
   const handleChange = (event, newValue) => setValue(newValue);
   const handleOpenEdit = () => setOpenEdit(true);
@@ -177,7 +164,7 @@ function PlayerProfile({ profilePic }) {
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
             alt={playerDetails.firstName}
-            src={localProfilePic}
+            src={profilePic}
           />
 
           <Button
@@ -222,6 +209,7 @@ function PlayerProfile({ profilePic }) {
         handleFileAndImageUpload={handleFileAndImageUpload}
         handleSave={handleSave}
         options={options}
+        profilePic={profilePic}
       />
 
 

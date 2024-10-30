@@ -137,18 +137,30 @@ public class TournamentController {
     }
 
     @GetMapping("/getTournamentImage/{tournamentId}")
-    public ResponseEntity<InputStreamResource> getTournamentImage(@PathVariable("tournamentId") long tournamentId) {
+    public ResponseEntity<InputStreamResource> getTournamentImage(@PathVariable("tournamentId") String tournamentIdString) {
+        System.out.println("Received ID: " + tournamentIdString); // Log the received ID
         try {
-            String filename = "tournament_" + tournamentId;// Assuming the filename is constructed like this
+            long tournamentId = Long.parseLong(tournamentIdString);
+            String filename = "tournament_" + tournamentId; // Construct the filename
             byte[] photoData = tournamentService.getTournamentImage(filename); // Fetch the photo data
+    
+            // Check if photoData is null
+            if (photoData == null || photoData.length == 0) {
+                System.out.println("Photo data is null or empty for ID: " + tournamentId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if no photo found
+            }
+    
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(determineMediaType(filename)); // Set the correct media type
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(new InputStreamResource(new ByteArrayInputStream(photoData))); // Return as
-                                                                                         // InputStreamResource
+                    .body(new InputStreamResource(new ByteArrayInputStream(photoData))); // Return as InputStreamResource
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if photo not found
+            System.out.println("IOException occurred: " + e.getMessage()); // Log the exception message
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Return 500 on IO error
+        } catch (Exception e) {
+            System.out.println("Unexpected error: " + e.getMessage()); // Log unexpected errors
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Return 500 for other exceptions
         }
     }
 

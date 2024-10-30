@@ -16,7 +16,7 @@ public class SwissBracket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(mappedBy = "swissBracket")
+    @OneToOne
     private Tournament tournament;
 
     @Column(name = "number_of_rounds", nullable = false)
