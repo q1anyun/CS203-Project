@@ -41,7 +41,7 @@ function AdminTournamentDetails() {
                 console.log(matchesResponse.data);
 
                 // Format rounds only if the tournament type is 'KNOCKOUT'
-                if (response.data.type === 'KNOCKOUT') {
+                if (response.data.tournamentType.typeName === 'Knockout') {
                     const formattedRounds = formatRounds(matchesResponse.data);
                     setRounds(formattedRounds);
                 } else {
@@ -136,16 +136,14 @@ function AdminTournamentDetails() {
         <Box sx={{ padding: 2 }}>
             <TournamentDescription tournament={tournament} handleStart={handleStart} handleViewRegisteredPlayers={handleViewRegisteredPlayers} />
 
-            <Typography variant="header2" marginLeft={'20px'}>Tournament Bracket</Typography>
-            <Button variant="contained" color="primary" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
-                <Typography variant="body4">Check Leaderboard</Typography>
-            </Button>
-            <Divider sx={{ width: '80%', margin: '20px 0' }} />
+            <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
+
+            <Divider sx={{ width: '80%', margin: '10px 0' }} />
 
             {/* Conditional Rendering Based on Tournament Type */}
-            {tournament?.tournamentType?.id === 1 && (
-                <>
-        {console.log("Rendering Knockout bracket")}
+            {tournament?.tournamentType?.id === 1 ? (
+
+
                 <Knockout
                     rounds={rounds}
                     handleEditWinner={handleEditWinner}
@@ -156,22 +154,15 @@ function AdminTournamentDetails() {
                     handleCloseEdit={handleCloseEdit}
                     handleSaveWinner={handleSaveWinner}
                 />
-                    </>
-            )}
 
-            {tournament?.tournamentType?.id === 2 && (
-                  <>
-        {console.log("Rendering Swiss bracket")}
-                <SwissBracket 
-                matches={matches}
-                handleEditWinner={handleEditWinner}
-                winner={winner}
-                selectedTeams={selectedTeams}
-                setWinner={setWinner}
-                open={open}
-                handleCloseEdit={handleCloseEdit}
-                handleSaveWinner={handleSaveWinner} />
-                </>
+
+            ) : tournament?.tournamentType?.id === 2 && tournament?.swissBracketId ? (
+                <SwissBracket
+                    matches={matches}
+                    SwissBracketID={tournament.swissBracketId}
+                />
+            ) : (
+                <Typography variant='playerProfile2'>No matches to display — Tournament has not started.</Typography>
             )}
         </Box>
     );
