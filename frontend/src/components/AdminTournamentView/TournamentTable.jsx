@@ -173,6 +173,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         <IconButton
                                             onClick={() => handleEditClick(tournament.id)}
                                             sx={{ color: 'primary.main', mr: 4 }}
+                                            disabled={tournament.status === 'LIVE' || tournament.status === 'COMPLETED'}
                                         >
                                             <EditIcon />
                                         </IconButton>
