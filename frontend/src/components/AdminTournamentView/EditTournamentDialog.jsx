@@ -57,9 +57,9 @@ function EditTournamentDialog({
                     format: ''
                 });
 
-                // setEditDialogOpen(false);
+                setEditDialogOpen(false);
 
-                // window.location.reload();
+                window.location.reload();
             } catch (error) {
                 if (error.response) {
                     console.error('Error data:', error.response.data);
@@ -81,14 +81,6 @@ function EditTournamentDialog({
         setUpdateTournament(prevState => ({
             ...prevState,
             [name]: value
-        }));
-    };
-    const handleEditDateChange = (name, newValue) => {
-        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
-        const localISOString = localDate ? localDate.toISOString() : '';
-        setUpdateTournament((prevState) => ({
-            ...prevState,
-            [name]: localISOString,
         }));
     };
     return (
