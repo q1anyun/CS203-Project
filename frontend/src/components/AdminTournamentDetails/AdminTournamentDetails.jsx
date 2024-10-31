@@ -132,10 +132,8 @@ function AdminTournamentDetails() {
     };
 
     const handleViewRegisteredPlayers = () => {
-        navigate(`${window.location.pathname}/registeredplayers`);
+        navigate(`${window.location.pathname}/registeredplayers`, { state: { tournament } });
     };
-
-
 
     return (
         <Box sx={{ padding: 2 }}>
