@@ -105,12 +105,12 @@ function TournamentRegistrationDetails() {
                             </Box>
                             <PersonRemoveIcon
                                 color="primary"
-                                sx={{ 
-                                    cursor: (tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED') ? 'not-allowed' : 'pointer' 
+                                sx={{
+                                    cursor: (tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED') ? 'not-allowed' : 'pointer'
                                 }}
                                 onClick={tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED'
-                                    ? null 
-                                    : () => handleOpenDialog(participant) 
+                                    ? null
+                                    : () => handleOpenDialog(participant)
                                 }
                             />
                         </DetailBox>
