@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Typography, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
@@ -27,6 +27,9 @@ export default function AdminTournamentView() {
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
     const [maxPlayerError, setMaxPlayerError] = useState('');
+    const [tournamentId, setTournamentId] = useState(''); 
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
@@ -141,11 +144,33 @@ export default function AdminTournamentView() {
         fetchTournaments();
     }, []);
 
-    const handleUploadClick = (tournamentId) => {
-        // Logic to handle file upload interaction
-        console.log("Upload button clicked for tournament ID:", tournamentId);
-        // You can extend this to actually show a dialog or direct file input
+    const handleUploadClick = (id) => {
+       setTournamentId(id);
+       console.log(id);
+       fileInputRef.current.click();
+       
     };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0]; // Get the first file
+          // Handle file upload
+          setSelectedFile(file);
+          console.log(file); 
+          if (selectedFile) {
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+        await axios.post(`${baseURL}/uploadTournamentImage/${tournamentId}`, formData, null, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+           
+          },
+        });
+        window.location.reload();
+        console.log('image updated successfully');
+
+    }
+}
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -197,7 +222,9 @@ export default function AdminTournamentView() {
                 handleEditClick={handleEditClick}
                 handleDeleteClick={handleDeleteClick}
                 handleViewDetails={handleViewDetails}
+                handleFileChange={handleFileChange}
                 handleUploadClick={handleUploadClick}
+                fileInputRef={fileInputRef}
             />
 
             <CreateTournamentDialog

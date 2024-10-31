@@ -6,7 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import styles from './AdminTournamentView.module.css';
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { TextField, FormControl, InputLabel, Select, MenuItem , Input} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 import TournamentItem from '../TournamentItem/TournamentItem';
@@ -21,7 +21,7 @@ const statusColorMap = {
 };
 
 
-function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleUploadClick}) {
+function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleFileChange, handleUploadClick, fileInputRef }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
@@ -194,11 +194,17 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         </IconButton>
 
                                         <IconButton
-                                            onClick={() => handleUploadClick(tournament.id)}
+                                             onClick={() => handleUploadClick(tournament.id)}
                                             sx={{ color: 'info.main', mr: 4 }}
                                         >
                                             <CloudUploadIcon />
                                         </IconButton>
+                                        <Input
+                                            type="file"
+                                            style={{ display: 'none' }}
+                                            inputRef={fileInputRef}
+                                            onChange={handleFileChange}
+                                        />
                                         <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
 
                                     </Box>
