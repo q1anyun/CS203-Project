@@ -8,7 +8,7 @@ function LeaderboardHeader() {
     return (
         <div className={styles.container}>
             <img src={image} alt="Leaderboard Background" />
-            <div className={styles.content} alignContent={'center'}>
+            <div className={styles.content}>
                 <Typography variant = "homePage" textAlign={'center'} >Leaderboard</Typography>
                 <Typography variant="homePage2" display='block' textAlign={'left'}>"When you see a good move, look for a better one."</Typography>
             </div>

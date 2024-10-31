@@ -40,8 +40,6 @@ function TournamentDescription({ tournament }) {
     };
 
     return (
-
-
         <Box sx={{ padding: 2 }}>
             <Box
                 sx={{
@@ -67,7 +65,7 @@ function TournamentDescription({ tournament }) {
 
 
             <Typography variant="header1" >{tournament.name}</Typography>
-            <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
+            <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
 
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
 
@@ -79,13 +77,13 @@ function TournamentDescription({ tournament }) {
             {/* Tournament Details */}
 
             <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Format</strong></Typography>
                         <Typography variant="body2">{tournament.format}</Typography>
                     </DetailBox>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Current Players</strong></Typography>
 
@@ -93,34 +91,47 @@ function TournamentDescription({ tournament }) {
                     </DetailBox>
                 </Grid>
 
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Start Date</strong></Typography>
                         <Typography variant="body2">{new Date(tournament.startDate).toLocaleDateString()}</Typography>
                     </DetailBox>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>End Date</strong></Typography>
                         <Typography variant="body2">{new Date(tournament.endDate).toLocaleDateString()}</Typography>
                     </DetailBox>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Minimum Elo</strong></Typography>
                         <Typography variant="body2">{tournament.minElo}</Typography>
                     </DetailBox>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12} sm={3}>
                     <DetailBox>
                         <Typography variant="playerProfile2"><strong>Maximum Elo</strong></Typography>
                         <Typography variant="body2">{tournament.maxElo}</Typography>
                     </DetailBox>
                 </Grid>
+                <Grid item xs={12} sm={3}>
+                    <DetailBox>
+                        <Typography variant="playerProfile2"><strong>Time Control</strong></Typography>
+                        <Typography variant="body2">{tournament.timeControl?.name || 'N/A'}</Typography>
+                    </DetailBox>
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                    <DetailBox>
+                        <Typography variant="playerProfile2"><strong>Tournament Type</strong></Typography>
+                        <Typography variant="body2">{tournament.tournamentType?.typeName || 'N/A'}</Typography> {/* Fixed rendering the tournament type */}
+                    </DetailBox>
+                </Grid>
+
                 <Button variant='contained' onClick={handleViewRegisteredPlayers} color='outlined'>
                     <Typography variant="body4">Click to view registered players</Typography>
                 </Button>
-                <Button variant="contained" color="outlined" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
+                <Button variant="contained" color="outlined" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/tournaments/leaderboard/${tournament.id}`)}>
                     <Typography variant="body4">Click to view Leaderboard</Typography>
                 </Button>
             </Grid>

@@ -1,86 +1,92 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import TournamentDescription from "../AdminTournamentDetails/TournamentDescription";
 import useTournamentDetails from "../Hooks/useTournamentDetails";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Profile from '../Leaderboard/Profile';
 import Container from '@mui/material/Container';
-import {Grid, Typography, Box} from '@mui/material'; // Assuming you're using MUI Grid
+import { Grid, Typography, Box, Chip, Divider } from '@mui/material';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const statusColorMap = {
+    LIVE: 'success',
+    UPCOMING: 'warning',
+    EXPIRED: 'default',
+};
 
 function TournamentLeaderboard() {
     const { id } = useParams();
     const { tournament } = useTournamentDetails(id);
-    const [profiles, setProfiles] = useState([]); 
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
+    const [profiles, setProfiles] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`${baseURL}/${id}`); 
-                setProfiles(response.data); 
-                setLoading(false); 
+                const response = await axios.get(`${baseURL}/${id}`);
+                setProfiles(response.data);
+                setLoading(false);
             } catch (err) {
-                setError('Failed to load data'); 
+                setError('Failed to load data');
                 setLoading(false);
             }
         };
 
-        fetchData(); 
+        fetchData();
     }, [id]);
 
     if (loading) {
-        return <div>Loading...</div>; // Simple loading message
+        return <div>Loading...</div>;
     }
 
     if (error) {
-        return <div>{error}</div>; // Display error message
+        return <div>{error}</div>;
     }
 
     return (
         <div>
-              <Box sx={{ padding: 2 }}>
-            <TournamentDescription tournament={tournament} />
-            <Typography variant="header1" component="h2" align="center"> 
+
+
+            <Box sx={{ padding: 2 }}>
+                <Typography variant="header1" >{tournament.name}</Typography>
+                <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
+                <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
+                <Divider sx={{ margin: '20px 0' }} />
+
+                <Typography variant="header1" component="h2" align="center">
                     Leaderboard
-            </Typography>
-            <Container maxWidth="lg" sx={{ marginTop: 4, marginBottom: 10 }}>
-                <Grid container spacing={2}>
-                    {profiles.map((profile, index) => (
-                        <Grid item xs={12} key={profile.userId}>
-                            <Profile
-                                rank={index + 1} 
-                                firstName={profile.firstName}
-                                lastName={profile.lastName}
-                                eloRating={profile.eloRating}
-                                profilePhoto={profile.profilePicture}
-                            />
-                        </Grid>
-                    ))}
-                </Grid>
-                {/* To create specific leaderboard position for player */}
-            </Container>
+                </Typography>
+                <Container maxWidth="lg" sx={{ marginTop: 4, marginBottom: 10 }}>
+                    <Grid container spacing={2}>
+                        {profiles.length === 0 ? ( // Check if profiles array is empty
+                            <Grid item xs={12}>
+                                <Typography variant="body1" align="center">
+                                    No participants registered.
+                                </Typography>
+                            </Grid>
+                        ) : (
+                            profiles.map((profile, index) => (
+                                <Grid item xs={12} key={profile.id}>
+                                    <Link
+                                        to={`/profileview/${profile.id}`}
+                                        style={{ textDecoration: 'none', color: 'inherit' }} // Optional styling for the link
+                                    >
+                                        <Profile
+                                            rank={index + 1}
+                                            firstName={profile.firstName}
+                                            lastName={profile.lastName}
+                                            eloRating={profile.eloRating}
+                                            profilePhoto={profile.profilePicture}
+                                        />
+                                    </Link>
+                                </Grid>
+                            ))
+                        )}
+                    </Grid>
+                </Container>
             </Box>
         </div>
     );
 }
-
-// Sample data for testing (you can remove this in production)
-const sampleProfiles = [
-    { userId: 1, firstName: "Alice", lastName: "Smith", eloRating: 1500, profilePicture: "/path/to/photo1.jpg" },
-    { userId: 2, firstName: "Bob", lastName: "Johnson", eloRating: 1420, profilePicture: "/path/to/photo2.jpg" },
-    { userId: 3, firstName: "Charlie", lastName: "Brown", eloRating: 1600, profilePicture: "/path/to/photo3.jpg" },
-];
-
-// Simulate fetching data
-const fetchSampleData = () => {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve(sampleProfiles);
-        }, 1000);
-    });
-};
 
 export default TournamentLeaderboard;

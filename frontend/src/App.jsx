@@ -86,11 +86,6 @@ function AppContent() {
             <AdminTournamentDetails />
           </ProtectedRoute>} />
 
-        <Route path="/admin/tournaments/leaderboard/:id"
-          element={<ProtectedRoute>
-            <TournamentLeaderboard />
-          </ProtectedRoute>} />
-
         <Route path="/player/tournaments/:id"
           element={<ProtectedRoute>
             <TournamentDetails />
@@ -126,6 +121,7 @@ function AppContent() {
         <Route path="/error" element={<DefaultErrorPage />} />
         <Route path="/profileview/:id" element={<PlayerProfileView />} />
         <Route path="verification" element={<AuthPage />} />
+        <Route path="/tournaments/leaderboard/:id" element={<TournamentLeaderboard />} />
 
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<PageNotFound />} />

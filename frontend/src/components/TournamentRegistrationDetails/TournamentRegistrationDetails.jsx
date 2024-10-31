@@ -85,36 +85,42 @@ function TournamentRegistrationDetails() {
                     Registered Participants
                 </Typography>
                 <DetailBoxContainer>
-                    {participants.map((participant) => (
-                        <DetailBox key={participant.id}>
-                            <Avatar
-                                alt={`${participant.firstName} ${participant.lastName}`}
-                                src={participant.profilePhoto}
-                                sx={{ width: 56, height: 56, marginRight: '16px' }}
-                            />
-                            <Box sx={{ flexGrow: 1 }}>
-                                <Link
-                                    to={`/profileview/${participant.id}`}
-                                    style={{ textDecoration: 'none', color: 'inherit' }}
-                                >
-                                    <Typography variant="h6">
-                                        {`${participant.firstName} ${participant.lastName}`}
-                                    </Typography>
-                                </Link>
-                                <Typography variant="body2">{participant.country}</Typography>
-                            </Box>
-                            <PersonRemoveIcon
-                                color="primary"
-                                sx={{
-                                    cursor: (tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED') ? 'not-allowed' : 'pointer'
-                                }}
-                                onClick={tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED'
-                                    ? null
-                                    : () => handleOpenDialog(participant)
-                                }
-                            />
-                        </DetailBox>
-                    ))}
+                    {participants.length === 0 ? ( 
+                        <Typography variant="body1" align="center">
+                            No participants registered.
+                        </Typography>
+                    ) : (
+                        participants.map((participant) => (
+                            <DetailBox key={participant.id}>
+                                <Avatar
+                                    alt={`${participant.firstName} ${participant.lastName}`}
+                                    src={participant.profilePhoto}
+                                    sx={{ width: 56, height: 56, marginRight: '16px' }}
+                                />
+                                <Box sx={{ flexGrow: 1 }}>
+                                    <Link
+                                        to={`/profileview/${participant.id}`}
+                                        style={{ textDecoration: 'none', color: 'inherit' }}
+                                    >
+                                        <Typography variant="h6">
+                                            {`${participant.firstName} ${participant.lastName}`}
+                                        </Typography>
+                                    </Link>
+                                    <Typography variant="body2">{participant.country}</Typography>
+                                </Box>
+                                <PersonRemoveIcon
+                                    color="primary"
+                                    sx={{
+                                        cursor: (tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED') ? 'not-allowed' : 'pointer'
+                                    }}
+                                    onClick={tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED'
+                                        ? null
+                                        : () => handleOpenDialog(participant)
+                                    }
+                                />
+                            </DetailBox>
+                        ))
+                    )}
                 </DetailBoxContainer>
             </div>
 

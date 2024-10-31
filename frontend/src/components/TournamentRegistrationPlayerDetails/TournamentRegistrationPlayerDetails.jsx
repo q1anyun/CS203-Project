@@ -9,7 +9,7 @@ import { useParams, Link } from 'react-router-dom';
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
 const DetailBox = styled(Box)({
-    backgroundColor: '#fcffff',
+    backgroundColor: '#fff',
     borderRadius: '8px',
     padding: '16px',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -58,7 +58,12 @@ function TournamentRegistrationPlayerDetails() {
                     Registered Participants
                 </Typography>
                 <DetailBoxContainer>
-                    {participants.map((participant) => (
+                {participants.length === 0 ? ( // Check if participants array is empty
+                    <Typography variant="body1" align="center">
+                        Be the first to register!
+                    </Typography>
+                ) : (
+                    participants.map((participant) => (
                         <DetailBox key={participant.id}>
                             <Avatar
                                 alt={`${participant.firstName} ${participant.lastName}`}
@@ -75,7 +80,8 @@ function TournamentRegistrationPlayerDetails() {
                                 <Typography variant="body1">{participant.country}</Typography>
                             </Box>
                         </DetailBox>
-                    ))}
+                    ))
+                )}
                 </DetailBoxContainer>
             </div>
 
