@@ -8,7 +8,6 @@ import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ForgotPasswordDialog from './ForgotPasswordDialog';
 
 // js
 import { handleClickShowPassword, handleDialogClose, handleSubmit } from './LoginFunctions';
@@ -19,7 +18,6 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
@@ -106,8 +104,6 @@ function LoginPage() {
           </Grid2>
         </Card>
       </Container>
-
-      <ForgotPasswordDialog open={openDialog} onClose={() => handleDialogClose(setOpenDialog)} />
     </div>
   );
 }
