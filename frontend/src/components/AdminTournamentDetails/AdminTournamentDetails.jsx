@@ -17,10 +17,6 @@ function AdminTournamentDetails() {
     const [tournament, setTournament] = useState({});
     const [matches, setMatches] = useState([]);
     const [rounds, setRounds] = useState([]);
-    const [selectedMatchId, setSelectedMatchId] = useState(null);
-    const [selectedTeams, setSelectedTeams] = useState([]); // Store selected match teams
-    const [winner, setWinner] = useState('');
-    const [open, setOpen] = useState(false);
 
 
     const token = localStorage.getItem('token');
@@ -83,27 +79,7 @@ function AdminTournamentDetails() {
         }));
     };
 
-    const handleEditWinner = (matchId, teams) => {
-        setSelectedMatchId(matchId);
-        setSelectedTeams(teams);
-        setOpen(true);
-    };
-
-    const handleCloseEdit = () => {
-        setOpen(false);
-    };
-
-    const handleSaveWinner = async () => {
-        try {
-            await axios.put(`${baseURL2}/${selectedMatchId}/winner/${winner}`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setOpen(false);
-            window.location.reload();
-        } catch (error) {
-            console.error('Error updating the winner:', error);
-        }
-    };
+    
 
     const handleStart = async () => {
         if (tournament.tournamentType.id === 2 && tournament.currentPlayers !== tournament.maxPlayers) {
@@ -149,13 +125,6 @@ function AdminTournamentDetails() {
 
                 <Knockout
                     rounds={rounds}
-                    handleEditWinner={handleEditWinner}
-                    winner={winner}
-                    setWinner={setWinner}
-                    selectedTeams={selectedTeams}
-                    open={open}
-                    handleCloseEdit={handleCloseEdit}
-                    handleSaveWinner={handleSaveWinner}
                 />
 
 

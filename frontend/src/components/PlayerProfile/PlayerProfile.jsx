@@ -29,7 +29,6 @@ const VisuallyHiddenInput = styled('input')({
 
 function PlayerProfile({ profilePic }) {
 
-  const [value, setValue] = useState(0); // State for managing tab selection
   const [openEdit, setOpenEdit] = useState(false);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);

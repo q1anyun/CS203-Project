@@ -1,13 +1,15 @@
-// Knockout.js
-import React from 'react';
+import React, { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import { Typography, Dialog, Select, MenuItem, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import axios from 'axios';
+
+const token = localStorage.getItem('token');
+const baseURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
+
 
 const CustomSeed = ({ seed, handleEditWinner }) => {
     const winnerId = seed.winnerId;
-
-    // Check if both player1Id and player2Id are null and winnerId exists (auto-advance case)
     const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
 
     return (
@@ -16,24 +18,22 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
                 <div>
                     {isAutoAdvance ? (
                         <SeedTeam style={{ backgroundColor: 'green' }}>
-                            <Typography variant="header3" component="span" style={{ color: 'white' }}>
+                            <Typography variant="h6" component="span" style={{ color: 'white' }}>
                                 Auto Advance PLAYER {winnerId}
                             </Typography>
                         </SeedTeam>
                     ) : (
                         <>
                             <SeedTeam style={{ backgroundColor: winnerId === seed.teams[0]?.id ? 'green' : 'white' }}>
-                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'white' : 'black' }}>
+                                <Typography variant="body1" component="span" style={{ color: winnerId === seed.teams[0]?.id ? 'white' : 'black' }}>
                                     {seed.teams[0]?.name || 'Pending'}
                                 </Typography>
                             </SeedTeam>
                             <SeedTeam style={{ backgroundColor: winnerId === seed.teams[1]?.id ? 'green' : 'white' }}>
-                                <Typography variant="playerProfile2" component="span" style={{ color: winnerId === seed.teams[1]?.id ? 'white' : 'black' }}>
+                                <Typography variant="body1" component="span" style={{ color: winnerId === seed.teams[1]?.id ? 'white' : 'black' }}>
                                     {seed.teams[1]?.name || 'Pending'}
                                 </Typography>
                             </SeedTeam>
-
-                            {/* Only show the edit icon if there's no winner yet */}
                             {winnerId === null && (
                                 <IconButton onClick={() => handleEditWinner(seed.id, seed.teams)} aria-label="edit winner" sx={{ color: 'white' }}>
                                     <EditIcon />
@@ -44,11 +44,37 @@ const CustomSeed = ({ seed, handleEditWinner }) => {
                 </div>
             </SeedItem>
         </Seed>
-
     );
 };
 
-const Knockout = ({ rounds, handleEditWinner, winner, setWinner, selectedTeams, open, handleCloseEdit, handleSaveWinner }) => {
+const Knockout = ({ rounds }) => {
+    const [selectedMatchId, setSelectedMatchId] = useState(null);
+    const [selectedTeams, setSelectedTeams] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [winner, setWinner] = useState('');
+
+    const handleEditWinner = (matchId, teams) => {
+        setSelectedMatchId(matchId);
+        setSelectedTeams(teams);
+        setOpen(true);
+    };
+
+    const handleCloseEdit = () => {
+        setOpen(false);
+    };
+
+    const handleSaveWinner = async () => {
+        try {
+            await axios.put(`${baseURL}/${selectedMatchId}/winner/${winner}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            setOpen(false);
+            window.location.reload(); // Consider using state update rather than full page reload
+        } catch (error) {
+            console.error('Error updating the winner:', error);
+        }
+    };
+
     return (
         <>
             <Bracket
@@ -69,19 +95,20 @@ const Knockout = ({ rounds, handleEditWinner, winner, setWinner, selectedTeams, 
                     <Select
                         value={winner}
                         onChange={(e) => setWinner(e.target.value)}
-                        sx={{
-                            width: '300px',
-                            height: '50px',
-                            fontSize: '18px',
-                            padding: '10px',
-                        }}>
-                        <MenuItem value={selectedTeams[0]?.id}>{selectedTeams[0]?.name}</MenuItem>
-                        <MenuItem value={selectedTeams[1]?.id}>{selectedTeams[1]?.name}</MenuItem>
+                        sx={{ width: '300px', height: '50px', fontSize: '18px', padding: '10px' }}
+                    >
+                        {selectedTeams.map((team) => (
+                            <MenuItem key={team.id} value={team.id}>
+                                {team.name}
+                            </MenuItem>
+                        ))}
                     </Select>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleCloseEdit}>Cancel</Button>
-                    <Button onClick={handleSaveWinner} color="primary">Save</Button>
+                    <Button onClick={handleSaveWinner} color="primary">
+                        Save
+                    </Button>
                 </DialogActions>
             </Dialog>
         </>

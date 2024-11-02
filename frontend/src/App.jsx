@@ -32,17 +32,32 @@ function AppContent() {
   const hideNavBarPaths = ['/login', '/signup', '/error', '/verification'];
   // State to store the current profile picture, initialized with the default image
   const [profilePic, setProfilePic] = useState(null);
+  const [userRole, setUserRole] = useState(null);
+
+
+
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
 
   useEffect(() => {
     const loadProfilePic = async () => {
-      const imageUrl = await fetchProfilePic();
-      setProfilePic(imageUrl);
+      if (userRole === 'PLAYER') {
+        try {
+          const imageUrl = await fetchProfilePic();
+          setProfilePic(imageUrl);
+        } catch (error) {
+          console.error('Error loading profile picture:', error);
+          setProfilePic(defaultProfilePic);
+        }
+      } else {
+        setProfilePic(defaultProfilePic);
+      }
     };
 
     loadProfilePic();
-  }, []);
-
-
+  }, [userRole, defaultProfilePic]);
 
   return (
     <>
@@ -78,7 +93,7 @@ function AppContent() {
 
         <Route path="/admin/profile"
           element={<ProtectedRoute>
-            <AdminProfile profilePic={profilePic} />
+            <AdminProfile />
           </ProtectedRoute>} />
 
         <Route path="/admin/tournaments/:id"

@@ -2,26 +2,13 @@ import React, { useState, useEffect}  from 'react';
 import { styled } from '@mui/material/styles';
 import { Card, CardContent, Typography, Avatar, Box,  Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
 import axios from 'axios';
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL; // Base URL for API calls
+import defaultProfilePic from '../../assets/default_user.png'; 
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL; 
 
-function AdminProfile({ profilePic }) {
+function AdminProfile() {
 
   const [adminDetails, setAdminDetails] = useState([]); 
-  profilePic = useProfilePic();
-
-
 
 
   useEffect(() => {
@@ -31,9 +18,7 @@ function AdminProfile({ profilePic }) {
         navigate('/login'); // Redirect to login if no token
         return;
       }
-
-    
-        // Fetch player details
+       
         const adminResponse = await axios.get(`${baseURL}/current`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -44,10 +29,7 @@ function AdminProfile({ profilePic }) {
       fetchUserData();
     }, );
 
-    //in progress will add the profile pic upload when i set up bucket 3 
-  
  
-
 
   return (
     <Box
@@ -55,8 +37,8 @@ function AdminProfile({ profilePic }) {
 
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
-        height: 'auto', // Full viewport height
-        backgroundColor: '#f0f0f0',// Optional: background color for the page
+        height: '100vh',
+        backgroundColor: '#f0f0f0',
         justifyItems: 'center',
 
       }}
@@ -68,19 +50,11 @@ function AdminProfile({ profilePic }) {
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
             alt={adminDetails.username}
-            src={profilePic}
+            src={defaultProfilePic}
           />
-
-          <Button
-            className="button"
-            variant="contained"
-            color="primary"
-            // onClick={handleOpenEdit}
-          >
-            Edit Profile
-          </Button>
           <CardContent>
-            <Typography variant="h4">{adminDetails.username}</Typography>
+            <Typography variant="playerProfile2"><strong>Username : </strong>{adminDetails.username}</Typography>
+            <Typography variant="playerProfile2" display={'block'}><strong>Email : </strong>{adminDetails.email}</Typography>
           </CardContent>
         </Box>
       </Card>

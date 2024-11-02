@@ -5,6 +5,7 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
     fontFamily: 'League Spartan, sans-serif',
   typography: {
+    //styles of font in general 
     header1: {
       fontSize: '40px',
       fontWeight: 'bold',
@@ -24,7 +25,7 @@ const theme = createTheme({
     },
     header4:{
       fontSize:'15px', 
-      fontWeight: 'regular',
+      fontWeight: 'semibold',
       
     },
     body4: {
@@ -32,6 +33,7 @@ const theme = createTheme({
       fontWeight: 'light',
       textAlign: 'left'
     },
+    //font specific to the page 
     
     navBar: {
         fontSize: '18px',
