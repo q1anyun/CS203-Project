@@ -1,4 +1,4 @@
-package com.chess.tms.elo_service.eloController;
+package com.chess.tms.elo_service.unit.eloController;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -73,7 +73,7 @@ public class EloControllerTest {
         LocalDateTime timeNow = LocalDateTime.parse("2024-10-10T16:02:18");
         EloResponseDTO response = new EloResponseDTO(1, 1315, 1315, Reason.WIN, timeNow);
 
-            when(eloService.saveEloHistory(any(EloHistoryRequestDTO.class)))
+            when(eloService.saveEloHistory(1315, any(EloHistoryRequestDTO.class)))
                 .thenReturn(response);
             // serialize expected response to json
             ObjectMapper objectMapper = new ObjectMapper();
@@ -87,7 +87,7 @@ public class EloControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(expectedResponseJson));
                 
-            verify(eloService, times(1)).saveEloHistory(any(EloHistoryRequestDTO.class));
+            verify(eloService, times(1)).saveEloHistory(1315, any(EloHistoryRequestDTO.class));
     }
 
     @Test

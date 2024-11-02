@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EloHistoryChartDTO {
     private int elo;
+    
     private LocalDate date;
 }

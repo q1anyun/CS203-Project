@@ -29,7 +29,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.spy;
 
 import java.time.LocalDate;
 

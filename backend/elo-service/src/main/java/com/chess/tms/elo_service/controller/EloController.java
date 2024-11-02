@@ -56,9 +56,10 @@ public class EloController {
 
  
     @PutMapping("/match") 
-    public void updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
+    public ResponseEntity<String> updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
         System.out.println("Running updateMatchPlayersElo in Elo Service");
         eloService.updateMatchPlayersElo(dto);
+        return ResponseEntity.ok("Players' elo updated successfully");
     }
 
     @GetMapping("/chart/current")
@@ -72,9 +73,10 @@ public class EloController {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
 
-    @PostMapping("")
-    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
-        return ResponseEntity.ok(eloService.saveEloHistory(dto));
-    }
+    // for testing 
+    // @PostMapping("")
+    // public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
+    //     return ResponseEntity.ok(eloService.saveEloHistory(dto));
+    // }
     
 }

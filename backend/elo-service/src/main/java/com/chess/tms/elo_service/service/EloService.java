@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -38,8 +39,10 @@ public class EloService {
     @Value("${players.service.url}")
     private String playersServiceUrl;
 
+    @Autowired
     private EloRepository eloRepository;
-
+    
+    @Autowired
     private RestTemplate restTemplate;
 
     public EloService(EloRepository eloRepository, RestTemplate restTemplate) {
@@ -86,25 +89,25 @@ public class EloService {
         newEloHistory.setCreatedAt(LocalDateTime.now());
 
         eloRepository.save(newEloHistory);
-
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
+    
+    //for testing
+    // public EloResponseDTO saveEloHistory(EloHistoryRequestDTO dto) {
+    //     EloHistory newEloHistory = new EloHistory();
+    //     List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
+    //     if (!list.isEmpty()) {
+    //         newEloHistory.setOldElo(list.get(0).getNewElo());
+    //     }
+    //     newEloHistory.setNewElo(dto.getNewElo());
+    //     newEloHistory.setPlayerId(dto.getPlayerId());
+    //     newEloHistory.setChangeReason(dto.getChangeReason());
+    //     newEloHistory.setCreatedAt(LocalDateTime.now());
 
-    public EloResponseDTO saveEloHistory(EloHistoryRequestDTO dto) {
-        EloHistory newEloHistory = new EloHistory();
-        List<EloHistory> list = eloRepository.findByPlayerIdOrderByCreatedAtDesc(dto.getPlayerId());
-        if (!list.isEmpty()) {
-            newEloHistory.setOldElo(list.get(0).getNewElo());
-        }
-        newEloHistory.setNewElo(dto.getNewElo());
-        newEloHistory.setPlayerId(dto.getPlayerId());
-        newEloHistory.setChangeReason(dto.getChangeReason());
-        newEloHistory.setCreatedAt(LocalDateTime.now());
+    //     eloRepository.save(newEloHistory);
 
-        eloRepository.save(newEloHistory);
-
-        return DTOUtil.convertEntryToResponseDTO(newEloHistory);
-    }
+    //     return DTOUtil.convertEntryToResponseDTO(newEloHistory);
+    // }
 
     public List<EloResponseDTO> findByPlayerIdAndChangeReason(long playerId, String changeReason) {
         Reason reason = Reason.WIN;
@@ -113,8 +116,7 @@ public class EloService {
         } else if (changeReason.equals("loss")) {
             reason = Reason.LOSS;
         } else {
-            throw new InvalidReasonException(
-                    "Reason: " + changeReason + " is not valid. Valid reasons: win, loss, draw");
+            throw new InvalidReasonException("Reason: " + changeReason + " is not valid. Valid reasons: win, loss, draw");
         }
 
         List<EloHistory> list = eloRepository.findByPlayerIdAndChangeReasonOrderByCreatedAtDesc(playerId, reason);

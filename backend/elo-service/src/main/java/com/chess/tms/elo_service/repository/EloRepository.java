@@ -16,6 +16,9 @@ import com.chess.tms.elo_service.enums.Reason;
 
 @Repository
 public interface EloRepository extends JpaRepository<EloHistory, Long>{
+
+    public List<EloHistory> findAll();
+
     public Optional<List<EloHistory>> findByPlayerId(long playerId);
     
     public List<EloHistory> findByCreatedAtLessThanEqual(LocalDateTime latest);
@@ -32,10 +35,12 @@ public interface EloRepository extends JpaRepository<EloHistory, Long>{
 
     public Optional<EloHistory> findByPlayerIdAndCreatedAt(long playerId, LocalDateTime createdAt);
 
+    /**
+     * This method returns the latest 5 EloHistory entries with given playerId.
+     */
     @Query(value = "SELECT * FROM elo_history e WHERE e.player_id = :playerId AND e.created_at IN " +
         "(SELECT MAX(eh.created_at) FROM elo_history eh WHERE eh.player_id = :playerId " +
         "GROUP BY DATE(eh.created_at)) " +
         "ORDER BY e.created_at DESC LIMIT 5", nativeQuery = true)
     List<EloHistory> findLatestEloHistoryByPlayerId(@Param("playerId") Long playerId);
-    
 }
