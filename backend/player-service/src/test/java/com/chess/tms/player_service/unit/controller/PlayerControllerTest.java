@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.multipart.MultipartFile;
@@ -226,4 +227,141 @@ class PlayerControllerTest {
 
         verify(playerService, never()).getRankingForCurrentPlayer(anyLong());
     }
+
+    @Test
+    void getListOfPlayerDetailsReturnsData() throws Exception {
+        List<Long> playerIds = List.of(1L, 2L);
+        PlayerDetailsDTO player1 = new PlayerDetailsDTO();
+        player1.setId(1L);
+        PlayerDetailsDTO player2 = new PlayerDetailsDTO();
+        player2.setId(2L);
+        
+        List<PlayerDetailsDTO> playerDetails = List.of(player1, player2);
+        when(playerService.getListOfPlayerDetails(playerIds)).thenReturn(playerDetails);
+        
+        mockMvc.perform(post("/api/player/list")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(playerIds)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2));
+
+        verify(playerService, times(1)).getListOfPlayerDetails(any());
+    }
+
+    @Test
+    void getListOfPlayerDetailsHandlesEmptyList() throws Exception {
+        List<Long> playerIds = List.of();
+        when(playerService.getListOfPlayerDetails(any())).thenReturn(List.of());
+
+        String jsonPayload = objectMapper.writeValueAsString(playerIds);
+
+        mockMvc.perform(post("/api/player/list")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonPayload))
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.length()").value(0));
+
+        verify(playerService, times(1)).getListOfPlayerDetails(any());
+    }
+
+    @Test
+    void uploadProfilePictureFailure() throws Exception {
+        MockMultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "test image content".getBytes());
+        doThrow(new IOException("Failed to save file")).when(playerService).uploadProfilePicture(anyLong(), any(MultipartFile.class));
+
+        mockMvc.perform(multipart("/api/player/uploadProfile")
+                .file(file)
+                .header("X-User-PlayerId", "1"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string("File upload failed"));
+
+        verify(playerService).uploadProfilePicture(1L, file);
+    }
+
+    @Test
+    void getPhotoReturnsNotFoundWhenDataIsNull() throws Exception {
+        // Mock the service to return null
+        when(playerService.getProfilePicture("player_1")).thenReturn(null);
+
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1"))
+                .andExpect(status().isNotFound());
+
+        // Verify that the service was called with the correct ID
+        verify(playerService).getProfilePicture("player_1");
+    }
+
+    @Test
+    void getPhotoReturnsNotFoundWhenDataIsEmpty() throws Exception {
+        // Mock the service to return an empty byte array
+        when(playerService.getProfilePicture("player_1")).thenReturn(new byte[0]);
+
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1"))
+                .andExpect(status().isNotFound());
+
+        // Verify that the service was called with the correct ID
+        verify(playerService).getProfilePicture("player_1");
+    }
+    @Test
+    void getPhotoWithDifferentMediaTypes() throws Exception {
+        // Prepare data for each media type
+        byte[] jpgPhoto = "fake jpg data".getBytes();
+        byte[] jpegPhoto = "fake jpeg data".getBytes();
+        byte[] pngPhoto = "fake png data".getBytes();
+        byte[] gifPhoto = "fake gif data".getBytes();
+
+        // Setup service to return different data based on the filename
+        when(playerService.getProfilePicture("player_1.jpg")).thenReturn(jpgPhoto);
+        when(playerService.getProfilePicture("player_1.jpeg")).thenReturn(jpegPhoto);
+        when(playerService.getProfilePicture("player_1.png")).thenReturn(pngPhoto);
+        when(playerService.getProfilePicture("player_1.gif")).thenReturn(gifPhoto);
+
+        // Test JPG media type
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1.jpg"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_JPEG));
+
+            // Test JPEG media type
+        mockMvc.perform(get("/api/player/photo")
+        .header("X-User-PlayerId", "1.jpeg"))
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.IMAGE_JPEG));
+
+        // Test PNG media type
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1.png"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG));
+
+        // Test GIF media type
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1.gif"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_GIF));
+
+        // Verify interactions
+        verify(playerService).getProfilePicture("player_1.jpg");
+        verify(playerService).getProfilePicture("player_1.jpeg");
+        verify(playerService).getProfilePicture("player_1.png");
+        verify(playerService).getProfilePicture("player_1.gif");
+    }
+
+    @Test
+    void getPhotoIOExceptionReturnsNotFound() throws Exception {
+        // Mock the service to throw an IOException
+        when(playerService.getProfilePicture("player_1")).thenThrow(new IOException("Failed to retrieve file"));
+
+        mockMvc.perform(get("/api/player/photo")
+                .header("X-User-PlayerId", "1"))
+                .andExpect(status().isNotFound());
+
+        // Verify that the service was called with the correct ID
+        verify(playerService).getProfilePicture("player_1");
+    }
+
+    
 }
