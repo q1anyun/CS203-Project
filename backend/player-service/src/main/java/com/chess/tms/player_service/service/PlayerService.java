@@ -61,6 +61,16 @@ public class PlayerService {
                 .orElseThrow(() -> new UserNotFoundException("Player with id " + id + " not found"));
     }
 
+    
+    // Fetch player details by ID
+    private Optional<PlayerDetails> fetchPlayerDetails(Long playerId) {
+        if (playerId == null) {
+
+            return Optional.empty();
+        }
+        return playerDetailsRepository.findById(playerId);
+    }
+
     // Fetch multiple player details in a batch
     public List<PlayerDetailsDTO> getListOfPlayerDetails(List<Long> playerIds) {
         List<PlayerDetails> players = playerDetailsRepository.findByIdIn(playerIds);
@@ -116,6 +126,7 @@ public class PlayerService {
 
         try {
             MatchDTO[] matches = restTemplate.getForObject(url, MatchDTO[].class);
+            
             return Arrays.stream(matches)
                     .map(this::convertToMatchResponseDTO)
                     .collect(Collectors.toList());
@@ -142,14 +153,6 @@ public class PlayerService {
         return responseDTO;
     }
 
-    // Fetch player details by ID
-    private Optional<PlayerDetails> fetchPlayerDetails(Long playerId) {
-        if (playerId == null) {
-
-            return Optional.empty();
-        }
-        return playerDetailsRepository.findById(playerId);
-    }
 
     public List<RankingDTO> findTop100Players() {
         List<PlayerDetails> top100 = playerDetailsRepository.findByOrderByEloRatingDesc(Limit.of(100));
@@ -238,6 +241,8 @@ public class PlayerService {
         // Return the byte array
         return response.getBody();
     }
+
+    //duplicate method with getPlayerElo
 
     public Integer getRankingForCurrentPlayer(Long playerId) {
         PlayerDetails player = playerDetailsRepository.findById(playerId)
