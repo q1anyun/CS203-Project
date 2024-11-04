@@ -30,15 +30,15 @@ public class FileUploadController {
         }
     }
     
-    @DeleteMapping("/delete/{filename}")
-    public ResponseEntity<String> deleteFile(@PathVariable String filename) {
-        try {
-            fileUploadService.deleteFile(filename);
-            return ResponseEntity.ok("File deleted successfully!");
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting file: " + e.getMessage());
-        }
-    }
+    // @DeleteMapping("/delete/{filename}")
+    // public ResponseEntity<String> deleteFile(@PathVariable String filename) {
+    //     try {
+    //         fileUploadService.deleteFile(filename);
+    //         return ResponseEntity.ok("File deleted successfully!");
+    //     } catch (IOException e) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting file: " + e.getMessage());
+    //     }
+    // }
 
     @GetMapping("/find/{filename}")
     public ResponseEntity<byte[]> findFile(@PathVariable String filename) {
