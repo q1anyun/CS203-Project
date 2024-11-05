@@ -60,8 +60,6 @@ function PlayerDashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRecommendedTournaments(reccomendedTournamentResponse.data);
-            } catch (err) {
-                handleFetchError(err);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;

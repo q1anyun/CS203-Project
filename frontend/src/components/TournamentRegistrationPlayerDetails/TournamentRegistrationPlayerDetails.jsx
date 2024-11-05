@@ -4,7 +4,6 @@ import { Typography, Avatar, Box, Grid, Button, TextField } from '@mui/material'
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -29,7 +28,6 @@ function TournamentRegistrationPlayerDetails() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchParticipants = async () => {
