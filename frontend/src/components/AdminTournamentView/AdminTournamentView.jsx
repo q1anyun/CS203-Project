@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Typography, CircularProgress } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -13,8 +12,6 @@ const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
 export default function AdminTournamentView() {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournaments, setTournaments] = useState([]);
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
@@ -33,6 +30,7 @@ export default function AdminTournamentView() {
     const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
+
     useEffect(() => {
         const fetchTimeControls = async () => {
             const response = await axios.get(`${gameTypeURL}`);
@@ -41,6 +39,7 @@ export default function AdminTournamentView() {
 
         fetchTimeControls();
     }, []);
+
     useEffect(() => {
         const fetchRoundType = async () => {
             const response = await axios.get(`${roundTypeURL}/choices`);
@@ -129,16 +128,17 @@ export default function AdminTournamentView() {
                 const response = await axios.get(`${tournamentURL}`);
                 console.log(response.data);
                 setTournaments(response.data);
-                setLoading(false);
-
             } catch (error) {
-                console.error('Error fetching tournaments:', error);
-                setError(error);
-                setLoading(false);
-
-
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
-
         };
 
         fetchTournaments();
@@ -197,21 +197,21 @@ export default function AdminTournamentView() {
             });
             setEditDialogOpen(true);
         } catch (error) {
-            console.error('Error fetching tournament data:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     const handleCreate = () => {
         setCreateDialogOpen(true);
     };
-
-    if (loading) {
-        return <CircularProgress />;
-    }
-
-    if (error) {
-        return <Typography color="error">Error loading tournaments: {error.message}</Typography>;
-    }
 
     return (
         <div className={styles.container}>

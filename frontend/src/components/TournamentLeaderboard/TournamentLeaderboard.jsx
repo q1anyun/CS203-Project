@@ -5,6 +5,7 @@ import { useParams, Link } from "react-router-dom";
 import Profile from '../Leaderboard/Profile';
 import Container from '@mui/material/Container';
 import { Grid, Typography, Box, Chip, Divider } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const statusColorMap = {
@@ -17,30 +18,27 @@ function TournamentLeaderboard() {
     const { id } = useParams();
     const { tournament } = useTournamentDetails(id);
     const [profiles, setProfiles] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await axios.get(`${baseURL}/${id}`);
                 setProfiles(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError('Failed to load data');
-                setLoading(false);
+            } catch (error) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
         fetchData();
     }, [id]);
-
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return <div>{error}</div>;
-    }
 
     return (
         <div>

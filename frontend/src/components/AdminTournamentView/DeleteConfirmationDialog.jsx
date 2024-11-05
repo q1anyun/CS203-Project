@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const DeleteConfirmationDialog = ({
     open,
@@ -12,6 +13,7 @@ const DeleteConfirmationDialog = ({
     setTournamentToDelete,
     tournaments,
 }) => {
+    const navigate = useNavigate();
     
     const handleConfirm = async () => {
         try {
@@ -28,11 +30,17 @@ const DeleteConfirmationDialog = ({
                 setTournamentToDelete(null);
                 console.log('Tournament deleted successfully.');
                 window.location.reload();
-            } else {
-                console.warn('Delete request did not return a success status:', response.status);
-            }
+            } 
         } catch (error) {
-            console.error('Error deleting tournament:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 

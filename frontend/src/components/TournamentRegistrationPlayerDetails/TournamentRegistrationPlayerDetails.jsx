@@ -4,7 +4,7 @@ import { Typography, Avatar, Box } from '@mui/material';
 import styles from './TournamentRegistrationPlayerDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -32,6 +32,7 @@ function createData(id, firstName, lastName, country) {
 function TournamentRegistrationPlayerDetails() {
     const { id } = useParams();
     const [participants, setParticipants] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -44,7 +45,15 @@ function TournamentRegistrationPlayerDetails() {
                 );
                 setParticipants(formattedData);
             } catch (error) {
-                console.error('Error fetching participants:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 

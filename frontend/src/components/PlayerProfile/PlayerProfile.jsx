@@ -45,29 +45,21 @@ function PlayerProfile({ profilePic }) {
         });
         setPlayerDetails(playerResponse.data || {});
 
-      } catch (err) {
-        handleFetchError(err);
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (err.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+        }
       }
     };
 
     fetchPlayerAndMatchData();
   }, [navigate]);
-
-  const handleFetchError = (err) => {
-    if (err.response) {
-      const statusCode = err.response.status;
-      const errorMessage = err.response.data.message || 'An error occurred';
-      if (statusCode === 404 || statusCode === 403) {
-        setError('Player details not found or access denied');
-      } else {
-        navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-      }
-    } else if (err.request) {
-      navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-    } else {
-      navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-    }
-  };
 
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];

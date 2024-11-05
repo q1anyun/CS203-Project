@@ -4,7 +4,7 @@ import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, Dialo
 import styles from './TournamentRegistrationDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
@@ -36,6 +36,7 @@ function TournamentRegistrationDetails() {
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const location = useLocation();
     const tournament = location.state?.tournament;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -47,7 +48,15 @@ function TournamentRegistrationDetails() {
                 );
                 setParticipants(formattedData);
             } catch (error) {
-                console.error('Error fetching participants:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
@@ -63,7 +72,15 @@ function TournamentRegistrationDetails() {
                 );
                 handleCloseDialog();
             } catch (error) {
-                console.error('Error deregistering participant:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         }
     };

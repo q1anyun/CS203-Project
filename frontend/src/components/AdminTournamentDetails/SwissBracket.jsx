@@ -3,6 +3,7 @@ import {CardContent, Typography, Box, Divider, Grid, Avatar, Tab, Tabs, IconButt
 import axios from 'axios';
 import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
+import { useNavigate } from 'react-router-dom';
 
 const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
@@ -15,6 +16,8 @@ function SwissBracket({ matches, SwissBracketID }) {
     const [swissMatches, setSwissMatches] = useState([]);
     const [knockoutMatches, setKnockoutMatches] = useState([]);
     const [groupedRounds, setGroupedRounds] = useState([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchSwissBracket = async () => {
@@ -78,7 +81,15 @@ function SwissBracket({ matches, SwissBracketID }) {
             handleCloseEdit();
             window.location.reload();
         } catch (error) {
-            console.error('Error updating the winner:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 

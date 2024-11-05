@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 import { Typography, Dialog, Select, MenuItem, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import axios from 'axios';
 
@@ -51,6 +52,7 @@ const Knockout = ({ rounds }) => {
     const [selectedTeams, setSelectedTeams] = useState([]);
     const [open, setOpen] = useState(false);
     const [winner, setWinner] = useState('');
+    const navigate = useNavigate();
 
     const handleEditWinner = (matchId, teams) => {
         setSelectedMatchId(matchId);
@@ -70,7 +72,15 @@ const Knockout = ({ rounds }) => {
             setOpen(false);
             window.location.reload();
         } catch (error) {
-            console.error('Error updating the winner:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
