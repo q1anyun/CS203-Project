@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Box, Typography, Grid, Card, CardContent, Avatar, Divider } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate } from 'react-router-dom';
+import TournamentItem from "../TournamentItem/TournamentItem";
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -13,6 +14,7 @@ function PlayerDashboard() {
     const [playerDetails, setPlayerDetails] = useState({});
     const [recentMatches, setRecentMatches] = useState([]);
     const [liveTournaments, setLiveTournaments] = useState([]);
+    const [recommendedTournaments, setRecommendedTournaments] = useState([]);
     const [uData, setUData] = useState([]);
     const [xLabels, setXLabels] = useState([]);
     const navigate = useNavigate();
@@ -52,6 +54,14 @@ function PlayerDashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setLiveTournaments(tournamentResponse.data || []);
+
+                //fetch reccomended Tournaments 
+                const reccomendedTournamentResponse = await axios.get(`${baseURL2}/recommended`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setRecommendedTournaments(reccomendedTournamentResponse.data);
+            } catch (err) {
+                handleFetchError(err);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -109,10 +119,26 @@ function PlayerDashboard() {
                         </Card>
                     </Grid>
 
+                    <Grid item xs={12}>
+
+                        <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
+                            <Typography variant="header2">Recommended Tournaments</Typography>
+                            {recommendedTournaments.map((tournament) => (
+                                <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+                                        <TournamentItem key={tournament.id} tournament={tournament} />
+                                    </Card>
+                                </Grid>))}
+
+
+                        </Card>
+                    </Grid>
+
                     <Grid item xs={12} md={6}>
                         <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
                             <Typography variant="header2">Ongoing Tournaments</Typography>
-                            {/* Placeholder content or actual dynamic content */}
+
 
                             <Box sx={{ p: 2, height: '100%' }}>
 
