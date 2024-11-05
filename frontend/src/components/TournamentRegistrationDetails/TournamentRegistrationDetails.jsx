@@ -34,8 +34,8 @@ function TournamentRegistrationDetails() {
     const [participants, setParticipants] = useState([]);
     const [open, setOpen] = useState(false);
     const [selectedParticipant, setSelectedParticipant] = useState(null);
-    const location = useLocation(); // Get location from props
-    const tournament = location.state?.tournament; // Access tournament from state
+    const location = useLocation();
+    const tournament = location.state?.tournament;
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -85,7 +85,7 @@ function TournamentRegistrationDetails() {
                     Registered Participants
                 </Typography>
                 <DetailBoxContainer>
-                    {participants.length === 0 ? ( 
+                    {participants.length === 0 ? (
                         <Typography variant="body1" align="center">
                             No participants registered.
                         </Typography>

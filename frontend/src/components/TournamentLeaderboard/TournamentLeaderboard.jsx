@@ -31,7 +31,6 @@ function TournamentLeaderboard() {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -45,8 +44,6 @@ function TournamentLeaderboard() {
 
     return (
         <div>
-
-
             <Box sx={{ padding: 2 }}>
                 <Typography variant="header1" >{tournament.name}</Typography>
                 <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
@@ -58,7 +55,7 @@ function TournamentLeaderboard() {
                 </Typography>
                 <Container maxWidth="lg" sx={{ marginTop: 4, marginBottom: 10 }}>
                     <Grid container spacing={2}>
-                        {profiles.length === 0 ? ( // Check if profiles array is empty
+                        {profiles.length === 0 ? ( 
                             <Grid item xs={12}>
                                 <Typography variant="body1" align="center">
                                     No participants registered.
@@ -69,7 +66,7 @@ function TournamentLeaderboard() {
                                 <Grid item xs={12} key={profile.id}>
                                     <Link
                                         to={`/profileview/${profile.id}`}
-                                        style={{ textDecoration: 'none', color: 'inherit' }} // Optional styling for the link
+                                        style={{ textDecoration: 'none', color: 'inherit' }} 
                                     >
                                         <Profile
                                             rank={index + 1}

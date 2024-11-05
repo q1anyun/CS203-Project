@@ -20,17 +20,17 @@ public class OTPController {
     @Autowired
     private OTPService otpService;
 
-    @PostMapping("/send")
+    @PostMapping("/request")
     public ResponseEntity<String> sendOtp(@Valid @RequestBody OtpRequest otpRequest) {    
             return ResponseEntity.ok(otpService.sendOtp(otpRequest.getUsername(), otpRequest.getEmail()));
     }
 
-    @PostMapping("/validate")
+    @PostMapping("/verification")
     public ResponseEntity<String> validateOtp(@RequestBody OtpVerificationDTO otpVerificationDTO) {
         return ResponseEntity.ok(otpService.validateOtp(otpVerificationDTO.getEmail(), otpVerificationDTO.getOtp()));
     }
 
-    @PostMapping("/resend")
+    @PostMapping("/retry")
     public ResponseEntity<String> resendOtp(@RequestBody OtpRequest otpRequest) {
         return ResponseEntity.ok(otpService.resendOtp(otpRequest.getUsername(), otpRequest.getEmail()));
     }

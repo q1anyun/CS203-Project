@@ -58,33 +58,32 @@ function TournamentRegistrationPlayerDetails() {
                     Registered Participants
                 </Typography>
                 <DetailBoxContainer>
-                {participants.length === 0 ? ( // Check if participants array is empty
-                    <Typography variant="body1" align="center">
-                        Be the first to register!
-                    </Typography>
-                ) : (
-                    participants.map((participant) => (
-                        <DetailBox key={participant.id}>
-                            <Avatar
-                                alt={`${participant.firstName} ${participant.lastName}`}
-                                src={participant.profilePhoto}
-                                sx={{ width: 56, height: 56, marginRight: '16px' }}
-                            />
-                            <Box>
-                                <Link
-                                    to={`/profileview/${participant.id}`}
-                                    style={{ textDecoration: 'none', color: 'inherit' }}
-                                >
-                                    <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
-                                </Link>
-                                <Typography variant="body1">{participant.country}</Typography>
-                            </Box>
-                        </DetailBox>
-                    ))
-                )}
+                    {participants.length === 0 ? (
+                        <Typography variant="body1" align="center">
+                            Be the first to register!
+                        </Typography>
+                    ) : (
+                        participants.map((participant) => (
+                            <DetailBox key={participant.id}>
+                                <Avatar
+                                    alt={`${participant.firstName} ${participant.lastName}`}
+                                    src={participant.profilePhoto}
+                                    sx={{ width: 56, height: 56, marginRight: '16px' }}
+                                />
+                                <Box>
+                                    <Link
+                                        to={`/profileview/${participant.id}`}
+                                        style={{ textDecoration: 'none', color: 'inherit' }}
+                                    >
+                                        <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
+                                    </Link>
+                                    <Typography variant="body1">{participant.country}</Typography>
+                                </Box>
+                            </DetailBox>
+                        ))
+                    )}
                 </DetailBoxContainer>
             </div>
-
         </>
     );
 }

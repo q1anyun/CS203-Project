@@ -6,7 +6,7 @@ function PageNotFound() {
     const navigate = useNavigate();
 
     const handleGoHome = () => {
-        navigate('/home'); // Redirect to homepage
+        navigate('/home');
     };
 
     return (

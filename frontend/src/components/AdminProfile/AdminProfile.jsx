@@ -1,40 +1,38 @@
-import React, { useState, useEffect}  from 'react';
-import { styled } from '@mui/material/styles';
-import { Card, CardContent, Typography, Avatar, Box,  Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, Typography, Avatar, Box } from '@mui/material';
 import axios from 'axios';
-import defaultProfilePic from '../../assets/default_user.png'; 
+import defaultProfilePic from '../../assets/default_user.png';
 
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL; 
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 function AdminProfile() {
 
-  const [adminDetails, setAdminDetails] = useState([]); 
+  const [adminDetails, setAdminDetails] = useState([]);
 
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login'); // Redirect to login if no token
+        navigate('/login'); 
         return;
       }
-       
-        const adminResponse = await axios.get(`${baseURL}/current`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setAdminDetails(adminResponse.data || {});
 
-      };
+      const adminResponse = await axios.get(`${baseURL}/current`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAdminDetails(adminResponse.data || {});
 
-      fetchUserData();
-    }, );
+    };
 
- 
+    fetchUserData();
+  },);
+
+
 
   return (
     <Box
       sx={{
-
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
         height: '100vh',
@@ -43,7 +41,6 @@ function AdminProfile() {
 
       }}
     >
-
       <Card sx={{ width: '80%', height: '500px', padding: 2, marginTop: '5%' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Profile Card Section */}
@@ -58,10 +55,6 @@ function AdminProfile() {
           </CardContent>
         </Box>
       </Card>
-     
-      
-      
-
     </Box>
   );
 }

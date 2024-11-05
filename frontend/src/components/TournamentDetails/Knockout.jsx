@@ -1,6 +1,5 @@
-// KnockoutBrackets.jsx
 import React from 'react';
-import {Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { Bracket, Seed, SeedItem, SeedTeam } from 'react-brackets';
 
 const CustomSeed = ({ seed }) => {

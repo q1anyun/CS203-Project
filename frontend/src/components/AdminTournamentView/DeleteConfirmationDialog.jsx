@@ -21,7 +21,6 @@ const DeleteConfirmationDialog = ({
                 }
             });
 
-            // Check if the deletion was successful
             if (response.status === 200) {
                 const updatedTournaments = tournaments.filter(t => t.tournamentId !== tournamentToDelete);
                 setTournaments(updatedTournaments);

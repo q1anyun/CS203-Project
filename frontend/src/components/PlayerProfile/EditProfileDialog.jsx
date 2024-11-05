@@ -15,15 +15,13 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 
-
 function EditProfileDialog({ open, handleClose, playerDetails, handleDetailChange, handleFileAndImageUpload, handleSave, options, profilePic }) {
-
 
   return (
     <Dialog open={open} onClose={handleClose} sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }}>
       <DialogTitle>Edit Profile</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <Avatar sx={{ width: 200, height: 200, marginTop: 15}} alt={playerDetails.firstName} src={profilePic} />
+        <Avatar sx={{ width: 200, height: 200, marginTop: 15 }} alt={playerDetails.firstName} src={profilePic} />
         <Button component="label" variant="contained" startIcon={<CloudUploadIcon />}>
           Upload files
           <VisuallyHiddenInput type="file" onChange={handleFileAndImageUpload} />
