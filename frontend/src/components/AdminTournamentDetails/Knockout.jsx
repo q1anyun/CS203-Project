@@ -7,7 +7,6 @@ import axios from 'axios';
 const token = localStorage.getItem('token');
 const baseURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
-
 const CustomSeed = ({ seed, handleEditWinner }) => {
     const winnerId = seed.winnerId;
     const isAutoAdvance = !seed.teams[0]?.id && !seed.teams[1]?.id && winnerId !== null;
@@ -69,7 +68,7 @@ const Knockout = ({ rounds }) => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setOpen(false);
-            window.location.reload(); // Consider using state update rather than full page reload
+            window.location.reload();
         } catch (error) {
             console.error('Error updating the winner:', error);
         }

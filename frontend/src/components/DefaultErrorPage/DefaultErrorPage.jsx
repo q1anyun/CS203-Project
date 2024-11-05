@@ -10,7 +10,6 @@ function DefaultErrorPage() {
     const navigate = useNavigate();
     
     useEffect(() => {
-        // Redirect to /login page if error is 403 (Forbidden) due to JWT expiration
         if (statusCode === '403') {
             navigate('/login');
         }
@@ -23,8 +22,6 @@ function DefaultErrorPage() {
                 {statusCode ? `Error ${statusCode}: ${errorMessage}` : 'An unexpected error occurred.'}
             </Typography>
             <Typography variant="body1">Please try again later or contact support.</Typography>
-            <br></br>
-            <Typography>Temporary page to view and debug errors</Typography>
         </Container>
     );
 }

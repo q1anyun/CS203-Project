@@ -1,30 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import axios from 'axios';
 import countryList from 'react-select-country-list'
-import defaultProfilePic from '../../assets/default_user.png'
 import EditProfileDialog from './EditProfileDialog';
 import { useNavigate } from 'react-router-dom';
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL3 = import.meta.env.VITE_ELO_SERVICE_URL;
-const baseURL4 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
-
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
-
 
 
 function PlayerProfile({ profilePic }) {
@@ -32,22 +15,15 @@ function PlayerProfile({ profilePic }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [error, setError] = useState(''); // Declare error state
   const navigate = useNavigate();
-
-
 
   const options = useMemo(() => countryList().getData(), []);
 
-
-  const handleChange = (event, newValue) => setValue(newValue);
   const handleOpenEdit = () => setOpenEdit(true);
   const handleCloseEdit = () => setOpenEdit(false);
 
   const handleDetailChange = (event) => {
     const { name, value } = event.target;
-
-    // Update the corresponding field in playerDetails
     setPlayerDetails((prevDetails) => ({
       ...prevDetails,
       [name]: value
@@ -59,12 +35,11 @@ function PlayerProfile({ profilePic }) {
     const fetchPlayerAndMatchData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login'); // Redirect to login if no token
+        navigate('/login');
         return;
       }
 
       try {
-        // Fetch player details
         const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -78,7 +53,6 @@ function PlayerProfile({ profilePic }) {
     fetchPlayerAndMatchData();
   }, [navigate]);
 
-  //handle the errors 
   const handleFetchError = (err) => {
     if (err.response) {
       const statusCode = err.response.status;
@@ -95,8 +69,6 @@ function PlayerProfile({ profilePic }) {
     }
   };
 
-
-
   const handleFileAndImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -105,8 +77,6 @@ function PlayerProfile({ profilePic }) {
       setLocalProfilePic(imageUrl);
     }
   };
-
-
 
   const handleSave = async () => {
     const token = localStorage.getItem('token');
@@ -142,9 +112,6 @@ function PlayerProfile({ profilePic }) {
     handleCloseEdit();
   };
 
-
-
-
   return (
     <Box
       sx={{
@@ -156,7 +123,6 @@ function PlayerProfile({ profilePic }) {
 
       }}
     >
-
       <Card sx={{ width: '80%', height: '500px', padding: 2, marginTop: '5%' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Profile Card Section */}
@@ -210,13 +176,7 @@ function PlayerProfile({ profilePic }) {
         options={options}
         profilePic={profilePic}
       />
-
-
-
     </Box>
-
-
-
   );
 }
 

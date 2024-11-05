@@ -1,5 +1,5 @@
 import axios from 'axios';
-import defaultbackgroundImage from '../../assets/welcome.jpg'; // Adjust path as needed
+import defaultbackgroundImage from '../../assets/welcome.jpg'; 
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 

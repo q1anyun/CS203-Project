@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider} from '@mui/material';
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardActions} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';
@@ -13,11 +12,8 @@ import RegisterDialog from './RegisterDialog';
 import WithdrawDialog from './WithdrawDialog';
 import TournamentItem from '../TournamentItem/TournamentItem';
 
- 
-
-
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const playerServiceURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const statusColorMap = {
@@ -25,8 +21,6 @@ const statusColorMap = {
     UPCOMING: 'warning',
     COMPLETED: 'default',
 };
-
-
 
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
@@ -88,12 +82,12 @@ function PlayerTournamentView() {
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const tournamentResponse = await axios.get(baseURL, {
+                const tournamentResponse = await axios.get(tournamentURL, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setTournaments(tournamentResponse.data);
 
-                const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
+                const registeredResponse = await axios.get(`${tournamentURL}/registered/current`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setJoinedTournaments(registeredResponse.data);
@@ -123,7 +117,7 @@ function PlayerTournamentView() {
         try {
             console.log(token);
             console.log(selectedTournament.id);
-            const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
+            const response = await axios.post(`${tournamentPlayerURL}/register/current/${selectedTournament.id}`, null, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
@@ -137,7 +131,7 @@ function PlayerTournamentView() {
     {/*WAITING FOR API TO WITHDRAW */ }
     const handleWithdrawConfirmation = async () => {
         try {
-            const response = await axios.delete(`${baseURL2}/current/${selectedTournament.id}`, {
+            const response = await axios.delete(`${tournamentPlayerURL}/current/${selectedTournament.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 

@@ -1,4 +1,3 @@
-// SettingsPage.jsx
 import React, { useState } from 'react';
 import { Container, TextField, Card, Grid2, InputAdornment, IconButton, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +7,6 @@ import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-// js
 import { handleSubmitChanges, handleClickShowPassword } from './SettingsFunctions';
 
 function Settings() {
@@ -21,7 +19,7 @@ function Settings() {
   const navigate = useNavigate();
 
   return (
-    <div className={styles.settingsContainer}>
+    <div>
       <Container maxWidth="sm" className={styles.cardContainer}>
         <Card variant="outlined" className={styles.cardStyle}>
           <Typography variant='header2' marginBottom={'20px'}>Change Password</Typography>
@@ -46,51 +44,47 @@ function Settings() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton
-                         onClick={() => handleClickShowPassword(setShowOldPassword)}
+                        onClick={() => handleClickShowPassword(setShowOldPassword)}
                         edge="end"
                       >
                         {showOldPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
 
-                        
+
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
               />
             </Grid2>
-
-
-          
-
             <Grid2 size={12}>
-  <TextField
-    variant="outlined"
-    fullWidth
-    label="New Password"
-    type={showNewPassword ? 'text' : 'password'}
-    autoComplete="new-password"
-    placeholder="Enter new password"
-    value={newPassword}
-    onChange={(e) => setNewPassword(e.target.value)}
-    InputProps={{
-      startAdornment: (
-        <InputAdornment position="start">
-          <LockIcon />
-        </InputAdornment>
-      ),
-      endAdornment: (
-        <InputAdornment position="end">
-          <IconButton
-            onClick={() => setShowNewPassword(prev => !prev)} // Toggle function
-            edge="end"
-          >
-            {showNewPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-          </IconButton>
-        </InputAdornment>
-      ),
-    }}
-  />
-</Grid2>
+              <TextField
+                variant="outlined"
+                fullWidth
+                label="New Password"
+                type={showNewPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="Enter new password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowNewPassword(prev => !prev)} // Toggle function
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Grid2>
 
             {error && (
               <Grid2 size={12}>

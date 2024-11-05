@@ -34,8 +34,6 @@ function AppContent() {
   const [profilePic, setProfilePic] = useState(null);
   const [userRole, setUserRole] = useState(null);
 
-
-
   useEffect(() => {
     const role = localStorage.getItem('role');
     setUserRole(role);
@@ -148,7 +146,6 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider theme={theme}>
-
       <Router>
         <AppContent />
       </Router>

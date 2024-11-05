@@ -5,13 +5,11 @@ import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
 import { useNavigate } from 'react-router-dom';
 
 const DetailBox = styled(Box)({
-    backgroundColor: '#fff', // White background for each detail box
-    borderRadius: '8px', // Rounded corners
-    padding: '16px', // Padding inside the box
-    marginBottom: '10px', // Space between boxes
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    padding: '16px',
+    marginBottom: '10px',
     boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-
-
 });
 
 const statusColorMap = {
@@ -19,8 +17,6 @@ const statusColorMap = {
     UPCOMING: 'warning',
     EXPIRED: 'default',
 };
-
-
 
 function TournamentDescription({ tournament }) {
     const [localTournamentPic, setLocalTournamentPic] = useState(null);
@@ -43,19 +39,19 @@ function TournamentDescription({ tournament }) {
         <Box sx={{ padding: 2 }}>
             <Box
                 sx={{
-                    width: '100vw', // Full width of the parent
-                    height: '200px', // Fixed height
-                    position: 'relative', // Position relative for absolute child positioning if needed
+                    width: '100vw',
+                    height: '200px',
+                    position: 'relative',
                 }}
             >
                 <img
                     alt="Tournament"
                     src={localTournamentPic}
                     style={{
-                        width: '100%', // Full width of the container
-                        height: '100%', // Full height of the container
-                        objectFit: 'cover', // Cover the entire area
-                        position: 'absolute', // Positioning to cover the box
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        position: 'absolute',
                         top: -30,
                         left: -32,
                     }}
@@ -68,14 +64,9 @@ function TournamentDescription({ tournament }) {
             <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
 
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
-
-
             <Divider sx={{ margin: '20px 0' }} />
 
-
-
             {/* Tournament Details */}
-
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={3}>
                     <DetailBox>

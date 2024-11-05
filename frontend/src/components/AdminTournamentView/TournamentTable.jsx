@@ -1,18 +1,15 @@
-import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button, Card, Grid, CardActions, CardContent, Divider } from '@mui/material';
+import { Typography, Chip, IconButton, Box, Fab, Paper, Button, Card, Grid, CardActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
-import styles from './AdminTournamentView.module.css';
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { TextField, FormControl, InputLabel, Select, MenuItem , Input} from '@mui/material';
+import { useState } from 'react';
+import { TextField, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 import TournamentItem from '../TournamentItem/TournamentItem';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
-
 
 const statusColorMap = {
     LIVE: 'success',
@@ -50,10 +47,10 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
     return (
         <div>
             <Box sx={{ display: 'flex', alignItems: 'center', margin: '0px' }}>
-                <Typography variant="header1" component="h2" className={styles.title}>
+                <Typography variant="header1" component="h2">
                     All Tournaments
                 </Typography>
-                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }}>
+                <Fab color="primary" aria-label="add" onClick={handleCreate} sx={{ ml: 2 }}>
                     <AddIcon />
                 </Fab>
             </Box>
@@ -194,7 +191,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         </IconButton>
 
                                         <IconButton
-                                             onClick={() => handleUploadClick(tournament.id)}
+                                            onClick={() => handleUploadClick(tournament.id)}
                                             sx={{ color: 'info.main', mr: 4 }}
                                         >
                                             <CloudUploadIcon />

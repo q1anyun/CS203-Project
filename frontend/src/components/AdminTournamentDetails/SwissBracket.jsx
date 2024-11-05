@@ -4,8 +4,8 @@ import axios from 'axios';
 import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
-const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
+const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
+const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
 function SwissBracket({ matches, SwissBracketID }) {
     const [swissRoundDetails, setSwissRoundDetails] = useState([]);
@@ -18,7 +18,7 @@ function SwissBracket({ matches, SwissBracketID }) {
 
     useEffect(() => {
         const fetchSwissBracket = async () => {
-            const response = await axios.get(`${baseURL}/${SwissBracketID}`);
+            const response = await axios.get(`${swissBracketURL}/${SwissBracketID}`);
             setSwissRoundDetails(response.data);
         };
         fetchSwissBracket();
@@ -72,7 +72,7 @@ function SwissBracket({ matches, SwissBracketID }) {
     const handleSaveWinner = async () => {
         const winnerId = selectedWinner[editMatchId];
         try {
-            await axios.put(`${baseURL2}/${editMatchId}/winner/${winnerId}`, {
+            await axios.put(`${matchmakingURL}/${editMatchId}/winner/${winnerId}`, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             });
             handleCloseEdit();

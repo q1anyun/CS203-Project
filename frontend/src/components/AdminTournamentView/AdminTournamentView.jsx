@@ -8,7 +8,7 @@ import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
 import TournamentTable from './TournamentTable';
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
@@ -27,7 +27,7 @@ export default function AdminTournamentView() {
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
     const [maxPlayerError, setMaxPlayerError] = useState('');
-    const [tournamentId, setTournamentId] = useState(''); 
+    const [tournamentId, setTournamentId] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
@@ -126,7 +126,7 @@ export default function AdminTournamentView() {
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const response = await axios.get(`${baseURL}`);
+                const response = await axios.get(`${tournamentURL}`);
                 console.log(response.data);
                 setTournaments(response.data);
                 setLoading(false);
@@ -145,32 +145,32 @@ export default function AdminTournamentView() {
     }, []);
 
     const handleUploadClick = (id) => {
-       setTournamentId(id);
-       console.log(id);
-       fileInputRef.current.click();
-       
+        setTournamentId(id);
+        console.log(id);
+        fileInputRef.current.click();
+
     };
 
     const handleFileChange = async (event) => {
         const file = event.target.files[0]; // Get the first file
-          // Handle file upload
-          setSelectedFile(file);
-          console.log(file); 
-          if (selectedFile) {
+        // Handle file upload
+        setSelectedFile(file);
+        console.log(file);
+        if (selectedFile) {
             const formData = new FormData();
             formData.append("file", selectedFile);
-        await axios.post(`${baseURL}/uploadTournamentImage/${tournamentId}`, formData, null, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data',
-           
-          },
-        });
-        window.location.reload();
-        console.log('image updated successfully');
+            await axios.post(`${tournamentURL}/uploadTournamentImage/${tournamentId}`, formData, null, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
 
+                },
+            });
+            window.location.reload();
+            console.log('image updated successfully');
+
+        }
     }
-}
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -179,7 +179,7 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         try {
-            const response = await axios.get(`${baseURL}/${tournamentId}`);
+            const response = await axios.get(`${tournamentURL}/${tournamentId}`);
             console.log(response.data);
             setTournamentToEdit(response.data);
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
@@ -242,12 +242,12 @@ export default function AdminTournamentView() {
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 setTournaments={setTournaments}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
             />
 
             <EditTournamentDialog
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 updateTournament={updateTournament}
                 timeControlOptions={timeControlOptions}
@@ -270,7 +270,7 @@ export default function AdminTournamentView() {
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 tournamentToDelete={tournamentToDelete}
                 setTournaments={setTournaments}
