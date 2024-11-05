@@ -67,12 +67,6 @@ function AdminUserDetails() {
         setPage(0); // Reset to first page on search
     };
 
-    // Handle rows per page change
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset to first page on rows per page change
-    };
-
     // Handle page change
     const handleChangePage = (newPage) => {
         setPage(newPage);
