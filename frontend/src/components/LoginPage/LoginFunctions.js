@@ -17,7 +17,7 @@ export const handleDialogClose = (setOpenDialog) => {
 export const handleSubmit = async (e, username, password, navigate, setError) => {
     e.preventDefault();
     try {
-        const response = await axios.post(`${baseURL}/login`, { username, password });
+        const response = await axios.post(`${baseURL}/session`, { username, password });
 
         const { role, jwtResponse } = response.data;
         const { token, expiresIn } = jwtResponse;

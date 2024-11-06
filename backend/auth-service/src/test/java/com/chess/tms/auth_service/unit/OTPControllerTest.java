@@ -47,7 +47,7 @@ class OTPControllerTest {
         when(otpService.sendOtp(otpRequest.getUsername(), otpRequest.getEmail())).thenReturn("OTP sent successfully");
 
         // Act & Assert
-        mockMvc.perform(post("/api/otp/send")
+        mockMvc.perform(post("/api/otp/request")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(otpRequest)))
                 .andExpect(status().isOk())
@@ -67,7 +67,7 @@ class OTPControllerTest {
                 .thenReturn("OTP validated successfully");
 
         // Act & Assert
-        mockMvc.perform(post("/api/otp/validate")
+        mockMvc.perform(post("/api/otp/verification")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(otpVerificationDTO)))
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class OTPControllerTest {
         when(otpService.resendOtp(otpRequest.getUsername(), otpRequest.getEmail())).thenReturn("OTP resent successfully");
 
         // Act & Assert
-        mockMvc.perform(post("/api/otp/resend")
+        mockMvc.perform(post("/api/otp/retry")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(otpRequest)))
                 .andExpect(status().isOk())

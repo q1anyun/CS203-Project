@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,11 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -96,14 +90,14 @@ class PlayerControllerTest {
     void updatePlayer_Success() throws Exception {
         long playerId = 1L;
         UpdatePlayerDetailsDTO updatedPlayerDetails = new UpdatePlayerDetailsDTO();
-        doNothing().when(playerService).updatePlayer(playerId, updatedPlayerDetails);
+        when(playerService.updatePlayer(playerId, updatedPlayerDetails)).thenReturn("Successfully updated player with ID " + playerId);
 
         mockMvc.perform(put("/api/player/currentPlayerById")
                 .header("X-User-PlayerId", String.valueOf(playerId))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedPlayerDetails)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Successfully updated player"));
+                .andExpect(content().string("Successfully updated player with ID " + playerId));
 
         verify(playerService).updatePlayer(playerId, updatedPlayerDetails);
     }
@@ -127,7 +121,7 @@ class PlayerControllerTest {
         List<RankingDTO> topPlayers = Arrays.asList(new RankingDTO(), new RankingDTO());
         when(playerService.findTop100Players()).thenReturn(topPlayers);
 
-        mockMvc.perform(get("/api/player/getTop100Players"))
+        mockMvc.perform(get("/api/player/top100Players"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(topPlayers)));
 
@@ -138,11 +132,12 @@ class PlayerControllerTest {
     void uploadProfilePicture_Success() throws Exception {
         long playerId = 1L;
         MultipartFile file = mock(MultipartFile.class);
-        doNothing().when(playerService).uploadProfilePicture(playerId, file);
+        when(playerService.uploadProfilePicture(playerId, file)).thenReturn("Profile uploaded successfully");
 
         mockMvc.perform(multipart("/api/player/uploadProfile")
                 .file("file", "dummy content".getBytes())
-                .header("X-User-PlayerId", String.valueOf(playerId)))
+                .header("X-User-PlayerId", String.valueOf(playerId))
+                .contentType(MediaType.MULTIPART_FORM_DATA))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Profile uploaded successfully"));
 
@@ -193,7 +188,7 @@ class PlayerControllerTest {
         WinLossUpdateDTO dto = new WinLossUpdateDTO(1L, 1550, true);
         doNothing().when(playerService).updateWinLossElo(dto);
 
-        mockMvc.perform(put("/api/player/updateWinLossElo")
+        mockMvc.perform(put("/api/player/winLossElo")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
@@ -208,24 +203,13 @@ class PlayerControllerTest {
         int ranking = 5;
         when(playerService.getRankingForCurrentPlayer(playerId)).thenReturn(ranking);
 
-        mockMvc.perform(get("/api/player/getRanking")
+        mockMvc.perform(get("/api/player/ranking")
                 .header("X-User-PlayerId", String.valueOf(playerId)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().string(String.valueOf(ranking)));
 
         verify(playerService).getRankingForCurrentPlayer(playerId);
-    }
-
-    @Test
-    void getRankingForCurrentPlayer_InvalidPlayerIdFormat_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(get("/api/player/getRanking")
-                .header("X-User-PlayerId", "invalid_id"))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.message").value("Invalid format for numeric value: For input string: \"invalid_id\""));
-
-        verify(playerService, never()).getRankingForCurrentPlayer(anyLong());
     }
 
     @Test

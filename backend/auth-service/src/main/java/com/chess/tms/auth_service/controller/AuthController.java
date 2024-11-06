@@ -31,7 +31,7 @@ public class AuthController {
      * @throws UserNotFoundException if authentication fails due to incorrect
      *                               credentials or any
      */
-    @PostMapping("/login")
+    @PostMapping("/session")
     public ResponseEntity<LoginResponse> login(@RequestBody JwtRequest jwtRequest) throws Exception {
         // Authenticate the user and retrieve user details
         AuthenticatedUserDTO authenticatedUser = authService.authenticate(jwtRequest);
@@ -59,7 +59,7 @@ public class AuthController {
      * @return a ResponseEntity containing a success message if registration is
      *         successful
      */
-    @PostMapping("/register/player")
+    @PostMapping("/users/player")
     public ResponseEntity<String> registerPlayer(@Valid @RequestBody PlayerRegistrationRequestDTO player) {
         return ResponseEntity.ok(authService.registerPlayer(player));
     }
@@ -71,7 +71,7 @@ public class AuthController {
      * @return a ResponseEntity containing a success message if registration is
      *         successful
      */
-    @PostMapping("/register/admin")
+    @PostMapping("/users/admin")
     public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistrationRequestDTO admin) {
         return ResponseEntity.ok(authService.registerAdmin(admin));
     }
