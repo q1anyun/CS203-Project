@@ -1,18 +1,15 @@
-import { Table, TableBody, TableContainer, TableHead, TableRow, TableCell, tableCellClasses, Typography, Chip, IconButton, Box, Fab, Paper, Button, Card, Grid, CardActions, CardContent, Divider } from '@mui/material';
+import { Typography, Chip, IconButton, Box, Fab, Paper, Button, Card, Grid, CardActions } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AddIcon from '@mui/icons-material/Add';
-import styles from './AdminTournamentView.module.css';
 import * as React from 'react';
-import { useState, useEffect } from 'react';
-import { TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { useState } from 'react';
+import { TextField, FormControl, InputLabel, Select, MenuItem, Input } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 import TournamentItem from '../TournamentItem/TournamentItem';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-
-
 
 const statusColorMap = {
     LIVE: 'success',
@@ -21,7 +18,7 @@ const statusColorMap = {
 };
 
 
-function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleUploadClick}) {
+function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDeleteClick, handleViewDetails, handleFileChange, handleUploadClick, fileInputRef }) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
@@ -50,10 +47,10 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
     return (
         <div>
             <Box sx={{ display: 'flex', alignItems: 'center', margin: '0px' }}>
-                <Typography variant="header1" component="h2" className={styles.title}>
+                <Typography variant="header1" component="h2">
                     All Tournaments
                 </Typography>
-                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }}>
+                <Fab color="primary" aria-label="add" onClick={handleCreate} sx={{ ml: 2 }}>
                     <AddIcon />
                 </Fab>
             </Box>
@@ -173,6 +170,7 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         <IconButton
                                             onClick={() => handleEditClick(tournament.id)}
                                             sx={{ color: 'primary.main', mr: 4 }}
+                                            disabled={tournament.status === 'LIVE' || tournament.status === 'COMPLETED'}
                                         >
                                             <EditIcon />
                                         </IconButton>
@@ -198,6 +196,12 @@ function TournamentTable({ tournaments, handleCreate, handleEditClick, handleDel
                                         >
                                             <CloudUploadIcon />
                                         </IconButton>
+                                        <Input
+                                            type="file"
+                                            style={{ display: 'none' }}
+                                            inputRef={fileInputRef}
+                                            onChange={handleFileChange}
+                                        />
                                         <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
 
                                     </Box>

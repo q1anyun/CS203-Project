@@ -3,6 +3,7 @@ import { Box, Typography, Chip, Button, Divider, Grid } from '@mui/material';
 import { styled } from '@mui/system';
 import defaultbackgroundImage from '../../assets/playerbg.jpg';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
+import { useNavigate } from 'react-router-dom';
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff',
@@ -20,6 +21,7 @@ const statusColorMap = {
 
 function TournamentDescription({ tournament, handleStart, handleViewRegisteredPlayers }) {
     const [localTournamentPic, setLocalTournamentPic] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const getTournamentImage = async () => {
@@ -41,7 +43,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
             >
                 <img
                     alt="Tournament"
-                    src={localTournamentPic || defaultbackgroundImage} // Use default image if none is available
+                    src={localTournamentPic || defaultbackgroundImage}
                     style={{
                         width: '100%',
                         height: '100%',
@@ -54,7 +56,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
             </Box>
 
             <Typography variant="header1">{tournament.name}</Typography>
-            <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
+            <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
             <Button
                 variant="contained"
                 color="primary"
@@ -64,7 +66,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
             >
                 Start Tournament
             </Button>
-            
+
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>
                 {tournament.description}
             </Typography>
@@ -123,10 +125,7 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
                 </Grid>
             </Grid>
             <Button variant='contained' onClick={handleViewRegisteredPlayers} color='outlined'>
-            <Typography variant="body4">Click to view registered players</Typography>
-            </Button>
-            <Button variant="contained" color="outlined" sx={{ marginLeft: '10px' }} onClick={() => navigate(`/admin/tournaments/leaderboard/${tournament.id}`)}>
-                <Typography variant="body4">Click to view Leaderboard</Typography>
+                <Typography variant="body4">Click to view registered players</Typography>
             </Button>
         </Box>
     );

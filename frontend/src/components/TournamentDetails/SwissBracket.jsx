@@ -1,23 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, Divider, Grid, Avatar, Tab, Tabs, IconButton, MenuItem, Select, Dialog, DialogContent, DialogActions, DialogTitle, Button } from '@mui/material';
+import { CardContent, Typography, Box, Divider, Grid, Avatar, Tab, Tabs } from '@mui/material';
 import axios from 'axios';
-import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
-const baseURL2 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
 function SwissBracket({ matches, SwissBracketID }) {
     const [swissRoundDetails, setSwissRoundDetails] = useState([]);
     const [tabValue, setTabValue] = useState('swiss');
-    const [editMatchId, setEditMatchId] = useState(null);
-    const [selectedWinner, setSelectedWinner] = useState({});
     const [swissMatches, setSwissMatches] = useState([]);
     const [knockoutMatches, setKnockoutMatches] = useState([]);
     const [groupedRounds, setGroupedRounds] = useState([]);
-    const [selectedTeams, setSelectedTeams] = useState([]); // Store selected match teams
-    const [winner, setWinner] = useState('');
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         const fetchSwissBracket = async () => {
@@ -25,11 +18,10 @@ function SwissBracket({ matches, SwissBracketID }) {
             setSwissRoundDetails(response.data);
         };
 
-        // Check for a saved tab state in local storage
         const lastTab = localStorage.getItem('lastTab');
         if (lastTab) {
             setTabValue(lastTab);
-            localStorage.removeItem('lastTab'); // Clear the saved state so it defaults on future loads
+            localStorage.removeItem('lastTab');
         }
 
         fetchSwissBracket();
@@ -56,8 +48,8 @@ function SwissBracket({ matches, SwissBracketID }) {
                     id: match.id,
                     winnerId: match.winnerId,
                     teams: [
-                        { id: match.player1 ? match.player1.id : 0, name: match.player1 ? match.player1.firstName : "Pending" },
-                        { id: match.player2 ? match.player2.id : 0, name: match.player2 ? match.player2.firstName : "Pending" }
+                        { id: match.player1?.id || 0, name: match.player1? match.player1.firstName + match.player2.lastName :"Pending" },
+                        { id: match.player2?.id || 0, name: match.player2? match.player2.firstName + match.player2.lastName : "Pending" }
                     ],
                 });
                 return acc;
@@ -72,8 +64,6 @@ function SwissBracket({ matches, SwissBracketID }) {
         const formattedRounds = groupMatchesByRound();
         setGroupedRounds(formattedRounds);
     }, [matches]);
-
-    
 
     const matchesByRound = swissMatches.reduce((acc, match) => {
         const roundNumber = `Round ${match.swissRoundNumber || 'Unknown'}`;
@@ -121,37 +111,39 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                 borderRadius: 2,
                                             }}
                                         >
-                                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 4,  backgroundColor: match.winnerId === match.player1.id ? 'green' : 'background.paper', // Conditional background
-                                                    p: 1, borderRadius: 1 }}>
+                                            <Box sx={{
+                                                display: 'flex', alignItems: 'center', mb: 4, backgroundColor: match.winnerId === match.player1.id ? 'green' : 'background.paper', // Conditional background
+                                                p: 1, borderRadius: 1
+                                            }}>
                                                 <Avatar
                                                     alt={`${match.player1?.firstName}`}
                                                     src={`/path/to/profile_picture/player_${match.player1.id}.jpg`}
                                                     sx={{ mr: 1 }}
                                                 />
-                                                
-                                                    <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>{match.player1?.firstName}</Typography>
-                                                
+
+                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>{`${match.player1?.firstName} ${match.player1?.lastName}`}</Typography>
+
                                             </Box>
 
-                                            <Box sx={{ 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
+                                            <Box sx={{
+                                                display: 'flex',
+                                                alignItems: 'center',
                                                 mb: 2,
-                                                backgroundColor: match.winnerId === match.player2.id ? 'lightgreen' : 'background.paper', // Conditional background
+                                                backgroundColor: match.winnerId === match.player2.id ? 'green' : 'background.paper', // Conditional background
                                                 p: 1,
-                                                borderRadius: 1, 
+                                                borderRadius: 1,
                                             }}>
                                                 <Avatar
                                                     alt={`${match.player2.firstName}`}
                                                     src={`/path/to/profile_picture/player_${match.player2Id}.jpg`}
                                                     sx={{ mr: 1 }}
                                                 />
-                                               
-                                                    <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>{match.player2.firstName}</Typography>
-                                                
+
+                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>{`${match.player2?.firstName} ${match.player2?.lastName}`}</Typography>
+
                                             </Box>
                                         </Box>
-                                       
+
                                     </Grid>
                                 ))}
                             </Grid>

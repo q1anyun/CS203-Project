@@ -1,17 +1,7 @@
 import React from 'react';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Button, Box, Grid } from '@mui/material';
 
-function RegisterDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openRegisterDialog, setOpenRegisterDialog}) {
+function RegisterDialog({ handleRegister, agreedToTerms, setAgreedToTerms, openRegisterDialog, setOpenRegisterDialog }) {
 
     const handleRegisterDialogClose = () => {
         setOpenRegisterDialog(false);

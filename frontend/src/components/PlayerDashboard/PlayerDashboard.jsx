@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Typography, Paper, Grid, Card, CardContent, Avatar, Divider } from '@mui/material';
+import { Box, Typography, Grid, Card, CardContent, Avatar, Divider } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate } from 'react-router-dom';
+import TournamentItem from "../TournamentItem/TournamentItem";
 
-const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL3 = import.meta.env.VITE_ELO_SERVICE_URL;
-const baseURL4 = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
+const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const eloURL = import.meta.env.VITE_ELO_SERVICE_URL;
+const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
+
 function PlayerDashboard() {
     const [playerDetails, setPlayerDetails] = useState({});
     const [recentMatches, setRecentMatches] = useState([]);
     const [liveTournaments, setLiveTournaments] = useState([]);
+    const [recommendedTournaments, setRecommendedTournaments] = useState([]);
     const [uData, setUData] = useState([]);
     const [xLabels, setXLabels] = useState([]);
     const navigate = useNavigate();
@@ -21,38 +24,52 @@ function PlayerDashboard() {
         const fetchPlayerAndMatchData = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/login'); // Redirect to login if no token
+                navigate('/login'); 
                 return;
             }
 
             try {
                 // Fetch player details
-                const playerResponse = await axios.get(`${baseURL}/currentPlayerById`, {
+                const playerResponse = await axios.get(`${playerURL}/currentPlayerById`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setPlayerDetails(playerResponse.data || {});
                 console.log(playerResponse.data);
 
                 // Fetch chart data
-                const chartResponse = await axios.get(`${baseURL3}/chart/current`, {
+                const chartResponse = await axios.get(`${eloURL}/chart/current`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUData(chartResponse.data.map((data) => data.elo));
                 setXLabels(chartResponse.data.map((data) => data.date));
 
                 // Fetch recent matches
-                const matchResponse = await axios.get(`${baseURL4}/player/current/recent`, {
+                const matchResponse = await axios.get(`${matchmakingURL}/player/current/recent`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRecentMatches(matchResponse.data || []);
 
                 // Fetch live tournaments
-                const tournamentResponse = await axios.get(`${baseURL2}/live/current`, {
+                const tournamentResponse = await axios.get(`${tournamentURL}/live/current`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setLiveTournaments(tournamentResponse.data || []);
-            } catch (err) {
-                handleFetchError(err);
+
+                //fetch reccomended Tournaments 
+                const reccomendedTournamentResponse = await axios.get(`${baseURL2}/recommended`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setRecommendedTournaments(reccomendedTournamentResponse.data);
+            } catch (error) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
@@ -72,9 +89,6 @@ function PlayerDashboard() {
 
                         <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
                             <Typography variant="header2">Your Statistics</Typography>
-
-                            {/* Example Stats */}
-
                             <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', justifyItems: 'center', height: '400px', marginTop: '-50px' }}>
                                 <PieChart
                                     series={[
@@ -100,6 +114,21 @@ function PlayerDashboard() {
                                     xAxis={[{ scaleType: 'point', data: xLabels, ticks: false }]}
                                 />
                             </Box>
+                        </Card>
+                    </Grid>
+
+                    <Grid item xs={12}>
+
+                        <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
+                            <Typography variant="header2">Recommended Tournaments</Typography>
+                            {recommendedTournaments.map((tournament) => (
+                                <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+                                        <TournamentItem key={tournament.id} tournament={tournament} />
+                                    </Card>
+                                </Grid>))}
+
 
                         </Card>
                     </Grid>
@@ -107,7 +136,7 @@ function PlayerDashboard() {
                     <Grid item xs={12} md={6}>
                         <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
                             <Typography variant="header2">Ongoing Tournaments</Typography>
-                            {/* Placeholder content or actual dynamic content */}
+
 
                             <Box sx={{ p: 2, height: '100%' }}>
 
@@ -137,7 +166,6 @@ function PlayerDashboard() {
                                     )}
                                 </Box>
                             </Box>
-
                         </Card>
                     </Grid>
 
@@ -158,7 +186,6 @@ function PlayerDashboard() {
                                                 borderRadius: 2,
                                                 flexGrow: 1,
                                                 alignItems: 'center'
-
                                             }}
                                         >
                                             <Typography variant="header3">{match.tournament.name}</Typography>
@@ -223,7 +250,6 @@ function PlayerDashboard() {
                                     </Typography>
                                 )}
                             </Box>
-
                         </Card>
                     </Grid>
                 </Grid>

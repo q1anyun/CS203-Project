@@ -1,9 +1,10 @@
 import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function EditTournamentDialog({
-    baseURL,
+    tournamentURL,
     token,
     updateTournament,
     timeControlOptions,
@@ -22,6 +23,8 @@ function EditTournamentDialog({
     tournaments,
     setTournaments
 }) {
+    const navigate = useNavigate();
+
     const handleEditSubmit = async () => {
 
         if (validateForm(updateTournament)) {
@@ -31,7 +34,7 @@ function EditTournamentDialog({
             console.log(updatedTournamentData);
 
             try {
-                const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
+                const response = await axios.put(`${tournamentURL}/${tournamentToEdit.id}`, updatedTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Include JWT token
                     }
@@ -57,16 +60,18 @@ function EditTournamentDialog({
                     format: ''
                 });
 
-                // setEditDialogOpen(false);
+                setEditDialogOpen(false);
 
-                // window.location.reload();
+                window.location.reload();
             } catch (error) {
                 if (error.response) {
-                    console.error('Error data:', error.response.data);
-                    console.error('Error status:', error.response.status);
-                    console.error('Error headers:', error.response.headers);
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    console.error('Error message:', error.message);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
                 }
             }
         }
@@ -81,14 +86,6 @@ function EditTournamentDialog({
         setUpdateTournament(prevState => ({
             ...prevState,
             [name]: value
-        }));
-    };
-    const handleEditDateChange = (name, newValue) => {
-        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
-        const localISOString = localDate ? localDate.toISOString() : '';
-        setUpdateTournament((prevState) => ({
-            ...prevState,
-            [name]: localISOString,
         }));
     };
     return (

@@ -25,12 +25,12 @@ function AuthPage() {
 
             const email = pendingRegistration.email;
 
-            const otpResponse = await axios.post(`${otpURL}/validate`, { email, otp });
+            const otpResponse = await axios.post(`${otpURL}/verification`, { email, otp });
             if (otpResponse.status === 200) {
                 const registerResponse = await axios.post(`${authURL}/register/player`, pendingRegistration);
                 if (registerResponse.status === 200) {
                     sessionStorage.removeItem('pendingRegistration');
-                    
+
                     setError('');
                     setLoading(true);
 
@@ -48,7 +48,7 @@ function AuthPage() {
 
     const handleResend = async () => {
         try {
-            const otpResponse = await axios.post(`${otpURL}/resend`, {
+            const otpResponse = await axios.post(`${otpURL}/retry`, {
                 username: pendingRegistration.username,
                 email: pendingRegistration.email
             });

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { Typography, CircularProgress } from '@mui/material';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -8,13 +7,11 @@ import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
 import TournamentTable from './TournamentTable';
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
 export default function AdminTournamentView() {
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [tournaments, setTournaments] = useState([]);
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
@@ -27,9 +24,13 @@ export default function AdminTournamentView() {
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
     const [maxPlayerError, setMaxPlayerError] = useState('');
+    const [tournamentId, setTournamentId] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
+
     useEffect(() => {
         const fetchTimeControls = async () => {
             const response = await axios.get(`${gameTypeURL}`);
@@ -38,6 +39,7 @@ export default function AdminTournamentView() {
 
         fetchTimeControls();
     }, []);
+
     useEffect(() => {
         const fetchRoundType = async () => {
             const response = await axios.get(`${roundTypeURL}/choices`);
@@ -89,7 +91,7 @@ export default function AdminTournamentView() {
     };
 
     const validateForm = (tournament) => {
-        console.log(newTournament);
+        
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
             return !tournament[key];
         });
@@ -123,29 +125,52 @@ export default function AdminTournamentView() {
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const response = await axios.get(`${baseURL}`);
+                const response = await axios.get(`${tournamentURL}`);
                 console.log(response.data);
                 setTournaments(response.data);
-                setLoading(false);
-
             } catch (error) {
-                console.error('Error fetching tournaments:', error);
-                setError(error);
-                setLoading(false);
-
-
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
-
         };
 
         fetchTournaments();
     }, []);
 
-    const handleUploadClick = (tournamentId) => {
-        // Logic to handle file upload interaction
-        console.log("Upload button clicked for tournament ID:", tournamentId);
-        // You can extend this to actually show a dialog or direct file input
+    const handleUploadClick = (id) => {
+        setTournamentId(id);
+        console.log(id);
+        fileInputRef.current.click();
+
     };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0]; // Get the first file
+        // Handle file upload
+        setSelectedFile(file);
+        console.log(file);
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            await axios.post(`${tournamentURL}/uploadTournamentImage/${tournamentId}`, formData, null, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+
+                },
+            });
+            window.location.reload();
+            console.log('image updated successfully');
+
+        }
+    }
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -154,7 +179,7 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         try {
-            const response = await axios.get(`${baseURL}/${tournamentId}`);
+            const response = await axios.get(`${tournamentURL}/${tournamentId}`);
             console.log(response.data);
             setTournamentToEdit(response.data);
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
@@ -172,21 +197,21 @@ export default function AdminTournamentView() {
             });
             setEditDialogOpen(true);
         } catch (error) {
-            console.error('Error fetching tournament data:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     const handleCreate = () => {
         setCreateDialogOpen(true);
     };
-
-    if (loading) {
-        return <CircularProgress />;
-    }
-
-    if (error) {
-        return <Typography color="error">Error loading tournaments: {error.message}</Typography>;
-    }
 
     return (
         <div className={styles.container}>
@@ -197,7 +222,9 @@ export default function AdminTournamentView() {
                 handleEditClick={handleEditClick}
                 handleDeleteClick={handleDeleteClick}
                 handleViewDetails={handleViewDetails}
+                handleFileChange={handleFileChange}
                 handleUploadClick={handleUploadClick}
+                fileInputRef={fileInputRef}
             />
 
             <CreateTournamentDialog
@@ -215,12 +242,12 @@ export default function AdminTournamentView() {
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 setTournaments={setTournaments}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
             />
 
             <EditTournamentDialog
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 updateTournament={updateTournament}
                 timeControlOptions={timeControlOptions}
@@ -243,7 +270,7 @@ export default function AdminTournamentView() {
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 tournamentToDelete={tournamentToDelete}
                 setTournaments={setTournaments}

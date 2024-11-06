@@ -46,6 +46,7 @@ public class UserService {
         if (updateUserRequestDTO.getOldPassword() != null && 
             !updateUserRequestDTO.getOldPassword().isEmpty()) {
             if (!passwordEncoder.matches(updateUserRequestDTO.getOldPassword(), user.getPassword())) {
+               
                 throw new UserNotFoundException("Old password is incorrect");
             }
         }
@@ -54,6 +55,7 @@ public class UserService {
         if (updateUserRequestDTO.getEmail() != null && 
             !updateUserRequestDTO.getEmail().isEmpty()) {
             if (updateUserRequestDTO.getEmail().equals(user.getEmail())) {
+               
                 throw new UserAlreadyExistsException("Email is the same as the current email.");
             }
             if (usersRepository.findByEmail(updateUserRequestDTO.getEmail()).isPresent()) {

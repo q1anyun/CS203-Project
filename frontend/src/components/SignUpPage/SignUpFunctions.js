@@ -44,7 +44,7 @@ export const handleSubmit = async (e, formData, setFormData, setErrors, setShowA
     if (Object.keys(formErrors).length > 0) return;
 
     try {
-        const otpResponse = await axios.post(`${baseURL}/send`, { username: formData.username, email: formData.email });
+        const otpResponse = await axios.post(`${baseURL}/request`, { username: formData.username, email: formData.email });
         if (otpResponse.status === 200) {
             navigate('/verification');
             sessionStorage.setItem('pendingRegistration', JSON.stringify(formData));

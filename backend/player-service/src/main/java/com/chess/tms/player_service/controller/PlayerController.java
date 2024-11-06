@@ -58,7 +58,7 @@ public class PlayerController {
             @RequestBody UpdatePlayerDetailsDTO updatedPlayerDetails) {
         Long playerId = Long.parseLong(id);
         playerService.updatePlayer(playerId, updatedPlayerDetails);
-        return ResponseEntity.ok("Suceessfully updated player");
+        return ResponseEntity.ok("Successfully updated player");
     }
 
     @GetMapping("/recentMatches")

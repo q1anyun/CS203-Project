@@ -1,16 +1,8 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { Typography, TextField, Box, Button } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableHead, tableCellClasses, TableRow, Paper, Typography, TextField, Box, Button } from '@mui/material';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
@@ -38,6 +30,7 @@ function createData(number, username, email, role) {
 }
 
 function AdminUserDetails() {
+    const navigate = useNavigate();
     const { id } = useParams();
     const [participants, setParticipants] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +47,15 @@ function AdminUserDetails() {
                 );
                 setParticipants(formattedData);
             } catch (error) {
-                console.error('Error fetching participants:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
@@ -65,12 +66,6 @@ function AdminUserDetails() {
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
         setPage(0); // Reset to first page on search
-    };
-
-    // Handle rows per page change
-    const handleChangeRowsPerPage = (event) => {
-        setRowsPerPage(parseInt(event.target.value, 10));
-        setPage(0); // Reset to first page on rows per page change
     };
 
     // Handle page change

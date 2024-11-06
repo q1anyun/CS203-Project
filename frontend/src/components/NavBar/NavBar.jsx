@@ -12,14 +12,10 @@ import { Typography } from '@mui/material';
 function NavBar({ profilePic }) {
   const [userRole, setUserRole] = useState(null);
 
-
-
   useEffect(() => {
     const role = localStorage.getItem('role');
     setUserRole(role);
   }, []);
-
-
 
   return (
 
@@ -71,7 +67,6 @@ function NavBar({ profilePic }) {
 
           </>
         )}
-
 
         <Navbar.Collapse className="justify-content-end">
           <NavDropdown

@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardContent, CardActions, Divider} from '@mui/material';
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardActions} from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';
@@ -13,11 +12,8 @@ import RegisterDialog from './RegisterDialog';
 import WithdrawDialog from './WithdrawDialog';
 import TournamentItem from '../TournamentItem/TournamentItem';
 
- 
-
-
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const playerServiceURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const statusColorMap = {
@@ -26,8 +22,6 @@ const statusColorMap = {
     COMPLETED: 'default',
 };
 
-
-
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
     const [joinedTournaments, setJoinedTournaments] = useState([]);
@@ -35,8 +29,6 @@ function PlayerTournamentView() {
     const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState({});
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [minElo, setMinElo] = useState('');
@@ -51,7 +43,7 @@ function PlayerTournamentView() {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 7;
+    const itemsPerPage = 9;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
     const handleNextPage = () => {
         if (currentPage < totalPages) {
@@ -74,34 +66,47 @@ function PlayerTournamentView() {
             });
             setElo(response.data.eloRating);
         } catch (error) {
-            console.error('Failed to fetch player ELO:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     useEffect(() => {
         if (token) {
             getPlayerElo();
-
         }
     }, [token]);
 
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const tournamentResponse = await axios.get(baseURL, {
+                const tournamentResponse = await axios.get(tournamentURL, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setTournaments(tournamentResponse.data);
 
-                const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
+                const registeredResponse = await axios.get(`${tournamentURL}/registered/current`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setJoinedTournaments(registeredResponse.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
+            } 
         };
 
         fetchTournaments();
@@ -123,38 +128,50 @@ function PlayerTournamentView() {
         try {
             console.log(token);
             console.log(selectedTournament.id);
-            const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
+            const response = await axios.post(`${tournamentPlayerURL}/register/current/${selectedTournament.id}`, null, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
             setJoinedTournaments(prev => [...prev, selectedTournament]);
             setOpenRegisterDialog(false);
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     {/*WAITING FOR API TO WITHDRAW */ }
     const handleWithdrawConfirmation = async () => {
         try {
-            const response = await axios.delete(`${baseURL2}/current/${selectedTournament.id}`, {
+            const response = await axios.delete(`${tournamentPlayerURL}/current/${selectedTournament.id}`, {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
             setJoinedTournaments(prev => prev.filter(tournament => tournament.id !== selectedTournament.id));
             setOpenWithdrawDialog(false);
         } catch (err) {
-            console.error(err);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
     };
-
-
-    if (loading) return <Typography>Loading tournaments...</Typography>;
-    if (error) return <Typography>Error: {error}</Typography>;
 
     return (
         <div className={styles.container}>

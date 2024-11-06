@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Tabs, Tab } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-// import countryList from 'react-select-country-list'
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -12,11 +11,10 @@ const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
 function PlayerProfileView({ profilePic }) {
 
-  const [value, setValue] = useState(0); // State for managing tab selection
+  const [value, setValue] = useState(0);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [uData, setUData] = useState([]);
   const [xLabels, setXLabels] = useState([]);
-  const [error, setError] = useState(''); // Declare error state
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
   const { id } = useParams();
@@ -29,7 +27,7 @@ function PlayerProfileView({ profilePic }) {
     const fetchPlayerAndMatchData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login'); // Redirect to login if no token
+        navigate('/login');
         return;
       }
 
@@ -58,35 +56,25 @@ function PlayerProfileView({ profilePic }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLiveTournaments(tournamentResponse.data || []);
-      } catch (err) {
-        handleFetchError(err);
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (err.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+        }
       }
     };
 
     fetchPlayerAndMatchData();
   }, [navigate]);
 
-  //handle the errors 
-  const handleFetchError = (err) => {
-    if (err.response) {
-      const statusCode = err.response.status;
-      const errorMessage = err.response.data.message || 'An error occurred';
-      if (statusCode === 404 || statusCode === 403) {
-        setError('Player details not found or access denied');
-      } else {
-        navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-      }
-    } else if (err.request) {
-      navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-    } else {
-      navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-    }
-  };
-
   return (
     <Box
       sx={{
-
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
         height: '100%', // Full viewport height
@@ -95,7 +83,6 @@ function PlayerProfileView({ profilePic }) {
 
       }}
     >
-
       <Card sx={{ width: '80%', height: '500px', padding: 2, marginTop: '5%' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Profile Card Section */}
@@ -104,7 +91,6 @@ function PlayerProfileView({ profilePic }) {
             alt={playerDetails.firstName}
             src={profilePic}
           />
-
           <CardContent>
             <Typography variant="playerProfile">{playerDetails.firstName + " " + playerDetails.lastName}</Typography>
           </CardContent>
@@ -125,7 +111,6 @@ function PlayerProfileView({ profilePic }) {
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
               <Typography variant="header3" display='block'>Rating</Typography>
               <Typography variant="playerProfile2" display='block'>{playerDetails.eloRating}</Typography>
-
             </Box>
           </Grid>
         </Grid>
@@ -164,10 +149,8 @@ function PlayerProfileView({ profilePic }) {
                     </Typography>
                   }
                   sx={{
-
                     padding: '12px 24px',
                     marginX: 'auto',
-
                   }}
                 />
 
@@ -179,10 +162,8 @@ function PlayerProfileView({ profilePic }) {
                   }
 
                   sx={{
-
                     padding: '12px 24px',
                     marginX: 'auto',
-
                   }}
                 />
 
@@ -192,7 +173,6 @@ function PlayerProfileView({ profilePic }) {
             {/* tab for results statistics*/}
             {value === 0 && (
               <Box sx={{ p: 2 }}>
-
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', justifyContent: 'center', alignItems: 'center', height: '400px', marginTop: '-50px' }}>
                   <PieChart
                     series={[
@@ -234,7 +214,6 @@ function PlayerProfileView({ profilePic }) {
                         borderRadius: 2,
                         flexGrow: 1,
                         alignItems: 'center'
-
                       }}
                     >
                       <Typography variant="header3">{match.tournament.name}</Typography>
@@ -304,7 +283,6 @@ function PlayerProfileView({ profilePic }) {
             {/* tab for ongoing tournaments */}
             {value === 2 && (
               <Box sx={{ p: 2, height: '100%' }}>
-
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {liveTournaments.length > 0 ? (
                     liveTournaments.map((tournament, index) => (

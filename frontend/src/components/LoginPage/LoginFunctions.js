@@ -18,16 +18,15 @@ export const handleSubmit = async (e, username, password, navigate, setError) =>
     e.preventDefault();
     try {
         const response = await axios.post(`${baseURL}/login`, { username, password });
-        
+
         const { role, jwtResponse } = response.data;
         const { token, expiresIn } = jwtResponse;
-    
+
         localStorage.setItem('token', token);
         const expirationTime = Date.now() + expiresIn * 1000;
         localStorage.setItem('tokenExpiration', expirationTime);
         localStorage.setItem('role', role);
 
-        // navigate to home page
         navigate('/home');
 
     } catch (err) {

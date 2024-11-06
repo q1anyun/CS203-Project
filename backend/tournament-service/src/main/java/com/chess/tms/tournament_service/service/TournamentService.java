@@ -333,7 +333,7 @@ public class TournamentService {
             if (tournamentType.isEmpty()) {
                 throw new TournamentTypeNotFoundException("TournamentType with id " + dto.getTournamentType() + " does not exist.");
             }
-            tournament.setTournamentId(dto.getTournamentType());
+            tournament.setTournamentType(tournamentType.get());
         }
         
         // Save the updated tournament

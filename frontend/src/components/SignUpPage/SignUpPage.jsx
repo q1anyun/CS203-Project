@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle, Select, MenuItem, FormControl, InputLabel, Box, Button } from '@mui/material';
 import countryList from 'react-select-country-list'
 
-// Icons
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -11,20 +10,18 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-// Local assets and styles
 import styles from './SignUpPage.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import profilePic from '../../assets/default_user.png';
 
-// js
 import { handleClickShowPassword, handleChange, handleLoginClick, handleSubmit } from './SignUpFunctions';
 
 function SignUpPage() {
-    const [showPassword, setShowPassword] = useState(false); // password toggle visibility
-    const [errors, setErrors] = useState({}); // display error messages
-    const [showAlert, setShowAlert] = useState(false); // successful sign up
+    const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [showAlert, setShowAlert] = useState(false);
     const options = useMemo(() => countryList().getData(), [])
-    const [formData, setFormData] = useState({ // sign up form
+    const [formData, setFormData] = useState({
         username: '',
         firstName: '',
         lastName: '',
@@ -34,7 +31,7 @@ function SignUpPage() {
         profilePicture: profilePic
     });
 
-    const navigate = useNavigate(); // to navigate to other pages
+    const navigate = useNavigate();
 
     return (
         <div className={styles.signUpBgContainer}>
@@ -59,7 +56,7 @@ function SignUpPage() {
                                 <h1 className={styles.signUpText}>SIGN UP</h1>
 
                                 <Grid2 container spacing={3}>
-                                    {showAlert && ( // successful login alert
+                                    {showAlert && (
                                         <Grid2 size={12} className={styles.alertContainer}>
                                             <Alert severity="success">
                                                 <AlertTitle>Account Created</AlertTitle>
@@ -67,7 +64,7 @@ function SignUpPage() {
                                                 <Link
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        handleLoginClick(navigate); // Navigate to the login page
+                                                        handleLoginClick(navigate);
                                                     }}
                                                     className={styles.loginLink}
                                                 >

@@ -1,61 +1,62 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
 import styles from './TournamentRegistrationDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
+const DetailBox = styled(Box)({
+    backgroundColor: '#fff',
+    borderRadius: '8px',
+    padding: '16px',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    display: 'flex',
+    alignItems: 'center',
+});
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}));
+const DetailBoxContainer = styled(Box)({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '25px',
+    marginTop: '20px',
+});
 
-function createData(id, firstName, lastName, country, eloRating, totalMatches) {
-    return { id, firstName, lastName, country, eloRating, totalMatches };
+function createData(id, firstName, lastName, country) {
+    return { id, firstName, lastName, country };
 }
 
 function TournamentRegistrationDetails() {
     const { id } = useParams();
     const [participants, setParticipants] = useState([]);
     const [open, setOpen] = useState(false);
-    const [selectedParticipant, setSelectedParticipant] = useState(null); // Add state for the selected participant
+    const [selectedParticipant, setSelectedParticipant] = useState(null);
+    const location = useLocation();
+    const tournament = location.state?.tournament;
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchParticipants = async () => {
             try {
                 const response = await axios.get(`${baseURL}/${id}`);
                 const data = response.data;
-                console.log(data);
                 const formattedData = data.map((participant) =>
-                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating, participant.totalMatches)
+                    createData(participant.id, participant.firstName, participant.lastName, participant.country)
                 );
                 setParticipants(formattedData);
             } catch (error) {
-                console.error('Error fetching participants:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
@@ -71,19 +72,27 @@ function TournamentRegistrationDetails() {
                 );
                 handleCloseDialog();
             } catch (error) {
-                console.error('Error deregistering participant:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         }
     };
 
     const handleOpenDialog = (participant) => {
-        setSelectedParticipant(participant); // Set the participant to be deregistered
-        setOpen(true); // Open the dialog
+        setSelectedParticipant(participant);
+        setOpen(true);
     };
 
     const handleCloseDialog = () => {
-        setOpen(false); // Close the dialog
-        setSelectedParticipant(null); // Reset the selected participant
+        setOpen(false);
+        setSelectedParticipant(null);
     };
 
     return (
@@ -92,52 +101,44 @@ function TournamentRegistrationDetails() {
                 <Typography variant="header1" component="h2">
                     Registered Participants
                 </Typography>
-                <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                        <TableHead>
-                            <TableRow>
-                                <StyledTableCell></StyledTableCell>
-                                <StyledTableCell>User ID</StyledTableCell>
-                                <StyledTableCell>First Name</StyledTableCell>
-                                <StyledTableCell>Last Name</StyledTableCell>
-                                <StyledTableCell>Country</StyledTableCell>
-                                <StyledTableCell>Elo Rating</StyledTableCell>
-                                <StyledTableCell>Total Matches</StyledTableCell>
-                                <StyledTableCell>Actions</StyledTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {participants.map((row) => (
-                                <StyledTableRow key={row.id} hover>
+                <DetailBoxContainer>
+                    {participants.length === 0 ? (
+                        <Typography variant="body1" align="center">
+                            No participants registered.
+                        </Typography>
+                    ) : (
+                        participants.map((participant) => (
+                            <DetailBox key={participant.id}>
+                                <Avatar
+                                    alt={`${participant.firstName} ${participant.lastName}`}
+                                    src={participant.profilePhoto}
+                                    sx={{ width: 56, height: 56, marginRight: '16px' }}
+                                />
+                                <Box sx={{ flexGrow: 1 }}>
                                     <Link
-                                        to={`/profileview/${row.id}`}
-                                        style={{ display: 'contents', textDecoration: 'none', color: 'inherit' }}
+                                        to={`/profileview/${participant.id}`}
+                                        style={{ textDecoration: 'none', color: 'inherit' }}
                                     >
-                                        <StyledTableCell>{row.id}</StyledTableCell>
-                                        <StyledTableCell>
-                                            <Avatar alt="Profile" src={row.profilePhoto} sx={{ width: 56, height: 56, border: '1px solid' }} />
-                                        </StyledTableCell>
-                                        <StyledTableCell>{row.firstName}</StyledTableCell>
-                                        <StyledTableCell>{row.lastName}</StyledTableCell>
-                                        <StyledTableCell>{row.country}</StyledTableCell>
-                                        <StyledTableCell>{row.eloRating}</StyledTableCell>
-                                        <StyledTableCell>{row.totalMatches}</StyledTableCell>
+                                        <Typography variant="h6">
+                                            {`${participant.firstName} ${participant.lastName}`}
+                                        </Typography>
                                     </Link>
-                                    <StyledTableCell align="left">
-                                        <Button
-                                            variant="outlined"
-                                            color="error"
-                                            size="small"
-                                            onClick={() => handleOpenDialog(row)}
-                                        >
-                                            Deregister
-                                        </Button>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+                                    <Typography variant="body2">{participant.country}</Typography>
+                                </Box>
+                                <PersonRemoveIcon
+                                    color="primary"
+                                    sx={{
+                                        cursor: (tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED') ? 'not-allowed' : 'pointer'
+                                    }}
+                                    onClick={tournament?.status === 'LIVE' || tournament?.status === 'COMPLETED'
+                                        ? null
+                                        : () => handleOpenDialog(participant)
+                                    }
+                                />
+                            </DetailBox>
+                        ))
+                    )}
+                </DetailBoxContainer>
             </div>
 
             {/* Confirmation Dialog */}

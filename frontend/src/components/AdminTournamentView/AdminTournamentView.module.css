@@ -1,32 +1,3 @@
-.table {
-    max-width: 1400px;
-    border-radius: 8px; /* Rounded corners for the table */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow effect */
-    border: none; /* Remove table border */
-}
-
-.title {
-    padding-top: 24px;
-    font-weight: bold;
-    text-align: center; /* Center the title */
-    color: #333; /* Darker color for better readability */
-}
-
-.table thead {
-    background-color: black; /* Black background for header */
-}
-
-.table th {
-    color: white; /* White text color for header cells */
-    border-bottom: none; /* Remove bottom border from header cells */
-    text-align: center; /* Center align header text */
-}
-
-.table td {
-    border-bottom: none; /* Remove bottom border from data cells */
-    text-align: center; /* Center align data text */
-}
-
 .container{
     display: flex;
     flex-direction: column;

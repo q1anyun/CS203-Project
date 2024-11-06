@@ -1,7 +1,8 @@
 import React from 'react';
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material'; // Import necessary MUI components
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material'; 
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function CreateTournamentDialog({
     createDialogOpen,
@@ -18,7 +19,7 @@ function CreateTournamentDialog({
     createFormError,
     setCreateFormError,
     setTournaments,
-    baseURL,
+    tournamentURL,
     token,
 }) {
     const handleCreateDialogClose = () => {
@@ -33,8 +34,9 @@ function CreateTournamentDialog({
                 ...newTournament,
             };
             console.log("New Tournament Data:", newTournamentData);
+
             try {
-                const response = await axios.post(`${baseURL}`, newTournamentData, {
+                const response = await axios.post(`${tournamentURL}`, newTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -44,12 +46,14 @@ function CreateTournamentDialog({
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
-                    console.error('Error data:', error.response.data); // Response from the backend
-                    console.error('Error status:', error.response.status); // Status code (e.g., 400)
-                    console.error('Error headers:', error.response.headers); // Response headers
-                    console.error('Error message:', error.message);
+                    console.log(error.message);
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    console.error('Error message:', error.message);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
                 }
             }
         }
@@ -62,6 +66,8 @@ function CreateTournamentDialog({
             [name]: value,
         });
     };
+
+    const navigate = useNavigate();
 
     return (
         <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm">
