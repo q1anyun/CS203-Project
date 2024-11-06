@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class MatchEloRequestDTO {
     private long winner;
 
-    public long loser;
+    private long loser;
 }

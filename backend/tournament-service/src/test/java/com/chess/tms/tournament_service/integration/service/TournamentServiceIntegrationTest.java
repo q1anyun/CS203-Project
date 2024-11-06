@@ -118,7 +118,6 @@ public class TournamentServiceIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
     
         HttpEntity<TournamentRegistrationDTO> request = new HttpEntity<>(dto, headers);
-    
         ResponseEntity<String> response = restTemplate.postForEntity(
             "/api/tournaments",
             request,

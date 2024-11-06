@@ -8,42 +8,31 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.junit.Test;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestTemplate;
 
 import com.chess.tms.elo_service.model.EloHistory;
 import com.chess.tms.elo_service.repository.EloRepository;
 import com.chess.tms.elo_service.service.EloService;
 import com.chess.tms.elo_service.dto.DTOUtil;
-import com.chess.tms.elo_service.dto.EloDTO;
 import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 import com.chess.tms.elo_service.dto.WinLossUpdateDTO;
 import com.chess.tms.elo_service.enums.Reason;
-import com.chess.tms.elo_service.exception.GlobalExceptionHandler;
 import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
 
 
@@ -109,7 +98,6 @@ public class EloServiceTest {
        
 
        LocalDateTime t1 = LocalDateTime.now();
-        LocalDateTime t2 = LocalDateTime.now();
 
         list.add(new EloHistory(1, 12345, 1315, 1315, Reason.WIN, t1));
         List<EloResponseDTO> expected = DTOUtil.convertEntriesToResponseDTOs(list);

@@ -87,7 +87,7 @@ public class EloService {
         newEloHistory.setPlayerId(dto.getPlayerId());
         newEloHistory.setChangeReason(dto.getChangeReason());
         newEloHistory.setCreatedAt(LocalDateTime.now());
-
+        System.out.println("Running " + newEloHistory);
         eloRepository.save(newEloHistory);
         return DTOUtil.convertEntryToResponseDTO(newEloHistory);
     }
@@ -144,18 +144,18 @@ public class EloService {
         return changedElo;
     }
 
-    public void updateMatchPlayersElo(MatchEloRequestDTO dto) {
+    public String updateMatchPlayersElo(MatchEloRequestDTO dto) {
         System.out.println("Running updateMatchPlayersElo in Elo Service 2");
         long winnerId = dto.getWinner();
         long loserId = dto.getLoser();
 
         // Get Elo of Players
+        System.out.println("Running get for player elo 1");
         int winnerElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + winnerId,
-        Integer.class);
-        
+                        Integer.class);
         int loserElo = restTemplate.getForObject(playersServiceUrl + "/api/player/elo/" + loserId,
-                Integer.class);
-
+                            Integer.class);
+        System.out.println("Running get for player elo 2");
         //testing
         // int winnerElo = eloRepository.findByPlayerIdOrderByCreatedAtDesc(winnerId).get(0).getNewElo();
         // int loserElo = eloRepository.findByPlayerIdOrderByCreatedAtDesc(loserId).get(0).getNewElo();
@@ -178,7 +178,8 @@ public class EloService {
         // Save Elo History
         EloHistoryRequestDTO winnerHistory = new EloHistoryRequestDTO(winner.getPlayerId(), newWinnerElo, Reason.WIN);
         EloHistoryRequestDTO loserHistory = new EloHistoryRequestDTO(loser.getPlayerId(), newLoserElo, Reason.LOSS);
-        saveEloHistory(winnerElo, winnerHistory);
+        System.out.println("Running saveEloHistory(newLoserElo, loserHistory)");
+        saveEloHistory(winnerElo, winnerHistory); // issue 
         saveEloHistory(loserElo, loserHistory);
 
         // Update Player's Elo
@@ -186,8 +187,12 @@ public class EloService {
     
         WinLossUpdateDTO winDto = new WinLossUpdateDTO(winnerId, newWinnerElo, true);
         WinLossUpdateDTO lossDto = new WinLossUpdateDTO(loserId, newLoserElo, false);
+        System.out.println("Running put for updateWinLossElo");
         restTemplate.put(updateServiceUrl, winDto);
         restTemplate.put(updateServiceUrl, lossDto);
+
+        System.out.println("Players' elo updated successfully");
+        return "Players' elo updated successfully";
     }
 
     public List<EloHistoryChartDTO> findPlayerEloHistoryForChart(long id) {
