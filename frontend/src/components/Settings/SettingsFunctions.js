@@ -30,23 +30,20 @@ export const handleSubmitChanges = async (event, oldPassword, newPassword, setEr
 
     try {
         const response = await axios.put(`${baseURL}/current`, body, { headers });
-        
         if (response.status === 200) {
-            // Successfully updated credentials
             console.log("Successfully updated credentials");
-            alert("Credentials updated successfully!"); // Notify user
-            navigate('/home'); // Redirect to a dashboard or appropriate page
-        } else {
-            // Handle unexpected response
-            setError('Failed to update credentials. Please try again.');
+            alert("Credentials updated successfully!");
+            navigate('/home');
         }
     } catch (error) {
         if (error.response) {
-            // Check if error response has specific message
-            setError(error.response.data.message || 'Error updating credentials');
+            const statusCode = error.response.status;
+            const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+            navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (err.request) {
+            navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
         } else {
-            setError('Network error, please check your connection and try again.');
+            navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
         }
-        console.error('Error updating credentials:', error);
     }
 };

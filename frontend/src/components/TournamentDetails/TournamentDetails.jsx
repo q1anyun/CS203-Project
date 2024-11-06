@@ -5,6 +5,7 @@ import { useParams } from 'react-router-dom';
 import TournamentDescription from './TournamentDescription';
 import Knockout from './Knockout';
 import SwissBracket from './SwissBracket';
+import { useNavigate } from 'react-router-dom';
 
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
@@ -14,7 +15,7 @@ function TournamentDetails() {
     const [tournament, setTournament] = useState({});
     const [rounds, setRounds] = useState([]);
     const [matches, setMatches] = useState([]);
-
+    const navigate = useNavigate();
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -40,7 +41,15 @@ function TournamentDetails() {
                 }
 
             } catch (error) {
-                console.error('Error fetching tournament details:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 

@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import { Typography, Avatar, Box, Grid, Button, TextField } from '@mui/material';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -23,10 +24,10 @@ function createData(id, firstName, lastName, country, score) {
 function TournamentRegistrationPlayerDetails() {
     const { id } = useParams();
     const [participants, setParticipants] = useState([]);
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -43,7 +44,15 @@ function TournamentRegistrationPlayerDetails() {
                 const sortedData = formattedData.sort((a, b) => b.score - a.score);
                 setLeaderboard(sortedData);
             } catch (error) {
-                console.error('Error fetching participants:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 

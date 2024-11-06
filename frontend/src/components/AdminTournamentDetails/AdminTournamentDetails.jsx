@@ -16,7 +16,6 @@ function AdminTournamentDetails() {
     const [matches, setMatches] = useState([]);
     const [rounds, setRounds] = useState([]);
 
-
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
@@ -43,7 +42,15 @@ function AdminTournamentDetails() {
                 }
 
             } catch (error) {
-                console.error('Error fetching tournament details:', error);
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
@@ -100,7 +107,6 @@ function AdminTournamentDetails() {
                 window.location.reload();
             }
         } catch (error) {
-            console.error("Error starting the tournament:", error);
             alert("Failed to start the tournament.");
         }
     };
@@ -119,13 +125,9 @@ function AdminTournamentDetails() {
 
             {/* Conditional Rendering Based on Tournament Type */}
             {tournament?.tournamentType?.id === 1 ? (
-
-
                 <Knockout
                     rounds={rounds}
                 />
-
-
             ) : tournament?.tournamentType?.id === 2 && tournament?.swissBracketId ? (
                 <SwissBracket
                     matches={matches}

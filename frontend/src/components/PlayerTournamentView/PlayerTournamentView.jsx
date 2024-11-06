@@ -29,8 +29,6 @@ function PlayerTournamentView() {
     const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
     const [selectedTournament, setSelectedTournament] = useState({});
     const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [minElo, setMinElo] = useState('');
@@ -68,14 +66,21 @@ function PlayerTournamentView() {
             });
             setElo(response.data.eloRating);
         } catch (error) {
-            console.error('Failed to fetch player ELO:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     useEffect(() => {
         if (token) {
             getPlayerElo();
-
         }
     }, [token]);
 
@@ -91,11 +96,17 @@ function PlayerTournamentView() {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setJoinedTournaments(registeredResponse.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+            } catch (error) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
+            } 
         };
 
         fetchTournaments();
@@ -123,8 +134,16 @@ function PlayerTournamentView() {
 
             setJoinedTournaments(prev => [...prev, selectedTournament]);
             setOpenRegisterDialog(false);
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
@@ -138,17 +157,21 @@ function PlayerTournamentView() {
             setJoinedTournaments(prev => prev.filter(tournament => tournament.id !== selectedTournament.id));
             setOpenWithdrawDialog(false);
         } catch (err) {
-            console.error(err);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
     };
-
-
-    if (loading) return <Typography>Loading tournaments...</Typography>;
-    if (error) return <Typography>Error: {error}</Typography>;
 
     return (
         <div className={styles.container}>

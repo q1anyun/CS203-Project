@@ -2,33 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Avatar, Box } from '@mui/material';
 import axios from 'axios';
 import defaultProfilePic from '../../assets/default_user.png';
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 function AdminProfile() {
 
   const [adminDetails, setAdminDetails] = useState([]);
-
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login'); 
+        navigate('/login');
         return;
       }
-
-      const adminResponse = await axios.get(`${baseURL}/current`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setAdminDetails(adminResponse.data || {});
-
+      try {
+        const adminResponse = await axios.get(`${baseURL}/current`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAdminDetails(adminResponse.data || {});
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (err.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+        }
+      }
     };
-
     fetchUserData();
   },);
-
-
 
   return (
     <Box

@@ -4,6 +4,7 @@ import LeaderboardHeader from './LeaderboardHeader';
 import axios from 'axios';
 import { Container, Grid2 } from '@mui/material';
 import { Link } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
@@ -12,6 +13,7 @@ function Leaderboard() {
   const [topThree, setTopThree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -25,17 +27,21 @@ function Leaderboard() {
         console.log(top3); 
         setProfiles(remainingPlayers);
         setLoading(false);
-      } catch (err) {
-        setError('Failed to load data');
-        setLoading(false);
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (err.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+        }
       }
     };
 
     fetchData();
   }, []);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div>
