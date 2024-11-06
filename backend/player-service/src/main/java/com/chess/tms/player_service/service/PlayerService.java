@@ -98,7 +98,7 @@ public class PlayerService {
 
     private RankingDTO convertToRankingDTO(PlayerDetails playerDetails) {
         RankingDTO dto = new RankingDTO();
-        dto.setUserId(playerDetails.getUserId());
+        dto.setPlayerId(playerDetails.getId());
         dto.setFirstName(playerDetails.getFirstName());
         dto.setLastName(playerDetails.getLastName());
         dto.setEloRating(playerDetails.getEloRating());
