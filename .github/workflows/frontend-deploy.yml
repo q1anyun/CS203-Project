@@ -25,7 +25,7 @@ jobs:
       - name: Build React App
         run: |
           cd frontend
-          npm run build
+          npm run build --force
 
       - name: Deploy to S3
         env:
