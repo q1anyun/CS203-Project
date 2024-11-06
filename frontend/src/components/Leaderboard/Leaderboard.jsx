@@ -9,6 +9,7 @@ const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 function Leaderboard() {
   const [profiles, setProfiles] = useState([]);
+  const [topThree, setTopThree] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -16,7 +17,13 @@ function Leaderboard() {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${baseURL}/getTop100Players`);
-        setProfiles(response.data);
+        // Separate top 3 players
+        const top3 = response.data.slice(0, 3);
+        const remainingPlayers = response.data.slice(3);
+        
+        setTopThree(top3);
+        console.log(top3); 
+        setProfiles(remainingPlayers);
         setLoading(false);
       } catch (err) {
         setError('Failed to load data');
@@ -32,16 +39,17 @@ function Leaderboard() {
 
   return (
     <div>
-      <LeaderboardHeader />
+      <LeaderboardHeader topPlayers={topThree} />
       <Container maxWidth="lg" sx={{ marginTop: 4, marginBottom: 10 }}>
         <Grid2 container spacing={2}>
           {profiles.map((profile, index) => (
             <Grid2 size={12} key={profile.userId}>
               <Link
                 to={`/profileview/${profile.userId}`}
-                style={{ textDecoration: 'none', color: 'inherit' }} >
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
                 <Profile
-                  rank={index + 1}
+                  rank={index + 4} // Add 4 to account for top 3 players
                   firstName={profile.firstName}
                   lastName={profile.lastName}
                   eloRating={profile.eloRating}
