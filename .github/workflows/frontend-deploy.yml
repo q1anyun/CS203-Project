@@ -34,4 +34,4 @@ jobs:
           AWS_REGION: us-east-1
         run: |
           npm install -g aws-cli
-          aws s3 sync frontend/dist/ s3://chess-tms-frontend/ --acl public-read
+          aws s3 sync frontend/dist/ s3://chess-tms-frontend/
