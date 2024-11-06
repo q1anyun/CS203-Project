@@ -44,8 +44,8 @@ function SwissBracket({ matches, SwissBracketID }) {
                     id: match.id,
                     winnerId: match.winnerId,
                     teams: [
-                        { id: match.player1?.id || 0, name: match.player1? match.player1.firstName + match.player2.lastName :"Pending" },
-                        { id: match.player2?.id || 0, name: match.player2? match.player2.firstName + match.player2.lastName : "Pending" }
+                        { id: match.player1?.id || 0, name: match.player1? match.player1.firstName + " " + match.player1.lastName :"Pending" },
+                        { id: match.player2?.id || 0, name: match.player2? match.player2.firstName + " " + match.player2.lastName : "Pending" }
                     ],
                 });
                 return acc;
@@ -156,7 +156,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                     sx={{ mr: 1 }}
                                                 />
                                                 <Typography variant="body1" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>
-                                                    {match.player1?.firstName}
+                                                {`${match.player1?.firstName} ${match.player1?.lastName}`}
                                                 </Typography>
                                             </Box>
 
@@ -167,7 +167,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                     sx={{ mr: 1 }}
                                                 />
                                                 <Typography variant="body1" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>
-                                                    {match.player2?.firstName}
+                                                {`${match.player2?.firstName} ${match.player2?.lastName}`}
                                                 </Typography>
                                             </Box>
 

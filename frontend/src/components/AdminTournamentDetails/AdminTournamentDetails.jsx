@@ -70,8 +70,8 @@ function AdminTournamentDetails() {
                 id: match.id,
                 winnerId: match.winnerId,
                 teams: [
-                    { id: match.player1 ? match.player1.id : 0, name: match.player1 ? match.player1.firstName + match.player1.lastName : "Pending" },
-                    { id: match.player2 ? match.player2.id : 0, name: match.player2 ? match.player2.firstName + match.player2.lastName: "Pending" }
+                    { id: match.player1 ? match.player1.id : 0, name: match.player1 ? match.player1.firstName + " " + match.player1.lastName : "Pending" },
+                    { id: match.player2 ? match.player2.id : 0, name: match.player2 ? match.player2.firstName + " " + match.player2.lastName: "Pending" }
                 ],
             });
 

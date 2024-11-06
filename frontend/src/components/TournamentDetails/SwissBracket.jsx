@@ -121,7 +121,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                     sx={{ mr: 1 }}
                                                 />
 
-                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>{match.player1?.firstName}</Typography>
+                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>{`${match.player1?.firstName} ${match.player1?.lastName}`}</Typography>
 
                                             </Box>
 
@@ -129,7 +129,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                 display: 'flex',
                                                 alignItems: 'center',
                                                 mb: 2,
-                                                backgroundColor: match.winnerId === match.player2.id ? 'lightgreen' : 'background.paper', // Conditional background
+                                                backgroundColor: match.winnerId === match.player2.id ? 'green' : 'background.paper', // Conditional background
                                                 p: 1,
                                                 borderRadius: 1,
                                             }}>
@@ -139,7 +139,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                     sx={{ mr: 1 }}
                                                 />
 
-                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>{match.player2.firstName}</Typography>
+                                                <Typography variant="playerProfile2" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>{`${match.player2?.firstName} ${match.player2?.lastName}`}</Typography>
 
                                             </Box>
                                         </Box>
