@@ -12,6 +12,7 @@ import com.chess.tms.match_service.exception.MatchAlreadyCompletedException;
 import com.chess.tms.match_service.exception.RoundTypeNotFoundException;
 import com.chess.tms.match_service.exception.SwissBracketNotFoundException;
 import com.chess.tms.match_service.model.*;
+import com.chess.tms.match_service.model.Match.MatchStatus;
 import com.chess.tms.match_service.repository.GameTypeRepository;
 import com.chess.tms.match_service.repository.MatchesRepository;
 import com.chess.tms.match_service.repository.RoundTypeRepository;
@@ -46,7 +47,9 @@ public class MatchService {
     @Autowired
     private SwissStandingRepository swissStandingRepository;
 
-    private final RestTemplate restTemplate;
+
+    @Autowired
+    private  RestTemplate restTemplate;
 
     @Value("${tournaments.service.url}")
     private String tournamentServiceUrl;
@@ -104,15 +107,7 @@ public class MatchService {
         List<Match> byeMatches = new ArrayList<>();
         for (int i = 0; i < byes; i++) {
             TournamentPlayerEloDTO playerWithBye = players[i]; // Top player gets a bye
-            Match byeMatch = new Match();
-            byeMatch.setTournamentId(tournamentId);
-            byeMatch.setPlayer1Id(null);
-            byeMatch.setPlayer2Id(null);
-            byeMatch.setWinnerId(playerWithBye.getId());
-            byeMatch.setRoundType(currentRoundType);
-            byeMatch.setGameType(gameTypeRepository.findById(gameTypeId)
-                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
-            byeMatch.setStatus(Match.MatchStatus.COMPLETED);
+            Match byeMatch = createMatch(tournamentId, null, null, playerWithBye.getId(), null, null, currentRoundType, gameTypeId, null, Match.MatchStatus.COMPLETED); 
             byeMatches.add(byeMatch);
             allMatches.add(byeMatch);
 
@@ -131,15 +126,9 @@ public class MatchService {
         while (lowIndex < highIndex) {
             TournamentPlayerEloDTO player1 = players[lowIndex]; // Higher Elo
             TournamentPlayerEloDTO player2 = players[highIndex]; // Lower Elo
-
-            Match match = new Match();
-            match.setTournamentId(tournamentId);
-            match.setPlayer1Id(player1.getId());
-            match.setPlayer2Id(player2.getId());
-            match.setRoundType(currentRoundType);
-            match.setGameType(gameTypeRepository.findById(gameTypeId)
-                    .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
-            match.setStatus(Match.MatchStatus.PENDING);
+           
+            Match match = createMatch(tournamentId, player1.getId(), player2.getId(), null, null, null, currentRoundType, gameTypeId, null, Match.MatchStatus.PENDING);
+    
             firstRoundMatches.add(match);
             allMatches.add(match);
 
@@ -163,13 +152,9 @@ public class MatchService {
             List<Match> currentRoundMatches = new ArrayList<>();
             for (int i = 0; i < currentRoundSize; i++) {
                 System.out.println("Round " + roundNumber + " Match " + i);
-                Match nextRoundMatch = new Match();
-                nextRoundMatch.setTournamentId(tournamentId);
-                nextRoundMatch.setRoundType(getRoundType(currentRoundSize * 2));
-                nextRoundMatch.setGameType(gameTypeRepository.findById(gameTypeId)
-                        .orElseThrow(
-                                () -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
-                nextRoundMatch.setStatus(Match.MatchStatus.PENDING);
+
+                RoundType roundType = getRoundType(currentRoundSize * 2);
+                Match nextRoundMatch = createMatch(tournamentId, null, null, null, null, null, roundType, gameTypeId, null, Match.MatchStatus.PENDING);
                 currentRoundMatches.add(nextRoundMatch);
                 allMatches.add(nextRoundMatch);
             }
@@ -307,19 +292,8 @@ public class MatchService {
     // Helper method to create and add a match to the list
     private void createAndAddMatch(List<Match> matches, TournamentPlayerEloDTO player1,
             TournamentPlayerEloDTO player2, Long tournamentId, Long gameTypeId, Integer roundNumber) {
-        Match match = new Match();
-        match.setTournamentId(tournamentId);
-        match.setPlayer1Id(player1.getId());
-        match.setPlayer2Id(player2.getId());
-        match.setSwissRoundNumber(roundNumber);
-        match.setRoundType(getRoundTypeForSwissRound()); // Define this to get the round type for Swiss rounds
 
-        // Fetch the GameType entity from the repository and set it
-        GameType gameType = gameTypeRepository.findById(gameTypeId)
-                .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found"));
-        match.setGameType(gameType);
-
-        match.setStatus(Match.MatchStatus.PENDING);
+        Match match = createMatch(tournamentId, player1.getId(), player2.getId(),null, null, roundNumber, getRoundTypeForSwissRound(), gameTypeId, null, Match.MatchStatus.PENDING);
 
         // Add the match to the matches list
         matches.add(match);
@@ -539,6 +513,7 @@ public class MatchService {
         PlayerDetailsDTO player2 = new PlayerDetailsDTO();
 
         if (match.getPlayer1Id() != null) {
+
             player1 = getPlayerDetails(match.getPlayer1Id());
             matchDTO.setPlayer1(player1);
         } else {
@@ -580,10 +555,32 @@ public class MatchService {
     }
 
     private PlayerDetailsDTO getPlayerDetails(long playerId) {
-        ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
-                playerServiceUrl + "/api/player/" + playerId,
-                PlayerDetailsDTO.class);
+        // ResponseEntity<PlayerDetailsDTO> response = restTemplate.getForEntity(
+        //         playerServiceUrl + "/api/player/" + playerId,
+        //         PlayerDetailsDTO.class);
 
-        return response.getBody();
+        String playerUrl =  playerServiceUrl + "/api/player/" + playerId; 
+        System.out.println(playerUrl);
+
+        return restTemplate.getForObject(playerUrl, PlayerDetailsDTO.class);
+    }
+    
+    private Match createMatch( Long tournamentId, Long player1Id, Long player2Id, Long winnerId, Long loserId,
+    Integer swissRoundNumber, RoundType roundType, Long gameTypeId, Long nextMatchId,
+    MatchStatus status){
+        Match match = new Match();
+        match.setTournamentId(tournamentId);
+        match.setPlayer1Id(player1Id);
+        match.setPlayer2Id(player2Id);
+        match.setWinnerId(winnerId);
+        match.setLoserId(loserId); 
+        match.setSwissRoundNumber(swissRoundNumber);
+        match.setRoundType(roundType);
+        match.setGameType(gameTypeRepository.findById(gameTypeId)
+                .orElseThrow(() -> new GameTypeNotFoundException("GameType with ID " + gameTypeId + " not found")));
+        match.setNextMatchId(nextMatchId);
+        match.setStatus(status);
+
+        return match; 
     }
 }
