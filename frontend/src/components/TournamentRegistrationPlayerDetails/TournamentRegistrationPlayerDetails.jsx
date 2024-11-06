@@ -3,6 +3,7 @@ import { styled } from '@mui/material/styles';
 import { Typography, Avatar, Box, Grid, Button, TextField } from '@mui/material';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import ReactCountryFlag from 'react-country-flag';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
@@ -120,14 +121,26 @@ function TournamentRegistrationPlayerDetails() {
                                             src={participant.profilePhoto}
                                             sx={{ width: 56, height: 56, marginRight: '16px' }}
                                         />
-                                        <Box >
+                                        <Box>
                                             <Link
                                                 to={`/profileview/${participant.id}`}
                                                 style={{ textDecoration: 'none', color: 'inherit' }}
                                             >
-                                                <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
+                                                <Typography variant="h6">{`${participant.firstName} ${participant.lastName}`}</Typography>
                                             </Link>
-                                            <Typography variant="body1">{participant.country}</Typography>
+                                            <Typography variant="body1">
+                                                <ReactCountryFlag
+                                                    countryCode={participant.country} // Assuming you have a countryCode field
+                                                    svg
+                                                    style={{
+                                                        width: '2em',
+                                                        height: '2em'
+                                                    }}
+                                                    title={participant.country}
+                                                /> 
+                                                {participant.country}
+                                            </Typography>
+                                            <Typography variant="body2">Elo: {participant.eloRating}</Typography> {/* Assuming you have an eloRating field */}
                                         </Box>
                                     </DetailBox>
                                 ))
