@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 
 const DeleteConfirmationDialog = ({
     open,
-    baseURL,
+    tournamentURL,
     token,
     tournamentToDelete,
     setTournaments,
@@ -17,7 +17,7 @@ const DeleteConfirmationDialog = ({
     
     const handleConfirm = async () => {
         try {
-            const response = await axios.delete(`${baseURL}/${tournamentToDelete}`, {
+            const response = await axios.delete(`${tournamentURL}/${tournamentToDelete}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }

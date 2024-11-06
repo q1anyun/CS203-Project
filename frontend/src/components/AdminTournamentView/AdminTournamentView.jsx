@@ -91,7 +91,7 @@ export default function AdminTournamentView() {
     };
 
     const validateForm = (tournament) => {
-        console.log(newTournament);
+        
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
             return !tournament[key];
         });

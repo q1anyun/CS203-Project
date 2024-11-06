@@ -19,7 +19,7 @@ function CreateTournamentDialog({
     createFormError,
     setCreateFormError,
     setTournaments,
-    baseURL,
+    tournamentURL,
     token,
 }) {
     const handleCreateDialogClose = () => {
@@ -34,8 +34,9 @@ function CreateTournamentDialog({
                 ...newTournament,
             };
             console.log("New Tournament Data:", newTournamentData);
+
             try {
-                const response = await axios.post(`${baseURL}`, newTournamentData, {
+                const response = await axios.post(`${tournamentURL}`, newTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -45,6 +46,7 @@ function CreateTournamentDialog({
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
+                    console.log(error.message);
                     const statusCode = error.response.status;
                     const errorMessage = error.response.data?.message || 'An unexpected error occurred';
                     navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);

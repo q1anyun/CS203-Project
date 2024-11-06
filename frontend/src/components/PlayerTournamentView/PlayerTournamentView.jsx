@@ -43,7 +43,7 @@ function PlayerTournamentView() {
     const navigate = useNavigate();
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 7;
+    const itemsPerPage = 9;
     const totalPages = Math.ceil(tournaments.length / itemsPerPage);
     const handleNextPage = () => {
         if (currentPage < totalPages) {

@@ -4,7 +4,7 @@ import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
 
 function EditTournamentDialog({
-    baseURL,
+    tournamentURL,
     token,
     updateTournament,
     timeControlOptions,
@@ -34,7 +34,7 @@ function EditTournamentDialog({
             console.log(updatedTournamentData);
 
             try {
-                const response = await axios.put(`${baseURL}/${tournamentToEdit.id}`, updatedTournamentData, {
+                const response = await axios.put(`${tournamentURL}/${tournamentToEdit.id}`, updatedTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`, // Include JWT token
                     }
