@@ -16,7 +16,7 @@ function Leaderboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseURL}/getTop100Players`);
+        const response = await axios.get(`${baseURL}/top100Players`);
         // Separate top 3 players
         const top3 = response.data.slice(0, 3);
         const remainingPlayers = response.data.slice(3);

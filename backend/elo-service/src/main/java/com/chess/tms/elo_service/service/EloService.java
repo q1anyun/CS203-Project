@@ -176,7 +176,7 @@ public class EloService {
         saveEloHistory(loserElo, loserHistory);
 
         // Update Player's Elo
-        String updateServiceUrl = playersServiceUrl + "/api/player/updateWinLossElo" ;
+        String updateServiceUrl = playersServiceUrl + "/api/player/winLossElo" ;
     
         WinLossUpdateDTO winDto = new WinLossUpdateDTO(winnerId, newWinnerElo, true);
         WinLossUpdateDTO lossDto = new WinLossUpdateDTO(loserId, newLoserElo, false);

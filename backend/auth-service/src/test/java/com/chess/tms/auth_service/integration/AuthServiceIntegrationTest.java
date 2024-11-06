@@ -49,7 +49,7 @@ public class AuthServiceIntegrationTest {
     public void testPlayerRegistrationSuccess() throws Exception {
         String registrationJson = createRegistrationJson(USERNAME, EMAIL, PASSWORD, "John", "Doe", "USA", "https://example.com/picture.jpg");
 
-        mockMvc.perform(post("/api/auth/register/player")
+        mockMvc.perform(post("/api/auth/users/player")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(registrationJson))
                 .andExpect(status().isOk())
@@ -60,7 +60,7 @@ public class AuthServiceIntegrationTest {
     public void testPlayerLoginSuccess() throws Exception {
         String registrationJson = createRegistrationJson(USERNAME, EMAIL, PASSWORD, "John", "Doe", "USA", "https://example.com/picture.jpg");
 
-        mockMvc.perform(post("/api/auth/register/player")
+        mockMvc.perform(post("/api/auth/users/player")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(registrationJson))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ public class AuthServiceIntegrationTest {
         JwtRequest jwtRequest = new JwtRequest(USERNAME, PASSWORD);
         String loginJson = objectMapper.writeValueAsString(jwtRequest);
 
-        ResultActions result = mockMvc.perform(post("/api/auth/login")
+        ResultActions result = mockMvc.perform(post("/api/auth/session")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginJson));
 
@@ -82,7 +82,7 @@ public class AuthServiceIntegrationTest {
     public void testPlayerLoginFailureInvalidCredentials() throws Exception {
         String registrationJson = createRegistrationJson(USERNAME, EMAIL, PASSWORD, "John", "Doe", "USA", "https://example.com/picture.jpg");
 
-        mockMvc.perform(post("/api/auth/register/player")
+        mockMvc.perform(post("/api/auth/users/player")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(registrationJson))
                 .andExpect(status().isOk())
@@ -95,7 +95,7 @@ public class AuthServiceIntegrationTest {
                 }
                 """, USERNAME);
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/auth/session")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidLoginJson))
                 .andExpect(status().isForbidden());
