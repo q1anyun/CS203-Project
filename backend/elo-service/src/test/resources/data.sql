@@ -23,7 +23,7 @@
 --   FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
 -- );
 
--- CREATE TABLE "elo_history" (
+-- CREATE TABLE elo_history (
 --   id BIGINT AUTO_INCREMENT PRIMARY KEY,
 --   player_id BIGINT NOT NULL,
 --   old_elo INT NOT NULL,
@@ -38,6 +38,8 @@
 -- ('john_doe', 'john.doe@example.com', 'hashed_password1', 'PLAYER'),
 -- ('jane_doe', 'jane.doe@example.com', 'hashed_password2', 'PLAYER');
 
--- INSERT INTO player_details (user_id, elo_rating) VALUES
--- (1, 1315),  
--- (2, 1315);
+-- select * from "user";
+
+INSERT INTO player_details (user_id, elo_rating) VALUES
+(1, 1315),  
+(2, 1315);

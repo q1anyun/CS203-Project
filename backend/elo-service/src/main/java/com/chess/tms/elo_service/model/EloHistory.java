@@ -27,7 +27,7 @@ public class EloHistory{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "player_id", nullable = false, unique = true)
+    @Column(name = "player_id", nullable = false)
     private long playerId;
     
     @Column(name = "old_elo", nullable = false)
