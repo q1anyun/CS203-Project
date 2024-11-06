@@ -11,8 +11,6 @@ const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 function Leaderboard() {
   const [profiles, setProfiles] = useState([]);
   const [topThree, setTopThree] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -26,7 +24,6 @@ function Leaderboard() {
         setTopThree(top3);
         console.log(top3); 
         setProfiles(remainingPlayers);
-        setLoading(false);
       } catch (error) {
         if (error.response) {
           const statusCode = error.response.status;
@@ -49,9 +46,9 @@ function Leaderboard() {
       <Container maxWidth="lg" sx={{ marginTop: 4, marginBottom: 10 }}>
         <Grid2 container spacing={2}>
           {profiles.map((profile, index) => (
-            <Grid2 size={12} key={profile.userId}>
+            <Grid2 size={12} key={profile.playerId}>
               <Link
-                to={`/profileview/${profile.userId}`}
+                to={`/profileview/${profile.playerId}`}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
                 <Profile

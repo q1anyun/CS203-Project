@@ -3,7 +3,6 @@ import { styled } from '@mui/material/styles';
 import { Typography, Avatar, Box, Grid, Button, TextField } from '@mui/material';
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 
 const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 
