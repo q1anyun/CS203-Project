@@ -105,23 +105,43 @@ public class PlayerController {
         return ResponseEntity.ok("Profile uploaded successfully");
     }
 
-    // @GetMapping("profilePicture")
-    // public ResponseEntity<Resource> getProfilePicture(@RequestHeader("X-User-PlayerId") String id) {
-    //     // Assuming you saved the file as player_{playerId}.jpg
-    //     Long playerId = Long.parseLong(id);
-    //     Path filePath = Paths.get("profile-picture/player_" + playerId + ".jpg"); // Adjust based on your naming convention
-    //     Resource resource = new FileSystemResource(filePath.toFile());
-        
-    //     if (!resource.exists()) {
-    //         return ResponseEntity.notFound().build();
-    //     }
     
-    //     return ResponseEntity.ok()
-    //             .contentType(MediaType.IMAGE_JPEG) // Change if using a different format
-    //             .body(resource);
-    // }
+    // for testing
+    @PostMapping("/uploadProfile/{id}")
+    public ResponseEntity<String> uploadProfilePicture(@PathVariable("id") long id,
+            @RequestParam("file") MultipartFile file) {
+        try {
+            playerService.uploadProfilePicture(id, file);
+        } catch (IOException e) {
+            System.out.println("File upload failed: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("File upload failed");
+        }
+        return ResponseEntity.ok("Profile uploaded successfully");
+    }
 
-     @GetMapping("/photo") // Accept filename as a path variable
+  
+     @GetMapping("/photo/{id}") // Accept filename as a path variable
+    public ResponseEntity<InputStreamResource> getPhoto(@PathVariable("id") long id) {
+        try {
+            String filename = "player_" + id; 
+            byte[] photoData = playerService.getProfilePicture(filename); // Retrieve the photo data
+            // Check if photoData is null
+            if (photoData == null || photoData.length == 0) {
+                System.out.println("Photo data is null or empty for ID: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if no photo found
+            }
+    
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(determineMediaType(filename)); // Set the correct media type
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new InputStreamResource(new ByteArrayInputStream(photoData))); // Return as InputStreamResource
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 if photo not found
+        }
+    }
+
+    @GetMapping("/photo") // Accept filename as a path variable
     public ResponseEntity<InputStreamResource> getPhoto(@RequestHeader("X-User-PlayerId") String id) {
         try {
             String filename = "player_" + id; 

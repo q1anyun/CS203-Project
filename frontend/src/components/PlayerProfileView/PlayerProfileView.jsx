@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Tabs, Tab } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate, useParams } from 'react-router-dom';
+import defaultProfilePic from '../../assets/default_user.png'; // Adjust path as needed
 import axios from 'axios';
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -9,7 +10,7 @@ const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const eloURL = import.meta.env.VITE_ELO_SERVICE_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 
-function PlayerProfileView({ profilePic }) {
+function PlayerProfileView() {
 
   const [value, setValue] = useState(0);
   const [playerDetails, setPlayerDetails] = useState([]);
@@ -18,6 +19,7 @@ function PlayerProfileView({ profilePic }) {
   const [recentMatches, setRecentMatches] = useState([]);
   const [liveTournaments, setLiveTournaments] = useState([]);
   const { id } = useParams();
+  const [profilePicture, setProfilePicture] = useState(defaultProfilePic)
 
   const navigate = useNavigate();
 
@@ -56,6 +58,9 @@ function PlayerProfileView({ profilePic }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         setLiveTournaments(tournamentResponse.data || []);
+
+    
+
       } catch (error) {
         if (error.response) {
           const statusCode = error.response.status;
@@ -72,6 +77,45 @@ function PlayerProfileView({ profilePic }) {
     fetchPlayerAndMatchData();
   }, [navigate]);
 
+
+
+  useEffect(() => {
+    const getProfilePicture = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+  
+      try {
+        const profilePictureResponse = await axios.get(`${playerURL}/photo/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        });
+        const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+        setProfilePicture(imageUrl);
+  
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          
+          if (statusCode === 404) {
+            setProfilePicture(defaultProfilePic);
+          } else {
+            navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+          }
+        } else if (error.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
+        }
+      }
+    };
+  
+    getProfilePicture();
+  }, [navigate]);
+  
   return (
     <Box
       sx={{
@@ -89,7 +133,7 @@ function PlayerProfileView({ profilePic }) {
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
             alt={playerDetails.firstName}
-            src={profilePic}
+            src={profilePicture}
           />
           <CardContent>
             <Typography variant="playerProfile">{playerDetails.firstName + " " + playerDetails.lastName}</Typography>
