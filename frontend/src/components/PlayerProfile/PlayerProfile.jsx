@@ -4,6 +4,7 @@ import axios from 'axios';
 import countryList from 'react-select-country-list'
 import EditProfileDialog from './EditProfileDialog';
 import { useNavigate } from 'react-router-dom';
+import ReactCountryFlag from 'react-country-flag';
 
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -145,7 +146,17 @@ function PlayerProfile({ profilePic }) {
           <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
               <Typography variant="header3" display='block'>Country</Typography>
-              <Typography variant="playerProfile2" display='block'>{playerDetails.country}</Typography>
+
+              <ReactCountryFlag
+                countryCode={playerDetails.country}// Assuming you have a countryCode field
+                svg
+                style={{
+                  width: '2em',
+                  height: '2em',
+                  marginLeft: '10px'
+                }}
+                title={playerDetails.country}
+              />
             </Box>
           </Grid>
           <Grid item xs={6}>

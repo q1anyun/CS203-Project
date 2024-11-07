@@ -34,11 +34,8 @@ function TournamentRegistrationPlayerDetails() {
             try {
                 const response = await axios.get(`${baseURL}/${id}`);
                 const data = response.data;
-                console.log(data);
-                const formattedData = data.map((participant) =>
-                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.score)
-                );
-                setParticipants(formattedData);
+                setParticipants(data);
+                console.log(participants);
 
                 // Create leaderboard data
                 const sortedData = formattedData.sort((a, b) => b.score - a.score);
@@ -109,13 +106,20 @@ function TournamentRegistrationPlayerDetails() {
                                 onChange={handleSearchChange}
                                 style={{ marginTop: '20px', width: '95vw' }}
                             />
+        
                             {participants.length === 0 ? (
                                 <Typography variant="playerProfile2" align="center">
                                     Be the first to register!
                                 </Typography>
                             ) : (
+
                                 paginatedParticipants.map((participant) => (
-                                    <DetailBox key={participant.id} marginTop={2}>
+                                    <DetailBox
+                                        key={participant.id}
+                                        display="flex"
+                                        py={2}
+                                        px={2}
+                                        borderBottom="1px solid #ddd">
                                         <Avatar
                                             alt={`${participant.firstName} ${participant.lastName}`}
                                             src={participant.profilePhoto}
@@ -126,22 +130,30 @@ function TournamentRegistrationPlayerDetails() {
                                                 to={`/profileview/${participant.id}`}
                                                 style={{ textDecoration: 'none', color: 'inherit' }}
                                             >
-                                                <Typography variant="h6">{`${participant.firstName} ${participant.lastName}`}</Typography>
+                                                <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
                                             </Link>
-                                            <Typography variant="body1">
-                                                <ReactCountryFlag
-                                                    countryCode={participant.country} // Assuming you have a countryCode field
-                                                    svg
-                                                    style={{
-                                                        width: '2em',
-                                                        height: '2em'
-                                                    }}
-                                                    title={participant.country}
-                                                /> 
-                                                {participant.country}
-                                            </Typography>
-                                            <Typography variant="body2">Elo: {participant.eloRating}</Typography> {/* Assuming you have an eloRating field */}
+
+                                            <ReactCountryFlag
+                                                countryCode={participant.country}// Assuming you have a countryCode field
+                                                svg
+                                                style={{
+                                                    width: '2em',
+                                                    height: '2em',
+                                                    marginLeft: '10px'
+                                                }}
+                                                title={participant.country}
+                                            />
                                         </Box>
+                                        <Box
+                                            sx={{
+                                                marginLeft: 'auto',
+                                                alignSelf: 'right', // Aligns the box to the top-right of the container
+                                            }}
+                                        >
+                                            <Typography variant="header3">{participant.eloRating}</Typography>
+
+                                        </Box>
+
                                     </DetailBox>
                                 ))
                             )}
