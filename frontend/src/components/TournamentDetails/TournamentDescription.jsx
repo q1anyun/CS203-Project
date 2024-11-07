@@ -66,12 +66,14 @@ function TournamentDescription({ tournament }) {
 
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>
-                <LocationLink
-                address={tournament.locationAddress}                
-                latitude={tournament.locationLatitude}
-                longitude={tournament.locationLongitude}
-
-            /></Typography>
+                {tournament.format !== "ONLINE" && (
+                    <LocationLink
+                        address={tournament.locationAddress}
+                        latitude={tournament.locationLatitude}
+                        longitude={tournament.locationLongitude}
+                    />
+                )}
+            </Typography>
             <Divider sx={{ margin: '20px 0' }} />
 
             {/* Tournament Details */}
