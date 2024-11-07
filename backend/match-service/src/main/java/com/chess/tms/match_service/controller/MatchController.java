@@ -16,13 +16,13 @@ public class MatchController {
     private MatchService matchService;
 
     // Generate knockout matches for a tournament
-    @PostMapping("/knockout/{tournamentId}/{gameTypeId}")
+    @PostMapping("tournament/{tournamentId}/knockout/{gameTypeId}")
     public ResponseEntity<Long> createKnockoutMatches(@PathVariable ("tournamentId")Long tournamentId, @PathVariable ("gameTypeId")Long gameTypeId) {
         return ResponseEntity.ok(matchService.createKnockoutMatches(tournamentId, gameTypeId, null));
     }
 
     // Generate swiss matches for a tournament
-    @PostMapping("/swiss/{tournamentId}/{gameTypeId}")
+    @PostMapping("tournament/{tournamentId}/swiss/{gameTypeId}")
     public ResponseEntity<Long> createSwissMatches(@PathVariable ("tournamentId") Long tournamentId, @PathVariable ("gameTypeId") Long gameTypeId) {
         return ResponseEntity.ok(matchService.createSwissMatches(tournamentId, gameTypeId));
     }
