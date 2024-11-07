@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material'; 
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -200,10 +200,48 @@ function CreateTournamentDialog({
                                 onChange={handleInputChange}
                             >
                                 <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="HYBRID">Hybrid</MenuItem>
                                 <MenuItem value="PHYSICAL">Physical</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid2>
+
+                    {(newTournament.format === 'PHYSICAL' || newTournament.format === 'HYBRID') && (
+                        <>
+                            <Grid2 size={12}>
+                                <TextField
+                                    name="locationAddress"
+                                    label="Location Address"
+                                    value={newTournament.locationAddress}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLatitude"
+                                    label="Latitude (Optional)"
+                                    value={newTournament.locationLatitude}
+                                    onChange={handleInputChange}
+                                    type="number"
+                                    fullWidth
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLongitude"
+                                    label="Longitude (Optional)"
+                                    value={newTournament.locationLongitude}
+                                    onChange={handleInputChange}
+                                    type="number"
+                                    fullWidth
+                                />
+                            </Grid2>
+                        </>
+                    )}
+
                     <Grid2 size={12}>
                         <FormControl fullWidth>
                             <InputLabel>Tournament Type</InputLabel>
