@@ -6,8 +6,8 @@ import com.chess.tms.tournament_service.exception.GlobalExceptionHandler;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
 import com.chess.tms.tournament_service.service.TournamentService;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -18,10 +18,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -49,11 +47,11 @@ class TournamentPlayerControllerTest {
 
     @Test
     void getTournamentPlayersByTournamentId_ValidTournamentId_ReturnPlayerDetails() throws Exception {
-        List<PlayerDetailsDTO> playerDetails = Arrays.asList(
+        List<PlayerDetailsDTO> playerDetails = List.of(
                 new PlayerDetailsDTO(1L, 100L, 1500, "John", "Doe", "https://example.com/image1.jpg", 10, 2, 12, 1600, "USA"),
                 new PlayerDetailsDTO(2L, 101L, 1400, "Jane", "Doe", "https://example.com/image2.jpg", 8, 3, 11, 1450, "Canada")
         );
-        
+
         when(tournamentService.getPlayersByTournament(1L)).thenReturn(playerDetails);
 
         mockMvc.perform(get("/api/tournament-players/1"))
@@ -61,97 +59,97 @@ class TournamentPlayerControllerTest {
                 .andExpect(jsonPath("$[0].userId").value(100L))
                 .andExpect(jsonPath("$[1].userId").value(101L));
 
-        verify(tournamentService, times(1)).getPlayersByTournament(1L);
+        verify(tournamentService).getPlayersByTournament(1L);
     }
 
     @Test
     void deletePlayerFromTournament_ValidTournamentId_Success() throws Exception {
-        doNothing().when(tournamentService).deletePlayerFromTournament(100L, 1L);
-
-        mockMvc.perform(delete("/api/tournament-players/100/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Player deleted successfully"));
-
-        verify(tournamentService, times(1)).deletePlayerFromTournament(100L, 1L);
+        testDeletePlayerFromTournament(100L, 1L);
     }
 
     @Test
     void registerPlayer_ValidIds_Success() throws Exception {
-        doNothing().when(tournamentService).registerPlayer(100L, 1L);
-
-        mockMvc.perform(post("/api/tournament-players/register/100/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Player registered successfully"));
-
-        verify(tournamentService, times(1)).registerPlayer(100L, 1L);
+        testRegisterPlayer(100L, 1L, "Player registered successfully");
     }
 
     @Test
     void deleteCurrentPlayerFromTournament_ValidTournamentId_Success() throws Exception {
-        doNothing().when(tournamentService).deletePlayerFromTournament(100L, 1L);
-
-        mockMvc.perform(delete("/api/tournament-players/current/1")
-                .header("X-User-PlayerId", "100"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Player deleted successfully"));
-
-        verify(tournamentService, times(1)).deletePlayerFromTournament(100L, 1L);
+        testDeletePlayerFromTournament(100L, 1L, "X-User-PlayerId", 100L);
     }
 
     @Test
     void registerCurrentPlayer_ValidTournamentId_Success() throws Exception {
-        doNothing().when(tournamentService).registerPlayer(100L, 1L);
-
-        mockMvc.perform(post("/api/tournament-players/register/current/1")
-                .header("X-User-PlayerId", "100"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Player registered successfully"));
-
-        verify(tournamentService, times(1)).registerPlayer(100L, 1L);
+        testRegisterPlayer(100L, 1L, "Player registered successfully", "X-User-PlayerId", 100L);
     }
 
     @Test
-    void getTournamentPlayersByTournament_InvalidTournamentId_ThrowsTournamentDoesNotExistException() throws Exception {
-        when(tournamentService.getPlayersByTournament(anyLong()))
-                .thenThrow(new TournamentDoesNotExistException("Tournament does not exist."));
-
-        mockMvc.perform(get("/api/tournament-players/99"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Tournament does not exist."))
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.timestamp").exists());
+    void getTournamentPlayersByTournament_InvalidTournamentId_ThrowsException() throws Exception {
+        testExceptionScenario(get("/api/tournament-players/99"),
+                TournamentDoesNotExistException.class,
+                "Tournament does not exist.", 404);
     }
 
     @Test
-    void registerPlayer_InvalidTournamentPlayerId_ThrowsPlayerAlreadyRegisteredException() throws Exception {
-        doThrow(new PlayerAlreadyRegisteredException("Player is already registered."))
-                .when(tournamentService).registerPlayer(100L, 1L);
-
-        mockMvc.perform(post("/api/tournament-players/register/100/1"))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Player is already registered."))
-                .andExpect(jsonPath("$.status").value(409))
-                .andExpect(jsonPath("$.timestamp").exists());
+    void registerPlayer_InvalidTournamentPlayerId_ThrowsException() throws Exception {
+        testExceptionScenario(post("/api/tournament-players/register/100/1"),
+                PlayerAlreadyRegisteredException.class,
+                "Player is already registered.", 409);
     }
 
     @Test
-    void deletePlayerFromTournament_InvalidTournamentId_ThrowsTournamentDoesNotExistException() throws Exception {
-        doThrow(new TournamentDoesNotExistException("Tournament does not exist."))
-                .when(tournamentService).deletePlayerFromTournament(100L, 99L);
-    
-        mockMvc.perform(delete("/api/tournament-players/100/99"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Tournament does not exist."))
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.timestamp").exists());
+    void deletePlayerFromTournament_InvalidTournamentId_ThrowsException() throws Exception {
+        testExceptionScenario(delete("/api/tournament-players/100/99"),
+                TournamentDoesNotExistException.class,
+                "Tournament does not exist.", 404);
     }
 
-    @Test
-    void deletePlayer_ValidTournamentPlayerId_Success() throws Exception {
-        mockMvc.perform(delete("/api/tournament-players/100/1"))
+    private void testDeletePlayerFromTournament(long playerId, long tournamentId) throws Exception {
+        testDeletePlayerFromTournament(playerId, tournamentId, null, null);
+    }
+
+    private void testDeletePlayerFromTournament(long playerId, long tournamentId, String header, Long headerValue) throws Exception {
+        doNothing().when(tournamentService).deletePlayerFromTournament(playerId, tournamentId);
+
+        var requestBuilder = delete("/api/tournament-players/" + playerId + "/" + tournamentId);
+        if (header != null && headerValue != null) {
+            requestBuilder = requestBuilder.header(header, headerValue.toString());
+        }
+
+        mockMvc.perform(requestBuilder)
                 .andExpect(status().isOk())
                 .andExpect(content().string("Player deleted successfully"));
 
-        verify(tournamentService, times(1)).deletePlayerFromTournament(100L, 1L);
+        verify(tournamentService).deletePlayerFromTournament(playerId, tournamentId);
+    }
+
+    private void testRegisterPlayer(long playerId, long tournamentId, String expectedMessage) throws Exception {
+        testRegisterPlayer(playerId, tournamentId, expectedMessage, null, null);
+    }
+
+    private void testRegisterPlayer(long playerId, long tournamentId, String expectedMessage, String header, Long headerValue) throws Exception {
+        doNothing().when(tournamentService).registerPlayer(playerId, tournamentId);
+
+        var requestBuilder = post("/api/tournament-players/register/" + playerId + "/" + tournamentId);
+        if (header != null && headerValue != null) {
+            requestBuilder = requestBuilder.header(header, headerValue.toString());
+        }
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().isOk())
+                .andExpect(content().string(expectedMessage));
+
+        verify(tournamentService).registerPlayer(playerId, tournamentId);
+    }
+
+    private void testExceptionScenario(MockHttpServletRequestBuilder requestBuilder, Class<? extends Exception> exceptionClass,
+                                       String expectedMessage, int expectedStatus) throws Exception {
+        doThrow(exceptionClass.getConstructor(String.class).newInstance(expectedMessage)).when(tournamentService)
+                .deletePlayerFromTournament(anyLong(), anyLong());
+
+        mockMvc.perform(requestBuilder)
+                .andExpect(status().is(expectedStatus))
+                .andExpect(jsonPath("$.message").value(expectedMessage))
+                .andExpect(jsonPath("$.status").value(expectedStatus))
+                .andExpect(jsonPath("$.timestamp").exists());
     }
 }

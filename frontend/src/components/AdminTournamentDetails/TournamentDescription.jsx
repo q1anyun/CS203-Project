@@ -4,6 +4,7 @@ import { styled } from '@mui/system';
 import defaultbackgroundImage from '../../assets/playerbg.jpg';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
 import { useNavigate } from 'react-router-dom';
+import LocationLink from '../Hooks/getLocationLink';
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff',
@@ -70,6 +71,13 @@ function TournamentDescription({ tournament, handleStart, handleViewRegisteredPl
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>
                 {tournament.description}
             </Typography>
+            <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>
+                <LocationLink
+                address={tournament.locationAddress}                
+                latitude={tournament.locationLatitude}
+                longitude={tournament.locationLongitude}
+
+            /></Typography>
 
             <Divider sx={{ margin: '20px 0' }} />
 
