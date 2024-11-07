@@ -26,36 +26,45 @@ class GameTypeServiceTest {
     @InjectMocks
     private GameTypeService gameTypeService;
 
-    private List<GameType> gameTypes;
+    private List<GameType> expectedGameTypes;
 
     @BeforeEach
     void setup() {
-        gameTypes = List.of(
-            createGameType(1L, "Blitz", 5),
-            createGameType(2L, "Rapid", 15)
+        expectedGameTypes = List.of(
+                createGameType(1L, "Blitz", 5),
+                createGameType(2L, "Rapid", 15)
         );
     }
 
     @Test
-    void getGameTypes_ReturnsListOfGameTypes() {
-        when(gameTypeRepository.findAll()).thenReturn(gameTypes);
+    void shouldReturnListOfGameTypes() {
+        // Arrange: Mock repository to return predefined game types
+        when(gameTypeRepository.findAll()).thenReturn(expectedGameTypes);
 
-        List<GameType> result = gameTypeService.getGameTypes();
+        // Act: Fetch game types from the service
+        List<GameType> actualGameTypes = gameTypeService.getGameTypes();
 
-        assertAll("gameTypes",
-            () -> assertEquals(2, result.size(), "Size should match"),
-            () -> assertEquals("Blitz", result.get(0).getName(), "First game type name"),
-            () -> assertEquals(5, result.get(0).getTimeControlMinutes(), "First game type time control"),
-            () -> assertEquals("Rapid", result.get(1).getName(), "Second game type name"),
-            () -> assertEquals(15, result.get(1).getTimeControlMinutes(), "Second game type time control")
-        );
+        // Assert: Validate the result
+        assertGameTypes(expectedGameTypes, actualGameTypes);
     }
 
+    // Helper method to reduce repetition when creating GameType objects
     private GameType createGameType(Long id, String name, int timeControlMinutes) {
         GameType gameType = new GameType();
         gameType.setId(id);
         gameType.setName(name);
         gameType.setTimeControlMinutes(timeControlMinutes);
         return gameType;
+    }
+
+    // Helper method for asserting game type lists
+    private void assertGameTypes(List<GameType> expected, List<GameType> actual) {
+        assertEquals(expected.size(), actual.size(), "Game types size should match.");
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).getId(), actual.get(i).getId(), "GameType ID at index " + i + " should match.");
+            assertEquals(expected.get(i).getName(), actual.get(i).getName(), "GameType name at index " + i + " should match.");
+            assertEquals(expected.get(i).getTimeControlMinutes(), actual.get(i).getTimeControlMinutes(),
+                    "GameType time control at index " + i + " should match.");
+        }
     }
 }

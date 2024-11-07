@@ -25,24 +25,30 @@ class RoundTypeServiceTest {
     @InjectMocks
     private RoundTypeService roundTypeService;
 
-    private List<Integer> numberOfPlayersChoices;
+    private List<Integer> expectedPlayerChoices;
 
     @BeforeEach
     void setup() {
-        numberOfPlayersChoices = List.of(2, 4, 8, 16, 32, 64);
+        expectedPlayerChoices = List.of(2, 4, 8, 16, 32, 64);  // List.of() is more concise
     }
 
     @Test
-    void getChoicesForNumberOfPlayers_ReturnsExpectedChoices() {
-        when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(numberOfPlayersChoices);
+    void shouldReturnCorrectChoicesForNumberOfPlayers() {
+        // Arrange: Mock repository to return the expected player choices
+        when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(expectedPlayerChoices);
 
-        List<Integer> result = roundTypeService.getChoicesForNumberOfPlayers();
+        // Act: Get the actual result from the service
+        List<Integer> actualPlayerChoices = roundTypeService.getChoicesForNumberOfPlayers();
 
-        assertAll("numberOfPlayersChoices",
-            () -> assertEquals(6, result.size(), "Size should match"),
-            () -> assertEquals(2, result.get(0), "First element should be 2"),
-            () -> assertEquals(16, result.get(3), "Fourth element should be 16"),
-            () -> assertEquals(64, result.get(5), "Last element should be 64")
-        );
+        // Assert: Validate the results
+        assertPlayerChoices(actualPlayerChoices);
+    }
+
+    // Helper method to reduce repetitive assertions
+    private void assertPlayerChoices(List<Integer> actualChoices) {
+        assertEquals(expectedPlayerChoices.size(), actualChoices.size(), "The number of choices should match.");
+        for (int i = 0; i < expectedPlayerChoices.size(); i++) {
+            assertEquals(expectedPlayerChoices.get(i), actualChoices.get(i), "Choice at index " + i + " should match.");
+        }
     }
 }

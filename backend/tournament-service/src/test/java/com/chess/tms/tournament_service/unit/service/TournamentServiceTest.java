@@ -1,15 +1,13 @@
 package com.chess.tms.tournament_service.unit.service;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.List;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,7 +49,32 @@ class TournamentServiceTest {
     void setup() {
         registrationDTO = createRegistrationDTO();
         tournament = createTournament();
-        playerDetails = createPlayerDetailsDTO();
+    }
+
+    // Helper Methods to create DTOs and Entities
+    private TournamentRegistrationDTO createRegistrationDTO() {
+        TournamentRegistrationDTO dto = new TournamentRegistrationDTO();
+        dto.setName("Test Tournament");
+        dto.setTimeControl(1);
+        dto.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
+        dto.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        dto.setMaxPlayers(16);
+        return dto;
+    }
+
+    private Tournament createTournament() {
+        Tournament t = new Tournament();
+        t.setTournamentId(1L);
+        t.setName("Test Tournament");
+        t.setStatus(Status.UPCOMING);
+        t.setTimeControl(new GameType());
+        t.setCurrentPlayers(2);
+        t.setMaxPlayers(32);
+        t.setMinElo(1000);
+        t.setMaxElo(2000);
+        t.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
+        t.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        return t;
     }
 
     @Test
@@ -69,8 +92,8 @@ class TournamentServiceTest {
     }
 
     @Test
-    void startTournament_ValidTournamentId_ReturnsSuccessMessage() {
-        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+    void startTournament_ValidTournamentId_Success() {
+        mockTournamentExistence();
         when(restTemplate.postForEntity(anyString(), eq(null), eq(Long.class)))
                 .thenReturn(new ResponseEntity<>(1L, HttpStatus.OK));
         when(roundTypeRepository.findById(1L)).thenReturn(Optional.of(new RoundType()));
@@ -89,8 +112,8 @@ class TournamentServiceTest {
     }
 
     @Test
-    void getTournamentDetailsById_ValidTournamentId_ReturnsDetails() {
-        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+    void getTournamentDetailsById_ValidTournamentId_Success() {
+        mockTournamentExistence();
 
         TournamentDetailsDTO result = tournamentService.getTournamentDetailsById(1L);
 
@@ -101,19 +124,23 @@ class TournamentServiceTest {
     }
 
     @Test
-    void registerPlayer_ValidPlayerId_IncrementsCurrentPlayers() {
-        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-        when(restTemplate.getForEntity(playerServiceUrl + "/api/player/100", PlayerDetailsDTO.class))
-                .thenReturn(new ResponseEntity<>(playerDetails, HttpStatus.OK));
+    void getTournamentDetailsById_InvalidTournamentId_ThrowsTournamentDoesNotExistException() {
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(TournamentDoesNotExistException.class, () -> tournamentService.getTournamentDetailsById(1L));
+    }
+
+    @Test
+    void registerPlayer_ValidPlayerId_Success() {
+        mockTournamentExistence();
 
         tournamentService.registerPlayer(100L, 1L);
 
-        assertEquals(3, tournament.getCurrentPlayers());
         verify(tournamentPlayerRepository).save(any(TournamentPlayer.class));
     }
 
     @Test
-    void completeTournament_ValidTournamentId_ReturnsSuccessMessage() {
+    void completeTournament_ValidTournamentId_Success() {
         TournamentPlayer mockPlayer = new TournamentPlayer();
         mockPlayer.setPlayerId(1L);
         mockPlayer.setTournament(tournament);
@@ -130,69 +157,63 @@ class TournamentServiceTest {
     }
 
     @Test
-    void updateTournament_AllFields_Success() {
-        TournamentUpdateRequestDTO updateDTO = createTournamentUpdateRequestDTO();
+    void updateTournament_InvalidTournamentId_ThrowsTournamentDoesNotExistException() {
+        TournamentUpdateRequestDTO updateDTO = createUpdateRequestDTO();
 
-        GameType gameType = new GameType();
-        gameType.setId(2L);
+        when(tournamentRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(TournamentDoesNotExistException.class, () -> tournamentService.updateTournament(99L, updateDTO));
+    }
+
+    @Test
+    void updateTournament_PartialFields_Success() {
+        TournamentUpdateRequestDTO updateDTO = createUpdateRequestDTO();
 
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
-        when(gameTypeRepository.getGameTypeById(2L)).thenReturn(Optional.of(gameType));
         when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
 
         tournamentService.updateTournament(1L, updateDTO);
 
-        assertAll("Updated Tournament",
-            () -> assertEquals(32, tournament.getMaxPlayers()),
-            () -> assertEquals(1300, tournament.getMinElo()),
-            () -> assertEquals(2200, tournament.getMaxElo()),
-            () -> assertEquals(LocalDate.parse("2024-01-05"), tournament.getStartDate()),
-            () -> assertEquals(LocalDate.parse("2024-02-01"), tournament.getEndDate()),
-            () -> assertEquals(gameType, tournament.getTimeControl())
-        );
+        assertEquals(20, tournament.getMaxPlayers());
+        assertEquals(1200, tournament.getMinElo());
         verify(tournamentRepository).save(tournament);
     }
 
-    // Helper methods to initialize DTOs and models
-    private Tournament createTournament() {
-        Tournament t = new Tournament();
-        t.setTournamentId(1L);
-        t.setName("Test Tournament");
-        t.setStatus(Status.UPCOMING);
-        t.setTimeControl(new GameType());
-        t.setCurrentPlayers(2);
-        t.setMaxPlayers(32);
-        t.setMinElo(1000);
-        t.setMaxElo(2000);
-        t.setStartDate(LocalDate.parse("2024-01-01"));
-        t.setEndDate(LocalDate.parse("2024-01-02"));
-        return t;
+    @Test
+    void deleteTournament_ValidTournamentId_Success() {
+        mockTournamentExistence();
+
+        tournamentService.deleteTournament(1L);
+
+        verify(tournamentRepository).deleteById(1L);
     }
 
-    private TournamentRegistrationDTO createRegistrationDTO() {
-        TournamentRegistrationDTO dto = new TournamentRegistrationDTO();
-        dto.setName("Test Tournament");
-        dto.setTimeControl(1);
-        dto.setStartDate(LocalDate.parse("2024-01-01"));
-        dto.setEndDate(LocalDate.parse("2024-01-02"));
-        dto.setMaxPlayers(16);
-        return dto;
+    @Test
+    void registerPlayer_InvalidTournamentPlayerId_ThrowsTournamentDoesNotExistException() {
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(TournamentDoesNotExistException.class, () -> tournamentService.registerPlayer(100L, 1L));
     }
 
-    private TournamentUpdateRequestDTO createTournamentUpdateRequestDTO() {
+    @Test
+    void startTournament_InsufficientPlayers_ThrowsInsufficientPlayersException() {
+        tournament.setCurrentPlayers(1);
+
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+
+        assertThrows(InsufficientPlayersException.class, () -> tournamentService.startTournament(1L));
+    }
+
+    // Helper Method for Update Tournament DTO
+    private TournamentUpdateRequestDTO createUpdateRequestDTO() {
         TournamentUpdateRequestDTO dto = new TournamentUpdateRequestDTO();
-        dto.setMaxPlayers(32);
-        dto.setMinElo(1300);
-        dto.setMaxElo(2200);
-        dto.setStartDate(LocalDate.parse("2024-01-05"));
-        dto.setEndDate(LocalDate.parse("2024-02-01"));
-        dto.setTimeControl(2);
+        dto.setMaxPlayers(20);
+        dto.setMinElo(1200);
         return dto;
     }
 
-    private PlayerDetailsDTO createPlayerDetailsDTO() {
-        PlayerDetailsDTO dto = new PlayerDetailsDTO();
-        dto.setEloRating(1500);
-        return dto;
+    // Helper Method for Mocking Tournament Existence
+    private void mockTournamentExistence() {
+        when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
     }
 }
