@@ -1,9 +1,9 @@
 package com.chess.tms.tournament_service.unit.service;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import com.chess.tms.tournament_service.repository.GameTypeRepository;
 import com.chess.tms.tournament_service.service.GameTypeService;
 
 @ExtendWith(MockitoExtension.class)
-public class GameTypeServiceTest {
+class GameTypeServiceTest {
 
     @Mock
     private GameTypeRepository gameTypeRepository;
@@ -30,29 +30,32 @@ public class GameTypeServiceTest {
 
     @BeforeEach
     void setup() {
-        GameType gameType1 = new GameType();
-        gameType1.setId(1L);
-        gameType1.setName("Blitz");
-        gameType1.setTimeControlMinutes(5);
-
-        GameType gameType2 = new GameType();
-        gameType2.setId(2L);
-        gameType2.setName("Rapid");
-        gameType2.setTimeControlMinutes(15);
-
-        gameTypes = Arrays.asList(gameType1, gameType2);
+        gameTypes = List.of(
+            createGameType(1L, "Blitz", 5),
+            createGameType(2L, "Rapid", 15)
+        );
     }
 
     @Test
-    void getGameTypes_Valid_ReturnListOfGameTypes() {
+    void getGameTypes_ReturnsListOfGameTypes() {
         when(gameTypeRepository.findAll()).thenReturn(gameTypes);
 
         List<GameType> result = gameTypeService.getGameTypes();
 
-        assertEquals(2, result.size());
-        assertEquals("Blitz", result.get(0).getName());
-        assertEquals(5, result.get(0).getTimeControlMinutes());
-        assertEquals("Rapid", result.get(1).getName());
-        assertEquals(15, result.get(1).getTimeControlMinutes());
+        assertAll("gameTypes",
+            () -> assertEquals(2, result.size(), "Size should match"),
+            () -> assertEquals("Blitz", result.get(0).getName(), "First game type name"),
+            () -> assertEquals(5, result.get(0).getTimeControlMinutes(), "First game type time control"),
+            () -> assertEquals("Rapid", result.get(1).getName(), "Second game type name"),
+            () -> assertEquals(15, result.get(1).getTimeControlMinutes(), "Second game type time control")
+        );
+    }
+
+    private GameType createGameType(Long id, String name, int timeControlMinutes) {
+        GameType gameType = new GameType();
+        gameType.setId(id);
+        gameType.setName(name);
+        gameType.setTimeControlMinutes(timeControlMinutes);
+        return gameType;
     }
 }
