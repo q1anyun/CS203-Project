@@ -1,6 +1,7 @@
 package com.chess.tms.elo_service.model;
 
 import java.time.LocalDateTime;
+
 import com.chess.tms.elo_service.enums.Reason;
 
 import jakarta.persistence.Column;
@@ -12,10 +13,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * This class represents an entry in the elo_history table
+ */ 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

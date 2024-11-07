@@ -43,7 +43,7 @@ dependencies {
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
 	// JWT and JSON processing
-	implementation 'com.fasterxml.jackson.core:jackson-databind'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.1'
 
 	// Testing dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test' // JUnit 5, Mockito, Spring Testing

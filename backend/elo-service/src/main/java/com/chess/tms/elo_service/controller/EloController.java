@@ -17,13 +17,17 @@ import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 
+/**
+ * This class receives REST requests forwarded from gateway service and 
+ * maps them to the corresponding endpoint 
+ */
 @RestController
 @RequestMapping("/api/elo")
 public class EloController {
 
     private EloService eloService;
 
-
+    //constructor injection
     public EloController(EloService eloService) {
         this.eloService = eloService;
     }
@@ -39,38 +43,31 @@ public class EloController {
     }
 
     @GetMapping("/{playerId}/{changeReason}")
-    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable("changeReason") String changeReason) {
+    public ResponseEntity<List<EloResponseDTO>> findAllEloHistoriesByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable("changeReason") String changeReason) {
         return ResponseEntity.ok(eloService.findByPlayerIdAndChangeReason(playerId, changeReason));
     }
 
 
-    @DeleteMapping("/delete/{playerId}") 
-    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable("playerId") long playerId) {
+    @DeleteMapping("/deletion/{playerId}") 
+    public ResponseEntity<List<EloResponseDTO>> deleteAllPlayerElo(@PathVariable("playerId") long playerId) {
         return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
     }
 
  
     @PutMapping("/match") 
-    public ResponseEntity<String> updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
-        System.out.println("Running updateMatchPlayersElo in Elo Service");
-        return ResponseEntity.ok(eloService.updateMatchPlayersElo(dto));
+    public ResponseEntity<String> updatePlayersEloAfterCompletedMatch(@RequestBody MatchEloRequestDTO dto) {
+        return ResponseEntity.ok(eloService.updatePlayersEloAfterCompletedMatch(dto));
     }
 
     @GetMapping("/chart/current")
-    public ResponseEntity<List<EloHistoryChartDTO>> findCurrentPlayerEloHistoryForChart(@RequestHeader("X-User-PlayerId") String id) {
+    public ResponseEntity<EloHistoryChartDTO[]> findCurrentPlayerEloHistoryForChart(@RequestHeader("X-User-PlayerId") String id) {
         long playerId = Long.parseLong(id);
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(playerId));
     }
 
     @GetMapping("/chart/{id}")
-    public ResponseEntity<List<EloHistoryChartDTO>> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
+    public ResponseEntity<EloHistoryChartDTO[]> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
 
-    // for testing 
-    // @PostMapping("")
-    // public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
-    //     return ResponseEntity.ok(eloService.saveEloHistory(dto));
-    // }
-    
 }

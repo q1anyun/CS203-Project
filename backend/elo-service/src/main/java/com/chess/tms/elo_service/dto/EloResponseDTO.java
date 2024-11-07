@@ -8,6 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * This class is used to return the elo history of a player in EloController.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
