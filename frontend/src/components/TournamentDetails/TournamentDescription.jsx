@@ -3,6 +3,7 @@ import { Box, Typography, Chip, Button, Divider, Grid } from '@mui/material';
 import { styled } from '@mui/system';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
 import { useNavigate } from 'react-router-dom';
+import LocationLink from '../Hooks/getLocationLink';
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff',
@@ -64,6 +65,13 @@ function TournamentDescription({ tournament }) {
             <Chip label={tournament.status} color={statusColorMap[tournament.status]} sx={{ marginLeft: '10px' }} />
 
             <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>{tournament.description}</Typography>
+            <Typography variant="playerProfile2" display={'block'} textAlign={'left'} marginLeft={'20px'}>
+                <LocationLink
+                address={tournament.locationAddress}                
+                latitude={tournament.locationLatitude}
+                longitude={tournament.locationLongitude}
+
+            /></Typography>
             <Divider sx={{ margin: '20px 0' }} />
 
             {/* Tournament Details */}

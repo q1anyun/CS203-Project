@@ -4,6 +4,7 @@ import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate, useParams } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png'; // Adjust path as needed
 import axios from 'axios';
+import ReactCountryFlag from 'react-country-flag';
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -148,7 +149,16 @@ function PlayerProfileView() {
           <Grid item xs={6}>
             <Box sx={{ backgroundColor: '#f5f5f5', padding: 2, textAlign: 'center', borderRadius: 2 }}>
               <Typography variant="header3" display='block'>Country</Typography>
-              <Typography variant="playerProfile2" display='block'>{playerDetails.country}</Typography>
+              <ReactCountryFlag
+                countryCode={playerDetails.country}// Assuming you have a countryCode field
+                svg
+                style={{
+                  width: '2em',
+                  height: '2em',
+                  marginLeft: '10px'
+                }}
+                title={playerDetails.country}
+              />
             </Box>
           </Grid>
           <Grid item xs={6}>
