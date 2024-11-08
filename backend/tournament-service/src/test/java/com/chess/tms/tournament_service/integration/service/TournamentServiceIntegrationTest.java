@@ -29,7 +29,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.spy;
 
 import java.time.LocalDate;
 
@@ -119,7 +118,6 @@ public class TournamentServiceIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
     
         HttpEntity<TournamentRegistrationDTO> request = new HttpEntity<>(dto, headers);
-    
         ResponseEntity<String> response = restTemplate.postForEntity(
             "/api/tournaments",
             request,
