@@ -31,7 +31,7 @@ jobs:
       - name: Check for changes in ${{ matrix.service }}
         id: changes-check
         run: |
-          if git diff --quiet HEAD^ HEAD "./${{ matrix.service }}"; then
+          if git diff --quiet HEAD^ HEAD "./backend/${{ matrix.service }}"; then
             echo "skip_build=true" >> $GITHUB_ENV
           else
             echo "skip_build=false" >> $GITHUB_ENV
