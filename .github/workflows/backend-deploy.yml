@@ -57,10 +57,9 @@ jobs:
 
       - name: Deploy to Amazon ECS for ${{ matrix.service }}
         if: steps.changes-check.outputs.skip_build == 'false'
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ matrix.service }}
-          service: ${{ matrix.service }}
-          cluster: chess-tms-cluster
-          region: us-east-1
-          force-new-deployment: true
+        run: |
+          aws ecs update-service \
+            --cluster chess-tms-cluster \
+            --service ${{ matrix.service }} \
+            --force-new-deployment \
+            --region us-east-1
