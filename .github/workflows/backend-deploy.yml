@@ -56,7 +56,7 @@ jobs:
         run: |
           IMAGE_NAME="${{ matrix.service }}"
           ECR_REPOSITORY="970547372113.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$IMAGE_NAME"
-          docker buildx build --platform linux/amd64 -t "$IMAGE_NAME:latest" "./${{ matrix.service }}" --load
+          docker buildx build --platform linux/amd64 -t "$IMAGE_NAME:latest" "./backend/${{ matrix.service }}" --load
           docker tag "$IMAGE_NAME:latest" "$ECR_REPOSITORY:latest"
           docker push "$ECR_REPOSITORY:latest"
 
