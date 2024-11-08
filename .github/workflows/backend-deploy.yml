@@ -21,6 +21,9 @@ jobs:
           - elo-service
           - tournament-service
 
+    env:
+      AWS_REGION: us-east-1
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -40,6 +43,8 @@ jobs:
       - name: Log in to Amazon ECR
         if: steps.changes-check.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
 
       - name: Build, tag, and push Docker image for ${{ matrix.service }}
         if: steps.changes-check.outputs.skip_build == 'false'
