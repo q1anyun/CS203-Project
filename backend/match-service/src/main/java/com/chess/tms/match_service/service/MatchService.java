@@ -203,8 +203,6 @@ public class MatchService {
 
     /**
      * Create matches for a tournament based on the Swiss tournament format.
-     * In a Swiss tournament, players are paired with other players with similar
-     * standings (based on wins).
      * Players accumulate points as they progress through the rounds without being
      * eliminated.
      *

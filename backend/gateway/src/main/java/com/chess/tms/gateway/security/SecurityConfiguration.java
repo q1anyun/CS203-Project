@@ -62,7 +62,7 @@ public class SecurityConfiguration {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
             .authorizeHttpRequests(auth -> auth
                 // .anyRequest().permitAll() 
-
+                .requestMatchers("/health").permitAll() 
                 // only permit the creation of admin by another admin
                 .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
                 .requestMatchers("/api/auth/**", "/api/users/register/**", "/api/otp/**").permitAll()  // Permit login and registration to everyone

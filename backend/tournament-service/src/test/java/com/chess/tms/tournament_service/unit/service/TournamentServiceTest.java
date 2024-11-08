@@ -56,8 +56,8 @@ class TournamentServiceTest {
         TournamentRegistrationDTO dto = new TournamentRegistrationDTO();
         dto.setName("Test Tournament");
         dto.setTimeControl(1);
-        dto.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
-        dto.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        dto.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
+        dto.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
         dto.setMaxPlayers(16);
         return dto;
     }
@@ -72,8 +72,8 @@ class TournamentServiceTest {
         t.setMaxPlayers(32);
         t.setMinElo(1000);
         t.setMaxElo(2000);
-        t.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00"));
-        t.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00"));
+        t.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
+        t.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
         return t;
     }
 

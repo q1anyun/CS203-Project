@@ -44,3 +44,6 @@ build/                       # Gradle build directory
 # OS Files
 .DS_Store                    # macOS Finder cache
 Thumbs.db                    # Windows thumbnail cache
+backend/db/db_setup.sql
+backend/tournament-service/.env
+backend/user-service/.env

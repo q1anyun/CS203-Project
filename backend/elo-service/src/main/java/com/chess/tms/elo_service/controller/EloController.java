@@ -3,7 +3,6 @@ package com.chess.tms.elo_service.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,9 +17,7 @@ import com.chess.tms.elo_service.service.EloService;
 import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
 import com.chess.tms.elo_service.dto.EloHistoryRequestDTO;
 import com.chess.tms.elo_service.dto.EloResponseDTO;
-import com.chess.tms.elo_service.dto.EloRequestDTO;
 import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
-import com.chess.tms.elo_service.enums.Reason;
 
 @RestController
 @RequestMapping("/api/elo")
