@@ -11,7 +11,6 @@ jobs:
     strategy:
       matrix:
         service:
-          - config-server
           - gateway
           - auth-service
           - user-service
