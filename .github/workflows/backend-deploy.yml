@@ -62,4 +62,5 @@ jobs:
           task-definition: ${{ matrix.service }}
           service: ${{ matrix.service }}
           cluster: chess-tms-cluster
+          region: us-east-1
           force-new-deployment: true
