@@ -1,40 +1,27 @@
-# Build stage: use a Gradle image to build the application
+# Build stage: use Gradle to build the application
 FROM gradle:8.10-jdk21-alpine AS build
-
-# Set the working directory inside the container for the build stage
 WORKDIR /app
 
-# Copy the Gradle wrapper and build files to the container
-COPY gradlew build.gradle settings.gradle /app/
-COPY gradle /app/gradle
-
-# Copy local Gradle cache into the container
-COPY .gradle /home/gradle/.gradle
+# Copy the Gradle wrapper, build scripts, and Gradle settings
+COPY gradlew build.gradle settings.gradle ./
+COPY gradle/ ./gradle/
+COPY gradle/wrapper/ ./gradle/wrapper/
 
 # Copy the source code to the container
-COPY src /app/src
+COPY src ./src
 
-# Give execute permissions to the Gradle wrapper
-RUN chmod +x /app/gradlew
+# Ensure the Gradle wrapper script is executable and build the JAR without running tests
+RUN chmod +x gradlew && ./gradlew build --no-daemon --parallel --exclude-task test
 
-# Run Gradle build to generate the JAR file (without running tests)
-RUN ./gradlew build --no-daemon --parallel --exclude-task test
-
-# Package stage: create a clean image with only the necessary runtime dependencies
+# Package stage: use a minimal OpenJDK image for running the application
 FROM openjdk:21-jdk-slim
+WORKDIR /usr/app
 
-# Set environment variables for the JAR name and application directory
-ENV JAR_NAME=match-service.jar
-ENV APP_HOME=/usr/app/
-
-# Set the working directory inside the container
-WORKDIR $APP_HOME
-
-# Copy the JAR file from the build stage to the runtime stage
-COPY --from=build /app/build/libs/*.jar $APP_HOME/$JAR_NAME
+# Copy the built JAR from the build stage
+COPY --from=build /app/build/libs/*.jar match-service.jar
 
 # Expose the port the application runs on
 EXPOSE 8085
 
 # Define the entry point to run the JAR
-ENTRYPOINT ["java", "-jar", "/usr/app/match-service.jar"]
+ENTRYPOINT ["java", "-jar", "match-service.jar"]

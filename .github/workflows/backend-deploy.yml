@@ -1,0 +1,61 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - config-server
+          - gateway
+          - auth-service
+          - user-service
+          - match-service
+          - player-service
+          - s3-upload-service
+          - elo-service
+          - tournament-service
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Check for changes in ${{ matrix.service }}
+        id: changes-check
+        run: |
+          if git diff --quiet HEAD^ HEAD ./${{ matrix.service }}; then
+            echo "::set-output name=skip_build::true"
+          else
+            echo "::set-output name=skip_build::false"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Amazon ECR
+        if: steps.changes-check.outputs.skip_build == 'false'
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push Docker image for ${{ matrix.service }}
+        if: steps.changes-check.outputs.skip_build == 'false'
+        run: |
+          IMAGE_NAME=${{ matrix.service }}
+          ECR_REPOSITORY=970547372113.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME
+          docker buildx build --platform linux/amd64 -t $IMAGE_NAME:latest ./${{ matrix.service }} --load
+          docker tag $IMAGE_NAME:latest $ECR_REPOSITORY:latest
+          docker push $ECR_REPOSITORY:latest
+
+      - name: Deploy to Amazon ECS for ${{ matrix.service }}
+        if: steps.changes-check.outputs.skip_build == 'false'
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ matrix.service }}.json
+          service: ${{ matrix.service }}
+          cluster: chess-tms-cluster
+          region: us-east-1
+          force-new-deployment: true
