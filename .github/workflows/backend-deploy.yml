@@ -22,6 +22,8 @@ jobs:
           - tournament-service
 
     env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_REGION: us-east-1
 
     steps:
@@ -31,41 +33,33 @@ jobs:
       - name: Check for changes in ${{ matrix.service }}
         id: changes-check
         run: |
-          if git diff --quiet HEAD^ HEAD "./backend/${{ matrix.service }}"; then
-            echo "skip_build=true" >> $GITHUB_ENV
+          if git diff --quiet HEAD^ HEAD ./${{ matrix.service }}; then
+            echo "::set-output name=skip_build::true"
           else
-            echo "skip_build=false" >> $GITHUB_ENV
+            echo "::set-output name=skip_build::false"
           fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-
       - name: Log in to Amazon ECR
-        if: env.skip_build == 'false'
+        if: steps.changes-check.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push Docker image for ${{ matrix.service }}
-        if: env.skip_build == 'false'
+        if: steps.changes-check.outputs.skip_build == 'false'
         run: |
-          IMAGE_NAME="${{ matrix.service }}"
-          ECR_REPOSITORY="970547372113.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/$IMAGE_NAME"
-          docker buildx build --platform linux/amd64 -t "$IMAGE_NAME:latest" "./backend/${{ matrix.service }}" --load
-          docker tag "$IMAGE_NAME:latest" "$ECR_REPOSITORY:latest"
-          docker push "$ECR_REPOSITORY:latest"
+          IMAGE_NAME=${{ matrix.service }}
+          ECR_REPOSITORY=970547372113.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME
+          docker buildx build --platform linux/amd64 -t $IMAGE_NAME:latest ./${{ matrix.service }} --load
+          docker tag $IMAGE_NAME:latest $ECR_REPOSITORY:latest
+          docker push $ECR_REPOSITORY:latest
 
       - name: Deploy to Amazon ECS for ${{ matrix.service }}
-        if: env.skip_build == 'false'
+        if: steps.changes-check.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ${{ matrix.service }}.json
+          task-definition: ${{ matrix.service }}
           service: ${{ matrix.service }}
           cluster: chess-tms-cluster
-          region: ${{ env.AWS_REGION }}
           force-new-deployment: true
