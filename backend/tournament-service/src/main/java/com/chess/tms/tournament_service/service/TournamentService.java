@@ -147,7 +147,7 @@ public class TournamentService {
         if (tournament.getCurrentPlayers() < 2) {
             throw new InsufficientPlayersException("Tournament cannot start with less than 2 players.");
         }
-        if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
+        if (tournament.getCurrentPlayers() > tournament.getMaxPlayers()) {
             throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
         }
     }
