@@ -85,6 +85,7 @@ public class EloService {
         }
         List<EloResponseDTO> deletedHistoryList = convertEntriesToResponseDTOs(eloHistoryList.get());
 
+        // Delete the history
         eloRepository.deleteByPlayerId(playerId);
         return deletedHistoryList;
     }
@@ -125,7 +126,7 @@ public class EloService {
         } else {
             throw new InvalidReasonException("Reason: " + reasonString + " is not valid. Valid reasons: win, loss, draw");
         }
-
+        // Find the history entries for the player and reason
         List<EloHistory> list = eloRepository.findByPlayerIdAndChangeReasonOrderByCreatedAtDesc(playerId, reason);
         List<EloResponseDTO> responses = convertEntriesToResponseDTOs(list);
         return responses;
