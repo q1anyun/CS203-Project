@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +48,7 @@ public class MatchServiceTest {
 
     @Mock
     private RestTemplate restTemplate;
-    
+
     @Spy
     @InjectMocks
     private MatchService matchService;
@@ -65,7 +67,7 @@ public class MatchServiceTest {
 
     @BeforeEach
     void setup() {
-        MockitoAnnotations.openMocks(this); 
+        MockitoAnnotations.openMocks(this);
 
         // Setup basic GameType
         gameType = new GameType();
@@ -76,7 +78,6 @@ public class MatchServiceTest {
         roundType = new RoundType();
         roundType.setId(1L);
         roundType.setRoundName("Quarterfinal");
-
 
         // Setup basic Match
         match = new Match();
@@ -112,7 +113,7 @@ public class MatchServiceTest {
         assertNotNull(swissBracketRepository, "MatchService should not be null");
         assertNotNull(roundTypeRepository, "RestTemplate should not be null");
         assertNotNull(gameTypeRepository, "MatchService should not be null");
-    
+
     }
 
     @Test
@@ -120,7 +121,7 @@ public class MatchServiceTest {
         when(gameTypeRepository.findById(1L)).thenReturn(Optional.of(gameType));
         when(roundTypeRepository.findByNumberOfPlayers(4)).thenReturn(Optional.of(roundType));
         when(roundTypeRepository.findByNumberOfPlayers(2)).thenReturn(Optional.of(roundType));
-        
+
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),
@@ -139,43 +140,29 @@ public class MatchServiceTest {
     void testCreateKnockoutMatchesWithAdvancedPlayerIds() {
         Long tournamentId = 1L;
         Long gameTypeId = 2L;
-        
-        // Sample advanced player IDs
+
         List<Long> advancedPlayerIds = Arrays.asList(101L, 102L, 103L, 104L, 105L);
 
-
-            // Mock `restTemplate.getForObject` for each player ID
         for (Long playerId : advancedPlayerIds) {
             when(restTemplate.getForObject(playerServiceUrl + "/api/player/" + playerId, PlayerDetailsDTO.class))
-                .thenReturn(playerDetails);
+                    .thenReturn(playerDetails);
         }
-
 
         when(gameTypeRepository.findById(2L)).thenReturn(Optional.of(gameType));
         when(roundTypeRepository.findByNumberOfPlayers(8)).thenReturn(Optional.of(roundType));
         when(roundTypeRepository.findByNumberOfPlayers(4)).thenReturn(Optional.of(roundType));
         when(roundTypeRepository.findByNumberOfPlayers(2)).thenReturn(Optional.of(roundType));
-        
-        // Mock for match saving
+
         when(matchRepository.saveAll(anyList())).thenAnswer(invocation -> {
             List<Match> matches = invocation.getArgument(0);
-            matches.forEach(match -> match.setId(new Random().nextLong()));  // Simulate setting ID on save
+            matches.forEach(match -> match.setId(new Random().nextLong())); // Simulate setting ID on save
             return matches;
         });
-        
-        // Call method
+
         Long roundId = matchService.createKnockoutMatches(tournamentId, gameTypeId, advancedPlayerIds);
-
-        // Verify correct number of matches were created
         verify(matchRepository, times(1)).saveAll(anyList());
-
-        // Additional Assertions: 
-        // 1. Round ID is not null
         assertNotNull(roundId, "Round ID should not be null");
 
-        // 2. Verify mock player ELO order in matches
-        // Assuming logic pairs highest-rated player with the lowest-rated
-        // Further assertions can be added here based on expected structure
     }
 
     @Test
@@ -201,7 +188,6 @@ public class MatchServiceTest {
         verify(swissStandingRepository, atLeast(1)).save(any());
     }
 
-   
     @Test
     void getMatchesByTournament_ValidInput_Success() {
         when(matchRepository.findByTournamentId(1L)).thenReturn(Arrays.asList(match));
@@ -221,7 +207,7 @@ public class MatchServiceTest {
     void getMatch_ValidId_Success() {
         when(matchRepository.findById(1L)).thenReturn(Optional.of(match));
         when(restTemplate.getForObject(contains("/api/player/"), eq(PlayerDetailsDTO.class)))
-        .thenReturn(playerDetails);
+                .thenReturn(playerDetails);
 
         when(restTemplate.getForObject(anyString(), eq(TournamentDTO.class)))
                 .thenReturn(new TournamentDTO());
@@ -231,7 +217,6 @@ public class MatchServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
     }
-
 
     @Test
     void getMatch_InvalidId_ThrowsException() {
@@ -261,9 +246,8 @@ public class MatchServiceTest {
         Long winnerId = 101L;
         Long loserId = 102L;
         Long tournamentId = 1L;
-        Long gameTypeId = 2L;
 
-        // Mock round type
+        // Mock RoundType for Swiss
         RoundType swissRoundType = new RoundType();
         swissRoundType.setId(1L);
         swissRoundType.setRoundName("Swiss");
@@ -277,7 +261,6 @@ public class MatchServiceTest {
         match.setRoundType(swissRoundType); // Set RoundType to Swiss
         match.setGameType(gameType);
 
-        // Mock MatchRepository to return this match
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
 
         // Mock SwissBracket
@@ -288,43 +271,85 @@ public class MatchServiceTest {
         bracket.setNumberOfRounds(3); // Set as the last round
         when(swissBracketRepository.findByTournamentId(tournamentId)).thenReturn(Optional.of(bracket));
 
-        // Mock Swiss standings for winner and loser
+        // Mock Swiss standings for 8 players, including winner and loser
         SwissStanding winnerStanding = new SwissStanding();
         winnerStanding.setPlayerId(winnerId);
-        winnerStanding.setWins(2);
+        winnerStanding.setWins(4);
 
         SwissStanding loserStanding = new SwissStanding();
         loserStanding.setPlayerId(loserId);
-        loserStanding.setLosses(1);
+        loserStanding.setLosses(3);
+
+        // Additional players with varying wins/losses
+        SwissStanding player3 = new SwissStanding();
+        player3.setPlayerId(103L);
+        player3.setWins(3);
+
+        SwissStanding player4 = new SwissStanding();
+        player4.setPlayerId(104L);
+        player4.setWins(3);
+
+        SwissStanding player5 = new SwissStanding();
+        player5.setPlayerId(105L);
+        player5.setWins(2);
+
+        SwissStanding player6 = new SwissStanding();
+        player6.setPlayerId(106L);
+        player6.setWins(2);
+
+        SwissStanding player7 = new SwissStanding();
+        player7.setPlayerId(107L);
+        player7.setWins(1);
+
+        SwissStanding player8 = new SwissStanding();
+        player8.setPlayerId(108L);
+        player8.setWins(0);
+
+        List<SwissStanding> standings = Arrays.asList(
+                winnerStanding, player3, player4, loserStanding, player5, player6, player7, player8);
 
         when(swissStandingRepository.findByBracketIdAndPlayerId(bracket.getId(), winnerId))
                 .thenReturn(Optional.of(winnerStanding));
         when(swissStandingRepository.findByBracketIdAndPlayerId(bracket.getId(), loserId))
                 .thenReturn(Optional.of(loserStanding));
 
-        // Mock round completion check - all matches in the current round are completed
+        when(swissStandingRepository.findByBracketIdOrderByWinsDescLossesAsc(bracket.getId())).thenReturn(standings);
+        when(roundTypeRepository.findByNumberOfPlayers(4)).thenReturn(Optional.of(roundType));
+        when(roundTypeRepository.findByNumberOfPlayers(2)).thenReturn(Optional.of(roundType));
+        when(gameTypeRepository.findById(1L)).thenReturn(Optional.of(gameType));
+
+        // Mock round completion check
         Match completedMatch = new Match();
         completedMatch.setStatus(Match.MatchStatus.COMPLETED);
         when(matchRepository.findByTournamentIdAndSwissRoundNumber(tournamentId, bracket.getCurrentRound()))
                 .thenReturn(Collections.singletonList(completedMatch));
+        when(restTemplate.getForObject(contains("/api/player/"), eq(PlayerDetailsDTO.class)))
+                .thenReturn(playerDetails);
 
-        // Mock sorted standings for top half
-        List<SwissStanding> standings = Arrays.asList(winnerStanding, loserStanding);
-        when(swissStandingRepository.findByBracketIdOrderByWinsDescLossesAsc(bracket.getId())).thenReturn(standings);
-        when(matchService.createKnockoutMatches(eq(tournamentId), eq(gameTypeId), anyList()))
-        .thenReturn(1L);
+        // Act
         String result = matchService.advanceWinner(matchId, winnerId);
 
         // Assert
         assertEquals("Swiss rounds completed, moving to knockout phase.", result);
 
-        // Verify interactions to confirm the Swiss path was taken
+        // Verify the expected top 4 players are selected for the knockout stage
+        List<Long> advancedPlayerIds = standings.stream()
+                .limit(4) 
+                .map(SwissStanding::getPlayerId)
+                .collect(Collectors.toList());
+
+        // Expected IDs of players advancing to the knockout stage
+        List<Long> expectedIds = Arrays.asList(winnerId, player3.getPlayerId(), player4.getPlayerId(), loserId);
+
+        // Assert that the advanced player list has the expected players
+        assertEquals(4, advancedPlayerIds.size(), "The advanced player list should contain exactly 4 players");
+        assertTrue(advancedPlayerIds.containsAll(expectedIds), "Advanced players should match expected top players");
+
+        // Verify repository saves and service calls
         verify(matchRepository).save(match);
         verify(swissStandingRepository).save(winnerStanding);
         verify(swissStandingRepository).save(loserStanding);
-        verify(matchService).createKnockoutMatches(tournamentId, gameTypeId, anyList());
     }
-
 
     @Test
     void advanceWinner_InvalidPlayer_ThrowsException() {

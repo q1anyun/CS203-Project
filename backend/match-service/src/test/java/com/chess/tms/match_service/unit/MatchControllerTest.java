@@ -64,7 +64,7 @@ class MatchControllerTest {
             .thenReturn(roundTypeId);
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/knockout/{tournamentId}/{gameTypeId}", tournamentId, gameTypeId)  // Use explicit values instead of path variables
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout//{gameTypeId}", tournamentId, gameTypeId)  // Use explicit values instead of path variables
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(roundTypeId.toString()));
@@ -84,7 +84,7 @@ class MatchControllerTest {
             .thenThrow(new RoundTypeNotFoundException( "Round type not found for " + invalidNumberOfPlayers + " players"));
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/knockout/{tournamentId}/{gameTypeId}", tournamentId, gameTypeId))
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout//{gameTypeId}", tournamentId, gameTypeId))
                 .andExpect(status().isNotFound());
     
         verify(matchService).createKnockoutMatches(tournamentId, gameTypeId, null);
@@ -101,7 +101,7 @@ class MatchControllerTest {
             .thenThrow(new GameTypeNotFoundException("GameType with ID " + invalidGameTypeId + " not found"));
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/knockout/{tournamentId}/{gameTypeId}", tournamentId, invalidGameTypeId) ) 
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout/{gameTypeId}", tournamentId, invalidGameTypeId) ) 
                 .andExpect(status().isNotFound()); 
     
         verify(matchService).createKnockoutMatches(tournamentId, invalidGameTypeId, null);
@@ -278,7 +278,7 @@ class MatchControllerTest {
             .thenReturn(bracketId);
 
         // Act & Assert
-        mockMvc.perform(post("/api/matches/swiss/{tournamentId}/{gameTypeId}", tournamentId, gameTypeId))
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/swiss/{gameTypeId}", tournamentId, gameTypeId))
                 .andExpect(status().isOk());
 
         verify(matchService).createSwissMatches(tournamentId, gameTypeId);
