@@ -4,9 +4,11 @@ import axios from 'axios';
 import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
 import { useNavigate } from 'react-router-dom';
+import defaultProfilePic from '../../assets/default_user.png'; 
 
 const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
+const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL; 
 
 function SwissBracket({ matches, SwissBracketID }) {
     const [swissRoundDetails, setSwissRoundDetails] = useState([]);
@@ -16,6 +18,7 @@ function SwissBracket({ matches, SwissBracketID }) {
     const [swissMatches, setSwissMatches] = useState([]);
     const [knockoutMatches, setKnockoutMatches] = useState([]);
     const [groupedRounds, setGroupedRounds] = useState([]);
+    const [playersWithPhotos, setPlayersWithPhotos] = useState({});
 
     const navigate = useNavigate();
 
@@ -33,6 +36,44 @@ function SwissBracket({ matches, SwissBracketID }) {
         setSwissMatches(swiss);
         setKnockoutMatches(knockout);
     }, [matches]);
+
+
+    useEffect(() => {
+        const fetchProfilePhotos = async (matches) => {
+            const allPlayers = matches.reduce((acc, match) => {
+                if (match.player1) acc.push(match.player1);
+                if (match.player2) acc.push(match.player2);
+                return acc;
+            }, []);
+
+            const playersWithPhotos = await attachProfilePhotos(allPlayers);
+            setPlayersWithPhotos(playersWithPhotos.reduce((acc, player) => {
+                acc[player.id] = player.profilePhoto;
+                return acc;
+            }, {}));
+        };
+
+        fetchProfilePhotos([...swissMatches, ...knockoutMatches]);
+    }, [swissMatches, knockoutMatches]);
+
+    const attachProfilePhotos = async (players) => {
+        const token = localStorage.getItem('token');
+        return await Promise.all(
+          players.map(async (player) => {
+            try {
+              const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+              });
+              const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+              return { ...player, profilePhoto: imageUrl };
+            } catch {
+              // If photo fetch fails, add a default image or handle as needed
+              return { ...player, profilePhoto: defaultProfilePic };
+            }
+          })
+        );
+      };
 
     useEffect(() => {
         const groupMatchesByRound = () => {
@@ -152,7 +193,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, backgroundColor: match.winnerId === match.player1.id ? 'green' : 'background.paper', p: 1, borderRadius: 1 }}>
                                                 <Avatar
                                                     alt={match.player1?.firstName}
-                                                    src={`/path/to/profile_picture/player_${match.player1?.id}.jpg`}
+                                                    src={playersWithPhotos[match.player1?.id] || defaultProfilePic}
                                                     sx={{ mr: 1 }}
                                                 />
                                                 <Typography variant="body1" style={{ color: match.winnerId === match.player1.id ? 'white' : 'black' }}>
@@ -163,7 +204,7 @@ function SwissBracket({ matches, SwissBracketID }) {
                                             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, backgroundColor: match.winnerId === match.player2.id ? 'green' : 'background.paper', p: 1, borderRadius: 1 }}>
                                                 <Avatar
                                                     alt={match.player2?.firstName}
-                                                    src={`/path/to/profile_picture/player_${match.player2?.id}.jpg`}
+                                                    src={playersWithPhotos[match.player2?.id] || defaultProfilePic}
                                                     sx={{ mr: 1 }}
                                                 />
                                                 <Typography variant="body1" style={{ color: match.winnerId === match.player2.id ? 'white' : 'black' }}>

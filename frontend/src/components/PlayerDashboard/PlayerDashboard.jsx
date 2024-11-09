@@ -24,7 +24,7 @@ function PlayerDashboard() {
         const fetchPlayerAndMatchData = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/login'); 
+                navigate('/login');
                 return;
             }
 
@@ -60,7 +60,7 @@ function PlayerDashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRecommendedTournaments(recommendedTournamentResponse.data);
-                console.log(recommendedTournaments); 
+                console.log(recommendedTournaments);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -124,12 +124,13 @@ function PlayerDashboard() {
                             <Typography variant="header2">Recommended Tournaments</Typography>
                             {recommendedTournaments.map((tournament) => (
                                 <Grid item xs={12} sm={6} md={4} key={tournament.id}>
-                                     <Link to={`/tournament/${tournament.id}`} style={{ textDecoration: 'none' }}>
-                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                        
+
+                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+                                        onClick={() => navigate(`/player/tournaments/${tournament.id}`)} >
+
                                         <TournamentItem key={tournament.id} tournament={tournament} />
                                     </Card>
-                                    </Link>
+
                                 </Grid>))}
 
 
