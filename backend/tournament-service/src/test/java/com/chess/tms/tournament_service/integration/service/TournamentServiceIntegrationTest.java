@@ -118,7 +118,6 @@ public class TournamentServiceIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
     
         HttpEntity<TournamentRegistrationDTO> request = new HttpEntity<>(dto, headers);
-    
         ResponseEntity<String> response = restTemplate.postForEntity(
             "/api/tournaments",
             request,
@@ -134,7 +133,7 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Valid_Success() {
         Tournament tournament = createTournament();
-
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
@@ -161,6 +160,7 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Error_Failure() {
         Tournament tournament = createTournament();
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 

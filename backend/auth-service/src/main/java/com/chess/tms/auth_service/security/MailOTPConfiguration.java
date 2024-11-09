@@ -23,19 +23,26 @@ public class MailOTPConfiguration {
     @Value("${spring.mail.password}")
     private String password;
 
+    /**
+     * Creates and configures a JavaMailSender bean for sending emails.
+     * 
+     * @return Configured JavaMailSender instance
+     */
     @Bean
     public JavaMailSender javaMailSender() {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        // Configure basic mail server settings
         mailSender.setHost(host);
         mailSender.setPort(port);
         mailSender.setUsername(username);
         mailSender.setPassword(password);
 
+        // Configure additional mail properties
         Properties props = mailSender.getJavaMailProperties();
-        props.put("mail.transport.protocol", "smtp");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true"); 
-        props.put("mail.debug", "true"); 
+        props.put("mail.transport.protocol", "smtp"); // Use SMTP protocol
+        props.put("mail.smtp.auth", "true"); // Enable SMTP authentication
+        props.put("mail.smtp.starttls.enable", "true"); // Use STARTTLS
+        props.put("mail.debug", "true"); // Enable debug mode for logging
 
         return mailSender;
     }

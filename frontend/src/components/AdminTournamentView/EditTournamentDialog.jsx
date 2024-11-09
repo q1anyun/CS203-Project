@@ -57,7 +57,10 @@ function EditTournamentDialog({
                     maxPlayers: '',
                     description: '',
                     tournamentType: '',
-                    format: ''
+                    format: '',
+                    locationAddress: '',
+                    locationLatitude: '',
+                    locationLongitude: ''
                 });
 
                 setEditDialogOpen(false);
@@ -218,10 +221,47 @@ function EditTournamentDialog({
                                 onChange={handleEditInputChange}
                             >
                                 <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="HYBRID">Hybrid</MenuItem>
                                 <MenuItem value="PHYSICAL">Physical</MenuItem>
                             </Select>
                         </FormControl>
                     </Grid2>
+
+                    {(updateTournament.format === 'PHYSICAL'  || updateTournament.format === 'HYBRID') && (
+                        <>
+                            <Grid2 size={12}>
+                                <TextField
+                                    name="locationAddress"
+                                    label="Location Address"
+                                    value={updateTournament.locationAddress}
+                                    onChange={handleEditInputChange}
+                                    fullWidth
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLatitude"
+                                    label="Latitude (Optional)"
+                                    value={updateTournament.locationLatitude}
+                                    onChange={handleEditInputChange}
+                                    fullWidth
+                                    type="number"
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLongitude"
+                                    label="Longitude (Optional)"
+                                    value={updateTournament.locationLongitude}
+                                    onChange={handleEditInputChange}
+                                    fullWidth
+                                />
+                            </Grid2>
+                        </>
+                    )}
+
 
                     <Grid2 size={12}>
                         <FormControl fullWidth>

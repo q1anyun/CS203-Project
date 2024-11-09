@@ -38,7 +38,7 @@ class RoundTypeServiceTest {
         when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(expectedPlayerChoices);
 
         // Act: Get the actual result from the service
-        List<Integer> actualPlayerChoices = roundTypeService.getChoicesForNumberOfPlayers();
+        List<Integer> actualPlayerChoices = roundTypeService.getAvailablePlayerCounts();
 
         // Assert: Validate the results
         assertPlayerChoices(actualPlayerChoices);

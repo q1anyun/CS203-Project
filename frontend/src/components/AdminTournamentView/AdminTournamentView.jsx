@@ -59,7 +59,10 @@ export default function AdminTournamentView() {
         maxPlayers: '',
         tournamentType: '',
         description: '',
-        format: ''
+        format: '',
+        locationAddress: '',
+        locationLatitude: '',
+        locationLongitude: ''
     });
 
     const [updateTournament, setUpdateTournament] = useState({
@@ -72,7 +75,10 @@ export default function AdminTournamentView() {
         maxPlayers: '',
         tournamentType: '',
         description: '',
-        format: ''
+        format: '',
+        locationAddress: '',
+        locationLatitude: '',
+        locationLongitude: ''
     });
 
     const resetNewTournament = () => {
@@ -86,15 +92,19 @@ export default function AdminTournamentView() {
             maxPlayers: '',
             tournamentType: '',
             description: '',
-            format: ''
+            format: '',
+            locationAddress: '',
+            locationLatitude: '',
+            locationLongitude: ''
         });
     };
 
     const validateForm = (tournament) => {
-        
+
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
+            if (key === 'locationLatitude' || key === 'locationLongitude') return false;
             return !tournament[key];
-        });
+        })
 
         if (isAnyFieldEmpty) {
             setCreateFormError('Please fill up all required fields');
@@ -193,7 +203,10 @@ export default function AdminTournamentView() {
                 maxPlayers: response.data.maxPlayers || '',
                 description: response.data.description || '',
                 tournamentType: response.data.tournamentType.id || '',
-                format: response.data.format || ''
+                format: response.data.format || '',
+                locationAddress: response.data.locationAddress || '',
+                locationLatitude: response.data.locationLatitude || '',
+                locationLongitude: response.data.locationLongitude || ''
             });
             setEditDialogOpen(true);
         } catch (error) {

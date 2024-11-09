@@ -17,6 +17,6 @@ public class RoundTypeController {
 
     @GetMapping("/choices")
     public List<Integer> getChoicesForNumberOfPlayers() {
-        return roundTypeService.getChoicesForNumberOfPlayers();
+        return roundTypeService.getAvailablePlayerCounts();
     }
 }

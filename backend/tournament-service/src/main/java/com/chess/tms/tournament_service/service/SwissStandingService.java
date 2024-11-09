@@ -17,18 +17,21 @@ import com.chess.tms.tournament_service.repository.SwissStandingRepository;
 
 @Service
 public class SwissStandingService {
-    @Autowired
-    private SwissStandingRepository swissStandingRepository;
+    private final SwissStandingRepository swissStandingRepository;
+    private final RestTemplate restTemplate;
+    private final String playerServiceUrl;
 
-    @Autowired
-    private RestTemplate restTemplate;
+    public SwissStandingService(SwissStandingRepository swissStandingRepository, 
+                               RestTemplate restTemplate,
+                               @Value("${players.service.url}") String playerServiceUrl) {
+        this.swissStandingRepository = swissStandingRepository;
+        this.restTemplate = restTemplate;
+        this.playerServiceUrl = playerServiceUrl;
+    }
 
-    @Value("${players.service.url}")
-    private String playerServiceUrl;
-
-     public List<SwissStandingDTO> getSwissStandings(Long bracketId) {
+    public List<SwissStandingDTO> getSwissStandings(Long bracketId) {
         // Fetch the list of Swiss standings for the given bracket ID
-        List<SwissStanding> standings = swissStandingRepository.findByBracketId(bracketId);
+        List<SwissStanding> standings = swissStandingRepository.findAllByBracketId(bracketId);
 
         // Throw exception if no standings are found for the given bracket ID
         if (standings.isEmpty()) {
@@ -51,6 +54,5 @@ public class SwissStandingService {
                 playerServiceUrl + "/api/player/" + playerId, PlayerDetailsDTO.class);
         return response.getBody();
     }
-
 
 }

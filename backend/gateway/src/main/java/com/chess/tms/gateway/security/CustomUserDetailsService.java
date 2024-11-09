@@ -10,9 +10,7 @@ import org.springframework.stereotype.Service;
 import com.chess.tms.gateway.repository.UsersRepository;
 import com.chess.tms.gateway.model.User;
 
-import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

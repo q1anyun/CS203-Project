@@ -18,7 +18,7 @@ export const handleLoginClick = (navigate) => {
     navigate('/login');
 };
 
-export const handleSubmit = async (e, formData, setFormData, setErrors, setShowAlert, navigate) => {
+export const handleSubmit = async (e, formData, setErrors, navigate) => {
     e.preventDefault();
 
     let formErrors = {};

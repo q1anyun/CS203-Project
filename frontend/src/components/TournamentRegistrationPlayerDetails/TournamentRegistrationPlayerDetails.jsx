@@ -4,8 +4,10 @@ import { Typography, Avatar, Box, Grid, Button, TextField } from '@mui/material'
 import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReactCountryFlag from 'react-country-flag';
+import defaultProfilePic from '../../assets/default_user.png';
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff',
@@ -16,9 +18,8 @@ const DetailBox = styled(Box)({
     alignItems: 'center',
 });
 
-
-function createData(id, firstName, lastName, country, score) {
-    return { id, firstName, lastName, country, score };
+function createData(id, firstName, lastName, country, eloRating) {
+    return { id, firstName, lastName, country, eloRating };
 }
 
 function TournamentRegistrationPlayerDetails() {
@@ -32,23 +33,23 @@ function TournamentRegistrationPlayerDetails() {
     useEffect(() => {
         const fetchParticipants = async () => {
             try {
-                const response = await axios.get(`${baseURL}/${id}`);
+                const response = await axios.get(`${tournamentPlayerURL}/${id}`);
                 const data = response.data;
-                setParticipants(data);
-                console.log(participants);
-
-                // Create leaderboard data
-                const sortedData = formattedData.sort((a, b) => b.score - a.score);
-                setLeaderboard(sortedData);
+                const formattedData = data.map((participant) =>
+                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating)
+                );
+                  // Attach profile photos to each participant
+                  const participantsWithPhotos = await attachProfilePhotos(formattedData);
+                  setParticipants(participantsWithPhotos);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
                     const errorMessage = error.response.data?.message || 'An unexpected error occurred';
                     navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
+                } else if (error.request) {
                     navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
                 }
             }
         };
@@ -56,7 +57,26 @@ function TournamentRegistrationPlayerDetails() {
         fetchParticipants();
     }, [id]);
 
-
+    const attachProfilePhotos = async (players) => {
+        const token = localStorage.getItem('token');
+        return await Promise.all(
+          players.map(async (player) => {
+            try {
+              const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+              });
+              const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+              return { ...player, profilePhoto: imageUrl };
+            } catch {
+              // If photo fetch fails, add a default image or handle as needed
+              return { ...player, profilePhoto: defaultProfilePic };
+            }
+          })
+        );
+      };
+    
+  
     // Handle search
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);

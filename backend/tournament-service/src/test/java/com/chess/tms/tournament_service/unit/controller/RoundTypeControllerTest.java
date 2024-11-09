@@ -42,13 +42,13 @@ class RoundTypeControllerTest {
     void getChoicesForNumberOfPlayers_ReturnsValidChoicesList() throws Exception {
         List<Integer> choices = List.of(2, 4, 8, 16, 32, 64);
 
-        when(roundTypeService.getChoicesForNumberOfPlayers()).thenReturn(choices);
+        when(roundTypeService.getAvailablePlayerCounts()).thenReturn(choices);
 
         mockMvc.perform(get("/api/round-type/choices")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[2,4,8,16,32,64]"));
 
-        verify(roundTypeService).getChoicesForNumberOfPlayers();
+        verify(roundTypeService).getAvailablePlayerCounts();
     }
 }

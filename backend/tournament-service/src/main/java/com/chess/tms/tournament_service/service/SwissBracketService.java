@@ -15,17 +15,20 @@ public class SwissBracketService {
     @Autowired
     private SwissBracketRepository swissBracketRepository;
 
+    /**
+     * Retrieves a Swiss bracket by its ID and converts it to DTO
+     * @param id The ID of the Swiss bracket to retrieve
+     * @return SwissBracketDTO containing the bracket information
+     * @throws SwissBracketNotFoundException if bracket is not found
+     */
     public SwissBracketDTO getSwissBracket(Long id) {
-        Optional<SwissBracket> bracket = swissBracketRepository.findById(id);
-
-        // Throw exception if bracket is not found
-        if (!bracket.isPresent()) {
-            throw new SwissBracketNotFoundException("Bracket not found");
-        }
-            SwissBracketDTO dto = new SwissBracketDTO();
-            dto.setCurrentRound(bracket.get().getCurrentRound());
-            dto.setNumberOfRounds(bracket.get().getNumberOfRounds());
-            return dto;
-
+        return swissBracketRepository.findById(id)
+            .map(bracket -> {
+                SwissBracketDTO dto = new SwissBracketDTO();
+                dto.setCurrentRound(bracket.getCurrentRound());
+                dto.setNumberOfRounds(bracket.getNumberOfRounds());
+                return dto;
+            })
+            .orElseThrow(() -> new SwissBracketNotFoundException("Bracket not found"));
     }
 }

@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Container, Grid2 } from '@mui/material';
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import defaultProfilePic from '../../assets/default_user.png';
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
@@ -21,9 +22,8 @@ function Leaderboard() {
         const top3 = response.data.slice(0, 3);
         const remainingPlayers = response.data.slice(3);
         
-        setTopThree(top3);
-        console.log(top3); 
-        setProfiles(remainingPlayers);
+        setTopThree(await attachProfilePhotos(top3));
+        setProfiles(await attachProfilePhotos(remainingPlayers));
       } catch (error) {
         if (error.response) {
           const statusCode = error.response.status;
@@ -39,6 +39,27 @@ function Leaderboard() {
 
     fetchData();
   }, []);
+
+
+  const attachProfilePhotos = async (players) => {
+    const token = localStorage.getItem('token');
+    return await Promise.all(
+      players.map(async (player) => {
+        try {
+          const profilePictureResponse = await axios.get(`${baseURL}/photo/${player.playerId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: 'blob',
+          });
+          const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+          return { ...player, profilePicture: imageUrl };
+        } catch {
+          // If photo fetch fails, add a default image or handle as needed
+          return { ...player, profilePicture: defaultProfilePic };
+        }
+      })
+    );
+  };
+
 
   return (
     <div>

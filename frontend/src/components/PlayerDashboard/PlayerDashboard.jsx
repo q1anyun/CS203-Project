@@ -24,7 +24,7 @@ function PlayerDashboard() {
         const fetchPlayerAndMatchData = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/login'); 
+                navigate('/login');
                 return;
             }
 
@@ -56,10 +56,11 @@ function PlayerDashboard() {
                 setLiveTournaments(tournamentResponse.data || []);
 
                 //fetch reccomended Tournaments 
-                const reccomendedTournamentResponse = await axios.get(`${tournamentURL}/recommended`, {
+                const recommendedTournamentResponse = await axios.get(`${tournamentURL}/recommended`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setRecommendedTournaments(reccomendedTournamentResponse.data);
+                setRecommendedTournaments(recommendedTournamentResponse.data);
+                console.log(recommendedTournaments);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -123,10 +124,13 @@ function PlayerDashboard() {
                             <Typography variant="header2">Recommended Tournaments</Typography>
                             {recommendedTournaments.map((tournament) => (
                                 <Grid item xs={12} sm={6} md={4} key={tournament.id}>
-                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+                                    <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+                                        onClick={() => navigate(`/player/tournaments/${tournament.id}`)} >
 
                                         <TournamentItem key={tournament.id} tournament={tournament} />
                                     </Card>
+
                                 </Grid>))}
 
 
@@ -134,7 +138,7 @@ function PlayerDashboard() {
                     </Grid>
 
                     <Grid item xs={12} md={6}>
-                        <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
+                        <Card elevation={3} sx={{ p: 2, minHeight: 140}}>
                             <Typography variant="header2">Ongoing Tournaments</Typography>
 
 
@@ -170,10 +174,10 @@ function PlayerDashboard() {
                     </Grid>
 
                     <Grid item xs={12} md={6}>
-                        <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
+                        <Card elevation={3} sx={{ p: 2, minHeight: 140, }}>
                             <Typography variant="header2">Recent Matches</Typography>
                             {/* List recent matches */}
-                            <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2, justifyContent: 'center' }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 2, p: 2, justifyContent: 'center', }}>
                                 {recentMatches.length > 0 ? (
                                     recentMatches.map((match, index) => (
                                         <Card
@@ -182,16 +186,16 @@ function PlayerDashboard() {
                                                 display: 'flex',
                                                 flexDirection: 'column',
                                                 p: 2,
-                                                backgroundColor: 'background.paper',
                                                 borderRadius: 2,
                                                 flexGrow: 1,
                                                 alignItems: 'center'
+                                                
                                             }}
                                         >
                                             <Typography variant="header3">{match.tournament.name}</Typography>
 
                                             {/* Flexbox for Players and Winner */}
-                                            <CardContent sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                                            <CardContent sx={{ display: 'flex', alignItems: 'flex-start',  }}>
                                                 {/* Left Column for Players */}
                                                 <Box sx={{ textAlign: 'left', alignItems: 'flex-start' }}>
                                                     {/* Player 1 */}
@@ -199,9 +203,9 @@ function PlayerDashboard() {
                                                         <Avatar
                                                             alt={`Player ${match.winnerId}`}
                                                             src={`../../../backend/player-service/profile-picture/player_${match.winnerId}.jpg`}
-                                                            sx={{ mr: 1 }}
+                                                            sx={{ mr: 1, backgroundColor: '#FDB068'}}
                                                         />
-                                                        <Typography variant="body4">Player {match.winnerId}</Typography>
+                                                        <Typography variant="header3">Player {match.winnerId}</Typography>
                                                     </Box>
 
                                                     {/* Player 2 */}
@@ -209,9 +213,9 @@ function PlayerDashboard() {
                                                         <Avatar
                                                             alt={`Player ${match.loserId}`}
                                                             src={`../../../backend/player-service/profile-picture/player_${match.loserId}.jpg`}
-                                                            sx={{ mr: 1 }}
+                                                            sx={{ mr: 1,  backgroundColor: '#FDB068'}}
                                                         />
-                                                        <Typography variant="body4">Player {match.loserId}</Typography>
+                                                        <Typography variant="header3">Player {match.loserId}</Typography>
                                                     </Box>
                                                 </Box>
 
@@ -220,7 +224,7 @@ function PlayerDashboard() {
 
                                                 {/* Right Column for Winner */}
                                                 <Box sx={{ flexShrink: 0, alignItems: 'center' }}>
-                                                    <Typography variant="body4">Winner:</Typography>
+                                                    <Typography variant="header3">Winner:</Typography>
                                                     <Box sx={{ mb: 2 }}>
                                                         <Avatar
                                                             alt={`Winner ${match.winnerId}`}
@@ -234,10 +238,11 @@ function PlayerDashboard() {
                                                                 height: 56,
                                                                 justifyContent: 'center',
                                                                 alignContent: 'center',
+                                                                backgroundColor: '#FCD34D', // gray-200
                                                             }}
                                                         />
                                                     </Box>
-                                                    <Typography variant="body4">
+                                                    <Typography variant="header3">
                                                         {match.winnerId ? `Player ${match.winnerId}` : 'Pending'}
                                                     </Typography>
                                                 </Box>

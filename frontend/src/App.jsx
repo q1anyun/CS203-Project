@@ -12,8 +12,7 @@ import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
-import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
-import TournamentLeaderboard from './components/TournamentLeaderboard/TournamentLeaderboard';
+import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails'; 
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
 import { fetchProfilePic } from './components/ProfilePicture/fetchProfilePic.js';
 import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
@@ -134,7 +133,6 @@ function AppContent() {
         <Route path="/error" element={<DefaultErrorPage />} />
         <Route path="/profileview/:id" element={<PlayerProfileView />} />
         <Route path="verification" element={<AuthPage />} />
-        <Route path="/tournaments/leaderboard/:id" element={<TournamentLeaderboard />} />
 
         {/* Catch-all route for undefined paths */}
         <Route path="*" element={<PageNotFound />} />

@@ -39,11 +39,11 @@ export const handleSubmitChanges = async (event, oldPassword, newPassword, setEr
         if (error.response) {
             const statusCode = error.response.status;
             const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-            navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        } else if (err.request) {
+            alert(`Error: ${errorMessage}`);
+        } else if (error.request) {
             navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
         } else {
-            navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
         }
     }
 };
