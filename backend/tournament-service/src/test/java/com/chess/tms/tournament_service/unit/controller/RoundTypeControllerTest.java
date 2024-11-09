@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -48,13 +47,8 @@ class RoundTypeControllerTest {
         mockMvc.perform(get("/api/round-type/choices")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0]").value(choices.get(0)))
-                .andExpect(jsonPath("$[1]").value(choices.get(1)))
-                .andExpect(jsonPath("$[2]").value(choices.get(2)))
-                .andExpect(jsonPath("$[3]").value(choices.get(3)))
-                .andExpect(jsonPath("$[4]").value(choices.get(4)))
-                .andExpect(jsonPath("$[5]").value(choices.get(5)));
+                .andExpect(content().json("[2,4,8,16,32,64]"));
 
-        verify(roundTypeService, times(1)).getChoicesForNumberOfPlayers();
+        verify(roundTypeService).getChoicesForNumberOfPlayers();
     }
 }

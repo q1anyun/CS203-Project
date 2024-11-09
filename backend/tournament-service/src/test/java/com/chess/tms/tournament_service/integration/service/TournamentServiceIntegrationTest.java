@@ -29,7 +29,6 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.spy;
 
 import java.time.LocalDate;
 
@@ -139,9 +138,9 @@ public class TournamentServiceIntegrationTest {
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
-        // Mock the external match service response
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
             .andRespond(withStatus(HttpStatus.OK)
             .contentType(MediaType.APPLICATION_JSON)
             .body("1"));
@@ -165,8 +164,9 @@ public class TournamentServiceIntegrationTest {
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
             .andRespond(withStatus(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body("{\"message\": \"Failed to start tournament due to match service error\"}"));
@@ -176,8 +176,6 @@ public class TournamentServiceIntegrationTest {
             null,
             String.class
         );
-
-        System.out.println("Response Body: " + response.getBody());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to start tournament due to match service error"));

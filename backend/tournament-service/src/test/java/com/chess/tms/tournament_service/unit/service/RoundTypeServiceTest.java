@@ -33,7 +33,7 @@ class RoundTypeServiceTest {
     }
 
     @Test
-    void shouldReturnCorrectChoicesForNumberOfPlayers() {
+    void getChoicesForNumberOfPlayers_Valid_ReturnChoices() {
         // Arrange: Mock repository to return the expected player choices
         when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(expectedPlayerChoices);
 

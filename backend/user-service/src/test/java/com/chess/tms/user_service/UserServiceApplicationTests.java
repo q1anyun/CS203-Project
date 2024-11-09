@@ -49,7 +49,7 @@ class UserServiceTest {
 
         updateUserRequestDTO = new UpdateUserRequestDTO();
         updateUserRequestDTO.setEmail("new.email@example.com");
-        updateUserRequestDTO.setPassword("new_password");
+        updateUserRequestDTO.setNewPassword("new_password");
         updateUserRequestDTO.setRole(UserRole.ADMIN);
     }
 
@@ -58,7 +58,7 @@ class UserServiceTest {
         // Arrange
         when(usersRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
         when(usersRepository.findByEmail(updateUserRequestDTO.getEmail())).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(updateUserRequestDTO.getPassword())).thenReturn("encoded_password");
+        when(passwordEncoder.encode(updateUserRequestDTO.getNewPassword())).thenReturn("encoded_password");
 
         // Act
         userService.updateUser(existingUser.getId(), updateUserRequestDTO);
@@ -97,7 +97,7 @@ class UserServiceTest {
     void updateUser_shouldThrowUserAlreadyExistsException_whenPasswordIsSame() {
         // Arrange
         when(usersRepository.findById(existingUser.getId())).thenReturn(Optional.of(existingUser));
-        when(passwordEncoder.matches(updateUserRequestDTO.getPassword(), existingUser.getPassword())).thenReturn(true);
+        when(passwordEncoder.matches(updateUserRequestDTO.getNewPassword(), existingUser.getPassword())).thenReturn(true);
 
         // Act & Assert
         assertThrows(UserAlreadyExistsException.class, () -> userService.updateUser(existingUser.getId(), updateUserRequestDTO));

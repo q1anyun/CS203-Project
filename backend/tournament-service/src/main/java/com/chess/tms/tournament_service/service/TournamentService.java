@@ -79,7 +79,6 @@ public class TournamentService {
     @Autowired
     private SwissBracketRepository swissBracketRepository;
 
-
     @Autowired
     private RestTemplate restTemplate;
 
@@ -159,7 +158,6 @@ public class TournamentService {
         tournament.setCurrentRound(roundType);
 
         try {
-            // Response entity with the Swiss bracket ID from Match Service after generating the matches
             restTemplate.postForEntity(
                     matchServiceUrl + "/api/matches/swiss/" + tournamentId + "/" + tournament.getTimeControl().getId(),
                     null, Long.class);
