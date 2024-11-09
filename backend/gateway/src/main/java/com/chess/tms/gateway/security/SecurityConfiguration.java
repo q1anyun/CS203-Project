@@ -87,6 +87,9 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/api/elo/**").permitAll()
                 .requestMatchers("/api/s3/**").permitAll()
+
+                // ===== Health Check Endpoints =====
+                .requestMatchers("/health").permitAll()
                 
                 // Require authentication for all other endpoints
                 .anyRequest().authenticated()
