@@ -8,5 +8,11 @@ import com.chess.tms.tournament_service.model.TournamentType;
 
 @Repository
 public interface TournamentTypeRepository extends JpaRepository<TournamentType, Long> {
-        public Optional<TournamentType> getTournamentTypeById(long id);
+    /**
+     * Retrieves a tournament type by its ID.
+     * 
+     * @param id The unique identifier of the tournament type
+     * @return An Optional containing the tournament type if found, empty otherwise
+     */
+    public Optional<TournamentType> getTournamentTypeById(long id);
 }

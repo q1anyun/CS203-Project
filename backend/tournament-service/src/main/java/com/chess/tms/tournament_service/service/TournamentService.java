@@ -48,7 +48,6 @@ import com.chess.tms.tournament_service.exception.MatchServiceException;
 import com.chess.tms.tournament_service.exception.MaxPlayersReachedException;
 import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
 import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
-import com.chess.tms.tournament_service.exception.SwissBracketNotFoundException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
 import com.chess.tms.tournament_service.exception.TournamentTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.UserDoesNotExistException;
@@ -80,7 +79,6 @@ public class TournamentService {
     @Autowired
     private SwissBracketRepository swissBracketRepository;
 
-
     @Autowired
     private RestTemplate restTemplate;
 
@@ -92,6 +90,10 @@ public class TournamentService {
     
     @Value("${s3.upload.service.url}")
     private String s3UploadServiceUrl;
+
+    private static final String SWISS_TOURNAMENT_TYPE = "swiss";
+    private static final String KNOCKOUT_TOURNAMENT_TYPE = "knockout";
+    private static final String SWISS_ROUND_NAME = "Swiss";
 
     public String createTournament(TournamentRegistrationDTO dto, long creatorId) {
         Tournament tournament = DTOUtil.convertDTOToTournament(dto, creatorId);
@@ -111,57 +113,53 @@ public class TournamentService {
         return "Tournament created successfully";
     }
 
-    // Start tournament based on tournament type
     public String startTournament(long tournamentId) {
         Tournament tournament = findTournamentById(tournamentId);
+        validateTournament(tournament);
 
-        // Check if tournament has enough players to start
-        validatePlayerCount(tournament);
-
-        // Start tournament based on tournament type
-        switch (tournament.getTournamentType().getTypeName().toLowerCase()) {
-            case "swiss":
+        String tournamentType = tournament.getTournamentType().getTypeName().toLowerCase();
+        switch (tournamentType) {
+            case SWISS_TOURNAMENT_TYPE:
                 startSwissTournament(tournamentId, tournament);
                 break;
-            case "knockout":
+            case KNOCKOUT_TOURNAMENT_TYPE:
                 startKnockoutTournamentAndSetRound(tournament);
                 break;
             default:
                 throw new TournamentTypeNotFoundException("Invalid TournamentType.");
         }
 
-        // Set tournament status to LIVE and save
         tournament.setStatus(Status.LIVE);
         tournamentRepository.save(tournament);
 
-        return tournament.getName() + " has started and current round is "
-                + tournament.getCurrentRound().getRoundName();
+        return String.format("%s has started and current round is %s", 
+            tournament.getName(), 
+            tournament.getCurrentRound().getRoundName());
     }
 
-    // Fetch tournament by ID or throw an exception
     private Tournament findTournamentById(long tournamentId) {
         return tournamentRepository.findById(tournamentId)
                 .orElseThrow(() -> new TournamentDoesNotExistException(
                         "Tournament with id " + tournamentId + " does not exist."));
     }
 
-    // Validate that the tournament has enough players to start
-    private void validatePlayerCount(Tournament tournament) {
+    private void validateTournament(Tournament tournament) {
         if (tournament.getCurrentPlayers() < 2) {
             throw new InsufficientPlayersException("Tournament cannot start with less than 2 players.");
         }
+        if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
+            throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
+        }
     }
 
-    // Start Swiss tournament and set current round
     private void startSwissTournament(long tournamentId, Tournament tournament) {
-        RoundType roundType = roundTypeRepository.findByRoundName("Swiss")
+        RoundType roundType = roundTypeRepository.findByRoundName(SWISS_ROUND_NAME)
                 .orElseThrow(() -> new RoundTypeNotFoundException("RoundType with name Swiss does not exist."));
         tournament.setCurrentRound(roundType);
 
         try {
-            // Response entity with the Swiss bracket ID from Match Service after generating the matches
-            ResponseEntity<Long> responseEntity = restTemplate.postForEntity(
-                    matchServiceUrl + "/api/matches/tournament" + tournamentId + "/swiss/" +tournament.getTimeControl().getId(),
+            restTemplate.postForEntity(
+                    matchServiceUrl + "/api/matches/swiss/" + tournamentId + "/" + tournament.getTimeControl().getId(),
                     null, Long.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
             throw new MatchServiceException("Failed to start tournament due to match service error: "
@@ -171,7 +169,6 @@ public class TournamentService {
         }
     }
 
-    // Start knockout tournament and set round
     private void startKnockoutTournamentAndSetRound(Tournament tournament) {
         ResponseEntity<Long> response = startKnockoutTournament(tournament.getTournamentId(), tournament);
         Long roundTypeId = response.getBody();
@@ -182,15 +179,13 @@ public class TournamentService {
         tournament.setCurrentRound(roundType);
     }
 
-    // Start knockout tournament and return the current round ID
     private ResponseEntity<Long> startKnockoutTournament(long tournamentId, Tournament tournament) {
         try {
             return restTemplate.postForEntity(
-                    matchServiceUrl + "/api/matches/tournament/" + tournamentId +"/knockout/"
+                    matchServiceUrl + "/api/matches/knockout/" + tournamentId + "/"
                             + tournament.getTimeControl().getId(),
                     null, Long.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
-       
             throw new MatchServiceException("Failed to start tournament due to match service error: "
                     + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
         } catch (RestClientException ex) {
@@ -198,7 +193,6 @@ public class TournamentService {
         }
     }
 
-    // Get detailed information about a tournament, including the winner (if any)
     public TournamentDetailsDTO getTournamentDetailsById(long id) {
         Tournament tournament = findTournamentById(id);
         TournamentDetailsDTO returnDTO = convertEntryToDTO(tournament);
@@ -342,45 +336,35 @@ public class TournamentService {
     }
 
     public void registerPlayer(long playerId, long tournamentId) {
-        Optional<Tournament> tournamentOptional = tournamentRepository.findById(tournamentId);
-        if (tournamentOptional.isEmpty()) {
-            throw new TournamentDoesNotExistException("Tournament with id " + tournamentId + " does not exist.");
-        }
-
-        PlayerDetailsDTO registeringPlayer = fetchPlayerDetails(playerId);
-
-        if (registeringPlayer == null) {
-            throw new UserDoesNotExistException("Player with id " + playerId + " does not exist.");
-        }
-
-        if (registeringPlayer.getEloRating() < tournamentOptional.get().getMinElo()
-                || registeringPlayer.getEloRating() > tournamentOptional.get().getMaxElo()) {
-            throw new EloNotInRangeException(
-                    "Player with id " + playerId + " does not meet the Elo requirements for this tournament.");
-        }
-
-        Tournament tournament = tournamentOptional.get();
-
-        if (tournament.getCurrentPlayers() >= tournament.getMaxPlayers()) {
-            throw new MaxPlayersReachedException("Tournament has reached the maximum number of players.");
-        }
-
-        Optional<TournamentPlayer> tp = tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(playerId,
-                tournamentId);
-
-        if (tp.isPresent()) {
-            throw new PlayerAlreadyRegisteredException(
+        Tournament tournament = findTournamentById(tournamentId);
+        PlayerDetailsDTO player = fetchPlayerDetails(playerId);
+        
+        validatePlayerForTournament(player, tournament);
+        
+        tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(playerId, tournamentId)
+            .ifPresent(tp -> {
+                throw new PlayerAlreadyRegisteredException(
                     "Player with id " + playerId + " is already registered for the tournament.");
-        }
+            });
 
-        TournamentPlayer player = new TournamentPlayer();
-        player.setPlayerId(playerId);
-        player.setTournament(tournament);
-
-        tournamentPlayerRepository.save(player);
+        TournamentPlayer tournamentPlayer = new TournamentPlayer();
+        tournamentPlayer.setPlayerId(playerId);
+        tournamentPlayer.setTournament(tournament);
+        tournamentPlayerRepository.save(tournamentPlayer);
 
         tournament.setCurrentPlayers(tournament.getCurrentPlayers() + 1);
         tournamentRepository.save(tournament);
+    }
+
+    private void validatePlayerForTournament(PlayerDetailsDTO player, Tournament tournament) {
+        if (player == null) {
+            throw new UserDoesNotExistException("Player does not exist.");
+        }
+        
+        if (player.getEloRating() < tournament.getMinElo() 
+                || player.getEloRating() > tournament.getMaxElo()) {
+            throw new EloNotInRangeException("Player does not meet the Elo requirements for this tournament.");
+        }
     }
 
     public List<PlayerDetailsDTO> getPlayersByTournament(long tournamentId) {
@@ -409,18 +393,11 @@ public class TournamentService {
     }
 
     public String completeTournament(long id, long winnerId) {
-        Optional<Tournament> tournamentOptional = tournamentRepository.findById(id);
-        if (tournamentOptional.isEmpty()) {
-            throw new TournamentDoesNotExistException("Tournament does not exist.");
-        }
-        Optional<TournamentPlayer> tp = tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(winnerId,
-                id);
+        Tournament tournament = findTournamentById(id);
+        
+        tournamentPlayerRepository.findByPlayerIdAndTournament_TournamentId(winnerId, id)
+            .orElseThrow(() -> new UserDoesNotExistException("Winner does not exist in this tournament."));
 
-        if (tp.isEmpty()) {
-            throw new UserDoesNotExistException("Winner does not exist in this tournament.");
-        }
-
-        Tournament tournament = tournamentOptional.get();
         tournament.setWinnerId(winnerId);
         tournament.setStatus(Status.COMPLETED);
         tournamentRepository.save(tournament);

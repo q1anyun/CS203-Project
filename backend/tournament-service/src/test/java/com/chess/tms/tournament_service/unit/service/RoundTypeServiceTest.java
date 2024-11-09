@@ -3,7 +3,6 @@ package com.chess.tms.tournament_service.unit.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,7 @@ import com.chess.tms.tournament_service.repository.RoundTypeRepository;
 import com.chess.tms.tournament_service.service.RoundTypeService;
 
 @ExtendWith(MockitoExtension.class)
-public class RoundTypeServiceTest {
+class RoundTypeServiceTest {
 
     @Mock
     private RoundTypeRepository roundTypeRepository;
@@ -25,21 +24,30 @@ public class RoundTypeServiceTest {
     @InjectMocks
     private RoundTypeService roundTypeService;
 
-    private List<Integer> numberOfPlayersChoices;
+    private List<Integer> expectedPlayerChoices;
 
     @BeforeEach
     void setup() {
-        numberOfPlayersChoices = Arrays.asList(2, 4, 8, 16, 32, 64);
+        expectedPlayerChoices = List.of(2, 4, 8, 16, 32, 64);  // List.of() is more concise
     }
 
     @Test
     void getChoicesForNumberOfPlayers_Valid_ReturnChoices() {
-        when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(numberOfPlayersChoices);
+        // Arrange: Mock repository to return the expected player choices
+        when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(expectedPlayerChoices);
 
-        List<Integer> result = roundTypeService.getChoicesForNumberOfPlayers();
+        // Act: Get the actual result from the service
+        List<Integer> actualPlayerChoices = roundTypeService.getAvailablePlayerCounts();
 
-        assertEquals(4, result.size());
-        assertEquals(2, result.get(0));
-        assertEquals(16, result.get(3));
+        // Assert: Validate the results
+        assertPlayerChoices(actualPlayerChoices);
+    }
+
+    // Helper method to reduce repetitive assertions
+    private void assertPlayerChoices(List<Integer> actualChoices) {
+        assertEquals(expectedPlayerChoices.size(), actualChoices.size(), "The number of choices should match.");
+        for (int i = 0; i < expectedPlayerChoices.size(); i++) {
+            assertEquals(expectedPlayerChoices.get(i), actualChoices.get(i), "Choice at index " + i + " should match.");
+        }
     }
 }

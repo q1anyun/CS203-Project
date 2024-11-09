@@ -11,10 +11,19 @@ import java.util.List;
 
 @Repository
 public interface SwissBracketRepository extends JpaRepository<SwissBracket, Long> {
-    
-    // Optional method to find a bracket by tournament
+    /**
+     * Finds a Swiss bracket associated with a specific tournament.
+     *
+     * @param tournament the tournament entity to search by
+     * @return an Optional containing the SwissBracket if found, empty Optional otherwise
+     */
     Optional<SwissBracket> findByTournament(Tournament tournament);
 
-    // Optional method to find all Swiss Brackets by current round or number of rounds, if needed
+    /**
+     * Retrieves all Swiss brackets that are currently in a specific round.
+     *
+     * @param currentRound the round number to search for
+     * @return a List of SwissBracket entities in the specified round
+     */
     List<SwissBracket> findAllByCurrentRound(int currentRound);
 }

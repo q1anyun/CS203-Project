@@ -27,20 +27,19 @@ import com.chess.tms.tournament_service.dto.TournamentDetailsDTO;
 import com.chess.tms.tournament_service.dto.TournamentRegistrationDTO;
 import com.chess.tms.tournament_service.dto.TournamentUpdateRequestDTO;
 import com.chess.tms.tournament_service.enums.Status;
-import com.chess.tms.tournament_service.exception.GameTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.InsufficientPlayersException;
-import com.chess.tms.tournament_service.exception.PlayerAlreadyRegisteredException;
-import com.chess.tms.tournament_service.exception.RoundTypeNotFoundException;
 import com.chess.tms.tournament_service.exception.TournamentDoesNotExistException;
-import com.chess.tms.tournament_service.exception.UserDoesNotExistException;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
+import com.chess.tms.tournament_service.model.TournamentType;
 import com.chess.tms.tournament_service.repository.GameTypeRepository;
 import com.chess.tms.tournament_service.repository.RoundTypeRepository;
 import com.chess.tms.tournament_service.repository.TournamentPlayerRepository;
 import com.chess.tms.tournament_service.repository.TournamentRepository;
+import com.chess.tms.tournament_service.repository.SwissBracketRepository;
+import com.chess.tms.tournament_service.repository.TournamentTypeRepository;
 import com.chess.tms.tournament_service.service.TournamentService;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +60,12 @@ public class TournamentServiceTest {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private SwissBracketRepository swissBracketRepository;
+
+    @Mock
+    private TournamentTypeRepository tournamentTypeRepository;
+
     @InjectMocks
     private TournamentService tournamentService;
 
@@ -79,6 +84,7 @@ public class TournamentServiceTest {
         registrationDTO.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
         registrationDTO.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
         registrationDTO.setMaxPlayers(16);
+        registrationDTO.setTournamentType(1L);
 
         tournament = new Tournament();
         tournament.setTournamentId(1L);
@@ -91,6 +97,10 @@ public class TournamentServiceTest {
         tournament.setMaxElo(2000);
         tournament.setStartDate(LocalDateTime.parse("2024-01-01T00:00:00").toLocalDate());
         tournament.setEndDate(LocalDateTime.parse("2024-01-02T00:00:00").toLocalDate());
+        TournamentType type = new TournamentType();
+        type.setId(1L);
+        type.setTypeName("SWISS");
+        tournament.setTournamentType(type);
 
         playerDetails = new PlayerDetailsDTO();
         playerDetails.setEloRating(1500);
@@ -100,7 +110,13 @@ public class TournamentServiceTest {
     void createTournament_ValidInput_Success() {
         GameType gameType = new GameType();
         gameType.setId(1L);
+
+        TournamentType tournamentType = new TournamentType();
+        tournamentType.setId(1L);
+        tournamentType.setTypeName("SWISS");
+
         when(gameTypeRepository.getGameTypeById(1L)).thenReturn(Optional.of(gameType));
+        when(tournamentTypeRepository.findById(1L)).thenReturn(Optional.of(tournamentType));
         when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
 
         String result = tournamentService.createTournament(registrationDTO, 1L);
@@ -111,10 +127,15 @@ public class TournamentServiceTest {
 
     @Test
     void startTournament_ValidTournamentId_Success() {
+        // Create and set up RoundType
+        RoundType swissRoundType = new RoundType();
+        swissRoundType.setId(1L);
+        swissRoundType.setRoundName("Swiss");
+
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
         when(restTemplate.postForEntity(anyString(), eq(null), eq(Long.class)))
                 .thenReturn(new ResponseEntity<>(1L, HttpStatus.OK));
-        when(roundTypeRepository.findById(1L)).thenReturn(Optional.of(new RoundType()));
+        when(roundTypeRepository.findByRoundName("Swiss")).thenReturn(Optional.of(swissRoundType));
 
         String result = tournamentService.startTournament(1L);
 
@@ -134,6 +155,8 @@ public class TournamentServiceTest {
     @Test
     void getTournamentDetailsById_ValidTournamentId_Success() {
         when(tournamentRepository.findById(1L)).thenReturn(Optional.of(tournament));
+        when(swissBracketRepository.findByTournament(tournament))
+                .thenReturn(Optional.empty());
 
         TournamentDetailsDTO result = tournamentService.getTournamentDetailsById(1L);
 

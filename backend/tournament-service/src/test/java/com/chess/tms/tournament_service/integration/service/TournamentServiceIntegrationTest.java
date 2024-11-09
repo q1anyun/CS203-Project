@@ -133,13 +133,13 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Valid_Success() {
         Tournament tournament = createTournament();
-
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
-        // Mock the external match service response
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
             .andRespond(withStatus(HttpStatus.OK)
             .contentType(MediaType.APPLICATION_JSON)
             .body("1"));
@@ -160,11 +160,13 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Error_Failure() {
         Tournament tournament = createTournament();
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
             .andRespond(withStatus(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body("{\"message\": \"Failed to start tournament due to match service error\"}"));
@@ -174,8 +176,6 @@ public class TournamentServiceIntegrationTest {
             null,
             String.class
         );
-
-        System.out.println("Response Body: " + response.getBody());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to start tournament due to match service error"));

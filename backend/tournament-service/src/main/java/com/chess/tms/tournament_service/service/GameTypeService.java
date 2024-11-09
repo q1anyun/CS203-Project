@@ -13,8 +13,11 @@ public class GameTypeService {
     @Autowired
     private GameTypeRepository gameTypeRepository;
 
+    /**
+     * Retrieves all game types from the repository
+     * @return List of all game types
+     */
     public List<GameType> getGameTypes() {
         return gameTypeRepository.findAll();
     }
-
 }
