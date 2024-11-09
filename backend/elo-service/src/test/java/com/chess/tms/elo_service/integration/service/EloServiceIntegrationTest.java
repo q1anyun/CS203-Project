@@ -145,15 +145,15 @@ public class EloServiceIntegrationTest {
         
         System.out.println("Running mocking response from player service for updateWinLossElo");
 
-        mockServer.expect(requestTo(playerServiceUrl + "/api/player/updateWinLossElo"))
+        mockServer.expect(requestTo(playerServiceUrl + "/api/player/winLossElo"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withStatus(HttpStatus.OK));
 
-        mockServer.expect(requestTo(playerServiceUrl + "/api/player/updateWinLossElo"))
+        mockServer.expect(requestTo(playerServiceUrl + "/api/player/winLossElo"))
             .andExpect(method(HttpMethod.PUT))
             .andRespond(withStatus(HttpStatus.OK));
         
-        System.out.println("Running mocking response from player service for updateWinLossElo");
+        System.out.println("Running mocking response from player service for winLossElo");
 
             
         HttpHeaders headers = new HttpHeaders();
