@@ -22,19 +22,11 @@ public class SecurityConfiguration {
         this.customUserDetailsService = customUserDetailsService;
     }
 
-    /**
-     * Configure password encryption for the application.
-     * BCrypt is used with default strength (10 rounds)
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Configure the authentication provider that integrates our 
-     * custom user details service with Spring Security
-     */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -43,47 +35,23 @@ public class SecurityConfiguration {
         return authProvider;
     }
 
-    /**
-     * Configure the authentication manager with our custom provider
-     */
     @Bean
-    public AuthenticationManager authenticationManager(
-            HttpSecurity http, 
-            DaoAuthenticationProvider provider
-    ) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http, DaoAuthenticationProvider provider) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .authenticationProvider(provider)
                 .build();
     }
 
-    /**
-     * Configure security rules and filters for HTTP requests
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            // Disable CSRF since we're using stateless JWT authentication
-            .csrf(csrf -> csrf.disable())
-            
-            // Configure authorization rules
+        http.csrf(csrf -> csrf.disable())  // Disable CSRF
             .authorizeHttpRequests(auth -> auth
-                // Public endpoints that don't require authentication
-                .requestMatchers(
-                    "/api/auth/login",
-                    "/api/auth/register",
-                    "/api/otp/**"
-                ).permitAll()
-                // All other endpoints require authentication
-                .anyRequest().authenticated()
+                .requestMatchers("/api/auth/**", "/api/otp/**").permitAll()  // Permit login and registration to everyone
+                .anyRequest().authenticated()  // All other requests require authentication
             )
-            
-            // Configure session management
             .sessionManagement(session -> session
-                // Use stateless sessions for JWT
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)
             )
-            
-            // Add our custom authentication provider
             .authenticationProvider(authenticationProvider());
 
         return http.build();

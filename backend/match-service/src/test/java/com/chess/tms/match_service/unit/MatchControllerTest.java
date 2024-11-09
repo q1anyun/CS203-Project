@@ -20,6 +20,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
@@ -30,6 +32,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
 class MatchControllerTest {
 
     private MockMvc mockMvc;
@@ -63,7 +66,7 @@ class MatchControllerTest {
             .thenReturn(roundTypeId);
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout//{gameTypeId}", tournamentId, gameTypeId)  // Use explicit values instead of path variables
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout/{gameTypeId}", tournamentId, gameTypeId)  // Use explicit values instead of path variables
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().string(roundTypeId.toString()));
@@ -83,7 +86,7 @@ class MatchControllerTest {
             .thenThrow(new RoundTypeNotFoundException( "Round type not found for " + invalidNumberOfPlayers + " players"));
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout//{gameTypeId}", tournamentId, gameTypeId))
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout/{gameTypeId}", tournamentId, gameTypeId))
                 .andExpect(status().isNotFound());
     
         verify(matchService).createKnockoutMatches(tournamentId, gameTypeId, null);
@@ -100,8 +103,8 @@ class MatchControllerTest {
             .thenThrow(new GameTypeNotFoundException("GameType with ID " + invalidGameTypeId + " not found"));
     
         // Act & Assert
-        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout/{gameTypeId}", tournamentId, invalidGameTypeId) ) 
-                .andExpect(status().isNotFound()); 
+        mockMvc.perform(post("/api/matches/tournament/{tournamentId}/knockout/{gameTypeId}", tournamentId, invalidGameTypeId))
+                .andExpect(status().isNotFound());
     
         verify(matchService).createKnockoutMatches(tournamentId, invalidGameTypeId, null);
     }
