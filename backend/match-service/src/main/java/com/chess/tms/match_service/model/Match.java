@@ -27,7 +27,7 @@ public class Match {
     @Column(name = "tournament_id", nullable = false)
     private Long tournamentId;
 
-    @Column(name = "player1_id", nullable = false)
+    @Column(name = "player1_id", nullable = true)
     private Long player1Id;
 
     @Column(name = "player2_id")
