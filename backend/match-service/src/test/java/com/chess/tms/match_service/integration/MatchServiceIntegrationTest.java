@@ -28,6 +28,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -89,7 +90,6 @@ public class MatchServiceIntegrationTest {
                 swissBracketRepository.deleteAll();
                 swissStandingRepository.deleteAll();
                 roundTypeRepository.deleteAll();
-             
 
                 // Insert initial data
                 semiFinals = new RoundType();
@@ -111,16 +111,15 @@ public class MatchServiceIntegrationTest {
         @Test
         public void createKnockoutMatches_ShouldReturnRoundTypeId() {
                 matchRepository.deleteAll();
-                //Act
+                // Act
                 mockServer.expect(requestTo(tournamentServiceUrl + "/api/tournament-players/1"))
                                 .andRespond(withStatus(HttpStatus.OK)
                                                 .body("[{\"id\":1,\"eloRating\":2000},{\"id\":2,\"eloRating\":1800},{\"id\":3,\"eloRating\":1900},{\"id\":4,\"eloRating\":1700}]")
                                                 .contentType(MediaType.APPLICATION_JSON));
-                //Arrange
+                // Arrange
                 Long roundTypeId = matchService.createKnockoutMatches(1L, 1L, null);
 
-                
-                //Assert
+                // Assert
                 assertNotNull(roundTypeId);
                 List<Match> matches = matchRepository.findAll();
                 assertFalse(matches.isEmpty());
@@ -136,7 +135,7 @@ public class MatchServiceIntegrationTest {
         @Test
         public void createKnockoutMatches_withAdvancedPlayerIds() {
                 matchRepository.deleteAll();
-                //Arrange
+                // Arrange
                 List<Long> advancedPlayerIds = Arrays.asList(1L, 2L);
                 mockServer.expect(requestTo(playerServiceUrl + "/api/player/1"))
                                 .andRespond(withStatus(HttpStatus.OK)
@@ -193,36 +192,42 @@ public class MatchServiceIntegrationTest {
         public void advanceWinner_SwissMatch() {
                 matchRepository.deleteAll();
                 swissBracketRepository.deleteAll();
-                //Arrange 
+                swissStandingRepository.deleteAll();
+
+                // Arrange a Swiss bracket with multiple players for realistic pairing
                 SwissBracket bracket = new SwissBracket();
                 bracket.setTournamentId(1L);
                 bracket.setCurrentRound(1);
-                bracket.setNumberOfRounds(3);
+                bracket.setNumberOfRounds(3); // Ensures there are multiple rounds in the tournament
                 swissBracketRepository.save(bracket);
-        
-                SwissStanding player1Standing = new SwissStanding();
-                player1Standing.setBracket(bracket);
-                player1Standing.setTournamentPlayerId(101L);
-                player1Standing.setPlayerId(1L);
-                player1Standing.setWins(2);
-                player1Standing.setLosses(1);
-                swissStandingRepository.save(player1Standing);
 
-                SwissStanding player2Standing = new SwissStanding();
-                player2Standing.setBracket(bracket);
-                player2Standing.setTournamentPlayerId(102L);
-                player2Standing.setPlayerId(2L);
-                player2Standing.setWins(1);
-                player2Standing.setLosses(2);
-                swissStandingRepository.save(player2Standing);
+                // Add 8 players to the bracket with varied win/loss records to prevent
+                // rematches
+                List<SwissStanding> standings = new ArrayList<>();
+                for (int i = 1; i <= 8; i++) {
+                        SwissStanding standing = new SwissStanding();
+                        standing.setBracket(bracket);
+                        standing.setTournamentPlayerId(100L + i);
+                        standing.setPlayerId((long) i);
+                        standing.setWins(i % 3); // Creates varying win records for diversity
+                        standing.setLosses((i + 1) % 3); // Creates varying loss records
+                        standings.add(standing);
+                }
+                swissStandingRepository.saveAll(standings);
 
-                swissStandingRepository.saveAll(List.of(player1Standing, player2Standing));
-
+                // Create a round type for Swiss matches
                 RoundType swissRoundType = new RoundType();
                 swissRoundType.setRoundName("Swiss");
-                swissRoundType.setNumberOfPlayers(4);
-                swissRoundType = roundTypeRepository.save(swissRoundType);
+                swissRoundType.setNumberOfPlayers(8);
+                roundTypeRepository.save(swissRoundType);
 
+                // Create a game type (e.g., standard chess) for the matches
+                GameType standardChess = new GameType();
+                standardChess.setName("Standard Chess");
+                standardChess.setTimeControlMinutes(10);
+                gameTypeRepository.save(standardChess);
+
+                // Setup an initial match between player 1 and player 2 to start the Swiss round
                 Match match = new Match();
                 match.setTournamentId(1L);
                 match.setPlayer1Id(1L);
@@ -234,24 +239,26 @@ public class MatchServiceIntegrationTest {
                 match.setCreatedAt(LocalDateTime.now());
                 matchRepository.save(match);
 
-               
-                Long matchId = matchRepository.findAll().get(0).getId();
+                Long matchId = match.getId();
                 Long winnerId = 1L;
 
+                // Mock responses for ELO service and tournament players
                 mockServer.expect(requestTo(eloServiceUrl + "/api/elo/match"))
                                 .andRespond(withStatus(HttpStatus.OK));
 
-                
                 mockServer.expect(requestTo(tournamentServiceUrl + "/api/tournament-players/1"))
                                 .andRespond(withStatus(HttpStatus.OK)
-                                .body("[{\"id\":1,\"eloRating\":2000},{\"id\":2,\"eloRating\":1800},{\"id\":3,\"eloRating\":1900},{\"id\":4,\"eloRating\":1700}]")
-                                .contentType(MediaType.APPLICATION_JSON));
+                                                .body("[{\"id\":1,\"eloRating\":2000},{\"id\":2,\"eloRating\":1800},{\"id\":3,\"eloRating\":1700},"
+                                                                +
+                                                                "{\"id\":4,\"eloRating\":1600},{\"id\":5,\"eloRating\":1500},{\"id\":6,\"eloRating\":1400},"
+                                                                +
+                                                                "{\"id\":7,\"eloRating\":1300},{\"id\":8,\"eloRating\":1200}]")
+                                                .contentType(MediaType.APPLICATION_JSON));
 
-
-                // Act
+                // Act - call advanceWinner for the match
                 String result = matchService.advanceWinner(matchId, winnerId);
 
-                // Assert: Check match updates
+                // Assert - verify the match updates and round progression
                 Match updatedMatch = matchRepository.findById(matchId).orElseThrow();
                 assertEquals(winnerId, updatedMatch.getWinnerId());
                 assertEquals(2L, updatedMatch.getLoserId());
@@ -462,7 +469,6 @@ public class MatchServiceIntegrationTest {
 
                 matchRepository.deleteAll();
 
-
                 Match match1 = new Match();
                 match1.setTournamentId(1L);
                 match1.setPlayer1Id(1L);
@@ -491,7 +497,6 @@ public class MatchServiceIntegrationTest {
                                                 .body("{\"id\":1,\"name\":\"rapid chess competition\"}")
                                                 .contentType(MediaType.APPLICATION_JSON));
 
-             
                 MatchDTO matchDTO = matchService.getMatch(savedMatchId);
                 mockServer.verify();
 

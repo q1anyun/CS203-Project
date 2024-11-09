@@ -321,9 +321,6 @@ public class MatchService {
         // Pair players between the two groups
         boolean[] pairedGroup2 = new boolean[group2.size()]; // Track paired players in group2
 
-        System.out.println("Group 1: " + group1.toString());
-        System.out.println("Group 2: " + group2.toString());
-
         for (int i = 0; i < group1.size(); i++) {
             TournamentPlayerEloDTO player1 = group1.get(i);
 
