@@ -16,27 +16,29 @@ public class MatchController {
     private MatchService matchService;
 
     // Generate knockout matches for a tournament
-    @PostMapping("/knockout/{tournamentId}/{gameTypeId}")
-    public ResponseEntity<Long> createKnockoutMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+    @PostMapping("tournament/{tournamentId}/knockout/{gameTypeId}")
+    public ResponseEntity<Long> createKnockoutMatches(@PathVariable("tournamentId") Long tournamentId, @PathVariable("gameTypeId") Long gameTypeId) {
         return ResponseEntity.ok(matchService.createKnockoutMatches(tournamentId, gameTypeId, null));
     }
 
     // Generate swiss matches for a tournament
-    @PostMapping("/swiss/{tournamentId}/{gameTypeId}")
-    public ResponseEntity<Long> createSwissMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
+    @PostMapping("tournament/{tournamentId}/swiss/{gameTypeId}")
+    public ResponseEntity<Long> createSwissMatches(
+            @PathVariable("tournamentId") Long tournamentId, 
+            @PathVariable("gameTypeId") Long gameTypeId) {
         return ResponseEntity.ok(matchService.createSwissMatches(tournamentId, gameTypeId));
     }
 
     // Get all matches for a tournament
     @GetMapping("/tournament/{tournamentId}")
-    public ResponseEntity<List<MatchDTO>> getMatchesByTournament(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<MatchDTO>> getMatchesByTournament(@PathVariable("tournamentId") Long tournamentId) {
         List<MatchDTO> matches = matchService.getMatchesByTournament(tournamentId);
         return ResponseEntity.ok(matches);
     }
 
     // Get a matches for a tournament
     @GetMapping("/{matchId}")
-    public ResponseEntity<MatchDTO> getMatch(@PathVariable Long matchId) {
+    public ResponseEntity<MatchDTO> getMatch(@PathVariable("matchId") Long matchId) {
         MatchDTO match = matchService.getMatch(matchId);
         return ResponseEntity.ok(match);
     }
@@ -44,14 +46,14 @@ public class MatchController {
     // Update match results and advance winner
     @PutMapping("/{matchId}/winner/{winnerId}")
     public ResponseEntity<String> updateMatchResult(
-            @PathVariable Long matchId,
-            @PathVariable Long winnerId) {
+            @PathVariable("matchId") Long matchId,
+            @PathVariable("winnerId") Long winnerId) {
         return ResponseEntity.ok(matchService.advanceWinner(matchId, winnerId));
     }
 
     // Recent 5 matches for a player
     @GetMapping("/player/{playerId}/recent")
-    public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@PathVariable Long playerId) {
+    public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@PathVariable("playerId") Long playerId) {
         List<MatchDTO> recentMatches = matchService.getRecentMatchesByPlayerId(playerId);
         return ResponseEntity.ok(recentMatches);
     }
