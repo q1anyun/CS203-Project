@@ -16,7 +16,9 @@
 }
 
 .content {
-  position: relative;
+  display: flex;            /* Set display to flex */
+  justify-content: center;   /* Center horizontally */
+  align-items: center;    
   z-index: 1;
   padding: 20px;
   color: black
