@@ -56,10 +56,11 @@ function PlayerDashboard() {
                 setLiveTournaments(tournamentResponse.data || []);
 
                 //fetch reccomended Tournaments 
-                const reccomendedTournamentResponse = await axios.get(`${tournamentURL}/recommended`, {
+                const recommendedTournamentResponse = await axios.get(`${tournamentURL}/recommended`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setRecommendedTournaments(reccomendedTournamentResponse.data);
+                setRecommendedTournaments(recommendedTournamentResponse.data);
+                console.log(recommendedTournaments); 
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -123,10 +124,12 @@ function PlayerDashboard() {
                             <Typography variant="header2">Recommended Tournaments</Typography>
                             {recommendedTournaments.map((tournament) => (
                                 <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+                                     <Link to={`/tournament/${tournament.id}`} style={{ textDecoration: 'none' }}>
                                     <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-
+                                        
                                         <TournamentItem key={tournament.id} tournament={tournament} />
                                     </Card>
+                                    </Link>
                                 </Grid>))}
 
 

@@ -171,7 +171,8 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                 </Typography>
                                             </Box>
 
-                                            <IconButton onClick={() => handleEditClick(match.id)} size="small" sx={{ ml: 'auto' }}>
+                                            <IconButton onClick={() => handleEditClick(match.id)} size="small" sx={{ ml: 'auto' }} 
+                                                disabled={match.winnerId !== null }>
                                                 <EditIcon />
                                             </IconButton>
                                         </Box>

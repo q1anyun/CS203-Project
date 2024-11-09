@@ -52,7 +52,7 @@ function TournamentRegistrationDetails() {
                     const statusCode = error.response.status;
                     const errorMessage = error.response.data?.message || 'An unexpected error occurred';
                     navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
+                } else if (error.request) {
                     navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
                     navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
