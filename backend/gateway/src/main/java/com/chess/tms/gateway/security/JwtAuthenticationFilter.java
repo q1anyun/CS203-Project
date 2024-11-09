@@ -36,6 +36,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
 
+        System.out.println("================================================");
+        System.out.println("Request URL: " + request.getRequestURL());
+        System.out.println("================================================");
+        
         // Check if the Authorization header is present and starts with "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("No Token found, process anyways");
