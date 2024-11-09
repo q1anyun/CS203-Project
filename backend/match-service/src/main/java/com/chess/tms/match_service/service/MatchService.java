@@ -111,8 +111,7 @@ public class MatchService {
         int lowIndex = byes;
         int highIndex = totalPlayers - 1;
         generateFirstRoundMatches(tournamentId, gameTypeId, players, currentRoundType, allMatches, firstRoundMatches,
-                lowIndex,
-                highIndex);
+                lowIndex, highIndex);
 
         // Combine first-round and bye matches, add to map, and generate subsequent
         // rounds
@@ -247,6 +246,7 @@ public class MatchService {
 
         createRoundMatches(players, tournamentId, gameTypeId, bracket.getCurrentRound());
         System.out.println("Returning ID: " + bracket.getId());
+
         return bracket.getId();
     }
 

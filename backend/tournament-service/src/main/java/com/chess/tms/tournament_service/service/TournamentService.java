@@ -186,10 +186,11 @@ public class TournamentService {
     private ResponseEntity<Long> startKnockoutTournament(long tournamentId, Tournament tournament) {
         try {
             return restTemplate.postForEntity(
-                    matchServiceUrl + "/api/matches/tournament" + tournamentId +"/knockout/"
+                    matchServiceUrl + "/api/matches/tournament/" + tournamentId +"/knockout/"
                             + tournament.getTimeControl().getId(),
                     null, Long.class);
         } catch (HttpClientErrorException | HttpServerErrorException ex) {
+       
             throw new MatchServiceException("Failed to start tournament due to match service error: "
                     + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
         } catch (RestClientException ex) {
