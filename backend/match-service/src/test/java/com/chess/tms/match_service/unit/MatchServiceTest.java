@@ -105,16 +105,7 @@ public class MatchServiceTest {
         };
     }
 
-    @Test
-    public void testMockInjection() {
-        assertNotNull(restTemplate, "RestTemplate should not be null");
-        assertNotNull(matchService, "MatchService should not be null");
-        assertNotNull(matchRepository, "RestTemplate should not be null");
-        assertNotNull(swissBracketRepository, "MatchService should not be null");
-        assertNotNull(roundTypeRepository, "RestTemplate should not be null");
-        assertNotNull(gameTypeRepository, "MatchService should not be null");
-
-    }
+    
 
     @Test
     void createKnockoutMatches_ValidInput_Success() {
@@ -137,7 +128,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    void testCreateKnockoutMatchesWithAdvancedPlayerIds() {
+    void createKnockoutMatchesWithAdvancedPlayerIds() {
         Long tournamentId = 1L;
         Long gameTypeId = 2L;
 
