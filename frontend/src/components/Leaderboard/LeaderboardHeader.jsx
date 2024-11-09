@@ -42,7 +42,7 @@ function LeaderboardHeader({ topPlayers }) {
                         <Typography variant="header3" sx={{ color: 'black' }}>
                             {topPlayers[1]?.firstName} {topPlayers[1]?.lastName}
                         </Typography>
-                        <Typography sx={{ color: '#A9A9A9' }}> {/* gray-300 */}
+                        <Typography sx={{ color: '#A9A9A9' }}> 
                             {topPlayers[1]?.eloRating}
                         </Typography>
                     </Box>
@@ -61,7 +61,7 @@ function LeaderboardHeader({ topPlayers }) {
                             sx={{
                                 width: '6rem',
                                 height: '6rem',
-                                backgroundColor: '#FCD34D', // gray-200
+                                backgroundColor: '#FCD34D', 
                                 margin: '0 auto 0.5rem',
                             }}
                         />
@@ -86,7 +86,7 @@ function LeaderboardHeader({ topPlayers }) {
                             sx={{
                                 width: '5rem',
                                 height: '5rem',
-                                backgroundColor: '#FDB068', // gray-200
+                                backgroundColor: '#FDB068', 
                                 margin: '0 auto 0.5rem',
                             }}
                         />
