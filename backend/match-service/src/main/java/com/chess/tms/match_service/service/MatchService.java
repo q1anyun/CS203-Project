@@ -165,7 +165,6 @@ public class MatchService {
         while (currentRoundSize >= 1) {
             List<Match> currentRoundMatches = new ArrayList<>();
             for (int i = 0; i < currentRoundSize; i++) {
-                System.out.println("Round " + roundNumber + " Match " + i);
 
                 RoundType roundType = getRoundType(currentRoundSize * 2);
                 Match nextRoundMatch = createMatch(tournamentId, null, null, null, null, null, roundType, gameTypeId,
@@ -207,7 +206,6 @@ public class MatchService {
      */
     private List<Match> getByeMatches(Long tournamentId, Long gameTypeId, TournamentPlayerEloDTO[] players, int byes,
             RoundType currentRoundType, List<Match> allMatches) {
-        System.out.println("Handle Byes");
         List<Match> byeMatches = new ArrayList<>();
         for (int i = 0; i < byes; i++) {
             TournamentPlayerEloDTO playerWithBye = players[i]; // Top player gets a bye
@@ -216,10 +214,8 @@ public class MatchService {
             byeMatches.add(byeMatch);
             allMatches.add(byeMatch);
 
-            System.out.println("Player with bye: " + playerWithBye.getId());
-            System.out.println("Player with bye: " + playerWithBye.getEloRating());
         }
-        System.out.println();
+   
         return byeMatches;
     }
 
@@ -245,8 +241,7 @@ public class MatchService {
         setSwissStanding(players, bracket);
 
         createRoundMatches(players, tournamentId, gameTypeId, bracket.getCurrentRound());
-        System.out.println("Returning ID: " + bracket.getId());
-
+     
         return bracket.getId();
     }
 
@@ -711,7 +706,7 @@ public class MatchService {
                 Match advanceMatch = matchRepository.findById(nextMatchId)
                         .orElseThrow(() -> new RuntimeException(
                                 "Next match not found for match ID: " + nextMatchId));
-                System.out.println(completedMatch.getWinnerId());
+           
                 if (advanceMatch.getPlayer1Id() == null) {
                     advanceMatch.setPlayer1Id(completedMatch.getWinnerId());
                 } else if (advanceMatch.getPlayer2Id() == null) {
