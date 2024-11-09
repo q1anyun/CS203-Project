@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Handle PlayerHistoryNotFoundException
     @ExceptionHandler(PlayerHistoryNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handlePlayerHistoryNotFoundException(PlayerHistoryNotFoundException e) {
         Map<String, Object> response = new HashMap<>();
@@ -22,6 +23,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    // Handle RestClientException
     @ExceptionHandler(RestClientException.class)
     public ResponseEntity<Map<String, Object>> handleRestClientException(RestClientException e) {
         Map<String, Object> response = new HashMap<>();
@@ -31,6 +33,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    // Handle InvalidReasonException
     @ExceptionHandler(InvalidReasonException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidReasonException(InvalidReasonException e) {
         Map<String, Object> response = new HashMap<>();

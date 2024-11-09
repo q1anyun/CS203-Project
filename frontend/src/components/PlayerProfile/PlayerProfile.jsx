@@ -15,6 +15,7 @@ function PlayerProfile({ profilePic }) {
   const [openEdit, setOpenEdit] = useState(false);
   const [playerDetails, setPlayerDetails] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [localProfilePic, setLocalProfilePic] = useState(); 
   const navigate = useNavigate();
 
   const options = useMemo(() => countryList().getData(), []);
@@ -99,9 +100,9 @@ function PlayerProfile({ profilePic }) {
         },
       });
     }
-    window.location.reload();
-    console.log('Profile updated successfully');
+    alert('Profile successfully updated!');
     handleCloseEdit();
+    window.location.reload();
   };
 
   return (
@@ -177,6 +178,7 @@ function PlayerProfile({ profilePic }) {
         handleSave={handleSave}
         options={options}
         profilePic={profilePic}
+        localProfilePic={localProfilePic}
       />
     </Box>
   );

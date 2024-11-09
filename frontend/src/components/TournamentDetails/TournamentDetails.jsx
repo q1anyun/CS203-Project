@@ -98,17 +98,16 @@ function TournamentDetails() {
             <Typography variant="header2" marginLeft={'20px'} >Tournament Bracket</Typography>
             <Divider sx={{ width: '80%', margin: '10px 0' }} />
             {/* Conditional Rendering Based on Tournament Type */}
-            {tournament?.tournamentType?.id === 1 ? (
-                <Knockout
-                    rounds={rounds}
-                />
-            ) : tournament?.tournamentType?.id === 2 && tournament?.swissBracketId ? (
-                <SwissBracket
-                    matches={matches}
-                    SwissBracketID={tournament.swissBracketId}
-                />
+            {tournament?.status === 'UPCOMING' ? (
+                <Typography variant='playerProfile2' marginLeft={'20px'}>No matches to display — Tournament has not started.</Typography>
             ) : (
-                <Typography variant='playerProfile2'>No matches to display — Tournament has not started.</Typography>
+                <>
+                    {tournament?.tournamentType?.id === 1 ? (
+                        <Knockout rounds={rounds} />
+                    ) : tournament?.tournamentType?.id === 2 && tournament?.swissBracketId ? (
+                        <SwissBracket matches={matches} SwissBracketID={tournament.swissBracketId} />
+                    ) : null}
+                </>
             )}
         </Box>
     );

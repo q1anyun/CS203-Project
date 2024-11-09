@@ -25,49 +25,77 @@ import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
 @RequestMapping("/api/elo")
 public class EloController {
 
-    private EloService eloService;
+    private final EloService eloService;
 
-    //constructor injection
     public EloController(EloService eloService) {
         this.eloService = eloService;
     }
 
+    /**
+     * Retrieves complete Elo history for all players
+     */
     @GetMapping("")
     public ResponseEntity<List<EloResponseDTO>> findAllEloHistory() {
         return ResponseEntity.ok(eloService.findAllByEloHistory());
     }
 
+    /**
+     * Saves a new Elo history entry
+     */
+    @PostMapping("")
+    public ResponseEntity<EloResponseDTO> saveEloHistory(@RequestBody EloHistoryRequestDTO dto) {
+        return ResponseEntity.ok(eloService.saveEloHistory(dto));
+    }
+
+    /**
+     * Retrieves Elo history for a specific player
+     */
     @GetMapping("/{playerId}")
     public ResponseEntity<List<EloResponseDTO>> findAllByPlayerId(@PathVariable("playerId") long playerId) {
         return ResponseEntity.ok(eloService.findEloHistoryByPlayerId(playerId));
     }
 
+    /**
+     * Retrieves filtered Elo history for a player based on change reason
+     */
     @GetMapping("/{playerId}/{changeReason}")
-    public ResponseEntity<List<EloResponseDTO>> findAllEloHistoriesByPlayerIdAndChangeReason(@PathVariable("playerId") long playerId, @PathVariable("changeReason") String changeReason) {
+    public ResponseEntity<List<EloResponseDTO>> findAllByPlayerIdAndChangeReason(
+            @PathVariable("playerId") long playerId,
+            @PathVariable("changeReason") String changeReason) {
         return ResponseEntity.ok(eloService.findByPlayerIdAndChangeReason(playerId, changeReason));
     }
 
-
-    @DeleteMapping("/deletion/{playerId}") 
-    public ResponseEntity<List<EloResponseDTO>> deleteAllPlayerElo(@PathVariable("playerId") long playerId) {
-        return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
-    }
-
- 
-    @PutMapping("/match") 
-    public ResponseEntity<String> updatePlayersEloAfterCompletedMatch(@RequestBody MatchEloRequestDTO dto) {
-        return ResponseEntity.ok(eloService.updatePlayersEloAfterCompletedMatch(dto));
-    }
-
+    /**
+     * Retrieves chart data for the current player's Elo history
+     */
     @GetMapping("/chart/current")
-    public ResponseEntity<EloHistoryChartDTO[]> findCurrentPlayerEloHistoryForChart(@RequestHeader("X-User-PlayerId") String id) {
-        long playerId = Long.parseLong(id);
-        return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(playerId));
+    public ResponseEntity<List<EloHistoryChartDTO>> findCurrentPlayerEloHistoryForChart(
+            @RequestHeader("X-User-PlayerId") String id) {
+        return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(Long.parseLong(id)));
     }
 
+    /**
+     * Retrieves chart data for a specific player's Elo history
+     */
     @GetMapping("/chart/{id}")
     public ResponseEntity<EloHistoryChartDTO[]> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));
     }
 
+    /**
+     * Updates Elo ratings for players after a match
+     */
+    @PutMapping("/match")
+    public ResponseEntity<Void> updateMatchPlayersElo(@RequestBody MatchEloRequestDTO dto) {
+        eloService.updateMatchPlayersElo(dto);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Deletes all Elo history for a specific player
+     */
+    @DeleteMapping("/delete/{playerId}")
+    public ResponseEntity<List<EloResponseDTO>> deletePlayerElo(@PathVariable("playerId") long playerId) {
+        return ResponseEntity.ok(eloService.deleteByPlayerId(playerId));
+    }
 }
