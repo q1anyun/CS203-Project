@@ -48,6 +48,7 @@ public class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
+    // Test fixtures
     private User mockUser;
     private PlayerDetails mockPlayerDetails;
 
@@ -55,6 +56,7 @@ public class AuthServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
+        // Initialize mock user with common test data
         mockUser = new User();
         mockUser.setId(1L);
         mockUser.setUsername("username");
@@ -62,6 +64,7 @@ public class AuthServiceTest {
         mockUser.setPassword("password");
         mockUser.setRole(UserRole.PLAYER);
 
+        // Initialize mock player details with common test data
         mockPlayerDetails = new PlayerDetails();
         mockPlayerDetails.setId(1L);
         mockPlayerDetails.setUserId(1L);
@@ -70,6 +73,7 @@ public class AuthServiceTest {
         mockPlayerDetails.setLastName("User");
     }
 
+    // Authentication Tests
     @Test
     void testAuthenticateSuccess() {
         JwtRequest jwtRequest = new JwtRequest("username", "password");
@@ -108,67 +112,91 @@ public class AuthServiceTest {
         assertThrows(UserNotFoundException.class, () -> authService.authenticate(jwtRequest));
     }
 
+    // Player Registration Tests
     @Test
     void testRegisterPlayerSuccess() {
-        PlayerRegistrationRequestDTO playerRequest = new PlayerRegistrationRequestDTO();
-        playerRequest.setUsername("newplayer");
-        playerRequest.setEmail("newplayer@test.com");
-        playerRequest.setPassword("password");
-        playerRequest.setFirstName("New");
-        playerRequest.setLastName("Player");
-        playerRequest.setCountry("USA");
+        PlayerRegistrationRequestDTO playerRequest = createPlayerRegistrationRequest();
 
+        // Mock repository responses
         when(usersRepository.findByUsername("newplayer")).thenReturn(Optional.empty());
         when(usersRepository.findByEmail("newplayer@test.com")).thenReturn(Optional.empty());
-
         when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
+        when(usersRepository.save(any(User.class))).thenReturn(createMockSavedUser());
+        when(playerDetailsRepository.save(any(PlayerDetails.class))).thenReturn(createMockPlayerDetails());
 
+        String result = authService.registerPlayer(playerRequest);
+
+        assertEquals("Player created successfully", result);
+        verifyPlayerRegistrationCalls();
+    }
+
+    // Admin Registration Tests
+    @Test
+    void testRegisterAdminSuccess() {
+        AdminRegistrationRequestDTO admin = createAdminRegistrationRequest();
+
+        // Mock repository responses
+        when(usersRepository.findByUsername("newadmin")).thenReturn(Optional.empty());
+        when(usersRepository.findByEmail("newadmin@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
+        when(usersRepository.save(any(User.class))).thenReturn(createMockSavedAdmin(admin));
+
+        String result = authService.registerAdmin(admin);
+
+        assertEquals("Admin created successfully", result);
+        verify(usersRepository, times(1)).save(any(User.class));
+    }
+
+    // Helper methods for creating test objects
+    private PlayerRegistrationRequestDTO createPlayerRegistrationRequest() {
+        PlayerRegistrationRequestDTO request = new PlayerRegistrationRequestDTO();
+        request.setUsername("newplayer");
+        request.setEmail("newplayer@test.com");
+        request.setPassword("password");
+        request.setFirstName("New");
+        request.setLastName("Player");
+        request.setCountry("USA");
+        return request;
+    }
+
+    private User createMockSavedUser() {
         User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setUsername("newplayer");
         savedUser.setEmail("newplayer@test.com");
         savedUser.setPassword("hashedPassword");
         savedUser.setRole(UserRole.PLAYER);
-        when(usersRepository.save(any(User.class))).thenReturn(savedUser);
+        return savedUser;
+    }
 
+    private PlayerDetails createMockPlayerDetails() {
         PlayerDetails playerDetails = new PlayerDetails();
         playerDetails.setId(1L);
         playerDetails.setUserId(1L);
-        when(playerDetailsRepository.save(any(PlayerDetails.class))).thenReturn(playerDetails);
-
-        String result = authService.registerPlayer(playerRequest);
-
-        assertEquals("Player created successfully", result);
-
-        verify(usersRepository, times(1)).save(any(User.class));
-        verify(playerDetailsRepository, times(1)).save(any(PlayerDetails.class));
+        return playerDetails;
     }
 
-    @Test
-    void testRegisterAdminSuccess() {
+    private AdminRegistrationRequestDTO createAdminRegistrationRequest() {
         AdminRegistrationRequestDTO admin = new AdminRegistrationRequestDTO();
         admin.setEmail("newadmin@test.com");
         admin.setUsername("newadmin");
         admin.setPassword("password");
+        return admin;
+    }
 
-        when(usersRepository.findByUsername("newadmin")).thenReturn(Optional.empty());
-        when(usersRepository.findByEmail("newadmin@test.com")).thenReturn(Optional.empty());
-
-        when(passwordEncoder.encode(anyString())).thenReturn("hashedPassword");
-
+    private User createMockSavedAdmin(AdminRegistrationRequestDTO admin) {
         User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setUsername(admin.getUsername());
         savedUser.setEmail(admin.getEmail());
         savedUser.setPassword("hashedPassword");
         savedUser.setRole(UserRole.ADMIN);
-        when(usersRepository.save(any(User.class))).thenReturn(savedUser);
+        return savedUser;
+    }
 
-        String result = authService.registerAdmin(admin);
-
-        assertEquals("Admin created successfully", result);
-
+    private void verifyPlayerRegistrationCalls() {
         verify(usersRepository, times(1)).save(any(User.class));
+        verify(playerDetailsRepository, times(1)).save(any(PlayerDetails.class));
     }
 
     @Test

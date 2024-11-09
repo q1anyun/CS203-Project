@@ -97,7 +97,6 @@ public class EloControllerTest {
         
         verify(eloService, times(1)).findAllByEloHistory();
     }
-
     @Test
     void deleteEloHistory_ValidUrlFormat_OK() throws Exception {
         LocalDateTime timeNow = LocalDateTime.parse("2024-10-10T16:02:18");
@@ -200,7 +199,6 @@ public class EloControllerTest {
 
     @Test
     void updatePlayersEloAfterCompletedMatch_ValidJSONBody_OK() throws Exception {
-
         String jsonPayload = """
             {
                 "players": [
@@ -325,33 +323,4 @@ public class EloControllerTest {
 
         verify(eloService, times(0)).findPlayerEloHistoryForChart(3L);
     }
-
-        // @Test
-    // void testSaveEloHistorySuccess() throws Exception {
-    //     String jsonPayload = """
-    //         {
-    //             "playerId": 1,
-    //             "newElo": 1315,
-    //             "changeReason": "WIN"
-    //         }
-    //             """;
-    //     LocalDateTime timeNow = LocalDateTime.parse("2024-10-10T16:02:18");
-    //     EloResponseDTO response = new EloResponseDTO(1, 1315, 1315, Reason.WIN, timeNow);
-
-    //         when(eloService.saveEloHistory(any(Integer.class), any(EloHistoryRequestDTO.class)))
-    //             .thenReturn(response);
-    //         // serialize expected response to json
-    //         ObjectMapper objectMapper = new ObjectMapper();
-    //         objectMapper.registerModule(new JavaTimeModule());
-    //         String expectedResponseJson = objectMapper.writeValueAsString(response);
-
-    //         mockMvc.perform(post("/api/elo")
-    //             .contentType(MediaType.APPLICATION_JSON)
-    //             .content(jsonPayload)
-    //             .header("X-User-Id", "1"))
-    //             .andExpect(status().isOk())
-    //             .andExpect(content().json(expectedResponseJson));
-                
-    //         verify(eloService, times(1)).saveEloHistory(1315, any(EloHistoryRequestDTO.class));
-    // }
-}
+}   

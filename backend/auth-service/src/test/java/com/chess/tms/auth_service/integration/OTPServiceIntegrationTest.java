@@ -44,7 +44,6 @@ public class OTPServiceIntegrationTest {
     private static final int OTP_LENGTH = 6;
     private static final int OTP_EXPIRATION_MINUTES = 5;
     private static final String SUCCESS_MESSAGE = "OTP generated successfully";
-    private static final String VALIDATION_SUCCESS_MESSAGE = "OTP is valid";
 
     // Dependencies
     @Autowired
