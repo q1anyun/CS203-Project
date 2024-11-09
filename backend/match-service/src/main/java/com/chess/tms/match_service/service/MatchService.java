@@ -281,7 +281,7 @@ public class MatchService {
         return bracket;
     }
 
-    /**
+/**
      * Creates matches between players for a Swiss round, ensuring that players with
      * similar standings are paired.
      * Players from each group (split based on Elo) are paired in a balanced way to
@@ -292,53 +292,31 @@ public class MatchService {
      * @param gameTypeId   the game type ID
      * @param roundNumber  the current round number in the Swiss bracket
      */
-
     private void createRoundMatches(TournamentPlayerEloDTO[] players, Long tournamentId, Long gameTypeId,
             int roundNumber) {
         List<Match> matches = new ArrayList<>();
-        Random random = new Random();
-
-        // Fetch previous opponents to avoid repeated pairings
         Map<Long, Set<Long>> playerMatchHistory = getPreviousOpponents(tournamentId);
 
-        // Sort players by Elo rating in descending order
-        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
+        // Sort and split players into groups based on Elo
+        List<TournamentPlayerEloDTO> group1 = new ArrayList<>();
+        List<TournamentPlayerEloDTO> group2 = new ArrayList<>();
+        splitPlayersIntoGroups(players, group1, group2);
 
-        // Split the players into two groups
-        int midIndex = players.length / 2;
-        List<TournamentPlayerEloDTO> group1 = new ArrayList<>(Arrays.asList(players).subList(0, midIndex));
-        List<TournamentPlayerEloDTO> group2 = new ArrayList<>(Arrays.asList(players).subList(midIndex, players.length));
+        // Track paired players in group2
+        boolean[] pairedGroup2 = new boolean[group2.size()];
 
-        // Shuffle both groups to add randomness in pairings
-        Collections.shuffle(group1, random);
-        Collections.shuffle(group2, random);
-
-        // Pair players between the two groups
-        boolean[] pairedGroup2 = new boolean[group2.size()]; // Track paired players in group2
-
-        for (int i = 0; i < group1.size(); i++) {
-            TournamentPlayerEloDTO player1 = group1.get(i);
-
-            // Look for a suitable opponent in group2
-            TournamentPlayerEloDTO player2 = null;
-            player2 = findSuitableOpponent(playerMatchHistory, group2, pairedGroup2, player1, player2);
-
-            // If no opponent is found, log or handle the issue appropriately
+        // Create matches between groups
+        for (TournamentPlayerEloDTO player1 : group1) {
+            TournamentPlayerEloDTO player2 = findSuitableOpponent(playerMatchHistory, group2, pairedGroup2, player1);
+            
             if (player2 == null) {
                 throw new IllegalStateException("Could not find a valid opponent for player " + player1.getId());
             }
 
-            // Create and save the match
             createAndAddMatch(matches, player1, player2, tournamentId, gameTypeId, roundNumber);
-
-            // Update player match history
-            playerMatchHistory.putIfAbsent(player1.getId(), new HashSet<>());
-            playerMatchHistory.putIfAbsent(player2.getId(), new HashSet<>());
-            playerMatchHistory.get(player1.getId()).add(player2.getId());
-            playerMatchHistory.get(player2.getId()).add(player1.getId());
+            updatePlayerMatchHistory(playerMatchHistory, player1.getId(), player2.getId());
         }
 
-        // Save all matches for this round
         matchRepository.saveAll(matches);
     }
 
@@ -355,19 +333,38 @@ public class MatchService {
      *                           found
      * @return the opponent (player2) matched with player1
      */
+    private void splitPlayersIntoGroups(TournamentPlayerEloDTO[] players, 
+            List<TournamentPlayerEloDTO> group1, 
+            List<TournamentPlayerEloDTO> group2) {
+        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
+        int midIndex = players.length / 2;
+        
+        group1.addAll(Arrays.asList(players).subList(0, midIndex));
+        group2.addAll(Arrays.asList(players).subList(midIndex, players.length));
+        
+        Collections.shuffle(group1);
+        Collections.shuffle(group2);
+    }
+
+    private void updatePlayerMatchHistory(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
+        playerMatchHistory.computeIfAbsent(player1Id, k -> new HashSet<>()).add(player2Id);
+        playerMatchHistory.computeIfAbsent(player2Id, k -> new HashSet<>()).add(player1Id);
+    }
+
     private TournamentPlayerEloDTO findSuitableOpponent(Map<Long, Set<Long>> playerMatchHistory,
-            List<TournamentPlayerEloDTO> group2, boolean[] pairedGroup2, TournamentPlayerEloDTO player1,
-            TournamentPlayerEloDTO player2) {
+            List<TournamentPlayerEloDTO> group2, boolean[] pairedGroup2, TournamentPlayerEloDTO player1) {
+        
         for (int j = 0; j < group2.size(); j++) {
-            if (!pairedGroup2[j] && !playerMatchHistory.getOrDefault(player1.getId(), new HashSet<>())
-                    .contains(group2.get(j).getId())) {
-                player2 = group2.get(j);
-                // Mark player in group2 as paired
+            if (!pairedGroup2[j] && !hasPlayedBefore(playerMatchHistory, player1.getId(), group2.get(j).getId())) {
                 pairedGroup2[j] = true;
-                break;
+                return group2.get(j);
             }
         }
-        return player2;
+        return null;
+    }
+
+    private boolean hasPlayedBefore(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
+        return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
     }
 
     /**
@@ -681,7 +678,6 @@ public class MatchService {
      * @return true if all matches are completed, false otherwise
      */
     private boolean isRoundCompleted(List<Match> roundMatches) {
-
         return roundMatches.stream().allMatch(m -> m.getStatus() == Match.MatchStatus.COMPLETED);
     }
 
@@ -797,3 +793,4 @@ public class MatchService {
         return match;
     }
 }
+
