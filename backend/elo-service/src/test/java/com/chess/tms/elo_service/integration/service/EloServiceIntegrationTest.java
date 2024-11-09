@@ -1,13 +1,17 @@
 package com.chess.tms.elo_service.integration.service;
 
+import com.chess.tms.elo_service.dto.EloResponseDTO;
+import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
+import com.chess.tms.elo_service.enums.Reason;
+import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
+import com.chess.tms.elo_service.model.EloHistory;
+import com.chess.tms.elo_service.repository.EloRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runners.Parameterized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -17,34 +21,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.client.MockRestServiceServer;
-
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
-
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.client.RestTemplate;
 
-import com.chess.tms.elo_service.dto.EloHistoryChartDTO;
-import com.chess.tms.elo_service.dto.EloResponseDTO;
-import com.chess.tms.elo_service.dto.MatchEloRequestDTO;
-import com.chess.tms.elo_service.enums.Reason;
-import com.chess.tms.elo_service.exception.PlayerHistoryNotFoundException;
-import com.chess.tms.elo_service.model.EloHistory;
-import com.chess.tms.elo_service.repository.EloRepository;
-
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.lenient;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-// @TestPropertySource(properties = {
-//     "players.service.url=http://localhost:8083"
-// })
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
+
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class EloServiceIntegrationTest {
@@ -53,10 +41,7 @@ public class EloServiceIntegrationTest {
 
     private final int PLAYER_2_ID = 2;
 
-    private int elo = 1315; // used to help in assertions and pre-setting up of H2 database
-
-    @LocalServerPort
-    private int port;
+    private int elo = 1315; // used to help in assertions and insertion of entries in H2 database before testing
 
     @Value("${players.service.url}")
     private String playerServiceUrl;
@@ -74,10 +59,6 @@ public class EloServiceIntegrationTest {
 
     @BeforeEach
     public void setup() {
-        // LocalDateTime[] times = new LocalDateTime[5]; 
-        // for(int i = 0; i < 5; i++) {
-        //     times[i] = LocalDateTime.now();
-        // }
         int elo = 1315; // ued to set old and current elo for pre-inserted EloHistories
 
         mockServer = MockRestServiceServer.createServer(externalRestTemplate);
@@ -92,6 +73,14 @@ public class EloServiceIntegrationTest {
 
     }
 
+    /**
+     * Helper function to create and save EloHistory
+     * @param playerId
+     * @param oldElo
+     * @param newElo
+     * @param reason
+     * @param dateTime
+     */
     public void saveNewEloHistory(int playerId, int oldElo, int newElo, Reason reason, LocalDateTime dateTime){ 
         EloHistory eloHistory = new EloHistory();
         eloHistory.setPlayerId(playerId);
@@ -101,26 +90,6 @@ public class EloServiceIntegrationTest {
         eloHistory.setCreatedAt(dateTime);
 
         eloRepository.save(eloHistory);
-    }
-
-    public void assertResponseListEquals(List<EloResponseDTO> list, int elo) {
-        for(int i = 0; i < 5; i++) {
-            assertEquals(list.get(i).getPlayerId(), 1);
-            assertEquals(list.get(i).getOldElo(), elo);
-            assertEquals(list.get(i).getNewElo(), elo + 10);
-            assertEquals(list.get(i).getChangeReason(), Reason.WIN);
-            elo += 10;
-        }
-    }
-
-    public void assertResponseListEqualsReverse(List<EloResponseDTO> list, int elo) {
-        for(int i = 4; i >= 0;  i--) {
-            assertEquals(list.get(i).getPlayerId(), 1);
-            assertEquals(list.get(i).getOldElo(), elo);
-            assertEquals(list.get(i).getNewElo(), elo + 10);
-            assertEquals(list.get(i).getChangeReason(), Reason.WIN);
-            elo += 10;
-        }
     }
 
     @Test
@@ -221,12 +190,11 @@ public class EloServiceIntegrationTest {
         headers.set("X-User-Id", "1");
         headers.setContentType(MediaType.APPLICATION_JSON);
         String msg = "";
-        String expectedMsg = "Player with player id " + playerId + " has no history";
     
         HttpEntity<Integer> request = new HttpEntity<>(1, headers);
 
         try {
-            ResponseEntity<List<EloResponseDTO>> response = restTemplate.exchange(
+            restTemplate.exchange(
                 "/api/elo/deletion/" + playerId,
                 HttpMethod.DELETE,
                 request,
@@ -238,6 +206,27 @@ public class EloServiceIntegrationTest {
         
         assertEquals(6, eloRepository.findAll().size());
         assertEquals(msg, "");
+    }
+
+    // Helper functions to assert each entry in EloResponseDTO is equal to given playerId and elo  
+    public void assertResponseListEquals(List<EloResponseDTO> list, int elo, int playerId) {
+        for(int i = 0; i < 5; i++) {
+            assertEquals(list.get(i).getPlayerId(), playerId);
+            assertEquals(list.get(i).getOldElo(), elo);
+            assertEquals(list.get(i).getNewElo(), elo + 10);
+            assertEquals(list.get(i).getChangeReason(), Reason.WIN);
+            elo += 10;
+        }
+    }
+
+    public void assertResponseListEqualsReverse(List<EloResponseDTO> list, int elo, int playerId) {
+        for(int i = 4; i >= 0;  i--) {
+            assertEquals(list.get(i).getPlayerId(), playerId);
+            assertEquals(list.get(i).getOldElo(), elo);
+            assertEquals(list.get(i).getNewElo(), elo + 10);
+            assertEquals(list.get(i).getChangeReason(), Reason.WIN);
+            elo += 10;
+        }
     }
 
     @Test
@@ -287,7 +276,7 @@ public class EloServiceIntegrationTest {
         );
 
         List<EloResponseDTO> eloResponseList = eloResponseOptional.getBody().get();
-        assertResponseListEquals(eloResponseList, elo);
+        assertResponseListEquals(eloResponseList, elo, PLAYER_1_ID);
         assertEquals(eloResponseList.size(), 5);
         assertEquals(HttpStatus.OK, eloResponseOptional.getStatusCode());
     }
@@ -301,15 +290,13 @@ public class EloServiceIntegrationTest {
 
         HttpEntity<Void> request = new HttpEntity<>(headers);
 
-        ResponseEntity<Optional<List<EloResponseDTO>>> eloResponseOptional = new ResponseEntity<>(HttpStatus.OK);
-        
         try {
-            eloResponseOptional = restTemplate.exchange(
-            "/api/elo/3",
-            HttpMethod.GET,
-            request,
-            new ParameterizedTypeReference<Optional<List<EloResponseDTO>>>(){}
-        );
+            restTemplate.exchange(
+                "/api/elo/3",
+                HttpMethod.GET,
+                request,
+                new ParameterizedTypeReference<Optional<List<EloResponseDTO>>>(){}
+            );
         } catch (PlayerHistoryNotFoundException e) {
             exceptionMsg = e.getMessage();
         }
@@ -333,7 +320,7 @@ public class EloServiceIntegrationTest {
         );
 
         List<EloResponseDTO> eloResponseList = eloResponseOptional.getBody().get();
-        assertResponseListEqualsReverse(eloResponseList, 1315);
+        assertResponseListEqualsReverse(eloResponseList, 1315, PLAYER_1_ID);
         assertEquals(eloResponseList.size(), 5);
         assertEquals(HttpStatus.OK, eloResponseOptional.getStatusCode());
     }
