@@ -50,7 +50,7 @@ public class JwtUtility {
         Map<String, String> claimsMap = new HashMap<>();
         Claims claims = extractAllClaims(token);
         
-        // Extract claims safely with null checks 
+        // Extract claims safely with null checks   
         if (claims.get("userId") != null) {
             claimsMap.put("userId", String.valueOf(claims.get("userId", Long.class)));
         }
