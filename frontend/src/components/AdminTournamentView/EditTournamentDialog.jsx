@@ -12,7 +12,6 @@ function EditTournamentDialog({
     errors,
     setErrors,
     eloError,
-    maxPlayerError,
     createFormError,
     setCreateFormError,
     validateForm,
@@ -26,7 +25,7 @@ function EditTournamentDialog({
     const navigate = useNavigate();
 
     const handleEditSubmit = async () => {
-
+        console.log(updateTournament.tournamentType, updateTournament.maxPlayers);
         if (validateForm(updateTournament)) {
             const updatedTournamentData = {
                 ...updateTournament,
@@ -36,7 +35,7 @@ function EditTournamentDialog({
             try {
                 const response = await axios.put(`${tournamentURL}/${tournamentToEdit.id}`, updatedTournamentData, {
                     headers: {
-                        'Authorization': `Bearer ${token}`, // Include JWT token
+                        'Authorization': `Bearer ${token}`, 
                     }
                 });
                 console.log(response.data);
@@ -63,9 +62,9 @@ function EditTournamentDialog({
                     locationLongitude: ''
                 });
 
-                setEditDialogOpen(false);
+                // setEditDialogOpen(false);
 
-                window.location.reload();
+                // window.location.reload();
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -189,28 +188,49 @@ function EditTournamentDialog({
                             helperText={!!eloError && updateTournament.maxElo < updateTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                         />
                     </Grid2>
-
                     <Grid2 size={12}>
-                        <FormControl fullWidth margin="dense" error={!!errors.maxPlayers}>
-                            <InputLabel>Max Players</InputLabel>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
                             <Select
-                                name="maxPlayers"
-                                label="Max Players"
-                                value={updateTournament.maxPlayers || ''}
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={updateTournament.tournamentType}
                                 onChange={handleEditInputChange}
                             >
-                                {roundTypeOptions.map((optionId) => (
-                                    <MenuItem key={optionId} value={optionId}>
-                                        {optionId}
-                                    </MenuItem>
-                                ))}
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
                             </Select>
-                            {(!!maxPlayerError && updateTournament.tournamentType === "2" && updateTournament.maxPlayers < 8) && (
-                                <FormHelperText error={true}>Max Players must be greater than 8 for swiss tournaments.</FormHelperText>
-                            )}
                         </FormControl>
-
                     </Grid2>
+                    {updateTournament.tournamentType && (
+                        <Grid2 size={12}>
+                            <FormControl fullWidth error={!!errors.maxPlayers}>
+                                <InputLabel>Max Players</InputLabel>
+                                <Select
+                                    name="maxPlayers"
+                                    label="Max Players"
+                                    value={updateTournament.maxPlayers}
+                                    onChange={handleEditInputChange}
+                                >
+                                    {roundTypeOptions
+                                        .filter((optionId) => {
+                                            if (updateTournament.tournamentType === "1") {
+                                                return true;
+                                            } else if (updateTournament.tournamentType === "2") {
+                                                return optionId !== 2 && optionId !== 4;
+                                            }
+                                            return true;
+                                        })
+                                        .map((optionId) => (
+                                            <MenuItem key={optionId} value={optionId}>
+                                                {optionId}
+                                            </MenuItem>
+                                        ))}
+                                </Select>
+                            </FormControl>
+                        </Grid2>
+                    )}
+                
                     <Grid2 size={12}>
                         <FormControl fullWidth>
                             <InputLabel>Format</InputLabel>
@@ -262,21 +282,6 @@ function EditTournamentDialog({
                         </>
                     )}
 
-
-                    <Grid2 size={12}>
-                        <FormControl fullWidth>
-                            <InputLabel>Tournament Type</InputLabel>
-                            <Select
-                                name="tournamentType"
-                                label="Tournament Type"
-                                value={updateTournament.tournamentType}
-                                onChange={handleEditInputChange}
-                            >
-                                <MenuItem value="1">Knockout</MenuItem>
-                                <MenuItem value="2">Swiss</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Grid2>
                     {createFormError && (
                         <Grid2 size={12}>
                             <h6 className={styles.errorMessage}>

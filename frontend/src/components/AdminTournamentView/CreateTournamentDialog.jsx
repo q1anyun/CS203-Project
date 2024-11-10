@@ -15,7 +15,6 @@ function CreateTournamentDialog({
     validateForm,
     errors,
     eloError,
-    maxPlayerError,
     createFormError,
     setCreateFormError,
     setTournaments,
@@ -171,25 +170,48 @@ function CreateTournamentDialog({
                         />
                     </Grid2>
                     <Grid2 size={12}>
-                        <FormControl fullWidth error={!!errors.maxPlayers}>
-                            <InputLabel>Max Players</InputLabel>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
                             <Select
-                                name="maxPlayers"
-                                label="Max Players"
-                                value={newTournament.maxPlayers}
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={newTournament.tournamentType}
                                 onChange={handleInputChange}
                             >
-                                {roundTypeOptions.map((optionId) => (
-                                    <MenuItem key={optionId} value={optionId}>
-                                        {optionId}
-                                    </MenuItem>
-                                ))}
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
                             </Select>
-                            {(!!maxPlayerError && newTournament.tournamentType === "2" && newTournament.maxPlayers < 8) && (
-                                <FormHelperText error={true}>Max Players must be greater than 8 for swiss tournaments.</FormHelperText>
-                            )}
                         </FormControl>
                     </Grid2>
+                    {newTournament.tournamentType && (
+                        <Grid2 size={12}>
+                            <FormControl fullWidth error={!!errors.maxPlayers}>
+                                <InputLabel>Max Players</InputLabel>
+                                <Select
+                                    name="maxPlayers"
+                                    label="Max Players"
+                                    value={newTournament.maxPlayers}
+                                    onChange={handleInputChange}
+                                >
+                                    {roundTypeOptions
+                                        .filter((optionId) => {
+                                            if (newTournament.tournamentType === "1") {
+                                                return true;
+                                            } else if (newTournament.tournamentType === "2") {
+                                                return optionId !== 2 && optionId !== 4;
+                                            }
+                                            return true;
+                                        })
+                                        .map((optionId) => (
+                                            <MenuItem key={optionId} value={optionId}>
+                                                {optionId}
+                                            </MenuItem>
+                                        ))}
+                                </Select>
+                            </FormControl>
+                        </Grid2>
+                    )}
+
                     <Grid2 size={12}>
                         <FormControl fullWidth>
                             <InputLabel>Format</InputLabel>
@@ -243,27 +265,14 @@ function CreateTournamentDialog({
                     )}
 
                     <Grid2 size={12}>
-                        <FormControl fullWidth>
-                            <InputLabel>Tournament Type</InputLabel>
-                            <Select
-                                name="tournamentType"
-                                label="Tournament Type"
-                                value={newTournament.tournamentType}
-                                onChange={handleInputChange}
-                            >
-                                <MenuItem value="1">Knockout</MenuItem>
-                                <MenuItem value="2">Swiss</MenuItem>
-                            </Select>
-                        </FormControl>
+                        {createFormError && (
+                            <Grid2 size={12}>
+                                <h6 className={styles.errorMessage}>
+                                    {createFormError}
+                                </h6>
+                            </Grid2>
+                        )}
                     </Grid2>
-
-                    {createFormError && (
-                        <Grid2 size={12}>
-                            <h6 className={styles.errorMessage}>
-                                {createFormError}
-                            </h6>
-                        </Grid2>
-                    )}
                 </Grid2>
             </DialogContent>
             <DialogActions>

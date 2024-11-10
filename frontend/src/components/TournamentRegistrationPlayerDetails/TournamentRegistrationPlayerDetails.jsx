@@ -88,10 +88,6 @@ function TournamentRegistrationPlayerDetails() {
         setPage(newPage);
     };
 
-    const handleBackClick = () => {
-        navigate(`/player/tournaments/${id}`);
-    };
-
 
     // Filter participants based on search term
     const filteredParticipants = participants.filter((participant) =>
@@ -114,9 +110,6 @@ function TournamentRegistrationPlayerDetails() {
                             <Typography variant="header1">
                                 Registered Participants
                             </Typography>
-                            <Button variant="outlined" onClick={handleBackClick} sx={{ marginLeft: '10px' }}>
-                                Back
-                            </Button>
 
                             <TextField
                                 variant="outlined"

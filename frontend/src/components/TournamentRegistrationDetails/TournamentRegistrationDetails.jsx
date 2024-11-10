@@ -6,8 +6,12 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import ReactCountryFlag from 'react-country-flag';
+import defaultProfilePic from '../../assets/default_user.png';
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+
+const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL
 
 const DetailBox = styled(Box)({
     backgroundColor: '#fff',
@@ -25,9 +29,10 @@ const DetailBoxContainer = styled(Box)({
     marginTop: '20px',
 });
 
-function createData(id, firstName, lastName, country) {
-    return { id, firstName, lastName, country };
+function createData(id, firstName, lastName, country, eloRating) {
+    return { id, firstName, lastName, country, eloRating };
 }
+
 
 function TournamentRegistrationDetails() {
     const { id } = useParams();
@@ -41,12 +46,14 @@ function TournamentRegistrationDetails() {
     useEffect(() => {
         const fetchParticipants = async () => {
             try {
-                const response = await axios.get(`${baseURL}/${id}`);
+                const response = await axios.get(`${tournamentPlayerURL}/${id}`);
                 const data = response.data;
                 const formattedData = data.map((participant) =>
-                    createData(participant.id, participant.firstName, participant.lastName, participant.country)
+                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating)
                 );
-                setParticipants(formattedData);
+                  // Attach profile photos to each participant
+                  const participantsWithPhotos = await attachProfilePhotos(formattedData);
+                  setParticipants(participantsWithPhotos);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -55,7 +62,7 @@ function TournamentRegistrationDetails() {
                 } else if (error.request) {
                     navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
                 }
             }
         };
@@ -63,23 +70,44 @@ function TournamentRegistrationDetails() {
         fetchParticipants();
     }, [id]);
 
+    const attachProfilePhotos = async (players) => {
+        const token = localStorage.getItem('token');
+        return await Promise.all(
+          players.map(async (player) => {
+            try {
+              const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                responseType: 'blob',
+              });
+              const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+              return { ...player, profilePhoto: imageUrl };
+            } catch {
+              // If photo fetch fails, add a default image or handle as needed
+              return { ...player, profilePhoto: defaultProfilePic };
+            }
+          })
+        );
+      };
+
     const deregisterParticipant = async () => {
         if (selectedParticipant) {
             try {
-                await axios.delete(`${baseURL}/${selectedParticipant.id}/${id}`);
+                await axios.delete(`${tournamentPlayerURL}/${selectedParticipant.id}/${id}`);
                 setParticipants((prevParticipants) =>
                     prevParticipants.filter((participant) => participant.id !== selectedParticipant.id)
                 );
+    
                 handleCloseDialog();
+                alert('Player is successfully deregistered'); 
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
                     const errorMessage = error.response.data?.message || 'An unexpected error occurred';
                     navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
+                } else if (error.request) {
                     navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
                 }
             }
         }
@@ -103,7 +131,7 @@ function TournamentRegistrationDetails() {
                 </Typography>
                 <DetailBoxContainer>
                     {participants.length === 0 ? (
-                        <Typography variant="body1" align="center">
+                        <Typography variant="playerProfile2" align="center">
                             No participants registered.
                         </Typography>
                     ) : (
@@ -119,11 +147,21 @@ function TournamentRegistrationDetails() {
                                         to={`/profileview/${participant.id}`}
                                         style={{ textDecoration: 'none', color: 'inherit' }}
                                     >
-                                        <Typography variant="h6">
+                                        <Typography variant="playerProfile2">
                                             {`${participant.firstName} ${participant.lastName}`}
                                         </Typography>
                                     </Link>
-                                    <Typography variant="body2">{participant.country}</Typography>
+                                    <ReactCountryFlag
+                                                countryCode={participant.country}
+                                                svg
+                                                style={{
+                                                    width: '2em',
+                                                    height: '2em',
+                                                    marginLeft: '10px', 
+                                        
+                                                }}
+                                                title={participant.country}
+                                            />
                                 </Box>
                                 <PersonRemoveIcon
                                     color="primary"
