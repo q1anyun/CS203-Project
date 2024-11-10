@@ -9,6 +9,9 @@ COPY gradlew build.gradle settings.gradle /app/
 COPY gradle /app/gradle
 COPY src /app/src
 
+# Run tests first to ensure they pass; fail the build if tests fail
+RUN ./gradlew clean test --no-daemon --parallel
+
 # Run the build to produce the application JAR (without running tests)
 RUN ./gradlew build --no-daemon --exclude-task test
 

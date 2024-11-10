@@ -10,8 +10,14 @@ COPY gradle/wrapper/ ./gradle/wrapper/
 # Copy the source code to the container
 COPY src ./src
 
-# Ensure the Gradle wrapper script is executable and build the JAR without running tests
-RUN chmod +x gradlew && ./gradlew build --no-daemon --parallel --exclude-task test
+# Ensure the Gradle wrapper script is executable
+RUN chmod +x gradlew
+
+# Run tests first to ensure they pass; fail the build if tests fail
+RUN ./gradlew clean test --no-daemon --parallel
+
+# Build the JAR after successful tests
+RUN ./gradlew build --no-daemon --parallel --exclude-task test
 
 # Package stage: use a minimal OpenJDK image for running the application
 FROM openjdk:21-jdk-slim

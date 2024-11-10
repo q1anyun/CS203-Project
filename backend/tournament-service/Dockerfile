@@ -10,6 +10,9 @@ COPY gradle/wrapper/ ./gradle/wrapper/
 # Copy the source code to the container
 COPY src ./src
 
+# Run tests first to ensure they pass; fail the build if tests fail
+RUN ./gradlew clean test --no-daemon --parallel
+
 # Ensure the Gradle wrapper script is executable and build the JAR without running tests
 RUN chmod +x gradlew && ./gradlew build --no-daemon --parallel --exclude-task test
 
