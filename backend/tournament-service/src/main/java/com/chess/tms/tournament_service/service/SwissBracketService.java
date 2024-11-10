@@ -1,13 +1,10 @@
 package com.chess.tms.tournament_service.service;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.chess.tms.tournament_service.dto.SwissBracketDTO;
 import com.chess.tms.tournament_service.exception.SwissBracketNotFoundException;
-import com.chess.tms.tournament_service.model.SwissBracket;
 import com.chess.tms.tournament_service.repository.SwissBracketRepository;
 
 @Service

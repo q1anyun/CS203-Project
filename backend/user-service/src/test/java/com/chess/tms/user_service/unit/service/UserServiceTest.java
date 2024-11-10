@@ -1,10 +1,8 @@
 package com.chess.tms.user_service.unit.service;
 
-import com.chess.tms.user_service.controller.UserController;
 import com.chess.tms.user_service.dto.UpdateUserRequestDTO;
 import com.chess.tms.user_service.dto.UserResponseDTO;
 import com.chess.tms.user_service.enums.UserRole;
-import com.chess.tms.user_service.exception.GlobalExceptionHandler;
 import com.chess.tms.user_service.exception.UserAlreadyExistsException;
 import com.chess.tms.user_service.exception.UserNotFoundException;
 import com.chess.tms.user_service.model.User;
@@ -15,15 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
