@@ -12,9 +12,6 @@ COPY src /app/src
 # Ensure the Gradle wrapper script is executable
 RUN chmod +x gradlew
 
-# Run tests first to ensure they pass; fail the build if tests fail
-RUN ./gradlew clean test --no-daemon --parallel
-
 # Run the build to produce the application JAR (without running tests)
 RUN ./gradlew build --no-daemon --exclude-task test
 

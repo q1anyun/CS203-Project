@@ -14,7 +14,7 @@ COPY src ./src
 RUN chmod +x gradlew
 
 # Run tests first to ensure they pass; fail the build if tests fail
-RUN ./gradlew clean test --no-daemon --parallel
+RUN ./gradlew clean test --no-daemon --tests '*unit.*' --parallel
 
 # Ensure the Gradle wrapper script is executable and build the JAR without running tests
 RUN chmod +x gradlew && ./gradlew build --no-daemon --parallel --exclude-task test

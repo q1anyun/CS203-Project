@@ -17,7 +17,7 @@ RUN chmod +x gradlew
 RUN ./gradlew clean test --no-daemon --parallel
 
 # Build the JAR after successful tests
-RUN ./gradlew build --no-daemon --parallel --exclude-task test
+RUN ./gradlew clean test --no-daemon --tests '*unit.*' --parallel
 
 # Package stage: use a minimal OpenJDK image for running the application
 FROM openjdk:21-jdk-slim
