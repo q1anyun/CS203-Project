@@ -13,7 +13,7 @@ export const fetchTournamentPic = async (tournamentId) => {
     }
 
     try {
-        const response = await axios.get(`${baseURL}/getTournamentImage/${tournamentId}`, {
+        const response = await axios.get(`${baseURL}/photo/${tournamentId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
             responseType: 'blob',
         });

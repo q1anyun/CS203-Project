@@ -121,7 +121,7 @@ public class TournamentController {
         return ResponseEntity.ok(tournamentService.getLiveTournaments(playerId));
     }
 
-    @PostMapping("/uploadTournamentImage/{tournamentId}")
+    @PostMapping("/photo/{tournamentId}")
     public ResponseEntity<String> uploadTournamentImage(
             @PathVariable("tournamentId") long tournamentId,
             @RequestPart("file") MultipartFile file) {
@@ -135,7 +135,7 @@ public class TournamentController {
         }
     }
 
-    @GetMapping("/getTournamentImage/{tournamentId}")
+    @GetMapping("/photo/{tournamentId}")
     public ResponseEntity<InputStreamResource> getTournamentImage(@PathVariable("tournamentId") String tournamentIdString) {
         System.out.println("Received ID: " + tournamentIdString); // Log the received ID
         try {

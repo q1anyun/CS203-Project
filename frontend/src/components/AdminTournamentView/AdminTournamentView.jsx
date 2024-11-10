@@ -152,28 +152,30 @@ export default function AdminTournamentView() {
 
     const handleUploadClick = (id) => {
         setTournamentId(id);
-        console.log(id);
-        fileInputRef.current.click();
 
     };
 
-    const handleFileChange = async (event) => {
-        const file = event.target.files[0]; // Get the first file
-        // Handle file upload
-        setSelectedFile(file);
-        console.log(file);
+    const handleFileChange = async (event, tournamnetId) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+        }
+
         if (selectedFile) {
             const formData = new FormData();
             formData.append("file", selectedFile);
-            await axios.post(`${tournamentURL}/uploadTournamentImage/${tournamentId}`, formData, null, {
+            console.log(formData);
+            console.log("its here");
+            await axios.post(`${tournamentURL}/photo/${tournamentId}`, formData, null, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',
 
                 },
             });
-            window.location.reload();
             console.log('image updated successfully');
+            window.location.reload();
+
 
         }
     }
@@ -233,7 +235,6 @@ export default function AdminTournamentView() {
                 handleViewDetails={handleViewDetails}
                 handleFileChange={handleFileChange}
                 handleUploadClick={handleUploadClick}
-                fileInputRef={fileInputRef}
             />
 
             <CreateTournamentDialog
