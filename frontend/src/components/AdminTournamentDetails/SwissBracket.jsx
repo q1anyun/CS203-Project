@@ -226,8 +226,8 @@ function SwissBracket({ matches, SwissBracketID }) {
                                                     onChange={(e) => handleWinnerChange(match.id, e.target.value)}
                                                     sx={{ width: '300px', height: '50px', fontSize: '18px', padding: '10px' }}
                                                 >
-                                                    <MenuItem value={match.player1?.id}>{match.player1?.firstName}</MenuItem>
-                                                    <MenuItem value={match.player2?.id}>{match.player2?.firstName}</MenuItem>
+                                                    <MenuItem value={match.player1?.id}>{match.player1.firstName + " " + match.player1.lastName}</MenuItem>
+                                                    <MenuItem value={match.player2?.id}>{match.player2.firstName + " " + match.player2.lastName}`</MenuItem>
                                                 </Select>
                                             </DialogContent>
                                             <DialogActions>

@@ -122,6 +122,7 @@ function PlayerDashboard() {
 
                         <Card elevation={3} sx={{ p: 2, minHeight: 140 }}>
                             <Typography variant="header2">Recommended Tournaments</Typography>
+                            <Grid container spacing={2}>
                             {recommendedTournaments.map((tournament) => (
                                 <Grid item xs={12} sm={6} md={4} key={tournament.id}>
 
@@ -132,6 +133,7 @@ function PlayerDashboard() {
                                     </Card>
 
                                 </Grid>))}
+                                </Grid>
 
 
                         </Card>
