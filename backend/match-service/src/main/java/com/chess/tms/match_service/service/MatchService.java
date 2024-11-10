@@ -298,91 +298,91 @@ public class MatchService {
         Map<Long, Set<Long>> playerMatchHistory = getPreviousOpponents(tournamentId);
 
         // Sort and split players into groups based on Elo
-        List<TournamentPlayerEloDTO> group1 = new ArrayList<>();
-        List<TournamentPlayerEloDTO> group2 = new ArrayList<>();
-        splitPlayersIntoGroups(players, group1, group2);
+        List<TournamentPlayerEloDTO> allPlayers = new ArrayList<>(Arrays.asList(players));
+        
+        // Track pairings and create matches
+        List<Pairing> pairings = findValidPairings(allPlayers, playerMatchHistory);
+        
+        if (pairings.isEmpty()) {
+            throw new IllegalStateException("Could not find valid pairings for all players");
+        }
 
-        // Track paired players in group2
-        boolean[] pairedGroup2 = new boolean[group2.size()];
-
-        // Create matches between groups
-        for (TournamentPlayerEloDTO player1 : group1) {
-            TournamentPlayerEloDTO player2 = findSuitableOpponent(playerMatchHistory, group2, pairedGroup2, player1);
-            
-            if (player2 == null) {
-                throw new IllegalStateException("Could not find a valid opponent for player " + player1.getId());
-            }
-
-            createAndAddMatch(matches, player1, player2, tournamentId, gameTypeId, roundNumber);
-            updatePlayerMatchHistory(playerMatchHistory, player1.getId(), player2.getId());
+        // Create matches from valid pairings
+        for (Pairing pairing : pairings) {
+            Match match = createMatch(
+                tournamentId, 
+                pairing.player1.getId(), 
+                pairing.player2.getId(), 
+                null, null, roundNumber,
+                getRoundTypeForSwissRound(), 
+                gameTypeId, 
+                null, 
+                Match.MatchStatus.PENDING
+            );
+            matches.add(match);
         }
 
         matchRepository.saveAll(matches);
     }
 
-    /**
-     * Finds a suitable opponent in group2 for a player from group1, ensuring no
-     * prior match history between them.
-     *
-     * @param playerMatchHistory map containing each player's past opponents
-     * @param group2             the group of potential opponents
-     * @param pairedGroup2       boolean array tracking if players in group2 are
-     *                           already paired
-     * @param player1            the player looking for an opponent
-     * @param player2            initially null, becomes the matched opponent if
-     *                           found
-     * @return the opponent (player2) matched with player1
-     */
-    private void splitPlayersIntoGroups(TournamentPlayerEloDTO[] players, 
-            List<TournamentPlayerEloDTO> group1, 
-            List<TournamentPlayerEloDTO> group2) {
-        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
-        int midIndex = players.length / 2;
-        
-        group1.addAll(Arrays.asList(players).subList(0, midIndex));
-        group2.addAll(Arrays.asList(players).subList(midIndex, players.length));
-        
-        Collections.shuffle(group1);
-        Collections.shuffle(group2);
+    // Helper class to represent a pairing
+    private static class Pairing {
+        TournamentPlayerEloDTO player1;
+        TournamentPlayerEloDTO player2;
+
+        Pairing(TournamentPlayerEloDTO p1, TournamentPlayerEloDTO p2) {
+            this.player1 = p1;
+            this.player2 = p2;
+        }
     }
 
-    private void updatePlayerMatchHistory(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
-        playerMatchHistory.computeIfAbsent(player1Id, k -> new HashSet<>()).add(player2Id);
-        playerMatchHistory.computeIfAbsent(player2Id, k -> new HashSet<>()).add(player1Id);
+    private List<Pairing> findValidPairings(List<TournamentPlayerEloDTO> players, Map<Long, Set<Long>> playerMatchHistory) {
+        List<Pairing> pairings = new ArrayList<>();
+        
+        // If found valid pairing, return pairing else return empty array list
+        return findValidPairings(new ArrayList<>(players), playerMatchHistory, pairings) ? pairings : new ArrayList<>();
     }
 
-    private TournamentPlayerEloDTO findSuitableOpponent(Map<Long, Set<Long>> playerMatchHistory,
-            List<TournamentPlayerEloDTO> group2, boolean[] pairedGroup2, TournamentPlayerEloDTO player1) {
+    private boolean findValidPairings(List<TournamentPlayerEloDTO> remainingPlayers, 
+            Map<Long, Set<Long>> playerMatchHistory, List<Pairing> pairings) {
+        // Base case: all players are paired
+        if (remainingPlayers.isEmpty()) {
+            // Print out pairings
+            for(int i=0 ; i<pairings.size() ; i++){
+                System.out.println("Pairing " + i + ": " + pairings.get(i).player1.getId() + " vs " + pairings.get(i).player2.getId());
+            }            
+            return true;
+        }
+
+        TournamentPlayerEloDTO player1 = remainingPlayers.get(0);
         
-        for (int j = 0; j < group2.size(); j++) {
-            if (!pairedGroup2[j] && !hasPlayedBefore(playerMatchHistory, player1.getId(), group2.get(j).getId())) {
-                pairedGroup2[j] = true;
-                return group2.get(j);
+        // Try to pair the first player with each remaining player
+        for (int i = 1; i < remainingPlayers.size(); i++) {
+            TournamentPlayerEloDTO player2 = remainingPlayers.get(i);
+            
+            // Check if these players can be paired
+            if (!hasPlayedBefore(playerMatchHistory, player1.getId(), player2.getId())) {
+                // Create the pairing
+                Pairing pairing = new Pairing(player1, player2);
+                pairings.add(pairing);
+                
+                // Remove both players from remaining players
+                List<TournamentPlayerEloDTO> newRemainingPlayers = new ArrayList<>(remainingPlayers);
+                newRemainingPlayers.remove(player2);
+                newRemainingPlayers.remove(player1);
+                
+                // Recursively try to pair the remaining players
+                if (findValidPairings(newRemainingPlayers, playerMatchHistory, pairings)) {
+                    return true;
+                }
+                
+                // If we couldn't pair the remaining players, undo this pairing
+                pairings.remove(pairings.size() - 1);
             }
         }
-        return null;
-    }
-
-    private boolean hasPlayedBefore(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
-        return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
-    }
-
-    /**
-     * Helper method to create a match entity and add it to the matches list.
-     *
-     * @param matches      list to add the newly created match
-     * @param player1      player one in the match
-     * @param player2      player two in the match
-     * @param tournamentId the tournament ID
-     * @param gameTypeId   the game type ID
-     * @param roundNumber  the round number for the match
-     */
-    private void createAndAddMatch(List<Match> matches, TournamentPlayerEloDTO player1,
-            TournamentPlayerEloDTO player2, Long tournamentId, Long gameTypeId, Integer roundNumber) {
-
-        Match match = createMatch(tournamentId, player1.getId(), player2.getId(), null, null, roundNumber,
-                getRoundTypeForSwissRound(), gameTypeId, null, Match.MatchStatus.PENDING);
-        matches.add(match);
+        
+        // If we get here, we couldn't find a valid pairing for the first player
+        return false;
     }
 
     /**
@@ -791,6 +791,10 @@ public class MatchService {
         match.setStatus(status);
 
         return match;
+    }
+
+    private boolean hasPlayedBefore(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
+        return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
     }
 }
 
