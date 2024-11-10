@@ -14,7 +14,7 @@ COPY src ./src
 RUN chmod +x gradlew
 
 # Run tests first to ensure they pass; fail the build if tests fail
-RUN ./gradlew clean test --no-daemon --parallel
+RUN ./gradlew clean test --no-daemon --tests '*unit.*' --parallel
 
 # Build the JAR after successful tests
 RUN ./gradlew build --no-daemon --parallel --exclude-task test

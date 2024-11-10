@@ -31,19 +31,32 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Check for changes in ${{ matrix.service }}
+        id: changes-check
+        run: |
+          if git diff --quiet HEAD^ HEAD ./backend/${{ matrix.service }}/; then
+            echo "skip_build=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip_build=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up JDK 17
+        if: steps.changes-check.outputs.skip_build == 'false'
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
       - name: Set up Docker Buildx
+        if: steps.changes-check.outputs.skip_build == 'false'
         uses: docker/setup-buildx-action@v2
 
       - name: Log in to Amazon ECR
+        if: steps.changes-check.outputs.skip_build == 'false'
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push Docker image for ${{ matrix.service }}
+        if: steps.changes-check.outputs.skip_build == 'false'
         run: |
           IMAGE_NAME=${{ matrix.service }}
           ECR_REPOSITORY=970547372113.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME
@@ -52,6 +65,7 @@ jobs:
           docker push $ECR_REPOSITORY:latest
 
       - name: Deploy to Amazon ECS for ${{ matrix.service }}
+        if: steps.changes-check.outputs.skip_build == 'false'
         run: |
           aws ecs update-service \
             --cluster chess-tms-cluster \
