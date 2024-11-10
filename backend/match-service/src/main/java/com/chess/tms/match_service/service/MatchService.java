@@ -76,13 +76,14 @@ public class MatchService {
      */
     public Long createKnockoutMatches(Long tournamentId, Long gameTypeId, List<Long> advancedPlayerIds) {
         TournamentPlayerEloDTO[] players;
+        // If advancedPlayerIds is null, get the list of players with Elo ratings from the tournament service
         if (advancedPlayerIds == null) {
-            // Get the list of players with Elo ratings from the tournament service
             ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
                     tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
                     TournamentPlayerEloDTO[].class);
             players = response.getBody();
         } else {
+            // If advancedPlayerIds is not null, get the list of players from the player service
             players = advancedPlayerIds.stream()
                     .map(playerId -> restTemplate.getForObject(playerServiceUrl + "/api/player/" + playerId,
                             PlayerDetailsDTO.class))
@@ -90,10 +91,13 @@ public class MatchService {
                     .toArray(TournamentPlayerEloDTO[]::new);
         }
 
-        // Calculate next power of 2 for knockout structure and determine necessary byes
+        // Calculate the next power of 2 for the knockout structure
+        // This is done by finding the smallest power of 2 that is greater than the number of players
         int totalPlayers = players.length;
-        int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));
+        int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));    
+        // Calculate the number of byes required for the top players
         int byes = nextPowerOfTwo - totalPlayers;
+        // Get the round type for the next round    
         RoundType currentRoundType = getRoundType(nextPowerOfTwo);
 
         // Sort players by Elo rating (highest first)
@@ -101,6 +105,8 @@ public class MatchService {
 
         // Prepare the matches for all rounds (create all rounds in advance)
         List<Match> allMatches = new ArrayList<>();
+
+        // Map to store matches for each round
         Map<Integer, List<Match>> roundMatchesMap = new HashMap<>();
 
         // Handle byes for top players first
@@ -108,25 +114,35 @@ public class MatchService {
 
         // Create first round matches with the remaining players after the byes
         List<Match> firstRoundMatches = new ArrayList<>();
+
+        // Set the low and high indices for the first round matches
         int lowIndex = byes;
         int highIndex = totalPlayers - 1;
+
+        // Generate the first round matches
         generateFirstRoundMatches(tournamentId, gameTypeId, players, currentRoundType, allMatches, firstRoundMatches,
                 lowIndex, highIndex);
 
-        // Combine first-round and bye matches, add to map, and generate subsequent
-        // rounds
+        // Combine first-round and bye matches, add to map, and generate subsequent rounds
         List<Match> combinedFirstRoundMatches = new ArrayList<>(firstRoundMatches);
         combinedFirstRoundMatches.addAll(byeMatches);
+
+        // Add the first round matches to the map
         roundMatchesMap.put(1, combinedFirstRoundMatches);
 
+        // Calculate the current round size and round number    
         int currentRoundSize = (firstRoundMatches.size() + byeMatches.size()) / 2;
         int roundNumber = 2;
+
+        // Generate subsequent rounds
         roundNumber = generateSubsequentMatches(tournamentId, gameTypeId, allMatches, roundMatchesMap, currentRoundSize,
                 roundNumber);
 
         // Save all the matches (both regular and bye matches) and update next_match_id
         // for each match in subsequent rounds
         matchRepository.saveAll(allMatches);
+
+        // Update next_match_id for each match in subsequent rounds
         updateNextMatchId(roundMatchesMap, roundNumber);
 
         return currentRoundType.getId();
@@ -140,14 +156,20 @@ public class MatchService {
             RoundType currentRoundType, List<Match> allMatches, List<Match> firstRoundMatches, int lowIndex,
             int highIndex) {
 
+        // Generate matches for the first round by pairing players based on Elo ratings
+        // The pairing is done by pairing the lowest rated player with the highest rated player
+        // Pairing logic is done using left and right pointers to traverse the array - complexity O(n)
         while (lowIndex < highIndex) {
             TournamentPlayerEloDTO player1 = players[lowIndex];
             TournamentPlayerEloDTO player2 = players[highIndex];
 
+            // Create the match for the first round
             Match match = createMatch(tournamentId, player1.getId(), player2.getId(), null, null, null,
                     currentRoundType, gameTypeId, null, Match.MatchStatus.PENDING);
 
+            // Add the match to the list of first round matches
             firstRoundMatches.add(match);
+            // Add the match to the list of all matches
             allMatches.add(match);
 
             lowIndex++;
@@ -162,20 +184,29 @@ public class MatchService {
      */
     private int generateSubsequentMatches(Long tournamentId, Long gameTypeId, List<Match> allMatches,
             Map<Integer, List<Match>> roundMatchesMap, int currentRoundSize, int roundNumber) {
+        // Generate subsequent rounds until the current round size is 1
         while (currentRoundSize >= 1) {
+            // Create a list to store the matches for the current round
             List<Match> currentRoundMatches = new ArrayList<>();
             for (int i = 0; i < currentRoundSize; i++) {
-
+                // Get the round type for the next round
                 RoundType roundType = getRoundType(currentRoundSize * 2);
+
+                // Create the match for the next round
                 Match nextRoundMatch = createMatch(tournamentId, null, null, null, null, null, roundType, gameTypeId,
                         null, Match.MatchStatus.PENDING);
                 currentRoundMatches.add(nextRoundMatch);
                 allMatches.add(nextRoundMatch);
             }
+            // Add the current round matches to the map
             roundMatchesMap.put(roundNumber, currentRoundMatches);
+            // Update the current round size and round number
             currentRoundSize /= 2;
+            // Increment the round number
             roundNumber++;
         }
+        // Return the final round number after all rounds are generated 
+        // This is used to update the next_match_id for each match in subsequent rounds
         return roundNumber;
     }
 
@@ -184,17 +215,25 @@ public class MatchService {
      * knockout structure.
      */
     private void updateNextMatchId(Map<Integer, List<Match>> roundMatchesMap, int roundNumber) {
+        // Update next_match_id for each match in subsequent rounds
         for (int round = 1; round < roundNumber - 1; round++) {
+            // Get the matches for the previous round
             List<Match> previousRoundMatches = roundMatchesMap.get(round);
+            // Get the matches for the next round
             List<Match> nextRoundMatches = roundMatchesMap.get(round + 1);
 
+            // Update next_match_id for each match in the previous round
             for (int i = 0; i < previousRoundMatches.size(); i += 2) {
+                // Get the matches for the previous round
                 Match previousMatch1 = previousRoundMatches.get(i);
                 Match previousMatch2 = previousRoundMatches.get(i + 1);
+                // Get the matches for the next round
                 Match nextRoundMatch = nextRoundMatches.get(i / 2);
 
+                // Set the next_match_id for each match in the previous round
                 previousMatch1.setNextMatchId(nextRoundMatch.getId());
                 previousMatch2.setNextMatchId(nextRoundMatch.getId());
+                // Save the matches
                 matchRepository.save(previousMatch1);
                 matchRepository.save(previousMatch2);
             }
@@ -208,14 +247,16 @@ public class MatchService {
             RoundType currentRoundType, List<Match> allMatches) {
         List<Match> byeMatches = new ArrayList<>();
         for (int i = 0; i < byes; i++) {
-            TournamentPlayerEloDTO playerWithBye = players[i]; // Top player gets a bye
+            // Top player gets a bye
+            TournamentPlayerEloDTO playerWithBye = players[i];
+            // Create the bye match
             Match byeMatch = createMatch(tournamentId, null, null, playerWithBye.getId(), null, null, currentRoundType,
                     gameTypeId, null, Match.MatchStatus.COMPLETED);
             byeMatches.add(byeMatch);
             allMatches.add(byeMatch);
 
         }
-   
+        // Return the list of bye matches
         return byeMatches;
     }
 
@@ -234,14 +275,17 @@ public class MatchService {
                 tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
                 TournamentPlayerEloDTO[].class);
 
+        // Get the list of players with Elo ratings from the tournament service
         TournamentPlayerEloDTO[] players = response.getBody();
+        // Get the number of players in the tournament
         int totalPlayers = players.length;
-
-        SwissBracket bracket = getSwissBracket(tournamentId, totalPlayers);
+        // Create the Swiss bracket for the tournament
+        SwissBracket bracket = createSwissBracket(tournamentId, totalPlayers);
+        // Set the standings for each player in the tournament
         setSwissStanding(players, bracket);
-
+        // Create the matches for the first round
         createRoundMatches(players, tournamentId, gameTypeId, bracket.getCurrentRound());
-     
+        // Return the ID of the Swiss bracket
         return bracket.getId();
     }
 
@@ -252,7 +296,7 @@ public class MatchService {
      * @param bracket the Swiss bracket for the tournament
      */
     private void setSwissStanding(TournamentPlayerEloDTO[] players, SwissBracket bracket) {
-
+        // Set the standings for each player in the tournament
         for (TournamentPlayerEloDTO player : players) {
             SwissStanding standing = new SwissStanding();
             standing.setBracket(bracket);
@@ -272,7 +316,7 @@ public class MatchService {
      * @param totalPlayers the number of players in the tournament
      * @return the created SwissBracket
      */
-    private SwissBracket getSwissBracket(Long tournamentId, int totalPlayers) {
+    private SwissBracket createSwissBracket(Long tournamentId, int totalPlayers) {
         SwissBracket bracket = new SwissBracket();
         bracket.setTournamentId(tournamentId);
         bracket.setCurrentRound(1);
@@ -295,94 +339,106 @@ public class MatchService {
     private void createRoundMatches(TournamentPlayerEloDTO[] players, Long tournamentId, Long gameTypeId,
             int roundNumber) {
         List<Match> matches = new ArrayList<>();
+        // Get the match history for each player in the tournament
         Map<Long, Set<Long>> playerMatchHistory = getPreviousOpponents(tournamentId);
 
         // Sort and split players into groups based on Elo
-        List<TournamentPlayerEloDTO> group1 = new ArrayList<>();
-        List<TournamentPlayerEloDTO> group2 = new ArrayList<>();
-        splitPlayersIntoGroups(players, group1, group2);
+        List<TournamentPlayerEloDTO> allPlayers = new ArrayList<>(Arrays.asList(players));
+        
+        // Track pairings and create matches
+        List<Pairing> pairings = findValidPairings(allPlayers, playerMatchHistory);
 
-        // Track paired players in group2
-        boolean[] pairedGroup2 = new boolean[group2.size()];
+        // If no valid pairings are found, throw an exception
+        if (pairings.isEmpty()) {
+            throw new IllegalStateException("Could not find valid pairings for all players");
+        }
 
-        // Create matches between groups
-        for (TournamentPlayerEloDTO player1 : group1) {
-            TournamentPlayerEloDTO player2 = findSuitableOpponent(playerMatchHistory, group2, pairedGroup2, player1);
-            
-            if (player2 == null) {
-                throw new IllegalStateException("Could not find a valid opponent for player " + player1.getId());
-            }
-
-            createAndAddMatch(matches, player1, player2, tournamentId, gameTypeId, roundNumber);
-            updatePlayerMatchHistory(playerMatchHistory, player1.getId(), player2.getId());
+        // Create matches from valid pairings
+        for (Pairing pairing : pairings) {
+            Match match = createMatch(
+                tournamentId, 
+                pairing.player1.getId(), 
+                pairing.player2.getId(), 
+                null, null, roundNumber,
+                getRoundTypeForSwissRound(), 
+                gameTypeId, 
+                null, 
+                Match.MatchStatus.PENDING
+            );
+            matches.add(match);
         }
 
         matchRepository.saveAll(matches);
     }
 
+    // Helper class to represent a pairing
+    private static class Pairing {
+        TournamentPlayerEloDTO player1;
+        TournamentPlayerEloDTO player2;
+
+        Pairing(TournamentPlayerEloDTO p1, TournamentPlayerEloDTO p2) {
+            this.player1 = p1;
+            this.player2 = p2;
+        }
+    }
+
     /**
-     * Finds a suitable opponent in group2 for a player from group1, ensuring no
-     * prior match history between them.
+     * Finds valid pairings for players in a Swiss tournament.
      *
-     * @param playerMatchHistory map containing each player's past opponents
-     * @param group2             the group of potential opponents
-     * @param pairedGroup2       boolean array tracking if players in group2 are
-     *                           already paired
-     * @param player1            the player looking for an opponent
-     * @param player2            initially null, becomes the matched opponent if
-     *                           found
-     * @return the opponent (player2) matched with player1
+     * @param players            list of players to pair
+     * @param playerMatchHistory map of player IDs to their match history
+     * @return list of valid pairings
      */
-    private void splitPlayersIntoGroups(TournamentPlayerEloDTO[] players, 
-            List<TournamentPlayerEloDTO> group1, 
-            List<TournamentPlayerEloDTO> group2) {
-        Arrays.sort(players, Comparator.comparingInt(TournamentPlayerEloDTO::getEloRating).reversed());
-        int midIndex = players.length / 2;
+    private List<Pairing> findValidPairings(List<TournamentPlayerEloDTO> players, Map<Long, Set<Long>> playerMatchHistory) {
+        List<Pairing> pairings = new ArrayList<>();
         
-        group1.addAll(Arrays.asList(players).subList(0, midIndex));
-        group2.addAll(Arrays.asList(players).subList(midIndex, players.length));
-        
-        Collections.shuffle(group1);
-        Collections.shuffle(group2);
+        // If found valid pairing, return pairing else return empty array list
+        return findValidPairings(new ArrayList<>(players), playerMatchHistory, pairings) ? pairings : new ArrayList<>();
     }
 
-    private void updatePlayerMatchHistory(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
-        playerMatchHistory.computeIfAbsent(player1Id, k -> new HashSet<>()).add(player2Id);
-        playerMatchHistory.computeIfAbsent(player2Id, k -> new HashSet<>()).add(player1Id);
-    }
+    private boolean findValidPairings(List<TournamentPlayerEloDTO> remainingPlayers, 
+            Map<Long, Set<Long>> playerMatchHistory, List<Pairing> pairings) {
+        // Base case: all players are paired
+        if (remainingPlayers.isEmpty()) {
+            // Print out pairings
+            for(int i=0 ; i<pairings.size() ; i++){
+                System.out.println("Pairing " + i + ": " + pairings.get(i).player1.getId() + " vs " + pairings.get(i).player2.getId());
+            }       
+            System.out.println();     
+            return true;
+        }
 
-    private TournamentPlayerEloDTO findSuitableOpponent(Map<Long, Set<Long>> playerMatchHistory,
-            List<TournamentPlayerEloDTO> group2, boolean[] pairedGroup2, TournamentPlayerEloDTO player1) {
+        // Get the first player in the remaining players list
+        TournamentPlayerEloDTO player1 = remainingPlayers.get(0);
         
-        for (int j = 0; j < group2.size(); j++) {
-            if (!pairedGroup2[j] && !hasPlayedBefore(playerMatchHistory, player1.getId(), group2.get(j).getId())) {
-                pairedGroup2[j] = true;
-                return group2.get(j);
+        // Try to pair the first player with each remaining player
+        for (int i = 1; i < remainingPlayers.size(); i++) {
+            // Get the second player in the remaining players list
+            TournamentPlayerEloDTO player2 = remainingPlayers.get(i);
+            
+            // Check if these players can be paired
+            if (!hasPlayedBefore(playerMatchHistory, player1.getId(), player2.getId())) {
+                // Create the pairing
+                Pairing pairing = new Pairing(player1, player2);
+                pairings.add(pairing);
+                
+                // Remove both players from remaining players
+                List<TournamentPlayerEloDTO> newRemainingPlayers = new ArrayList<>(remainingPlayers);
+                newRemainingPlayers.remove(player2);
+                newRemainingPlayers.remove(player1);
+                
+                // Recursively try to pair the remaining players
+                if (findValidPairings(newRemainingPlayers, playerMatchHistory, pairings)) {
+                    return true;
+                }
+                
+                // If we couldn't pair the remaining players, undo this pairing
+                pairings.remove(pairings.size() - 1);
             }
         }
-        return null;
-    }
-
-    private boolean hasPlayedBefore(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
-        return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
-    }
-
-    /**
-     * Helper method to create a match entity and add it to the matches list.
-     *
-     * @param matches      list to add the newly created match
-     * @param player1      player one in the match
-     * @param player2      player two in the match
-     * @param tournamentId the tournament ID
-     * @param gameTypeId   the game type ID
-     * @param roundNumber  the round number for the match
-     */
-    private void createAndAddMatch(List<Match> matches, TournamentPlayerEloDTO player1,
-            TournamentPlayerEloDTO player2, Long tournamentId, Long gameTypeId, Integer roundNumber) {
-
-        Match match = createMatch(tournamentId, player1.getId(), player2.getId(), null, null, roundNumber,
-                getRoundTypeForSwissRound(), gameTypeId, null, Match.MatchStatus.PENDING);
-        matches.add(match);
+        
+        // Couldn't find a valid pairing
+        return false;
     }
 
     /**
@@ -397,7 +453,9 @@ public class MatchService {
         List<Match> previousMatches = matchRepository.findByTournamentId(tournamentId);
         Map<Long, Set<Long>> playerMatchHistory = new HashMap<>();
 
+        // Iterate through the previous matches
         for (Match match : previousMatches) {
+            // Get the player IDs for the match
             Long player1Id = match.getPlayer1Id();
             Long player2Id = match.getPlayer2Id();
 
@@ -488,6 +546,7 @@ public class MatchService {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Match not found"));
 
+        // Validate the match and winner
         validateMatchAndWinner(winnerId, match);
 
         // Set winner and loser IDs, and mark the match as completed
@@ -500,6 +559,7 @@ public class MatchService {
 
         matchRepository.save(match);
 
+        // Advance the match based on the tournament format
         return match.getRoundType().getRoundName().equals("Swiss")
                 ? advanceSwissMatch(match, winnerId)
                 : advanceKnockoutMatch(match, winnerId);
@@ -513,10 +573,12 @@ public class MatchService {
      * @param match    the match being validated
      */
     private void validateMatchAndWinner(Long winnerId, Match match) {
+        // Validate that the match has not been completed
         if (match.getWinnerId() != null) {
             throw new MatchAlreadyCompletedException("Match has already been completed");
         }
 
+        // Validate that the winner is a valid participant in the match
         if (!match.getPlayer1Id().equals(winnerId) && !match.getPlayer2Id().equals(winnerId)) {
             throw new PlayerDoesNotExistInMatchException(
                     "Player with id " + winnerId + " is not recognised in the match.");
@@ -533,6 +595,8 @@ public class MatchService {
         MatchEloRequestDTO matchEloRequestDTO = new MatchEloRequestDTO();
         matchEloRequestDTO.setWinner(match.getWinnerId());
         matchEloRequestDTO.setLoser(match.getLoserId());
+
+        // Send the request to update the Elo ratings
         restTemplate.put(eloServiceUrl + "/api/elo/match", matchEloRequestDTO);
     }
 
@@ -550,12 +614,14 @@ public class MatchService {
         SwissBracket bracket = swissBracketRepository.findByTournamentId(match.getTournamentId())
                 .orElseThrow(() -> new SwissBracketNotFoundException("Swiss bracket not found"));
 
+        // Update the Swiss standings for the winner and loser
         updateSwissStanding(match, winnerId, bracket);
 
-        // Check if the round is completed
+        // Get the matches for the current round
         List<Match> roundMatches = matchRepository.findByTournamentIdAndSwissRoundNumber(match.getTournamentId(),
                 bracket.getCurrentRound());
 
+        // Check if the round is completed
         if (isRoundCompleted(roundMatches)) {
             // Check if the last Swiss round is reached
             if (bracket.getCurrentRound() == bracket.getNumberOfRounds()) {
@@ -576,13 +642,16 @@ public class MatchService {
      * @param bracket  the Swiss bracket to which the match belongs
      */
     private void updateSwissStanding(Match match, Long winnerId, SwissBracket bracket) {
+        // Get the Swiss standing for the winner
         SwissStanding winnerStanding = swissStandingRepository.findByBracketIdAndPlayerId(bracket.getId(), winnerId)
                 .orElseThrow(() -> new PlayerDoesNotExistInMatchException("Player not found"));
 
+        // Get the Swiss standing for the loser
         SwissStanding loserStanding = swissStandingRepository
                 .findByBracketIdAndPlayerId(bracket.getId(), match.getLoserId())
                 .orElseThrow(() -> new PlayerDoesNotExistInMatchException("Player not found"));
 
+        // Update the wins and losses for the winner and loser
         winnerStanding.setWins(winnerStanding.getWins() + 1);
         loserStanding.setLosses(loserStanding.getLosses() + 1);
 
@@ -599,6 +668,7 @@ public class MatchService {
      * @return a message indicating advancement to the next Swiss round
      */
     private String nextSwissRound(Match match, SwissBracket bracket) {
+        // Update the current round 
         bracket.setCurrentRound(bracket.getCurrentRound() + 1);
         swissBracketRepository.save(bracket);
         // Fetch all players with their updated standings for the next round
@@ -608,8 +678,10 @@ public class MatchService {
 
         TournamentPlayerEloDTO[] allPlayers = response.getBody();
 
+        // Create the matches for the next round
         createRoundMatches(allPlayers, match.getTournamentId(), match.getGameType().getId(),
                 bracket.getCurrentRound());
+        
         return "Advanced to Swiss Round " + bracket.getCurrentRound();
     }
 
@@ -622,10 +694,11 @@ public class MatchService {
      * @return a message indicating the tournament has moved to knockout phase
      */
     private String completedSwissRound(Match match, SwissBracket bracket) {
-        // Get the standings for the current bracket and sort by wins and losses for the
-        // top half
+        // Get the standings for the current bracket and sort by wins and losses for the top half
         List<SwissStanding> standings = swissStandingRepository
                 .findByBracketIdOrderByWinsDescLossesAsc(bracket.getId());
+
+        // Get the number of players in the top half
         int half = standings.size() / 2;
 
         // Get the IDs of players who advanced
@@ -637,7 +710,10 @@ public class MatchService {
         // Create knockout matches for the top half of players
         Long currentRoundId = createKnockoutMatches(match.getTournamentId(), match.getGameType().getId(),
                 advancedPlayers);
+
+        // Update the current round for the tournament
         updateCurrentRoundForTournament(match.getTournamentId(), currentRoundId);
+
         return "Swiss rounds completed, moving to knockout phase.";
     }
 
@@ -651,12 +727,16 @@ public class MatchService {
      * @return a message indicating the progress of the knockout tournament
      */
     private String advanceKnockoutMatch(Match match, Long winnerId) {
+        // Check if there is a next match
         if (match.getNextMatchId() != null) {
-
+            // Get the matches for the current round
             List<Match> roundMatches = getRoundMatches(match.getTournamentId(), match.getRoundType().getId());
 
+            // Check if the round is completed
             if (isRoundCompleted(roundMatches)) {
                 Match nextMatch = getNextMatch(match.getNextMatchId());
+
+                // Update the current round for the tournament
                 updateCurrentRoundForTournament(match.getTournamentId(), nextMatch.getRoundType().getId());
 
                 // Assign matches for the next round
@@ -666,6 +746,7 @@ public class MatchService {
             }
             return "Winner advanced to the next round";
         } else {
+            // Update the tournament winner
             updateTournamentWinner(match.getTournamentId(), winnerId);
             return "Tournament completed";
         }
@@ -681,28 +762,57 @@ public class MatchService {
         return roundMatches.stream().allMatch(m -> m.getStatus() == Match.MatchStatus.COMPLETED);
     }
 
+    /**
+     * Retrieves all matches for a specific tournament and round type.
+     *
+     * @param tournamentId the tournament ID
+     * @param roundTypeId  the round type ID
+     * @return a list of Match objects for the specified tournament and round type
+     */
     private List<Match> getRoundMatches(Long tournamentId, Long roundTypeId) {
         return matchRepository.findByTournamentIdAndRoundTypeId(tournamentId, roundTypeId);
     }
 
+    /**
+     * Retrieves a single match by its ID.
+     *
+     * @param nextMatchId the ID of the next match
+     * @return the Match object with the specified ID
+     */
     private Match getNextMatch(Long nextMatchId) {
         return matchRepository.findById(nextMatchId)
                 .orElseThrow(() -> new MatchDoesNotExistException("Next match not found"));
     }
 
+    /**
+     * Updates the tournament winner by calling the external tournament service.
+     *
+     * @param tournamentId the ID of the tournament
+     * @param winnerId     the ID of the tournament winner
+     */
     private void updateTournamentWinner(Long tournamentId, Long winnerId) {
+        // Update the tournament winner by calling the tournament service
         String updateTournamentUrl = tournamentServiceUrl + "/api/tournaments/" + tournamentId + "/winner/" + winnerId;
         restTemplate.put(updateTournamentUrl, null);
     }
 
+    /**
+     * Assigns the next round matches for the completed matches in a round.
+     *
+     * @param roundMatches the list of completed matches in the round
+     */
     private void assignNextRoundMatches(List<Match> roundMatches) {
+        // Iterate through the completed matches
         for (Match completedMatch : roundMatches) {
+            // Get the next match ID
             Long nextMatchId = completedMatch.getNextMatchId();
             if (nextMatchId != null) {
+                // Get the next match
                 Match advanceMatch = matchRepository.findById(nextMatchId)
                         .orElseThrow(() -> new RuntimeException(
                                 "Next match not found for match ID: " + nextMatchId));
-           
+
+                // Set the winner ID to the next match
                 if (advanceMatch.getPlayer1Id() == null) {
                     advanceMatch.setPlayer1Id(completedMatch.getWinnerId());
                 } else if (advanceMatch.getPlayer2Id() == null) {
@@ -724,6 +834,7 @@ public class MatchService {
 
         List<Match> matches = matchRepository.findTop5ByPlayer1IdOrPlayer2IdOrderByUpdatedAtDesc(playerId, playerId);
 
+        // Convert the matches to MatchDTO objects
         List<MatchDTO> matchDTOs = matches.stream()
                 .map(this::convertMatchToMatchDTO)
                 .collect(Collectors.toList());
@@ -731,6 +842,12 @@ public class MatchService {
         return matchDTOs;
     }
 
+    /**
+     * Converts a Match entity to a MatchDTO object.
+     *
+     * @param match the Match entity to convert
+     * @return the MatchDTO object
+     */
     private MatchDTO convertMatchToMatchDTO(Match match) {
         MatchDTO matchDTO = new MatchDTO();
         matchDTO.setId(match.getId());
@@ -754,26 +871,60 @@ public class MatchService {
         return matchDTO;
     }
 
+    /**
+     * Retrieves player details if the player ID is not null, otherwise returns null.
+     *
+     * @param playerId the ID of the player
+     * @return the PlayerDetailsDTO object if the player ID is not null, otherwise null
+     */
     private PlayerDetailsDTO getPlayerDetailsOrNull(Long playerId) {
+        // Get the player details from the player service if the player ID is not null
         return (playerId != null) ? getPlayerDetails(playerId) : null;
     }
 
+    /**
+     * Sets the winner and loser IDs for a MatchDTO object.
+     *
+     * @param match   the Match entity
+     * @param matchDTO the MatchDTO object to set the IDs on
+     */
     private void setWinnerAndLoserIds(Match match, MatchDTO matchDTO) {
         matchDTO.setWinnerId(match.getWinnerId());
         matchDTO.setLoserId(match.getLoserId());
     }
 
+    /**
+     * Retrieves tournament details by calling the external tournament service.
+     *
+     * @param tournamentId the ID of the tournament
+     * @return the TournamentDTO object for the specified tournament
+     */
     private TournamentDTO getTournamentDetails(Long tournamentId) {
+        // Get the tournament details from the tournament service
         String tournamentUrl = tournamentServiceUrl + "/api/tournaments/" + tournamentId;
         return restTemplate.getForObject(tournamentUrl, TournamentDTO.class);
     }
 
+    /**
+     * Retrieves player details by calling the external player service.
+     *
+     * @param playerId the ID of the player
+     * @return the PlayerDetailsDTO object for the specified player
+     */
     private PlayerDetailsDTO getPlayerDetails(long playerId) {
+        // Get the player details from the player service
         String playerUrl = playerServiceUrl + "/api/player/" + playerId;
         return restTemplate.getForObject(playerUrl, PlayerDetailsDTO.class);
     }
 
-    // Create a Match entity with provided details
+    /**
+     * Creates a Match entity with provided details.
+     *
+     * @param tournamentId, Long player1Id, Long player2Id, Long winnerId, Long loserId,
+     * @param swissRoundNumber, RoundType roundType, Long gameTypeId, Long nextMatchId,
+     * @param status
+     * @return the created Match entity
+     */
     private Match createMatch(Long tournamentId, Long player1Id, Long player2Id, Long winnerId, Long loserId,
             Integer swissRoundNumber, RoundType roundType, Long gameTypeId, Long nextMatchId,
             MatchStatus status) {
@@ -791,6 +942,18 @@ public class MatchService {
         match.setStatus(status);
 
         return match;
+    }
+
+    /**
+     * Checks if two players have played against each other before.
+     *
+     * @param playerMatchHistory the map of player IDs to their match history
+     * @param player1Id          the ID of the first player
+     * @param player2Id          the ID of the second player
+     * @return true if the players have played against each other, false otherwise
+     */
+    private boolean hasPlayedBefore(Map<Long, Set<Long>> playerMatchHistory, Long player1Id, Long player2Id) {
+        return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
     }
 }
 
