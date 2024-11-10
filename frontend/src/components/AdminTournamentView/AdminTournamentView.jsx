@@ -23,7 +23,6 @@ export default function AdminTournamentView() {
     const [errors, setErrors] = useState({});
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
-    const [maxPlayerError, setMaxPlayerError] = useState('');
     const [tournamentId, setTournamentId] = useState('');
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
@@ -102,7 +101,9 @@ export default function AdminTournamentView() {
     const validateForm = (tournament) => {
 
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
-            if (key === 'locationLatitude' || key === 'locationLongitude') return false;
+            if (key === 'locationLatitude' || key === 'locationLongitude' ||
+                (tournament.format === 'ONLINE' && key === 'locationAddress'))
+                return false;
             return !tournament[key];
         })
 
@@ -115,11 +116,6 @@ export default function AdminTournamentView() {
         if (maxElo < minElo) {
             setEloError('Max ELO must be greater than Min ELO.');
             setCreateFormError('');
-            return false;
-        }
-
-        if (tournamentType === '2' && maxPlayers < 8) {
-            setMaxPlayerError('For Swiss tournaments, Max Players must be more than 8.');
             return false;
         }
 
@@ -202,7 +198,7 @@ export default function AdminTournamentView() {
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
                 description: response.data.description || '',
-                tournamentType: response.data.tournamentType.id || '',
+                tournamentType: String(response.data.tournamentType.id) || '',
                 format: response.data.format || '',
                 locationAddress: response.data.locationAddress || '',
                 locationLatitude: response.data.locationLatitude || '',
@@ -251,7 +247,6 @@ export default function AdminTournamentView() {
                 validateForm={validateForm}
                 errors={errors}
                 eloError={eloError}
-                maxPlayerError={maxPlayerError}
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 setTournaments={setTournaments}
@@ -268,7 +263,6 @@ export default function AdminTournamentView() {
                 errors={errors}
                 setErrors={setErrors}
                 eloError={eloError}
-                maxPlayerError={maxPlayerError}
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 validateForm={validateForm}
