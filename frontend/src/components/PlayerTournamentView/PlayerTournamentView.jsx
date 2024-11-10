@@ -1,20 +1,16 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 
-import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardActions} from '@mui/material';
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardActions } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
 
-import RegisterDialog from './RegisterDialog';
-import WithdrawDialog from './WithdrawDialog';
 import TournamentItem from '../TournamentItem/TournamentItem';
 
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
-const playerServiceURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
 const statusColorMap = {
     LIVE: 'success',
@@ -24,11 +20,6 @@ const statusColorMap = {
 
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
-    const [joinedTournaments, setJoinedTournaments] = useState([]);
-    const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
-    const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
-    const [selectedTournament, setSelectedTournament] = useState({});
-    const [agreedToTerms, setAgreedToTerms] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedStatus, setSelectedStatus] = useState('');
     const [minElo, setMinElo] = useState('');
@@ -37,7 +28,6 @@ function PlayerTournamentView() {
     const [endDate, setEndDate] = useState('');
     const [timeControl, setTimeControl] = useState('');
     const [maxPlayers, setMaxPlayers] = useState('');
-    const [elo, setElo] = useState('');
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
@@ -57,32 +47,7 @@ function PlayerTournamentView() {
         }
     };
 
-    const getPlayerElo = async () => {
-        try {
-            const response = await axios.get(`${playerServiceURL}/currentPlayerById`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                }
-            });
-            setElo(response.data.eloRating);
-        } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
-        }
-    };
 
-    useEffect(() => {
-        if (token) {
-            getPlayerElo();
-        }
-    }, [token]);
 
     useEffect(() => {
         const fetchTournaments = async () => {
@@ -92,10 +57,6 @@ function PlayerTournamentView() {
                 });
                 setTournaments(tournamentResponse.data);
 
-                const registeredResponse = await axios.get(`${tournamentURL}/registered/current`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                setJoinedTournaments(registeredResponse.data);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -106,68 +67,11 @@ function PlayerTournamentView() {
                 } else {
                     navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
                 }
-            } 
+            }
         };
 
         fetchTournaments();
     }, [token]);
-
-    const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
-
-    const handleJoin = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenRegisterDialog(true);
-    };
-
-    const handleWithdraw = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenWithdrawDialog(true);
-    }
-    {/* DOESNT ACCOUNT min max elo*/ }
-    const handleRegister = async () => {
-        try {
-            console.log(token);
-            console.log(selectedTournament.id);
-            const response = await axios.post(`${tournamentPlayerURL}/register/current/${selectedTournament.id}`, null, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-
-            setJoinedTournaments(prev => [...prev, selectedTournament]);
-            setOpenRegisterDialog(false);
-        } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
-        }
-    };
-
-    {/*WAITING FOR API TO WITHDRAW */ }
-    const handleWithdrawConfirmation = async () => {
-        try {
-            const response = await axios.delete(`${tournamentPlayerURL}/current/${selectedTournament.id}`, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-
-            setJoinedTournaments(prev => prev.filter(tournament => tournament.id !== selectedTournament.id));
-            setOpenWithdrawDialog(false);
-        } catch (err) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
-        }
-    };
 
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
@@ -289,24 +193,9 @@ function PlayerTournamentView() {
                     .map((tournament) => (
                         <Grid item xs={12} sm={6} md={4} key={tournament.id}>
                             <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-                                
-                             <TournamentItem key={tournament.id} tournament={tournament} />
+
+                                <TournamentItem key={tournament.id} tournament={tournament} />
                                 <CardActions>
-                                    <Button
-                                        variant="contained"
-                                        color={isJoined(tournament.id) ? 'secondary' : 'primary'}
-                                        onClick={() => isJoined(tournament.id) ? handleWithdraw(tournament) : handleJoin(tournament)}
-                                        disabled={
-                                            tournament.status === 'COMPLETED' ||
-                                            (tournament.status === 'LIVE' && true) ||
-                                            elo < tournament.minElo ||
-                                            elo > tournament.maxElo ||
-                                            tournament.currentPlayers >= tournament.maxPlayers
-                                        }
-                                    >
-                                        {tournament.status === 'COMPLETED'
-                                            ? 'OVER' : tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
-                                    </Button>
                                     <Button variant="outlined" onClick={() => handleViewDetails(tournament.id)}>
                                         View
                                     </Button>
@@ -328,18 +217,6 @@ function PlayerTournamentView() {
                     Next
                 </Button>
             </Box>
-            <RegisterDialog
-                handleRegister={handleRegister}
-                agreedToTerms={agreedToTerms}
-                setAgreedToTerms={setAgreedToTerms}
-                openRegisterDialog={openRegisterDialog}
-                setOpenRegisterDialog={setOpenRegisterDialog}
-            />
-            <WithdrawDialog
-                openWithdrawDialog={openWithdrawDialog}
-                setOpenWithdrawDialog={setOpenWithdrawDialog}
-                handleWithdrawConfirmation={handleWithdrawConfirmation}
-            />
         </div>
 
     );
