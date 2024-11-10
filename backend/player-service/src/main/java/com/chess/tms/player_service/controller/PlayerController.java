@@ -48,7 +48,7 @@ public class PlayerController {
     }
 
     /**
-     * Retrieves the details of the current player by their ID.
+     * Retrieves the details of the current player by their ID.  
      * 
      * This endpoint fetches and returns the details of the player specified by the
      * "X-User-PlayerId" header.

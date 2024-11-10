@@ -51,7 +51,7 @@ public class UserService {
             }
         }
 
-        // Check if email is the same or already exists
+        // Check if email is the same or already exists  
         if (updateUserRequestDTO.getEmail() != null && 
             !updateUserRequestDTO.getEmail().isEmpty()) {
             if (updateUserRequestDTO.getEmail().equals(user.getEmail())) {

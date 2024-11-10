@@ -22,13 +22,7 @@ public class TournamentPlayerController {
 
     @Autowired
     private TournamentService tournamentService;
-
-
-    @GetMapping("/test")
-    public ResponseEntity<String> testEndpoint() {
-        return ResponseEntity.ok("Tournament Players service is up and running");
-    }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<List<PlayerDetailsDTO>> getTournamentPlayersByTournamentId(@PathVariable("id") long id) {
         return ResponseEntity.ok(tournamentService.getPlayersByTournament(id));

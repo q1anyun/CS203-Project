@@ -65,7 +65,7 @@ public class AuthController {
     }
 
     /**
-     * Registers a new admin with the provided registration details.
+     * Registers a new admin with the provided registration details.  
      *
      * @param admin the DTO containing admin registration information (validated)
      * @return a ResponseEntity containing a success message if registration is

@@ -32,7 +32,7 @@ public class S3FileUploadService {
     }
 
     
-    // Method to find a file in S3 and return its data as a byte array
+    // Method to find a file in S3 and return its data as a byte array  
     public byte[] findFile(String fileName) throws IOException {
         try {
             S3Object s3Object = amazonS3.getObject(bucketName, fileName);

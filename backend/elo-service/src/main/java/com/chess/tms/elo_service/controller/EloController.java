@@ -65,7 +65,7 @@ public class EloController {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(playerId));
     }
 
-    //Get player Elo history for chart
+    //Get player Elo history for chart  
     @GetMapping("/chart/{id}")
     public ResponseEntity<EloHistoryChartDTO[]> findPlayerEloHistoryForChart(@PathVariable("id") long id) {
         return ResponseEntity.ok(eloService.findPlayerEloHistoryForChart(id));

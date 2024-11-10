@@ -36,7 +36,7 @@ public class MatchController {
         return ResponseEntity.ok(matches);
     }
 
-    // Get a matches for a tournament
+    // Get a matches for a tournament  
     @GetMapping("/{matchId}")
     public ResponseEntity<MatchDTO> getMatch(@PathVariable("matchId") Long matchId) {
         MatchDTO match = matchService.getMatch(matchId);
