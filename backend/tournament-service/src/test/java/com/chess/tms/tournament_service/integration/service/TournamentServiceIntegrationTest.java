@@ -139,7 +139,7 @@ public class TournamentServiceIntegrationTest {
 
         // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
+            matchServiceUrl + "/api/matches/tournament/" + tournament.getTournamentId() + "/knockout/" + tournament.getTimeControl().getId()))
             .andRespond(withStatus(HttpStatus.OK)
             .contentType(MediaType.APPLICATION_JSON)
             .body("1"));
@@ -166,7 +166,7 @@ public class TournamentServiceIntegrationTest {
 
         // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/knockout/" + tournament.getTournamentId() + "/1"))
+            matchServiceUrl + "/api/matches/tournament/" + tournament.getTournamentId() + "/knockout/" + tournament.getTimeControl().getId()))
             .andRespond(withStatus(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body("{\"message\": \"Failed to start tournament due to match service error\"}"));
