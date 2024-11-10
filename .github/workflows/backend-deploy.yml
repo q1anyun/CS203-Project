@@ -47,6 +47,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant execute permission for Gradle Wrapper
+        if: steps.changes-check.outputs.skip_build == 'false'
+        run: chmod +x ./backend/${{ matrix.service }}/gradlew
+
       - name: Run tests for ${{ matrix.service }}
         if: steps.changes-check.outputs.skip_build == 'false'
         working-directory: ./backend/${{ matrix.service }}
