@@ -114,7 +114,7 @@ function TournamentRegistrationPlayerDetails() {
                             </Typography>
                             <TextField
                                 variant="outlined"
-                                placeholder="Search by Username"
+                                placeholder="Search by Name"
                                 size="small"
                                 value={searchTerm}
                                 onChange={handleSearchChange}
