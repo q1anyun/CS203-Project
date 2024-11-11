@@ -29,18 +29,20 @@ function TournamentRegistrationPlayerDetails() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [loading, setLoading] = useState(false);  // State to track loading status
 
     useEffect(() => {
         const fetchParticipants = async () => {
             try {
+                setLoading(true);
                 const response = await axios.get(`${tournamentPlayerURL}/${id}`);
                 const data = response.data;
                 const formattedData = data.map((participant) =>
                     createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating)
                 );
-                  // Attach profile photos to each participant
-                  const participantsWithPhotos = await attachProfilePhotos(formattedData);
-                  setParticipants(participantsWithPhotos);
+                // Attach profile photos to each participant
+                const participantsWithPhotos = await attachProfilePhotos(formattedData);
+                setParticipants(participantsWithPhotos);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -52,6 +54,7 @@ function TournamentRegistrationPlayerDetails() {
                     navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
                 }
             }
+            setLoading(false);
         };
 
         fetchParticipants();
@@ -60,23 +63,23 @@ function TournamentRegistrationPlayerDetails() {
     const attachProfilePhotos = async (players) => {
         const token = localStorage.getItem('token');
         return await Promise.all(
-          players.map(async (player) => {
-            try {
-              const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob',
-              });
-              const imageUrl = URL.createObjectURL(profilePictureResponse.data);
-              return { ...player, profilePhoto: imageUrl };
-            } catch {
-              // If photo fetch fails, add a default image or handle as needed
-              return { ...player, profilePhoto: defaultProfilePic };
-            }
-          })
+            players.map(async (player) => {
+                try {
+                    const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                        responseType: 'blob',
+                    });
+                    const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+                    return { ...player, profilePhoto: imageUrl };
+                } catch {
+                    // If photo fetch fails, add a default image or handle as needed
+                    return { ...player, profilePhoto: defaultProfilePic };
+                }
+            })
         );
-      };
-    
-  
+    };
+
+
     // Handle search
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
@@ -106,69 +109,67 @@ function TournamentRegistrationPlayerDetails() {
                 <Grid container spacing={4}>
                     <Grid item xs={12}>
                         <Box>
-
                             <Typography variant="header1">
                                 Registered Participants
                             </Typography>
-
                             <TextField
                                 variant="outlined"
-                                placeholder="Search by Username"
-                                size='small'
+                                placeholder="Search by Name"
+                                size="small"
                                 value={searchTerm}
                                 onChange={handleSearchChange}
-                                style={{ marginTop: '20px', width: '95vw' }}
+                                style={{ marginTop: '20px', width: '95vw' }} // Consider using percentage or theme-based spacing for responsiveness
                             />
-        
-                            {participants.length === 0 ? (
-                                <Typography variant="playerProfile2" align="center">
-                                    Be the first to register!
-                                </Typography>
+                            {loading ? (
+                                <Typography variant="playerProfile2" align="center">Loading...</Typography> // Consistency in typography for loading
                             ) : (
-
-                                paginatedParticipants.map((participant) => (
-                                    <DetailBox
-                                        key={participant.id}
-                                        display="flex"
-                                        py={2}
-                                        px={2}
-                                        borderBottom="1px solid #ddd">
-                                        <Avatar
-                                            alt={`${participant.firstName} ${participant.lastName}`}
-                                            src={participant.profilePhoto}
-                                            sx={{ width: 56, height: 56, marginRight: '16px' }}
-                                        />
-                                        <Box>
-                                            <Link
-                                                to={`/profileview/${participant.id}`}
-                                                style={{ textDecoration: 'none', color: 'inherit' }}
-                                            >
-                                                <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
-                                            </Link>
-
-                                            <ReactCountryFlag
-                                                countryCode={participant.country}// Assuming you have a countryCode field
-                                                svg
-                                                style={{
-                                                    width: '2em',
-                                                    height: '2em',
-                                                    marginLeft: '10px'
-                                                }}
-                                                title={participant.country}
-                                            />
-                                        </Box>
-                                        <Box
-                                            sx={{
-                                                marginLeft: 'auto',
-                                                alignSelf: 'right', // Aligns the box to the top-right of the container
-                                            }}
+                                participants.length === 0 ? (
+                                    <Typography variant="playerProfile2" align="center">
+                                        Be the first to register!
+                                    </Typography>
+                                ) : (
+                                    paginatedParticipants.map((participant) => (
+                                        <DetailBox
+                                            key={participant.id}
+                                            display="flex"
+                                            py={2}
+                                            px={2}
+                                            borderBottom="1px solid #ddd"
                                         >
-                                            <Typography variant="header3">{participant.eloRating}</Typography>
-
-                                        </Box>
-
-                                    </DetailBox>
-                                ))
+                                            <Avatar
+                                                alt={`${participant.firstName} ${participant.lastName}`}
+                                                src={participant.profilePhoto}
+                                                sx={{ width: 56, height: 56, marginRight: '16px' }}
+                                            />
+                                            <Box>
+                                                <Link
+                                                    to={`/profileview/${participant.id}`}
+                                                    style={{ textDecoration: 'none', color: 'inherit' }}
+                                                >
+                                                    <Typography variant="header3">{`${participant.firstName} ${participant.lastName}`}</Typography>
+                                                </Link>
+                                                <ReactCountryFlag
+                                                    countryCode={participant.country}
+                                                    svg
+                                                    style={{
+                                                        width: '2em',
+                                                        height: '2em',
+                                                        marginLeft: '10px'
+                                                    }}
+                                                    title={participant.country}
+                                                />
+                                            </Box>
+                                            <Box
+                                                sx={{
+                                                    marginLeft: 'auto',
+                                                    alignSelf: 'center' // Correct alignment to 'center' instead of 'right' which is not valid
+                                                }}
+                                            >
+                                                <Typography variant="header3">{participant.eloRating}</Typography>
+                                            </Box>
+                                        </DetailBox>
+                                    ))
+                                )
                             )}
                         </Box>
                     </Grid>

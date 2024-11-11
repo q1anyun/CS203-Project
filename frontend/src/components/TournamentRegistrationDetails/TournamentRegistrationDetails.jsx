@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { styled } from '@mui/material/styles';
-import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box } from '@mui/material';
+import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Box, TextField } from '@mui/material';
 import styles from './TournamentRegistrationDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -39,6 +39,10 @@ function TournamentRegistrationDetails() {
     const [participants, setParticipants] = useState([]);
     const [open, setOpen] = useState(false);
     const [selectedParticipant, setSelectedParticipant] = useState(null);
+    const [loading, setLoading] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(9);
     const location = useLocation();
     const tournament = location.state?.tournament;
     const navigate = useNavigate();
@@ -46,14 +50,15 @@ function TournamentRegistrationDetails() {
     useEffect(() => {
         const fetchParticipants = async () => {
             try {
+                setLoading(true);
                 const response = await axios.get(`${tournamentPlayerURL}/${id}`);
                 const data = response.data;
                 const formattedData = data.map((participant) =>
                     createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating)
                 );
-                  // Attach profile photos to each participant
-                  const participantsWithPhotos = await attachProfilePhotos(formattedData);
-                  setParticipants(participantsWithPhotos);
+                // Attach profile photos to each participant
+                const participantsWithPhotos = await attachProfilePhotos(formattedData);
+                setParticipants(participantsWithPhotos);
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -65,6 +70,7 @@ function TournamentRegistrationDetails() {
                     navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
                 }
             }
+            setLoading(false);
         };
 
         fetchParticipants();
@@ -73,21 +79,21 @@ function TournamentRegistrationDetails() {
     const attachProfilePhotos = async (players) => {
         const token = localStorage.getItem('token');
         return await Promise.all(
-          players.map(async (player) => {
-            try {
-              const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                responseType: 'blob',
-              });
-              const imageUrl = URL.createObjectURL(profilePictureResponse.data);
-              return { ...player, profilePhoto: imageUrl };
-            } catch {
-              // If photo fetch fails, add a default image or handle as needed
-              return { ...player, profilePhoto: defaultProfilePic };
-            }
-          })
+            players.map(async (player) => {
+                try {
+                    const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                        responseType: 'blob',
+                    });
+                    const imageUrl = URL.createObjectURL(profilePictureResponse.data);
+                    return { ...player, profilePhoto: imageUrl };
+                } catch {
+                    // If photo fetch fails, add a default image or handle as needed
+                    return { ...player, profilePhoto: defaultProfilePic };
+                }
+            })
         );
-      };
+    };
 
     const deregisterParticipant = async () => {
         if (selectedParticipant) {
@@ -96,9 +102,9 @@ function TournamentRegistrationDetails() {
                 setParticipants((prevParticipants) =>
                     prevParticipants.filter((participant) => participant.id !== selectedParticipant.id)
                 );
-    
+
                 handleCloseDialog();
-                alert('Player is successfully deregistered'); 
+                alert('Player is successfully deregistered');
             } catch (error) {
                 if (error.response) {
                     const statusCode = error.response.status;
@@ -113,6 +119,20 @@ function TournamentRegistrationDetails() {
         }
     };
 
+
+    // Handle search
+    const handleSearchChange = (event) => {
+        setSearchTerm(event.target.value);
+        setPage(0); // Reset to first page on search
+    };
+
+    // Handle page change
+    const handleChangePage = (newPage) => {
+        setPage(newPage);
+    };
+
+
+
     const handleOpenDialog = (participant) => {
         setSelectedParticipant(participant);
         setOpen(true);
@@ -123,19 +143,42 @@ function TournamentRegistrationDetails() {
         setSelectedParticipant(null);
     };
 
+
+    // Filter participants based on search term
+    const filteredParticipants = participants.filter((participant) =>
+        `${participant.firstName.toLowerCase()} ${participant.lastName.toLowerCase()}`.includes(searchTerm.toLowerCase())
+    );
+
+    // Calculate total pages
+    const totalPages = Math.ceil(filteredParticipants.length / rowsPerPage);
+
+    // Paginate participants
+    const paginatedParticipants = filteredParticipants.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
+
     return (
         <>
             <div className={styles.container}>
                 <Typography variant="header1" component="h2">
                     Registered Participants
                 </Typography>
+                <TextField
+                    variant="outlined"
+                    placeholder="Search by  Name"
+                    size="small"
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    style={{ marginTop: '20px', width: '95vw' }} // Consider using percentage or theme-based spacing for responsiveness
+                />
                 <DetailBoxContainer>
-                    {participants.length === 0 ? (
+                    {loading ? (
+                        <Typography align="center">Loading...</Typography> // Consistency in typography for loading
+                    ) : participants.length === 0 ? (
                         <Typography variant="playerProfile2" align="center">
                             No participants registered.
                         </Typography>
                     ) : (
-                        participants.map((participant) => (
+                        paginatedParticipants.map((participant) => (
                             <DetailBox key={participant.id}>
                                 <Avatar
                                     alt={`${participant.firstName} ${participant.lastName}`}
@@ -152,16 +195,15 @@ function TournamentRegistrationDetails() {
                                         </Typography>
                                     </Link>
                                     <ReactCountryFlag
-                                                countryCode={participant.country}
-                                                svg
-                                                style={{
-                                                    width: '2em',
-                                                    height: '2em',
-                                                    marginLeft: '10px', 
-                                        
-                                                }}
-                                                title={participant.country}
-                                            />
+                                        countryCode={participant.country}
+                                        svg
+                                        style={{
+                                            width: '2em',
+                                            height: '2em',
+                                            marginLeft: '10px',
+                                        }}
+                                        title={participant.country}
+                                    />
                                 </Box>
                                 <PersonRemoveIcon
                                     color="primary"
@@ -177,6 +219,27 @@ function TournamentRegistrationDetails() {
                         ))
                     )}
                 </DetailBoxContainer>
+                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+                    <Button
+                        onClick={() => handleChangePage(page - 1)}
+                        disabled={page === 0}
+                        variant="contained"
+                        sx={{ mr: 2 }}
+                    >
+                        Previous
+                    </Button>
+                    <Typography variant="body1">
+                        Page {page + 1} of {totalPages}
+                    </Typography>
+                    <Button
+                        onClick={() => handleChangePage(page + 1)}
+                        disabled={page >= totalPages - 1}
+                        variant="contained"
+                        sx={{ ml: 2 }}
+                    >
+                        Next
+                    </Button>
+                </Box>
             </div>
 
             {/* Confirmation Dialog */}

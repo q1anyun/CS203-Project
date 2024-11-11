@@ -16,7 +16,7 @@ const TournamentItem = ({ tournament }) => {
     return (
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
                 <img
-                    src={localTournamentPic} // get the tournament upload photo (to be updated at another date)
+                    src={localTournamentPic} 
                     alt={tournament.name}
                     style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                 />
@@ -52,7 +52,7 @@ const TournamentItem = ({ tournament }) => {
                     <Box display="flex" flexDirection="row" alignItems="center">
                         <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>Time Control:</Typography>
                         <Typography variant="playerProfile2">
-                            {tournament.timeControl.timeControlMinutes} minutes
+                            {tournament.timeControl.name} 
                         </Typography>
                     </Box>
                 </CardContent>
