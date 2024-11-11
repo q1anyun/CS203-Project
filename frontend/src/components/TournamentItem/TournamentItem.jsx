@@ -26,13 +26,13 @@ const TournamentItem = ({ tournament }) => {
 
                     <Typography variant="header3">Start: </Typography>
                     <Typography variant="playerProfile2">
-                        {new Date(tournament.startDate + "Z").toLocaleString()}
+                        {new Date(tournament.startDate).toLocaleString()}
                     </Typography>
 
                     <Box display="flex" flexDirection="row" alignItems="center">
                         <Typography variant="header3" display="block" sx={{ marginRight: '8px' }}>End:</Typography>
                         <Typography variant="playerProfile2">
-                            {new Date(tournament.endDate + "Z").toLocaleString()}
+                            {new Date(tournament.endDate).toLocaleString()}
                         </Typography> 
                     </Box>
 
