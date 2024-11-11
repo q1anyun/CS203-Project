@@ -1,6 +1,7 @@
 package com.chess.tms.player_service.controller;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.util.List;
@@ -280,8 +281,10 @@ public class PlayerController {
 
             return createPhotoResponse(photoData, filename);
 
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Return 404 for missing picture
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Return 500 for internal issues
         }
     }
 

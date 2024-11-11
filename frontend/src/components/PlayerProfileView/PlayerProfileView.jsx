@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Avatar, Box, Divider, Grid, Tabs, Tab } from '@mui/material';
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate, useParams } from 'react-router-dom';
-import defaultProfilePic from '../../assets/default_user.png'; // Adjust path as needed
+import defaultProfilePic from '../../assets/default_user.png'; 
 import axios from 'axios';
 import ReactCountryFlag from 'react-country-flag';
 
@@ -42,11 +42,19 @@ function PlayerProfileView() {
         setPlayerDetails(playerResponse.data || {});
 
         // Fetch chart data
-        const chartResponse = await axios.get(`${eloURL}/chart/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUData(chartResponse.data.map((data) => data.elo));
-        setXLabels(chartResponse.data.map((data) => data.date));
+        try {
+          const chartResponse = await axios.get(`${eloURL}/chart/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setUData(chartResponse.data.map((data) => data.elo));
+          setXLabels(chartResponse.data.map((data) => data.date));
+        } catch (error) {
+          if (error.response && error.response.status === 404) {
+            console.warn('Chart data not found (404)');
+          } else {
+            throw error; // Rethrow if it's not a 404 error
+          }
+        }
 
         // Fetch recent matches
         const matchResponse = await axios.get(`${matchmakingURL}/player/${id}/recent`, {
@@ -60,7 +68,7 @@ function PlayerProfileView() {
         });
         setLiveTournaments(tournamentResponse.data || []);
 
-    
+
 
       } catch (error) {
         if (error.response) {
@@ -87,7 +95,7 @@ function PlayerProfileView() {
         navigate('/login');
         return;
       }
-  
+
       try {
         const profilePictureResponse = await axios.get(`${playerURL}/photo/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
@@ -95,12 +103,14 @@ function PlayerProfileView() {
         });
         const imageUrl = URL.createObjectURL(profilePictureResponse.data);
         setProfilePicture(imageUrl);
-  
+
       } catch (error) {
         if (error.response) {
           const statusCode = error.response.status;
           const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-          
+          console.log('Error response:', error.response);  // Log the error response
+
+
           if (statusCode === 404) {
             setProfilePicture(defaultProfilePic);
           } else {
@@ -113,17 +123,17 @@ function PlayerProfileView() {
         }
       }
     };
-  
+
     getProfilePicture();
   }, [navigate]);
-  
+
   return (
     <Box
       sx={{
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
-        height: '100%', // Full viewport height
-        backgroundColor: '#f0f0f0',// Optional: background color for the page
+        height: '100%',
+        backgroundColor: '#f0f0f0',
         justifyItems: 'center',
 
       }}
