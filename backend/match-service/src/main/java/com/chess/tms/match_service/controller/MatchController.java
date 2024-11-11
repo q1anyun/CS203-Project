@@ -1,7 +1,6 @@
 package com.chess.tms.match_service.controller;
 
 import com.chess.tms.match_service.dto.MatchDTO;
-import com.chess.tms.match_service.model.Match;
 import com.chess.tms.match_service.service.MatchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,37 +15,45 @@ public class MatchController {
     @Autowired
     private MatchService matchService;
 
-    // Generate initial matches for a tournament
-    @PostMapping("/{tournamentId}/{gameTypeId}/generate")
-    public ResponseEntity<Long> generateInitialMatches(@PathVariable Long tournamentId, @PathVariable Long gameTypeId) {
-        return ResponseEntity.ok(matchService.createInitialMatches(tournamentId, gameTypeId));
+    // Generate knockout matches for a tournament
+    @PostMapping("tournament/{tournamentId}/knockout/{gameTypeId}")
+    public ResponseEntity<Long> createKnockoutMatches(@PathVariable("tournamentId") Long tournamentId, @PathVariable("gameTypeId") Long gameTypeId) {
+        return ResponseEntity.ok(matchService.createKnockoutMatches(tournamentId, gameTypeId, null));
+    }
+
+    // Generate swiss matches for a tournament
+    @PostMapping("tournament/{tournamentId}/swiss/{gameTypeId}")
+    public ResponseEntity<Long> createSwissMatches(
+            @PathVariable("tournamentId") Long tournamentId, 
+            @PathVariable("gameTypeId") Long gameTypeId) {
+        return ResponseEntity.ok(matchService.createSwissMatches(tournamentId, gameTypeId));
     }
 
     // Get all matches for a tournament
     @GetMapping("/tournament/{tournamentId}")
-    public ResponseEntity<List<Match>> getMatchesByTournament(@PathVariable Long tournamentId) {
-        List<Match> matches = matchService.getMatchesByTournament(tournamentId);
+    public ResponseEntity<List<MatchDTO>> getMatchesByTournament(@PathVariable("tournamentId") Long tournamentId) {
+        List<MatchDTO> matches = matchService.getMatchesByTournament(tournamentId);
         return ResponseEntity.ok(matches);
     }
 
-    // Get a matches for a tournament
+    // Get a matches for a tournament  
     @GetMapping("/{matchId}")
-    public ResponseEntity<Match> getMatch(@PathVariable Long matchId) {
-        Match match = matchService.getMatch(matchId);
+    public ResponseEntity<MatchDTO> getMatch(@PathVariable("matchId") Long matchId) {
+        MatchDTO match = matchService.getMatch(matchId);
         return ResponseEntity.ok(match);
     }
 
     // Update match results and advance winner
     @PutMapping("/{matchId}/winner/{winnerId}")
     public ResponseEntity<String> updateMatchResult(
-            @PathVariable Long matchId,
-            @PathVariable Long winnerId) {
+            @PathVariable("matchId") Long matchId,
+            @PathVariable("winnerId") Long winnerId) {
         return ResponseEntity.ok(matchService.advanceWinner(matchId, winnerId));
     }
 
     // Recent 5 matches for a player
     @GetMapping("/player/{playerId}/recent")
-    public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@PathVariable Long playerId) {
+    public ResponseEntity<List<MatchDTO>> getRecentMatchesByPlayer(@PathVariable("playerId") Long playerId) {
         List<MatchDTO> recentMatches = matchService.getRecentMatchesByPlayerId(playerId);
         return ResponseEntity.ok(recentMatches);
     }

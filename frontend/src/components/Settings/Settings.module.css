@@ -1,0 +1,35 @@
+
+.cardContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Ensures it fills the viewport height */
+}
+
+.cardStyle {
+  padding: 30px;
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  border-radius: 20px;
+  background-color: whitesmoke;
+  align-items: center; /* Center items horizontally */
+}
+
+.errorMessage {
+  color: red;
+}
+
+.gradientButton {
+  background: linear-gradient(to right, #000000, #434343, #000000);
+  width: 100%;
+  color: #fff;
+  border: none;
+  font-size: 25px;
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.gradientButton:hover {
+  background: linear-gradient(to right, #434343, #000000, #434343);
+}
+

@@ -1,22 +1,16 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Checkbox, FormControlLabel, Typography, Box, Grid } from '@mui/material';
-import styles from './PlayerTournamentView.module.css';
+
+import { Button, Chip, TextField, FormControl, InputLabel, Select, MenuItem, Box, Typography, Grid, Card, CardActions } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styles from './PlayerTournamentView.module.css';
+import SearchIcon from '@mui/icons-material/Search';
+import { InputAdornment } from '@mui/material'
 
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
-const baseURL2 = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
+import TournamentItem from '../TournamentItem/TournamentItem';
 
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 
 const statusColorMap = {
     LIVE: 'success',
@@ -24,341 +18,208 @@ const statusColorMap = {
     COMPLETED: 'default',
 };
 
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-        textAlign: 'center',
-        variant: 'header1'
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-        textAlign: 'center',
-    },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}));
-
 function PlayerTournamentView() {
     const [tournaments, setTournaments] = useState([]);
-    const [joinedTournaments, setJoinedTournaments] = useState([]);
-    const [openRegisterDialog, setOpenRegisterDialog] = useState(false);
-    const [openWithdrawDialog, setOpenWithdrawDialog] = useState(false);
-    const [selectedTournament, setSelectedTournament] = useState({});
-    const [agreedToTerms, setAgreedToTerms] = useState(false);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [minElo, setMinElo] = useState('');
+    const [maxElo, setMaxElo] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [timeControl, setTimeControl] = useState('');
+    const [maxPlayers, setMaxPlayers] = useState('');
+
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 9;
+    const totalPages = Math.ceil(tournaments.length / itemsPerPage);
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prevPage => prevPage + 1);
+        }
+    };
+
+    const handlePrevPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prevPage => prevPage - 1);
+        }
+    };
+
+
 
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                // Fetch all tournaments
-                const tournamentResponse = await axios.get(baseURL, {
+                const tournamentResponse = await axios.get(tournamentURL, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 setTournaments(tournamentResponse.data);
 
-                // Fetch tournaments that the user has registered for
-                const registeredResponse = await axios.get(`${baseURL}/registered/current`, {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                setJoinedTournaments(registeredResponse.data);
-            } catch (err) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
+            } catch (error) {
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
         fetchTournaments();
-    }, []);
-
-    const isJoined = (tournamentId) => joinedTournaments.some(tournament => tournament.id === tournamentId);
-
-    const handleJoin = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenRegisterDialog(true);
-    };
-
-    const handleWithdraw = (tournament) => {
-        setSelectedTournament(tournament);
-        setOpenWithdrawDialog(true);
-    }
-
-    const handleRegisterDialogClose = () => {
-        setOpenRegisterDialog(false);
-        setAgreedToTerms(false);
-    };
-
-    const handleWithdrawDialogClose = () => {
-        setOpenWithdrawDialog(false);
-    };
-
-    const handleAgreeChange = (event) => {
-        setAgreedToTerms(event.target.checked);
-    };
-
-    const handleRegister = async () => {
-        try {
-            const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
-                headers: { 'Authorization': `Bearer ${token}` },
-            });
-
-            if (response.status !== 200) {
-                throw new Error('Failed to enroll in the tournament');
-            }
-
-            setJoinedTournaments(prev => [...prev, selectedTournament]);
-            setOpenRegisterDialog(false);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    {/*WAITING FOR API TO WITHDRAW */ }
-    const handleWithdrawConfirmation = async () => {
-        // try {
-        //     const response = await axios.post(`${baseURL2}/register/current/${selectedTournament.id}`, null, {
-        //         headers: { 'Authorization': `Bearer ${token}` },
-        //     });
-
-        //     if (response.status !== 200) {
-        //         throw new Error('Failed to enroll in the tournament');
-        //     }
-
-        //     setJoinedTournaments(prev => [...prev, selectedTournament]);
-        //     setOpenWithdrawDialog(false);
-        // } catch (err) {
-        //     console.error(err);
-        // }
-
-        setOpenWithdrawDialog(false);
-    };
+    }, [token]);
 
     const handleViewDetails = (tournamentId) => {
         navigate(`${tournamentId}`);
     };
 
-    if (loading) return <Typography>Loading tournaments...</Typography>;
-    if (error) return <Typography>Error: {error}</Typography>;
-
-
     return (
-        <div>
-            <div className={styles.container}>
-                <Typography variant="header1" component="h2" gutterBottom className={styles.title}>
-                    All Tournaments
+        <div className={styles.container}>
+            <Typography variant="header1" gutterBottom>
+                All Tournaments
+            </Typography>
+
+            <Box display="flex" flexDirection="row" gap={1} margin="0px 0px 20px 20px" flexWrap="wrap">
+                <TextField
+                    label="Search Tournaments"
+                    variant="outlined"
+                    size="small"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    sx={{ flexShrink: 0, width: '450px' }}
+                    InputProps={{
+                        startAdornment: (
+                            <InputAdornment position="start">
+                                <SearchIcon />
+                            </InputAdornment>
+                        ),
+                    }}
+                />
+                <FormControl variant="outlined" size="small" sx={{ flexShrink: 0, width: '125px' }}>
+                    <InputLabel>Status</InputLabel>
+                    <Select
+                        value={selectedStatus}
+                        onChange={(e) => setSelectedStatus(e.target.value)}
+                        label="Status"
+                    >
+                        <MenuItem value=""><em>All</em></MenuItem>
+                        <MenuItem value="LIVE">Live</MenuItem>
+                        <MenuItem value="UPCOMING">Upcoming</MenuItem>
+                        <MenuItem value="COMPLETED">Completed</MenuItem>
+                    </Select>
+                </FormControl>
+                <TextField
+                    label="Min ELO"
+                    variant="outlined"
+                    type="number"
+                    size="small"
+                    value={minElo}
+                    onChange={(e) => setMinElo(e.target.value)}
+                    sx={{ flexShrink: 0, width: '100px' }}
+                />
+                <TextField
+                    label="Max ELO"
+                    variant="outlined"
+                    type="number"
+                    size="small"
+                    value={maxElo}
+                    onChange={(e) => setMaxElo(e.target.value)}
+                    sx={{ flexShrink: 0, width: '100px' }}
+                />
+                <TextField
+                    label="Start Date"
+                    variant="outlined"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    sx={{ flexShrink: 0, width: '140px' }}
+                />
+                <TextField
+                    label="End Date"
+                    variant="outlined"
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    sx={{ flexShrink: 0, width: '140px' }}
+                />
+                <TextField
+                    label="Time Control"
+                    variant="outlined"
+                    type="text"
+                    size="small"
+                    value={timeControl}
+                    onChange={(e) => setTimeControl(e.target.value)}
+                    sx={{ flexShrink: 0, width: '120px' }}
+                />
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => {
+                        setSearchQuery('');
+                        setSelectedStatus('');
+                        setMinElo('');
+                        setMaxElo('');
+                        setStartDate('');
+                        setEndDate('');
+                        setTimeControl('');
+                        setMaxPlayers('');
+                    }}
+                >
+                    Reset Filters
+                </Button>
+            </Box>
+
+            <Grid container spacing={3} padding={'8px'}>
+                {tournaments
+                    .filter(tournament =>
+                        tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+                        (selectedStatus ? tournament.status === selectedStatus : true) &&
+                        (minElo ? tournament.minElo >= minElo : true) &&
+                        (maxElo ? tournament.maxElo <= maxElo : true) &&
+                        (startDate ? new Date(tournament.startDate) >= new Date(startDate) : true) &&
+                        (endDate ? new Date(tournament.endDate) <= new Date(endDate) : true) &&
+                        (timeControl ? tournament.timeControl.timeControlMinutes.toString() === timeControl : true) &&
+                        (maxPlayers ? tournament.maxPlayers.toString() === maxPlayers : true)
+                    )
+                    .slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+                    .map((tournament) => (
+                        <Grid item xs={12} sm={6} md={4} key={tournament.id}>
+                            <Card sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+                                <TournamentItem key={tournament.id} tournament={tournament} />
+                                <CardActions>
+                                    <Button variant="outlined" onClick={() => handleViewDetails(tournament.id)}>
+                                        View
+                                    </Button>
+                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
+                                </CardActions>
+                            </Card>
+                        </Grid>
+                    ))}
+            </Grid>
+
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 2 }}>
+                <Button onClick={handlePrevPage} disabled={currentPage === 1} variant="contained" sx={{ mr: 2 }}>
+                    Previous
+                </Button>
+                <Typography variant="body1">
+                    Page {currentPage} of {totalPages}
                 </Typography>
-                <TableContainer component={Paper} className={styles.table}>
-                    <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                        <TableHead>
-                            <TableRow>
-                                <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Start Date</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">End Date</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="header4">View</Typography></StyledTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {tournaments.map((tournament) => (
-                                <StyledTableRow key={tournament.id}>
-                                    <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                    <StyledTableCell>
-                                        <Typography variant="body4">
-                                            {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
-                                                timeZone: 'Asia/Singapore',
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </Typography>
-                                    </StyledTableCell>
-
-                                    <StyledTableCell>
-                                        <Typography variant="body4">
-                                            {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
-                                                timeZone: 'Asia/Singapore',
-                                                year: 'numeric',
-                                                month: '2-digit',
-                                                day: '2-digit',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </Typography>
-                                    </StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
-                                    <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
-                                    <StyledTableCell>
-                                        <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                                    </StyledTableCell>
-                                    <StyledTableCell>
-                                        {tournament.status === "Live" || tournament.status === "Expired" ? (
-                                            <></>
-                                        ) : (
-                                            <Button
-                                                variant="contained"
-                                                color={isJoined(tournament.id) ? 'secondary' : 'success'}
-                                                disabled={tournament.status !== "UPCOMING" || tournament.currentPlayers == tournament.maxPlayers}
-                                                onClick={() => {
-                                                    if (isJoined(tournament.id)) {
-                                                        handleWithdraw(tournament);  // Call handleWithdraw if the user has joined
-                                                    } else {
-                                                        handleJoin(tournament);      // Call handleJoin if the user has not joined
-                                                    }
-                                                }}
-                                                style={{ width: '120px' }}
-                                            >
-                                                {isJoined(tournament.id)
-                                                    ? 'Withdraw'  // Show "Joined" if the player has joined
-                                                    : tournament.currentPlayers >= tournament.maxPlayers
-                                                        ? 'Full'    // Show "Full" if the tournament is full
-                                                        : 'Join'}
-                                            </Button>
-
-                                        )}
-                                    </StyledTableCell>
-                                    <StyledTableCell>
-                                        <Button
-                                            variant="outlined"
-                                            color="primary"
-                                            onClick={() => handleViewDetails(tournament.id)} // Navigate to tournament details
-                                            style={{ marginLeft: '8px' }}
-                                        >
-                                            <VisibilityIcon /> {/* Visibility Icon */}
-                                        </Button>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </div>
-            {/* Dialog for Terms of Agreement */}
-            <Dialog open={openRegisterDialog} onClose={handleRegisterDialogClose}>
-                <DialogTitle variant='header4' align="center">Registration for Chess Tournament</DialogTitle>
-                <DialogContent>
-                    <DialogContentText align="center" variant='body4'>
-                        Please agree to the following terms to join the tournament:
-                    </DialogContentText >
-                    <Box sx={{ margin: '16px 0' }}>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • No use of chess bots or external assistance during matches.
-                        </Typography>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • All participants must maintain good sportsmanship.
-                        </Typography>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • Adherence to tournament rules is mandatory.
-                        </Typography>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • Failure to comply may result in disqualification.
-                        </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-
-                        <FormControlLabel
-                            control={<Checkbox checked={agreedToTerms} onChange={handleAgreeChange} />}
-                            label={
-                                <Typography variant="body4">
-                                    I agree to the terms and conditions
-                                </Typography>
-                            }
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-                    <Grid container justifyContent="center" spacing={2}>
-                        <Grid item>
-                            <Button onClick={handleRegisterDialogClose} variant="outlined">
-                                Cancel
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                onClick={handleRegister}
-                                variant="contained"
-                                disabled={!agreedToTerms}
-                            >
-                                Register
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </DialogActions>
-            </Dialog>
-
-            {/* Dialog for Withdraw */}
-            <Dialog open={openWithdrawDialog} onClose={handleWithdrawDialogClose}>
-                <DialogTitle variant='header4' align="center">Withdraw from Chess Tournament</DialogTitle>
-                <DialogContent>
-                    <DialogContentText align="center" variant='body4'>
-                        Are you sure you want to withdraw from the tournament?
-                    </DialogContentText >
-                    <Box sx={{ margin: '16px 0' }}>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • Withdrawal will be final and you might not be able to rejoin this tournament.
-                        </Typography>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • Depending on the tournament rules, frequent withdrawals may affect your ability to participate in future tournaments.
-                        </Typography>
-                        <Typography variant="body4" gutterBottom display='block'>
-                            • Please confirm your decision carefully.
-                        </Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-
-                        <FormControlLabel
-                            control={<Checkbox checked={agreedToTerms} onChange={handleAgreeChange} />}
-                            label={
-                                <Typography variant="body4">
-                                    I confirm my withdrawal from the tournament
-                                </Typography>
-                            }
-                        />
-                    </Box>
-                </DialogContent>
-                <DialogActions sx={{ justifyContent: 'center', pb: 2 }}>
-                    <Grid container justifyContent="center" spacing={2}>
-                        <Grid item>
-                            <Button onClick={handleWithdrawDialogClose} variant="outlined">
-                                Cancel
-                            </Button>
-                        </Grid>
-                        <Grid item>
-                            <Button
-                                onClick={handleWithdrawConfirmation}
-                                variant="contained"
-                                disabled={!agreedToTerms}
-                            >
-                                Withdraw
-                            </Button>
-                        </Grid>
-                    </Grid>
-                </DialogActions>
-            </Dialog>
+                <Button onClick={handleNextPage} disabled={currentPage === totalPages} variant="contained" sx={{ ml: 2 }}>
+                    Next
+                </Button>
+            </Box>
         </div>
+
     );
 }
 
 export default PlayerTournamentView;
-

@@ -22,7 +22,7 @@ public class TournamentPlayerController {
 
     @Autowired
     private TournamentService tournamentService;
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<List<PlayerDetailsDTO>> getTournamentPlayersByTournamentId(@PathVariable("id") long id) {
         return ResponseEntity.ok(tournamentService.getPlayersByTournament(id));
@@ -34,17 +34,17 @@ public class TournamentPlayerController {
         return ResponseEntity.ok("Player deleted successfully");
     }
 
-    @PostMapping("/register/{playerid}/{tournamentid}") 
-    public ResponseEntity<String> registerPlayer(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
-        tournamentService.registerPlayer(playerid, tournamentid);
-        return ResponseEntity.ok("Player registered successfully");
-    }
-
     @DeleteMapping("/current/{tournamentid}")
     public ResponseEntity<String> deleteCurrentPlayerFromTournament(@RequestHeader("X-User-PlayerId") String id, @PathVariable("tournamentid") long tournamentid) {
         Long playerId = Long.parseLong(id);
         tournamentService.deletePlayerFromTournament(playerId, tournamentid);
         return ResponseEntity.ok("Player deleted successfully");
+    }
+
+    @PostMapping("/register/{playerid}/{tournamentid}") 
+    public ResponseEntity<String> registerPlayer(@PathVariable("playerid") long playerid, @PathVariable("tournamentid") long tournamentid) {
+        tournamentService.registerPlayer(playerid, tournamentid);
+        return ResponseEntity.ok("Player registered successfully");
     }
 
     @PostMapping("/register/current/{tournamentid}") 
@@ -53,4 +53,7 @@ public class TournamentPlayerController {
         tournamentService.registerPlayer(playerId, tournamentid);
         return ResponseEntity.ok("Player registered successfully");
     }
+
+
+    
 }

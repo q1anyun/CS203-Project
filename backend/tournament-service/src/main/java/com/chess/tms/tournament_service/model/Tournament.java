@@ -16,9 +16,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -44,10 +45,32 @@ public class Tournament {
     private String name;
 
     @Column
-    private LocalDateTime startDate;
+    @Enumerated(EnumType.STRING)
+    private Format format;
 
     @Column
-    private LocalDateTime endDate;
+    private String description;
+
+    @Column
+    private String photo;
+
+    @Column 
+    private String country;
+
+    @Column 
+    private String locationAddress;
+
+    @Column 
+    private Double locationLongitude;
+
+    @Column 
+    private Double locationLatitude;
+
+    @Column
+    private LocalDate startDate;
+
+    @Column
+    private LocalDate endDate;
 
     @Column
     private Integer minElo;
@@ -72,6 +95,10 @@ public class Tournament {
     @ManyToOne
     @JoinColumn(name = "time_control", nullable = false) 
     private GameType timeControl;
+
+    @ManyToOne
+    @JoinColumn(name = "tournament_type", nullable = false) 
+    private TournamentType tournamentType;
 
     @OneToMany(mappedBy = "tournament",
                 cascade = CascadeType.ALL)

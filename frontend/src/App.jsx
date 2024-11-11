@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import NavBar from './components/NavBar/NavBar';
 import Home from './components/Home/Home';
@@ -12,19 +12,49 @@ import Leaderboard from './components/Leaderboard/Leaderboard';
 import defaultProfilePic from './assets/default_user.png';
 import DefaultErrorPage from './components/DefaultErrorPage/DefaultErrorPage';
 import TournamentDetails from './components/TournamentDetails/TournamentDetails';
-import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails';
+import AdminTournamentDetails from './components/AdminTournamentDetails/AdminTournamentDetails'; 
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import useProfilePic from './components/ProfilePicture/UseProfilePicture';
+import { fetchProfilePic } from './components/ProfilePicture/fetchProfilePic.js';
+import PlayerProfileView from './components/PlayerProfileView/PlayerProfileView.jsx'
+import TournamentRegistrationDetails from './components/TournamentRegistrationDetails/TournamentRegistrationDetails.jsx';
+import AuthPage from './components/AuthPage/AuthPage.jsx';
+import PageNotFound from './components/PageNotFound/PageNotFound.jsx';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './styles/theme.js';
+import Settings from './components/Settings/Settings.jsx';
+import Dashboard from './components/PlayerDashboard/PlayerDashboard.jsx';
+import Users from './components/AdminUserDetails/AdminUserDetails.jsx';
+import TournamentRegistrationPlayerDetails from './components/TournamentRegistrationPlayerDetails/TournamentRegistrationPlayerDetails.jsx';
 
 function AppContent() {
   const location = useLocation();
-  const hideNavBarPaths = ['/login', '/signup', '/error'];
+  const hideNavBarPaths = ['/login', '/signup', '/error', '/verification'];
   // State to store the current profile picture, initialized with the default image
-  const profilePic = useProfilePic(); 
+  const [profilePic, setProfilePic] = useState(null);
+  const [userRole, setUserRole] = useState(null);
 
- 
+  useEffect(() => {
+    const role = localStorage.getItem('role');
+    setUserRole(role);
+  }, []);
+
+  useEffect(() => {
+    const loadProfilePic = async () => {
+      if (userRole === 'PLAYER') {
+        try {
+          const imageUrl = await fetchProfilePic();
+          setProfilePic(imageUrl);
+        } catch (error) {
+          console.error('Error loading profile picture:', error);
+          setProfilePic(defaultProfilePic);
+        }
+      } else {
+        setProfilePic(defaultProfilePic);
+      }
+    };
+
+    loadProfilePic();
+  }, [userRole, defaultProfilePic]);
 
   return (
     <>
@@ -47,9 +77,20 @@ function AppContent() {
             <PlayerProfile profilePic={profilePic} />
           </ProtectedRoute>} />
 
+        <Route path="/player/settings"
+          element={<ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>} />
+
+        <Route path="/admin/settings"
+          element={<ProtectedRoute>
+            <Settings />
+          </ProtectedRoute>} />
+
+
         <Route path="/admin/profile"
           element={<ProtectedRoute>
-            <AdminProfile profilePic={profilePic} />
+            <AdminProfile />
           </ProtectedRoute>} />
 
         <Route path="/admin/tournaments/:id"
@@ -57,18 +98,44 @@ function AppContent() {
             <AdminTournamentDetails />
           </ProtectedRoute>} />
 
-          <Route path="/player/tournaments/:id"
+        <Route path="/player/tournaments/:id"
           element={<ProtectedRoute>
             <TournamentDetails />
           </ProtectedRoute>} />
-       
+
+        <Route path="/admin/tournaments/:id/registeredPlayers"
+          element={<ProtectedRoute>
+            <TournamentRegistrationDetails />
+          </ProtectedRoute>} />
+
+        <Route path="/player/tournaments/:id/registeredPlayers"
+          element={<ProtectedRoute>
+            <TournamentRegistrationPlayerDetails />
+          </ProtectedRoute>} />
+
+        <Route path="/dashboard"
+          element={<ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>} />
+
+        <Route path="/Users"
+          element={<ProtectedRoute>
+            <Users />
+          </ProtectedRoute>} />
+
+
+
         {/* General Routes */}
         <Route path="/home" element={<Home />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/error" element={<DefaultErrorPage />} />
+        <Route path="/profileview/:id" element={<PlayerProfileView />} />
+        <Route path="verification" element={<AuthPage />} />
 
+        {/* Catch-all route for undefined paths */}
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
     </>
   );
@@ -77,10 +144,9 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider theme={theme}>
-
-    <Router>
-      <AppContent />
-    </Router>
+      <Router>
+        <AppContent />
+      </Router>
     </ThemeProvider>
   );
 }

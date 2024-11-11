@@ -27,6 +27,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 public class AuthControllerTest {
+    // Constants
+    private static final String VALID_USERNAME = "testuser";
+    private static final String VALID_PASSWORD = "password";
+    private static final String FAKE_JWT_TOKEN = "fake-jwt-token";
+
     @Mock
     private AuthService authService;
 
@@ -46,41 +51,78 @@ public class AuthControllerTest {
                 .build();
     }
 
+    // Authentication Tests
     @Test
-    void testLogin() throws Exception {
+    void testLogin_WithValidCredentials_ShouldReturnToken() throws Exception {
+        // Setup
         AuthenticatedUserDTO authenticatedUser = new AuthenticatedUserDTO();
-        authenticatedUser.setUsername("testuser");
+        authenticatedUser.setUsername(VALID_USERNAME);
         authenticatedUser.setRole(UserRole.PLAYER);
 
         when(authService.authenticate(any(JwtRequest.class))).thenReturn(authenticatedUser);
-        when(jwtUtility.generateToken(any(AuthenticatedUserDTO.class))).thenReturn("fake-jwt-token");
+        when(jwtUtility.generateToken(any(AuthenticatedUserDTO.class))).thenReturn(FAKE_JWT_TOKEN);
 
-        mockMvc.perform(post("/api/auth/login")
+        // Execute & Verify
+        mockMvc.perform(post("/api/auth/session")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\":\"testuser\", \"password\":\"password\"}"))
+                .content("{\"username\":\"" + VALID_USERNAME + "\", \"password\":\"" + VALID_PASSWORD + "\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.jwtResponse.token").value("fake-jwt-token"))
+                .andExpect(jsonPath("$.jwtResponse.token").value(FAKE_JWT_TOKEN))
                 .andExpect(jsonPath("$.role").value("PLAYER"));
     }
 
     @Test
-    void testRegisterPlayer() throws Exception {
+    void testLogin_WithInvalidCredentials_ShouldReturnNotFound() throws Exception {
+        when(authService.authenticate(any(JwtRequest.class)))
+                .thenThrow(new UserNotFoundException("Invalid credentials"));
+
+        mockMvc.perform(post("/api/auth/session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"wronguser\", \"password\":\"wrongpassword\"}"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(containsString("Invalid credentials")));
+    }
+
+    // Player Registration Tests
+    @Test
+    void testRegisterPlayer_WithValidInput_ShouldSucceed() throws Exception {
         when(authService.registerPlayer(any(PlayerRegistrationRequestDTO.class)))
                 .thenReturn("Player created successfully");
 
-        mockMvc.perform(post("/api/auth/register/player")
+        mockMvc.perform(post("/api/auth/users/player")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"newplayer\", \"email\":\"newplayer@test.com\", \"password\":\"password\", \"country\":\"Singapore\", \"firstName\":\"John\", \"lastName\":\"Doe\", \"profilePicture\":\"picturepng\"}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Player created successfully"));
     }
-    
+
     @Test
-    void testRegisterAdmin() throws Exception {
+    void testRegisterPlayer_WithInvalidInput_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/api/auth/users/player")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"\", \"email\":\"invalid\", \"password\":\"short\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void testRegisterPlayer_WithExistingUser_ShouldReturnConflict() throws Exception {
+        when(authService.registerPlayer(any(PlayerRegistrationRequestDTO.class)))
+                .thenThrow(new UserAlreadyExistsException("User already exists"));
+
+        mockMvc.perform(post("/api/auth/users/player")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"username\":\"existinguser\", \"email\":\"existing@test.com\", \"password\":\"password\", \"country\":\"Singapore\", \"firstName\":\"John\", \"lastName\":\"Doe\", \"profilePicture\":\"picturepng\"}"))
+                .andExpect(status().isConflict())
+                .andExpect(content().string(containsString("User already exists")));
+    }
+
+    // Admin Registration Tests
+    @Test
+    void testRegisterAdmin_WithValidInput_ShouldSucceed() throws Exception {
         when(authService.registerAdmin(any(AdminRegistrationRequestDTO.class)))
                 .thenReturn("Admin created successfully");
 
-        mockMvc.perform(post("/api/auth/register/admin")
+        mockMvc.perform(post("/api/auth/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"newadmin\", \"email\":\"newadmin@test.com\", \"password\":\"password\"}"))
                 .andExpect(status().isOk())
@@ -88,55 +130,22 @@ public class AuthControllerTest {
     }
 
     @Test
-    void testLoginInvalidCredentials() throws Exception {
-        when(authService.authenticate(any(JwtRequest.class)))
-                .thenThrow(new UserNotFoundException("Invalid credentials"));
-
-        mockMvc.perform(post("/api/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\":\"wronguser\", \"password\":\"wrongpassword\"}"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(containsString("Invalid credentials")));
-    }
-
-    @Test
-    void testRegisterPlayerInvalidInput() throws Exception {
-        mockMvc.perform(post("/api/auth/register/player")
+    void testRegisterAdmin_WithInvalidInput_ShouldReturnBadRequest() throws Exception {
+        mockMvc.perform(post("/api/auth/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"\", \"email\":\"invalid\", \"password\":\"short\"}"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testRegisterAdminInvalidInput() throws Exception {
-        mockMvc.perform(post("/api/auth/register/admin")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\":\"\", \"email\":\"invalid\", \"password\":\"short\"}"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void testRegisterPlayerUserAlreadyExists() throws Exception {
-        when(authService.registerPlayer(any(PlayerRegistrationRequestDTO.class)))
-                .thenThrow(new UserAlreadyExistsException("User already exists"));
-
-        mockMvc.perform(post("/api/auth/register/player")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"username\":\"existinguser\", \"email\":\"existing@test.com\", \"password\":\"password\", \"country\":\"Singapore\", \"firstName\":\"John\", \"lastName\":\"Doe\", \"profilePicture\":\"picturepng\"}"))
-                .andExpect(status().isConflict())
-                .andExpect(content().string(containsString("User already exists")));
-    }
-
-    @Test
-    void testRegisterAdminUserAlreadyExists() throws Exception {
+    void testRegisterAdmin_WithExistingUser_ShouldReturnConflict() throws Exception {
         when(authService.registerAdmin(any(AdminRegistrationRequestDTO.class)))
                 .thenThrow(new UserAlreadyExistsException("User already exists"));
 
-        mockMvc.perform(post("/api/auth/register/admin")
+        mockMvc.perform(post("/api/auth/users/admin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"username\":\"existinguser\", \"email\":\"existing@test.com\", \"password\":\"password\"}"))
                 .andExpect(status().isConflict())
                 .andExpect(content().string(containsString("User already exists")));
     }
-
 }

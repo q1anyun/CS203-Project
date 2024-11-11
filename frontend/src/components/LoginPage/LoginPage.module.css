@@ -14,16 +14,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh; /* Ensures it fills the viewport height */
+  height: 100vh; 
 }
 
 .cardStyle {
   padding: 30px;
   display: flex;
-  flex-direction: column; /* Stack elements vertically */
+  flex-direction: column; 
   border-radius: 20px;
   background-color: whitesmoke;
-  align-items: center; /* Center items horizontally */
+  align-items: center; 
 }
 
 

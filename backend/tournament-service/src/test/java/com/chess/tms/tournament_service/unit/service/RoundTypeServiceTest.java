@@ -16,7 +16,7 @@ import com.chess.tms.tournament_service.repository.RoundTypeRepository;
 import com.chess.tms.tournament_service.service.RoundTypeService;
 
 @ExtendWith(MockitoExtension.class)
-public class RoundTypeServiceTest {
+class RoundTypeServiceTest {
 
     @Mock
     private RoundTypeRepository roundTypeRepository;
@@ -32,12 +32,12 @@ public class RoundTypeServiceTest {
     }
 
     @Test
-    void shouldReturnCorrectChoicesForNumberOfPlayers() {
+    void getChoicesForNumberOfPlayers_Valid_ReturnChoices() {
         // Arrange: Mock repository to return the expected player choices
         when(roundTypeRepository.findDistinctNumberOfPlayers()).thenReturn(expectedPlayerChoices);
 
         // Act: Get the actual result from the service
-        List<Integer> actualPlayerChoices = roundTypeService.getChoicesForNumberOfPlayers();
+        List<Integer> actualPlayerChoices = roundTypeService.getAvailablePlayerCounts();
 
         // Assert: Validate the results
         assertPlayerChoices(actualPlayerChoices);

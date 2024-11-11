@@ -1,49 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { styled } from '@mui/material/styles';
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, IconButton, TextField, Select, MenuItem, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Button, Fab, CircularProgress, InputLabel, FormControl, Box, Grid2 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
-
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
+import TournamentTable from './TournamentTable';
 
-
-const baseURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
+const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
 const roundTypeURL = import.meta.env.VITE_TOURNAMENT_ROUNDTYPE_URL;
 
-const statusColorMap = {
-    LIVE: 'success',
-    UPCOMING: 'warning',
-    EXPIRED: 'default',
-};
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    '&:first-of-type': {
-        textAlign: 'center',
-    },
-    '&:last-of-type': {
-        textAlign: 'center',
-    },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-}));
-
 export default function AdminTournamentView() {
-    const [tournaments, setTournaments] = useState([]);
-    const [loading, setLoading] = useState(true); 
-    const [error, setError] = useState(null); 
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [tournaments, setTournaments] = useState([]);
     const [tournamentToEdit, setTournamentToEdit] = useState([]);
     const [tournamentToDelete, setTournamentToDelete] = useState(null);
     const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -53,9 +23,13 @@ export default function AdminTournamentView() {
     const [errors, setErrors] = useState({});
     const [createFormError, setCreateFormError] = useState('');
     const [eloError, setEloError] = useState('');
+    const [tournamentId, setTournamentId] = useState('');
+    const [selectedFile, setSelectedFile] = useState(null);
+    const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
 
     const navigate = useNavigate();
+
     useEffect(() => {
         const fetchTimeControls = async () => {
             const response = await axios.get(`${gameTypeURL}`);
@@ -82,6 +56,12 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
+        tournamentType: '',
+        description: '',
+        format: '',
+        locationAddress: '',
+        locationLatitude: '',
+        locationLongitude: ''
     });
 
     const [updateTournament, setUpdateTournament] = useState({
@@ -92,6 +72,12 @@ export default function AdminTournamentView() {
         minElo: '',
         maxElo: '',
         maxPlayers: '',
+        tournamentType: '',
+        description: '',
+        format: '',
+        locationAddress: '',
+        locationLatitude: '',
+        locationLongitude: ''
     });
 
     const resetNewTournament = () => {
@@ -103,20 +89,30 @@ export default function AdminTournamentView() {
             minElo: '',
             maxElo: '',
             maxPlayers: '',
+            tournamentType: '',
+            description: '',
+            format: '',
+            locationAddress: '',
+            locationLatitude: '',
+            locationLongitude: ''
         });
     };
 
     const validateForm = (tournament) => {
+
         const isAnyFieldEmpty = Object.keys(tournament).some((key) => {
+            if (key === 'locationLatitude' || key === 'locationLongitude' ||
+                (tournament.format === 'ONLINE' && key === 'locationAddress'))
+                return false;
             return !tournament[key];
-        });
+        })
 
         if (isAnyFieldEmpty) {
             setCreateFormError('Please fill up all required fields');
             return false;
         }
 
-        const { minElo, maxElo } = tournament;
+        const { minElo, maxElo, tournamentType, maxPlayers } = tournament;
         if (maxElo < minElo) {
             setEloError('Max ELO must be greater than Min ELO.');
             setCreateFormError('');
@@ -128,26 +124,61 @@ export default function AdminTournamentView() {
         return true;
     };
 
-    const handleViewDetails = (id) => {
-        navigate(`/admin/tournaments/${id}`);
+    const handleViewDetails = (id, photoUrl) => {
+        navigate(`/admin/tournaments/${id}`, { state: { photoUrl } });
     };
 
     useEffect(() => {
         const fetchTournaments = async () => {
             try {
-                const response = await axios.get(`${baseURL}`);
+                const response = await axios.get(`${tournamentURL}`);
                 console.log(response.data);
-                setTournaments(response.data); 
-                setLoading(false); 
+                setTournaments(response.data);
             } catch (error) {
-                console.error('Error fetching tournaments:', error);
-                setError(error);
-                setLoading(false); 
+                if (error.response) {
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+                } else {
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+                }
             }
         };
 
         fetchTournaments();
-    }, []); 
+    }, []);
+
+    const handleUploadClick = (id) => {
+        setTournamentId(id);
+
+    };
+
+    const handleFileChange = async (event, tournamnetId) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+        }
+
+        if (selectedFile) {
+            const formData = new FormData();
+            formData.append("file", selectedFile);
+            console.log(formData);
+            console.log("its here");
+            await axios.post(`${tournamentURL}/photo/${tournamentId}`, formData, null, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+
+                },
+            });
+            console.log('image updated successfully');
+            window.location.reload();
+
+
+        }
+    }
 
     const handleDeleteClick = (tournamentId) => {
         setTournamentToDelete(tournamentId);
@@ -156,26 +187,36 @@ export default function AdminTournamentView() {
 
     const handleEditClick = async (tournamentId) => {
         try {
-            const response = await axios.get(`${baseURL}/${tournamentId}`);
+            const response = await axios.get(`${tournamentURL}/${tournamentId}`);
             console.log(response.data);
             setTournamentToEdit(response.data);
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
             setUpdateTournament({
                 name: response.data.name || '',
-                startDate: response.data.startDate
-                    ? new Date(response.data.startDate + 'Z')
-                    : null,
-                endDate: response.data.endDate
-                    ? new Date(response.data.endDate + 'Z')
-                    : null,
+                startDate: response.data.startDate || '',
+                endDate: response.data.endDate || '',
                 timeControl: timeControlOption.id || '',
                 minElo: response.data.minElo || '',
                 maxElo: response.data.maxElo || '',
                 maxPlayers: response.data.maxPlayers || '',
+                description: response.data.description || '',
+                tournamentType: String(response.data.tournamentType.id) || '',
+                format: response.data.format || '',
+                locationAddress: response.data.locationAddress || '',
+                locationLatitude: response.data.locationLatitude || '',
+                locationLongitude: response.data.locationLongitude || ''
             });
             setEditDialogOpen(true);
         } catch (error) {
-            console.error('Error fetching tournament data:', error);
+            if (error.response) {
+                const statusCode = error.response.status;
+                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+            } else if (err.request) {
+                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+            } else {
+                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
+            }
         }
     };
 
@@ -183,99 +224,18 @@ export default function AdminTournamentView() {
         setCreateDialogOpen(true);
     };
 
-    if (loading) {
-        return <CircularProgress />;
-    }
-
-    if (error) {
-        return <Typography color="error">Error loading tournaments: {error.message}</Typography>;
-    }
-
     return (
         <div className={styles.container}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography variant="header1" component="h2" className={styles.title}>
-                    All Tournaments
-                </Typography>
-                <Fab color="primary" aria-label="add" onClick={handleCreate} className={styles.fab} sx={{ ml: 2 }} >
-                    <AddIcon />
-                </Fab>
-            </Box>
-            <TableContainer component={Paper} className={styles.table}>
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell> <Typography variant="header4">ID</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Name</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Start DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">End DateTime</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Time Control</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Min ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Max ELO</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Players</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Status</Typography></StyledTableCell>
-                            <StyledTableCell><Typography variant="header4">Actions</Typography></StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {tournaments.map((tournament, rowIndex) => (
-                            <StyledTableRow key={tournament.id}>
-                                <StyledTableCell><Typography variant="body4">{tournament.id}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.name}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.startDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
 
-                                <StyledTableCell>
-                                    <Typography variant="body4">
-                                        {new Date(tournament.endDate + "Z").toLocaleString('en-GB', {
-                                            timeZone: 'Asia/Singapore',
-                                            year: 'numeric',
-                                            month: '2-digit',
-                                            day: '2-digit',
-                                            hour: '2-digit',
-                                            minute: '2-digit'
-                                        })}
-                                    </Typography>
-                                </StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.timeControl.timeControlMinutes}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.minElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxElo}</Typography></StyledTableCell>
-                                <StyledTableCell><Typography variant="body4">{tournament.maxPlayers}</Typography></StyledTableCell>
-                                <StyledTableCell>
-                                    <Chip label={tournament.status} color={statusColorMap[tournament.status]} />
-                                </StyledTableCell>
-                                <StyledTableCell>
-                                    <>
-                                        <IconButton
-                                            onClick={() => handleEditClick(tournament.id)}
-                                            disabled={tournament.status !== "UPCOMING"} // Disable if status is "Live"
-                                        >
-                                            <EditIcon />
-                                        </IconButton>
-
-                                        <IconButton onClick={() => handleDeleteClick(tournament.id)}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        <IconButton onClick={() => handleViewDetails(tournament.id)}>
-                                            <VisibilityIcon />
-                                        </IconButton>
-                                    </>
-                                </StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+            <TournamentTable
+                tournaments={tournaments}
+                handleCreate={handleCreate}
+                handleEditClick={handleEditClick}
+                handleDeleteClick={handleDeleteClick}
+                handleViewDetails={handleViewDetails}
+                handleFileChange={handleFileChange}
+                handleUploadClick={handleUploadClick}
+            />
 
             <CreateTournamentDialog
                 createDialogOpen={createDialogOpen}
@@ -291,12 +251,12 @@ export default function AdminTournamentView() {
                 createFormError={createFormError}
                 setCreateFormError={setCreateFormError}
                 setTournaments={setTournaments}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
             />
-          
+
             <EditTournamentDialog
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 updateTournament={updateTournament}
                 timeControlOptions={timeControlOptions}
@@ -315,17 +275,17 @@ export default function AdminTournamentView() {
                 setTournaments={setTournaments}
             />
 
-           
 
             <DeleteConfirmationDialog
                 open={deleteDialogOpen}
-                baseURL={baseURL}
+                tournamentURL={tournamentURL}
                 token={token}
                 tournamentToDelete={tournamentToDelete}
                 setTournaments={setTournaments}
                 setDeleteDialogOpen={setDeleteDialogOpen}
                 setTournamentToDelete={setTournamentToDelete}
                 tournaments={tournaments}
+
             />
         </div>
     );

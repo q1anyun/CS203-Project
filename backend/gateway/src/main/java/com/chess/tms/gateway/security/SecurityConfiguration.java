@@ -1,6 +1,5 @@
 package com.chess.tms.gateway.security;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,7 +9,6 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,19 +26,18 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailsService customUserDetailsService;
 
-    @Value("${client.url}")
-    private String clientUrl;
-
     public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, CustomUserDetailsService customUserDetailsService) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.customUserDetailsService = customUserDetailsService;
     }
 
+    // Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Authentication provider
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -49,6 +46,7 @@ public class SecurityConfiguration {
         return authProvider;
     }
 
+    // Authentication manager
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, DaoAuthenticationProvider provider) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
@@ -56,36 +54,47 @@ public class SecurityConfiguration {
                 .build();
     }
 
-    @Bean
+    // Security filter chain
+        @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())  // Disable CSRF
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Apply CORS configuration
+        http.csrf(csrf -> csrf.disable())  // Disable CSRF for stateless API
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // .anyRequest().permitAll() 
-
-                // only permit the creation of admin by anotnher admin
+                // ===== Authentication & Registration Endpoints =====
+                .requestMatchers("/api/auth/**", "/api/users/register/**", "/api/otp/**").permitAll()
+                .requestMatchers("/api/auth/**").permitAll()
+                
+                // ===== Admin-Protected Endpoints =====
                 .requestMatchers("/api/auth/register/admin").hasAuthority("ADMIN")
-                .requestMatchers("/api/auth/**", "/api/users/register/**").permitAll()  // Permit login and registration to everyone
-                .requestMatchers("/api/auth/**").permitAll()  // Permit login and registration to everyone
+                .requestMatchers(HttpMethod.PUT, "/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                
+                // ===== Tournament & Game Related Public Endpoints =====
                 .requestMatchers("/api/matches/**").permitAll()
                 .requestMatchers("/api/player/**").permitAll()
-                .requestMatchers(HttpMethod.GET,"/api/tournaments/**").permitAll()
-                .requestMatchers(HttpMethod.POST,"/api/tournaments/**").permitAll()
-                .requestMatchers(HttpMethod.PUT,"/api/tournaments/**").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.DELETE,"/api/tournaments/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/tournaments/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/tournaments/**").permitAll()
                 .requestMatchers("/api/tournament-players/**").permitAll()
-                .requestMatchers("/api/game-type/**").permitAll() 
+                .requestMatchers("/api/game-type/**").permitAll()
                 .requestMatchers("/api/round-type/**").permitAll()
-                // Only admins can access /admin/** endpoints
-                .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                // Users and admins can access /user/** endpoints
-                .requestMatchers("/api/users/**").permitAll()
+                .requestMatchers("/api/tournament-type/**").permitAll()
+                .requestMatchers("/api/swiss-bracket/**").permitAll()
+                .requestMatchers("/api/swiss-standing/**").permitAll()
+                
+                // ===== User & Utility Endpoints =====
+                .requestMatchers("/api/user/**").permitAll()
                 .requestMatchers("/api/elo/**").permitAll()
+                .requestMatchers("/api/s3/**").permitAll()
 
-               .anyRequest().authenticated()  // All other requests require authentication
+                // ===== Health Check Endpoints =====
+                .requestMatchers("/health").permitAll()
+                
+                // Require authentication for all other endpoints
+                .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Set session to be stateless (JWT)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)  // Use stateless sessions for JWT
             )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -96,11 +105,12 @@ public class SecurityConfiguration {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin(clientUrl);
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.addAllowedOrigin("*");  // Allow all origins
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));  // Allow standard HTTP methods
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));  // Allow necessary headers
+        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);  // Apply to all paths
         return source;
     }
 }

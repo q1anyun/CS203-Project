@@ -22,6 +22,10 @@ import java.util.stream.Collectors;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Utility class for handling JWT (JSON Web Token) operations including token generation,
+ * validation, and claims extraction.
+ */
 @Component
 public class JwtUtility {
     @Value("${jwt.secret}")
@@ -44,34 +48,19 @@ public class JwtUtility {
 
     public Map<String, String> extractClaims(String token) {
         Map<String, String> claimsMap = new HashMap<>();
-
         Claims claims = extractAllClaims(token);
-
-        // Debugging: Log the entire claims object
-        System.out.println("Extracted claims: " + claims);
-
-        // Safely extract claims and handle potential null values
+        
+        // Extract claims safely with null checks   
         if (claims.get("userId") != null) {
             claimsMap.put("userId", String.valueOf(claims.get("userId", Long.class)));
-            System.out.println("Extracted userId: " + claimsMap.get("userId"));
-        } else {
-            System.out.println("userId claim is missing.");
         }
-
         if (claims.get("role") != null) {
             claimsMap.put("role", claims.get("role", String.class));
-            System.out.println("Extracted role: " + claimsMap.get("role"));
-        } else {
-            System.out.println("role claim is missing.");
         }
-
         if (claims.get("playerId") != null) {
             claimsMap.put("playerId", String.valueOf(claims.get("playerId", Long.class)));
-            System.out.println("Extracted playerId: " + claimsMap.get("playerId"));
-        } else {
-            System.out.println("playerId claim is missing.");
         }
-
+        
         return claimsMap;
     }
 
@@ -101,16 +90,11 @@ public class JwtUtility {
         return expiration;
     }
 
-    // private String createToken(Map<String, Object> claims, String subject) {
-    // return Jwts.builder()
-    // .setClaims(claims)
-    // .setSubject(subject)
-    // .setIssuedAt(new Date(System.currentTimeMillis()))
-    // .setExpiration(new Date(System.currentTimeMillis() + expiration))
-    // .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-    // .compact();
-    // }
-
+    /**
+     * Creates a JWT token for a given authentication object.
+     * @param authentication The authentication object containing user details
+     * @return A JWT token string
+     */
     public String generateToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)

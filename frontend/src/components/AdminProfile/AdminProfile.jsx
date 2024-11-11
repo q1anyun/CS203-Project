@@ -1,206 +1,68 @@
-import React, { useState }  from 'react';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import { styled } from '@mui/material/styles';
-import { Card, CardContent, Typography, Avatar, Box,  Button, Tabs, Tab, Dialog, DialogTitle, DialogContent, TextField } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, Typography, Avatar, Box } from '@mui/material';
+import axios from 'axios';
+import defaultProfilePic from '../../assets/default_user.png';
+import { useNavigate } from 'react-router-dom';
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
-function AdminProfile({ profilePic , onProfilePicUpdate}) {
-  const [value, setValue] = useState(0); // State for managing tab selection
-  const [openEdit, setOpenEdit] = useState(false);
-  const [localProfilePic, setLocalProfilePic] = useState(profilePic);
-  const [AdminName, setAdminName] = useState('Magnus Carlsen');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [selectedFile, setSelectedFile] = useState(null);
+function AdminProfile() {
 
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
+  const [adminDetails, setAdminDetails] = useState([]);
+  const navigate = useNavigate();
 
-  const handleOpenEdit = () => setOpenEdit(true);
-  const handleCloseEdit = () => setOpenEdit(false);
-
-  const handleNameChange = (event) => setAdminName(event.target.value);
-  const handleFirstNameChange = (event) => setFirstName(event.target.value);
-  const handleLastNameChange = (event) => setLastName(event.target.value);
-  const handleEmailChange = (event) => setEmail(event.target.value);
-  const handlePasswordChange = (event) => setPassword(event.target.value);
-
-  const handleFileAndImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-      const imageUrl = URL.createObjectURL(file);
-      setLocalProfilePic(imageUrl);
-      onProfilePicUpdate(imageUrl);
-    }
-  };
-  
-
-  const handleSave = async () => {
-    const formData = new FormData();
-    formData.append('AdminName', AdminName);
-    formData.append('firstName', firstName);
-    formData.append('lastName', lastName);
-    formData.append('email', email);
-    formData.append('password', password);
-
-    if (selectedFile) {
-      formData.append('profilePic', selectedFile);
-    }
-
-    try {
-      const response = await fetch('/api/update-profile', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        console.log('Profile updated successfully');
-        // Optionally, refresh the UI with the new data
-      } else {
-        console.error('Error updating profile');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
       }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-
-    handleCloseEdit();
-  };
+      try {
+        const adminResponse = await axios.get(`${baseURL}/current`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAdminDetails(adminResponse.data || {});
+      } catch (error) {
+        if (error.response) {
+          const statusCode = error.response.status;
+          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+        } else if (error.request) {
+          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
+        } else {
+          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
+        }
+      }
+    };
+    fetchUserData();
+  },);
 
   return (
     <Box
       sx={{
-
         display: 'grid',
         gridTemplateRows: '1fr 1fr',
-        height: 'auto', // Full viewport height
-        backgroundColor: '#f0f0f0',// Optional: background color for the page
+        height: '100vh',
+        backgroundColor: '#f0f0f0',
         justifyItems: 'center',
 
       }}
     >
-
       <Card sx={{ width: '80%', height: '500px', padding: 2, marginTop: '5%' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {/* Profile Card Section */}
           <Avatar
             sx={{ width: 200, height: 200, marginTop: 2 }}
-            alt={AdminName}
-            src={localProfilePic}
+            alt={adminDetails.username}
+            src={defaultProfilePic}
           />
-
-          <Button
-            className="button"
-            variant="contained"
-            color="primary"
-            onClick={handleOpenEdit}
-          >
-            Edit Profile
-          </Button>
           <CardContent>
-            <Typography variant="h4">{AdminName}</Typography>
+            <Typography variant="playerProfile2"><strong>Username : </strong>{adminDetails.username}</Typography>
+            <Typography variant="playerProfile2" display={'block'}><strong>Email : </strong>{adminDetails.email}</Typography>
           </CardContent>
         </Box>
       </Card>
-     
-      
-      {/*dialog to edit the profile*/}
-      <Dialog open={openEdit} onClose={handleCloseEdit}
-       sx={{ '& .MuiDialog-paper': { width: '80%', maxWidth: '600px' } }} >
-        <DialogTitle>Edit Profile</DialogTitle>
-        <DialogContent
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            
-          }}>
-          
-          {/* Display Existing Profile Picture */}
-
-          <Avatar
-            sx={{ width: 200, height: 200, marginTop: 1 }}
-            alt={AdminName}
-            src={localProfilePic}  // Use current profile picture
-          />
-
-
-        
-
-        {/* Label to Trigger File Input */}
-        <Button
-      component="label"
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-    >
-      Upload files
-      <VisuallyHiddenInput
-        type="file"
-        onChange={handleFileAndImageUpload}
-      
-      />
-    </Button>
-
-          <TextField
-            margin="dense"
-            label="Username"
-            fullWidth
-            value={AdminName}
-            onChange={handleNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="First Name"
-            fullWidth
-            value={firstName}
-            onChange={handleFirstNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="Last Name"
-            fullWidth
-            value={lastName}
-            onChange={handleLastNameChange}
-          />
-          <TextField
-            margin="dense"
-            label="Email"
-            fullWidth
-            value={email}
-            onChange={handleEmailChange}
-          />
-          <TextField
-            margin="dense"
-            label="Password"
-            fullWidth
-            type="password"
-            value={password}
-            onChange={handlePasswordChange}
-          />
-
-
-          <Button onClick={handleSave} color="primary">
-            Save
-          </Button>
-        </DialogContent>
-      </Dialog>
-
     </Box>
   );
 }

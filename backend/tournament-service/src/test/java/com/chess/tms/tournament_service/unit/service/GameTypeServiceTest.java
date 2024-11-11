@@ -3,6 +3,7 @@ package com.chess.tms.tournament_service.unit.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,45 +26,43 @@ public class GameTypeServiceTest {
     @InjectMocks
     private GameTypeService gameTypeService;
 
-    private List<GameType> expectedGameTypes;
+    private static final String BLITZ_NAME = "Blitz";
+    private static final String RAPID_NAME = "Rapid";
+    private static final int BLITZ_TIME = 5;
+    private static final int RAPID_TIME = 15;
+
+    private GameType blitzGameType;
+    private GameType rapidGameType;
+    private List<GameType> gameTypes;
 
     @BeforeEach
     void setup() {
-        expectedGameTypes = List.of(
-                createGameType(1L, "Blitz", 5),
-                createGameType(2L, "Rapid", 15)
-        );
+        blitzGameType = createGameType(1L, BLITZ_NAME, BLITZ_TIME);
+        rapidGameType = createGameType(2L, RAPID_NAME, RAPID_TIME);
+        gameTypes = Arrays.asList(blitzGameType, rapidGameType);
     }
 
-    @Test
-    void shouldReturnListOfGameTypes() {
-        // Arrange: Mock repository to return predefined game types
-        when(gameTypeRepository.findAll()).thenReturn(expectedGameTypes);
-
-        // Act: Fetch game types from the service
-        List<GameType> actualGameTypes = gameTypeService.getGameTypes();
-
-        // Assert: Validate the result
-        assertGameTypes(expectedGameTypes, actualGameTypes);
-    }
-
-    // Helper method to reduce repetition when creating GameType objects
-    private GameType createGameType(Long id, String name, int timeControlMinutes) {
+    private GameType createGameType(Long id, String name, int timeControl) {
         GameType gameType = new GameType();
         gameType.setId(id);
         gameType.setName(name);
-        gameType.setTimeControlMinutes(timeControlMinutes);
+        gameType.setTimeControlMinutes(timeControl);
         return gameType;
     }
 
-    // Helper method for asserting game type lists
-    private void assertGameTypes(List<GameType> expected, List<GameType> actual) {
-        assertEquals(expected.size(), actual.size(), "Game types size should match.");
-        for (int i = 0; i < expected.size(); i++) {
-            assertEquals(expected.get(i).getId(), actual.get(i).getId(), "GameType ID at index " + i + " should match.");
-            assertEquals(expected.get(i).getName(), actual.get(i).getName(), "GameType name at index " + i + " should match.");
-            assertEquals(expected.get(i).getTimeControlMinutes(), actual.get(i).getTimeControlMinutes(),
-                    "GameType time control at index " + i + " should match.");
-        }
+    @Test
+    void getGameTypes_Valid_ReturnListOfGameTypes() {
+        when(gameTypeRepository.findAll()).thenReturn(gameTypes);
+
+        List<GameType> result = gameTypeService.getGameTypes();
+
+        assertEquals(2, result.size());
+        assertGameType(result.get(0), BLITZ_NAME, BLITZ_TIME);
+        assertGameType(result.get(1), RAPID_NAME, RAPID_TIME);
+    }
+
+    private void assertGameType(GameType gameType, String expectedName, int expectedTime) {
+        assertEquals(expectedName, gameType.getName());
+        assertEquals(expectedTime, gameType.getTimeControlMinutes());
     }
 }

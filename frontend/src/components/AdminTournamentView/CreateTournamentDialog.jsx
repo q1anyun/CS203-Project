@@ -1,13 +1,8 @@
 import React from 'react';
-import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid } from '@mui/material'; // Import necessary MUI components
+import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material';
 import axios from 'axios';
-import styles from './AdminTournamentView.module.css'; 
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'; 
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; 
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; 
-import dayjs from 'dayjs';
-
-
+import styles from './AdminTournamentView.module.css';
+import { useNavigate } from 'react-router-dom';
 
 function CreateTournamentDialog({
     createDialogOpen,
@@ -23,7 +18,7 @@ function CreateTournamentDialog({
     createFormError,
     setCreateFormError,
     setTournaments,
-    baseURL,
+    tournamentURL,
     token,
 }) {
     const handleCreateDialogClose = () => {
@@ -38,8 +33,9 @@ function CreateTournamentDialog({
                 ...newTournament,
             };
             console.log("New Tournament Data:", newTournamentData);
+
             try {
-                const response = await axios.post(`${baseURL}`, newTournamentData, {
+                const response = await axios.post(`${tournamentURL}`, newTournamentData, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                     }
@@ -49,11 +45,14 @@ function CreateTournamentDialog({
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
-                    console.error('Error data:', error.response.data); // Response from the backend
-                    console.error('Error status:', error.response.status); // Status code (e.g., 400)
-                    console.error('Error headers:', error.response.headers); // Response headers
+                    console.log(error.message);
+                    const statusCode = error.response.status;
+                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
+                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
+                } else if (err.request) {
+                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
                 } else {
-                    console.error('Error message:', error.message);
+                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
                 }
             }
         }
@@ -67,25 +66,18 @@ function CreateTournamentDialog({
         });
     };
 
-    const handleDateChange = (name, newValue) => {
-        const localDate = newValue instanceof Date ? newValue : new Date(newValue);
-        const localISOString = localDate ? localDate.toISOString() : '';
-        setNewTournament({
-            ...newTournament,
-            [name]: localISOString,
-        });
-    };
+    const navigate = useNavigate();
 
     return (
-        <Dialog open={createDialogOpen} onClose={handleCreateDialogClose}>
+        <Dialog open={createDialogOpen} onClose={handleCreateDialogClose} maxWidth="sm">
             <DialogTitle>
                 <Typography variant="header3">
                     Create New Tournament
                 </Typography>
             </DialogTitle>
             <DialogContent>
-                <Grid container spacing={2}>
-                    <Grid item xs={12}>
+                <Grid2 container spacing={2}>
+                    <Grid2 size={12}>
                         <TextField
                             name="name"
                             label="Tournament Name"
@@ -93,31 +85,49 @@ function CreateTournamentDialog({
                             onChange={handleInputChange}
                             fullWidth
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid container spacing={4}>
-                        <Grid item xs={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="startDate"
-                                    label="Start Date Time"
-                                    value={newTournament.startDate ? dayjs(newTournament.startDate) : null}
-                                    onAccept={(newValue) => handleDateChange("startDate", newValue)} />
-                            </LocalizationProvider>
-                        </Grid>
+                    <Grid2 size={12}>
+                        <TextField
+                            name="description"
+                            label="Description"
+                            value={newTournament.description}
+                            onChange={handleInputChange}
+                            multiline
+                            rows={3}
+                            fullWidth
+                        />
+                    </Grid2>
 
-                        <Grid item xs={6}>
-                            <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DateTimePicker
-                                    name="endDate"
-                                    label="End Date Time"
-                                    value={newTournament.endDate ? dayjs(newTournament.endDate) : null}
-                                    onAccept={(newValue) => handleDateChange("endDate", newValue)}  // Only update when accepted
-                                />
-                            </LocalizationProvider>
-                        </Grid>
-                    </Grid>
-                    <Grid item xs={12}>
+                    <Grid2 size={6}>
+                        <TextField
+                            name="startDate"
+                            label="Start Date"
+                            type="date"
+                            value={newTournament.startDate}
+                            onChange={handleInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </Grid2>
+
+                    <Grid2 size={6}>
+                        <TextField
+                            name="endDate"
+                            label="End Date"
+                            type="date"
+                            value={newTournament.endDate}
+                            onChange={handleInputChange}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            fullWidth
+                        />
+                    </Grid2>
+
+                    <Grid2 size={12}>
                         <FormControl fullWidth error={!!errors.timeControl}>
                             <InputLabel>Time Control</InputLabel>
                             <Select
@@ -134,9 +144,9 @@ function CreateTournamentDialog({
                                 ))}
                             </Select>
                         </FormControl>
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="minElo"
                             label="Min ELO"
@@ -145,9 +155,9 @@ function CreateTournamentDialog({
                             onChange={handleInputChange}
                             fullWidth
                         />
-                    </Grid>
+                    </Grid2>
 
-                    <Grid item xs={12}>
+                    <Grid2 size={12}>
                         <TextField
                             name="maxElo"
                             label="Max ELO"
@@ -158,32 +168,112 @@ function CreateTournamentDialog({
                             error={!!eloError && newTournament.maxElo < newTournament.minElo}
                             helperText={!!eloError && newTournament.maxElo < newTournament.minElo ? "Max ELO must be greater than Min ELO." : ""}
                         />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <FormControl fullWidth error={!!errors.maxPlayers}>
-                            <InputLabel>Max Players</InputLabel>
+                    </Grid2>
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Tournament Type</InputLabel>
                             <Select
-                                name="maxPlayers"
-                                label="Max Players"
-                                value={newTournament.maxPlayers}
+                                name="tournamentType"
+                                label="Tournament Type"
+                                value={newTournament.tournamentType}
                                 onChange={handleInputChange}
                             >
-                                {roundTypeOptions.map((optionId) => (
-                                    <MenuItem key={optionId} value={optionId}>
-                                        {optionId}
-                                    </MenuItem>
-                                ))}
+                                <MenuItem value="1">Knockout</MenuItem>
+                                <MenuItem value="2">Swiss</MenuItem>
                             </Select>
                         </FormControl>
+                    </Grid2>
+                    {newTournament.tournamentType && (
+                        <Grid2 size={12}>
+                            <FormControl fullWidth error={!!errors.maxPlayers}>
+                                <InputLabel>Max Players</InputLabel>
+                                <Select
+                                    name="maxPlayers"
+                                    label="Max Players"
+                                    value={newTournament.maxPlayers}
+                                    onChange={handleInputChange}
+                                >
+                                    {roundTypeOptions
+                                        .filter((optionId) => {
+                                            if (newTournament.tournamentType === "1") {
+                                                return true;
+                                            } else if (newTournament.tournamentType === "2") {
+                                                return optionId !== 2 && optionId !== 4;
+                                            }
+                                            return true;
+                                        })
+                                        .map((optionId) => (
+                                            <MenuItem key={optionId} value={optionId}>
+                                                {optionId}
+                                            </MenuItem>
+                                        ))}
+                                </Select>
+                            </FormControl>
+                        </Grid2>
+                    )}
+
+                    <Grid2 size={12}>
+                        <FormControl fullWidth>
+                            <InputLabel>Format</InputLabel>
+                            <Select
+                                name="format"
+                                label="Format"
+                                value={newTournament.format}
+                                onChange={handleInputChange}
+                            >
+                                <MenuItem value="ONLINE">Online</MenuItem>
+                                <MenuItem value="HYBRID">Hybrid</MenuItem>
+                                <MenuItem value="PHYSICAL">Physical</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Grid2>
+
+                    {(newTournament.format === 'PHYSICAL' || newTournament.format === 'HYBRID') && (
+                        <>
+                            <Grid2 size={12}>
+                                <TextField
+                                    name="locationAddress"
+                                    label="Location Address"
+                                    value={newTournament.locationAddress}
+                                    onChange={handleInputChange}
+                                    fullWidth
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLatitude"
+                                    label="Latitude (Optional)"
+                                    value={newTournament.locationLatitude}
+                                    onChange={handleInputChange}
+                                    type="number"
+                                    fullWidth
+                                />
+                            </Grid2>
+
+                            <Grid2 size={6}>
+                                <TextField
+                                    name="locationLongitude"
+                                    label="Longitude (Optional)"
+                                    value={newTournament.locationLongitude}
+                                    onChange={handleInputChange}
+                                    type="number"
+                                    fullWidth
+                                />
+                            </Grid2>
+                        </>
+                    )}
+
+                    <Grid2 size={12}>
                         {createFormError && (
-                            <Grid item xs={12}>
+                            <Grid2 size={12}>
                                 <h6 className={styles.errorMessage}>
                                     {createFormError}
                                 </h6>
-                            </Grid>
+                            </Grid2>
                         )}
-                    </Grid>
-                </Grid>
+                    </Grid2>
+                </Grid2>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleCreateDialogClose} color="secondary">

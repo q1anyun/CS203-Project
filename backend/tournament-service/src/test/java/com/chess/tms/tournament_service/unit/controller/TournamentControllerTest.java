@@ -35,6 +35,34 @@ class TournamentControllerTest {
     @InjectMocks
     private TournamentController tournamentController;
 
+    // Constants
+    private static final Long TEST_USER_ID = 1L;
+    private static final Long TEST_TOURNAMENT_ID = 1L;
+    private static final Long TEST_PLAYER_ID = 1L;
+    
+    private static final String BASE_URL = "/api/tournaments";
+    
+    private static final TournamentDetailsDTO TEST_TOURNAMENT = createTestTournament();
+    private static final String VALID_TOURNAMENT_PAYLOAD = """
+            {
+                "name": "Chess Masters 2024",
+                "startDate": "2024-01-01",
+                "endDate": "2024-01-02",
+                "minElo": 1000,
+                "maxElo": 2000,
+                "maxPlayers": 16,
+                "timeControl": 5,
+                "tournamentType": 1,
+                "description": "Annual Chess Masters Tournament",
+                "photo": "tournament-photo-url",
+                "format": "Swiss",
+                "country": "Singapore",
+                "locationAddress": "123 Singapore Street",
+                "locationLatitude": 40.7128,
+                "locationLongitude": -74.0060
+            }
+            """;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -43,31 +71,27 @@ class TournamentControllerTest {
                 .build();
     }
 
+    // Helper method to create test tournament
+    private static TournamentDetailsDTO createTestTournament() {
+        TournamentDetailsDTO dto = new TournamentDetailsDTO();
+        dto.setId(TEST_TOURNAMENT_ID);
+        dto.setName("Chess Masters 2024");
+        return dto;
+    }
+
     @Test
     void createTournament_ValidInput_ReturnSuccess() throws Exception {
-        String jsonPayload = """
-                {
-                    "name": "Test Tournament",
-                    "startDate": "2024-01-01T10:00:00",
-                    "endDate": "2024-01-02T10:00:00",
-                    "minElo": 1000,
-                    "maxElo": 2000,
-                    "maxPlayers": 16,
-                    "timeControl": 5
-                }
-                """;
-
-        when(tournamentService.createTournament(any(TournamentRegistrationDTO.class), eq(1L)))
+        when(tournamentService.createTournament(any(TournamentRegistrationDTO.class), eq(TEST_USER_ID)))
                 .thenReturn("Tournament created successfully");
 
-        mockMvc.perform(post("/api/tournaments")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonPayload)
-                .header("X-User-Id", "1"))
+                .content(VALID_TOURNAMENT_PAYLOAD)
+                .header("X-User-Id", TEST_USER_ID.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Tournament created successfully"));
 
-        verify(tournamentService, times(1)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
+        verify(tournamentService).createTournament(any(TournamentRegistrationDTO.class), eq(TEST_USER_ID));
     }
 
     @Test
@@ -83,56 +107,48 @@ class TournamentControllerTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/tournaments")
+        mockMvc.perform(post(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonPayload)
-                .header("X-User-Id", "1"))
+                .header("X-User-Id", TEST_USER_ID.toString()))
                 .andExpect(status().isBadRequest());
 
-        verify(tournamentService, times(0)).createTournament(any(TournamentRegistrationDTO.class), eq(1L));
+        verify(tournamentService, times(0)).createTournament(any(TournamentRegistrationDTO.class), eq(TEST_USER_ID));
     }
 
     @Test
     void startTournament_ValidTournamentId_ReturnSuccess() throws Exception {
-        when(tournamentService.startTournament(1L)).thenReturn("Tournament started successfully");
+        when(tournamentService.startTournament(TEST_TOURNAMENT_ID)).thenReturn("Tournament started successfully");
 
-        mockMvc.perform(post("/api/tournaments/start/1"))
+        mockMvc.perform(post(BASE_URL + "/start/" + TEST_TOURNAMENT_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Tournament started successfully"));
 
-        verify(tournamentService, times(1)).startTournament(1L);
+        verify(tournamentService).startTournament(TEST_TOURNAMENT_ID);
     }
 
     @Test
     void getTournament_ValidTournamentId_ReturnsTournamentDetails() throws Exception {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(1L);
-        dto.setName("Test Tournament");
+        when(tournamentService.getTournamentDetailsById(TEST_TOURNAMENT_ID)).thenReturn(TEST_TOURNAMENT);
 
-        when(tournamentService.getTournamentDetailsById(1L)).thenReturn(dto);
-
-        mockMvc.perform(get("/api/tournaments/1"))
+        mockMvc.perform(get(BASE_URL + "/" + TEST_TOURNAMENT_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Test Tournament"));
+                .andExpect(jsonPath("$.id").value(TEST_TOURNAMENT_ID))
+                .andExpect(jsonPath("$.name").value(TEST_TOURNAMENT.getName()));
 
-        verify(tournamentService, times(1)).getTournamentDetailsById(1L);
+        verify(tournamentService).getTournamentDetailsById(TEST_TOURNAMENT_ID);
     }
 
     @Test
     void getAllTournaments_Valid_ReturnTournaments() throws Exception {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(1L);
-        dto.setName("Test Tournament");
+        when(tournamentService.getAllTournaments()).thenReturn(List.of(TEST_TOURNAMENT));
 
-        when(tournamentService.getAllTournaments()).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/tournaments"))
+        mockMvc.perform(get(BASE_URL))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].name").value("Test Tournament"));
+                .andExpect(jsonPath("$[0].id").value(TEST_TOURNAMENT_ID))
+                .andExpect(jsonPath("$[0].name").value(TEST_TOURNAMENT.getName()));
 
-        verify(tournamentService, times(1)).getAllTournaments();
+        verify(tournamentService).getAllTournaments();
     }
 
     @Test
@@ -149,75 +165,68 @@ class TournamentControllerTest {
                 }
                 """;
 
-        mockMvc.perform(put("/api/tournaments/1")
+        mockMvc.perform(put(BASE_URL + "/" + TEST_TOURNAMENT_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonPayload))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Tournament updated successfully"));
 
-        verify(tournamentService, times(1)).updateTournament(eq(1L), any(TournamentUpdateRequestDTO.class));
+        verify(tournamentService).updateTournament(eq(TEST_TOURNAMENT_ID), any(TournamentUpdateRequestDTO.class));
     }
 
     @Test
     void deleteTournament_ValidTournamentId_ReturnSuccess() throws Exception {
-        mockMvc.perform(delete("/api/tournaments/1"))
+        mockMvc.perform(delete(BASE_URL + "/" + TEST_TOURNAMENT_ID))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Successfully deleted tournament"));
 
-        verify(tournamentService, times(1)).deleteTournament(1L);
+        verify(tournamentService).deleteTournament(TEST_TOURNAMENT_ID);
     }
 
     @Test
     void updateCurrentRoundForTournament_ValidRoundId_ReturnSuccess() throws Exception {
-        mockMvc.perform(put("/api/tournaments/1/round/2"))
+        mockMvc.perform(put(BASE_URL + "/" + TEST_TOURNAMENT_ID + "/round/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Current round updated to 2"));
 
-        verify(tournamentService, times(1)).updateCurrentRoundForTournament(1L, 2L);
+        verify(tournamentService).updateCurrentRoundForTournament(TEST_TOURNAMENT_ID, 2L);
     }
 
     @Test
     void completeTournament_ValidIds_ReturnSuccess() throws Exception {
-        when(tournamentService.completeTournament(1L, 2L)).thenReturn("Tournament has been completed");
+        when(tournamentService.completeTournament(TEST_TOURNAMENT_ID, 2L)).thenReturn("Tournament has been completed");
 
-        mockMvc.perform(put("/api/tournaments/1/winner/2"))
+        mockMvc.perform(put(BASE_URL + "/" + TEST_TOURNAMENT_ID + "/winner/2"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Tournament has been completed"));
 
-        verify(tournamentService, times(1)).completeTournament(1L, 2L);
+        verify(tournamentService).completeTournament(TEST_TOURNAMENT_ID, 2L);
     }
 
     @Test
     void getRegisteredTournaments_ValidPlayerId_ReturnTournaments() throws Exception {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(1L);
-        dto.setName("Test Tournament");
+        when(tournamentService.getRegisteredTournaments(TEST_PLAYER_ID)).thenReturn(List.of(TEST_TOURNAMENT));
 
-        when(tournamentService.getRegisteredTournaments(1L)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/tournaments/registered/1"))
+        mockMvc.perform(get(BASE_URL + "/registered/" + TEST_PLAYER_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].name").value("Test Tournament"));
+                .andExpect(jsonPath("$[0].id").value(TEST_TOURNAMENT_ID))
+                .andExpect(jsonPath("$[0].name").value(TEST_TOURNAMENT.getName()));
 
-        verify(tournamentService, times(1)).getRegisteredTournaments(1L);
+        verify(tournamentService).getRegisteredTournaments(TEST_PLAYER_ID);
     }
 
     @Test
     void getRegisteredTournamentsCurrentPlayer_ValidPlayerId_ReturnTournaments() throws Exception {
-        TournamentDetailsDTO dto = new TournamentDetailsDTO();
-        dto.setId(1L);
-        dto.setName("Test Tournament");
+        when(tournamentService.getRegisteredTournaments(TEST_PLAYER_ID))
+                .thenReturn(List.of(TEST_TOURNAMENT));
 
-        when(tournamentService.getRegisteredTournaments(1L)).thenReturn(List.of(dto));
-
-        mockMvc.perform(get("/api/tournaments/registered/current")
-                .header("X-User-PlayerId", "1"))
+        mockMvc.perform(get(BASE_URL + "/registered/current")
+                .header("X-User-PlayerId", TEST_PLAYER_ID.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].name").value("Test Tournament"));
+                .andExpect(jsonPath("$[0].id").value(TEST_TOURNAMENT_ID))
+                .andExpect(jsonPath("$[0].name").value(TEST_TOURNAMENT.getName()));
 
-        verify(tournamentService, times(1)).getRegisteredTournaments(1L);
+        verify(tournamentService).getRegisteredTournaments(TEST_PLAYER_ID);
     }
 
     @Test

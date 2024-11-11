@@ -1,11 +1,13 @@
 package com.chess.tms.tournament_service.integration.service;
 
 import com.chess.tms.tournament_service.dto.*;
+import com.chess.tms.tournament_service.enums.Format;
 import com.chess.tms.tournament_service.enums.Status;
 import com.chess.tms.tournament_service.model.GameType;
 import com.chess.tms.tournament_service.model.RoundType;
 import com.chess.tms.tournament_service.model.Tournament;
 import com.chess.tms.tournament_service.model.TournamentPlayer;
+import com.chess.tms.tournament_service.model.TournamentType;
 import com.chess.tms.tournament_service.repository.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -48,6 +50,9 @@ public class TournamentServiceIntegrationTest {
 
     @Autowired
     private RoundTypeRepository roundTypeRepository;
+
+    @Autowired
+    private TournamentTypeRepository tournamentTypeRepository;
 
     @Autowired
     private RestTemplate externalRestTemplate;
@@ -78,19 +83,34 @@ public class TournamentServiceIntegrationTest {
             roundType.setNumberOfPlayers(16);
             roundTypeRepository.save(roundType);
         }
+
+        if (tournamentTypeRepository.findById(1L).isEmpty()) {
+            TournamentType tournamentType = new TournamentType();
+            tournamentType.setId(1L);
+            tournamentType.setTypeName("Knockout");
+            tournamentTypeRepository.save(tournamentType);
+        }
     }
 
     @Test
     public void createTournament_Valid_Success() {
         TournamentRegistrationDTO dto = new TournamentRegistrationDTO(
-            "Test Tournament",
-            LocalDateTime.now().plusDays(1),
-            LocalDateTime.now().plusDays(2),
-            1000,
-            2000,
-            16,
-            1
-        );
+        "Test Tournament",
+        LocalDate.now().plusDays(1),     // Start Date
+        LocalDate.now().plusDays(2),     // End Date
+        1000,                            // Minimum Elo
+        2000,                            // Maximum Elo
+        16,                              // Maximum Players
+        1,                               // Game Type ID
+        1L,                              // Tournament Type ID
+        "Test Description",              // Description
+        "Test Photo",                    // Photo URL or ID
+        "ONLINE",                        // Format (e.g., "ONLINE", "PHYSICAL", "HYBRID")
+        "Singapore",                     // Country
+        "Test Address",                  // Location Address
+        1.0,                               // Latitude
+        1.0                              // Longitude
+    );
     
         // Set the headers with the X-User-Id value
         HttpHeaders headers = new HttpHeaders();
@@ -98,13 +118,13 @@ public class TournamentServiceIntegrationTest {
         headers.setContentType(MediaType.APPLICATION_JSON);
     
         HttpEntity<TournamentRegistrationDTO> request = new HttpEntity<>(dto, headers);
-    
         ResponseEntity<String> response = restTemplate.postForEntity(
             "/api/tournaments",
             request,
             String.class
         );
     
+        System.out.println("Response Body: " + response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody().contains("Tournament created successfully"));
         assertEquals(1, tournamentRepository.findAll().size());
@@ -113,13 +133,13 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Valid_Success() {
         Tournament tournament = createTournament();
-
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
-        // Mock the external match service response
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/tournament/" + tournament.getTournamentId() + "/knockout/" + tournament.getTimeControl().getId()))
             .andRespond(withStatus(HttpStatus.OK)
             .contentType(MediaType.APPLICATION_JSON)
             .body("1"));
@@ -140,11 +160,13 @@ public class TournamentServiceIntegrationTest {
     @Test
     public void startTournament_Error_Failure() {
         Tournament tournament = createTournament();
+        tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
         registerPlayerForTournament(tournament, 100L);
         registerPlayerForTournament(tournament, 101L);
 
+        // Mock the external match service response for knockout tournament
         mockServer.expect(requestTo(
-            matchServiceUrl + "/api/matches/" + tournament.getTournamentId() + "/1/generate"))
+            matchServiceUrl + "/api/matches/tournament/" + tournament.getTournamentId() + "/knockout/" + tournament.getTimeControl().getId()))
             .andRespond(withStatus(HttpStatus.NOT_FOUND)
             .contentType(MediaType.APPLICATION_JSON)
             .body("{\"message\": \"Failed to start tournament due to match service error\"}"));
@@ -154,8 +176,6 @@ public class TournamentServiceIntegrationTest {
             null,
             String.class
         );
-
-        System.out.println("Response Body: " + response.getBody());
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertTrue(response.getBody().contains("Failed to start tournament due to match service error"));
@@ -266,18 +286,31 @@ public class TournamentServiceIntegrationTest {
         assertEquals(1, response.getBody().length);
     }
 
-    private Tournament createTournament() {
-        Tournament tournament = new Tournament();
-        tournament.setCreatorId(1L);
-        tournament.setName("Integration Tournament");
-        tournament.setMaxPlayers(32);
-        tournament.setCurrentPlayers(0);
-        tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
-        tournament.setStatus(Status.UPCOMING);
-        tournament.setStartDate(LocalDateTime.now().plusDays(1));
-        tournament.setEndDate(LocalDateTime.now().plusDays(2));
-        return tournamentRepository.save(tournament);
-    }
+private Tournament createTournament() {
+    Tournament tournament = new Tournament();
+    tournament.setCreatorId(1L);
+    tournament.setName("Integration Tournament");
+    tournament.setMaxPlayers(32);
+    tournament.setCurrentPlayers(0);
+    tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
+
+    tournament.setTournamentType(tournamentTypeRepository.findById(1L).orElseThrow());
+    tournament.setTimeControl(gameTypeRepository.findById(1L).orElseThrow());
+    tournament.setStatus(Status.UPCOMING);
+    tournament.setStartDate(LocalDate.now().plusDays(1));
+    tournament.setEndDate(LocalDate.now().plusDays(2));
+    tournament.setMinElo(1300); // Example minimum Elo
+    tournament.setMaxElo(2200); // Example maximum Elo
+    tournament.setDescription("An exciting integration test tournament.");
+    tournament.setPhoto("https://example.com/photos/integration-tournament.jpg");
+    tournament.setFormat(Format.PHYSICAL);
+    tournament.setCountry("USA");
+    tournament.setLocationAddress("123 Chess Avenue, Chess City");
+    tournament.setLocationLatitude(37.7749); // Example latitude
+    tournament.setLocationLongitude(-122.4194); // Example longitude
+
+    return tournamentRepository.save(tournament);
+}
 
     private void registerPlayerForTournament(Tournament tournament, long playerId) {
         TournamentPlayer player = new TournamentPlayer();

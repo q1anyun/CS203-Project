@@ -1,10 +1,8 @@
 import { React, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Alert, AlertTitle, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Container, TextField, Grid2, Card, Link, InputAdornment, IconButton, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
 import countryList from 'react-select-country-list'
 
-// Icons
 import EmailIcon from '@mui/icons-material/Email';
 import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
@@ -12,20 +10,17 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-// Local assets and styles
 import styles from './SignUpPage.module.css';
 import logoImage from '../../assets/chess_logo.png';
 import profilePic from '../../assets/default_user.png';
 
-// js
-import { handleClickShowPassword, handleChange, handleLoginClick, handleSubmit } from './SignUpFunctions';
+import { handleClickShowPassword, handleChange, handleSubmit } from './SignUpFunctions';
 
 function SignUpPage() {
-    const [showPassword, setShowPassword] = useState(false); // password toggle visibility
-    const [errors, setErrors] = useState({}); // display error messages
-    const [showAlert, setShowAlert] = useState(false); // successful sign up
+    const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState({});
     const options = useMemo(() => countryList().getData(), [])
-    const [formData, setFormData] = useState({ // sign up form
+    const [formData, setFormData] = useState({
         username: '',
         firstName: '',
         lastName: '',
@@ -34,8 +29,15 @@ function SignUpPage() {
         password: '',
         profilePicture: profilePic
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const navigate = useNavigate(); // to navigate to other pages
+    const handleClick = async (e) => {
+        setIsSubmitting(true);
+        await handleSubmit(e, formData, setErrors, navigate);
+        setIsSubmitting(false);
+    };
+
+    const navigate = useNavigate();
 
     return (
         <div className={styles.signUpBgContainer}>
@@ -60,24 +62,6 @@ function SignUpPage() {
                                 <h1 className={styles.signUpText}>SIGN UP</h1>
 
                                 <Grid2 container spacing={3}>
-                                    {showAlert && ( // successful login alert
-                                        <Grid2 size={12} className={styles.alertContainer}>
-                                            <Alert severity="success">
-                                                <AlertTitle>Account Created</AlertTitle>
-                                                Thank you for signing up! Please proceed to{' '}
-                                                <Link
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleLoginClick(navigate); // Navigate to the login page
-                                                    }}
-                                                    className={styles.loginLink}
-                                                >
-                                                    login
-                                                </Link>.
-                                            </Alert>
-                                        </Grid2>
-                                    )}
-
                                     {/*Username field*/}
                                     <Grid2 size={12}>
                                         <TextField
@@ -159,8 +143,8 @@ function SignUpPage() {
                                                 MenuProps={{
                                                     PaperProps: {
                                                         style: {
-                                                            maxHeight: 200, 
-                                                            width: 'auto', 
+                                                            maxHeight: 200,
+                                                            width: 'auto',
                                                         },
                                                     },
                                                 }}
@@ -233,17 +217,18 @@ function SignUpPage() {
                                         />
                                     </Grid2>
 
+                                    <Grid2 size={12}>
+                                        <button type="submit" className={styles.gradientButton}
+                                            onClick={handleClick}
+                                            disabled={isSubmitting}>
+                                            Sign Up
+                                        </button>
+                                    </Grid2>
+
                                     <Grid2 size={12} className={styles.toLoginLink}>
                                         <Link onClick={() => navigate('/login')} className={styles.link}>
                                             Already have an account? Sign In
                                         </Link>
-                                    </Grid2>
-
-                                    <Grid2 size={12}>
-                                        <button type="submit" className={styles.gradientButton}
-                                            onClick={(e) => handleSubmit(e, formData, setFormData, setErrors, setShowAlert, navigate)}>
-                                            Sign Up
-                                        </button>
                                     </Grid2>
                                 </Grid2>
                             </Card>

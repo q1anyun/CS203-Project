@@ -3,7 +3,7 @@ package com.chess.tms.tournament_service.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -15,10 +15,10 @@ public class TournamentRegistrationDTO {
     private String name;
 
     @NotNull(message = "Missing start date")
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @NotNull(message = "Missing end date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     @NotNull(message = "Missing minimum elo")
     private Integer minElo;
@@ -31,5 +31,21 @@ public class TournamentRegistrationDTO {
 
     @NotNull(message = "Missing game type")
     private Integer timeControl;
-    
+
+    @NotNull(message = "Missing tournament type")
+    private Long tournamentType;
+
+    private String description;
+
+    private String photo;
+
+    private String format;
+
+    private String country;
+
+    private String locationAddress;
+
+    private Double locationLatitude;
+
+    private Double locationLongitude;    
 }

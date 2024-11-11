@@ -3,6 +3,7 @@ package com.chess.tms.gateway.config;
 import org.springframework.http.HttpHeaders;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.server.mvc.handler.GatewayRouterFunctions;
 import org.springframework.cloud.gateway.server.mvc.handler.HandlerFunctions;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.function.RequestPredicates;
 import org.springframework.web.servlet.function.RouterFunction;
-import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerRequest;
 import org.springframework.web.servlet.function.ServerResponse;
 
@@ -21,6 +21,27 @@ public class ApiGatewayConfig {
 
     private final JwtUtility jwtUtility;
 
+    @Value("${tournaments.service.url}")
+    private String tournamentServiceUrl;
+
+    @Value("${elo.service.url}")
+    private String eloServiceUrl;
+
+    @Value("${players.service.url}")
+    private String playerServiceUrl;
+
+    @Value("${auth.service.url}")
+    private String authServiceUrl;
+
+    @Value("${users.service.url}")
+    private String usersServiceUrl;
+
+    @Value("${matches.service.url}")
+    private String matchesServiceUrl;
+
+    @Value("${s3.upload.service.url}")
+    private String s3UploadServiceUrl;
+
     public ApiGatewayConfig(JwtUtility jwtUtility) {
         this.jwtUtility = jwtUtility;
     }
@@ -28,14 +49,15 @@ public class ApiGatewayConfig {
     @Bean
     public RouterFunction<ServerResponse> authServiceRoute() {
         return GatewayRouterFunctions.route("auth-service")
-                .route(RequestPredicates.path("/api/auth/**"), HandlerFunctions.http("http://localhost:8081")).build();
+                .route(RequestPredicates.path("/api/auth/**"), HandlerFunctions.http(authServiceUrl)).build()
+                .andRoute(RequestPredicates.path("/api/otp/**"), HandlerFunctions.http(authServiceUrl));
     }
     
     @Bean
     public RouterFunction<ServerResponse> userServiceRoute() {
         return GatewayRouterFunctions.route("user-service")
                 .route(RequestPredicates.path("/api/user/**"), request -> 
-                    processRequestWithJwtClaims(request, "http://localhost:8082"))
+                    processRequestWithJwtClaims(request, usersServiceUrl))
                 .build();
     }
 
@@ -43,7 +65,7 @@ public class ApiGatewayConfig {
     public RouterFunction<ServerResponse> playerServiceRoute() {
         return GatewayRouterFunctions.route("player-service")
                 .route(RequestPredicates.path("/api/player/**"), request -> 
-                    processRequestWithJwtClaims(request, "http://localhost:8083"))
+                    processRequestWithJwtClaims(request, playerServiceUrl))
                 .build();
     }
 
@@ -51,28 +73,25 @@ public class ApiGatewayConfig {
 public RouterFunction<ServerResponse> tournamentServiceRoute() {
     return GatewayRouterFunctions
         .route(RequestPredicates.path("/api/tournaments/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
         .andRoute(RequestPredicates.path("/api/tournament-players/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
             .andRoute(RequestPredicates.path("/api/round-type/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"))
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
             .andRoute(RequestPredicates.path("/api/game-type/**"), 
-            request -> processRequestWithJwtClaims(request, "http://localhost:8084"));
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
+            .andRoute(RequestPredicates.path("/api/tournament-type/**"), 
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
+            .andRoute(RequestPredicates.path("/api/swiss-bracket/**"), 
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl))
+            .andRoute(RequestPredicates.path("/api/swiss-standing/**"), 
+            request -> processRequestWithJwtClaims(request, tournamentServiceUrl));
 }
-
     @Bean
     public RouterFunction<ServerResponse> matchServiceRoute() {
         return GatewayRouterFunctions.route("match-service")
                 .route(RequestPredicates.path("/api/matches/**"), request -> 
-                    processRequestWithJwtClaims(request, "http://localhost:8085"))
-                .build();
-    }
-
-    @Bean
-    public RouterFunction<ServerResponse> leaderboardServiceRoute() {
-        return GatewayRouterFunctions.route("leaderboard-service")
-                .route(RequestPredicates.path("/api/leaderboard/**"), request ->
-                    processRequestWithJwtClaims(request, "http://localhost:8087"))
+                    processRequestWithJwtClaims(request, matchesServiceUrl))
                 .build();
     }
 
@@ -80,11 +99,20 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
     public RouterFunction<ServerResponse> eloServiceRoute() {
         return GatewayRouterFunctions.route("elo-service")
                 .route(RequestPredicates.path("/api/elo/**"), request ->
-                    processRequestWithJwtClaims(request, "http://localhost:8086"))
+                    processRequestWithJwtClaims(request, eloServiceUrl))
+                .build();
+    }
+
+    @Bean
+    public RouterFunction<ServerResponse> s3UploadServiceRoute() {
+        return GatewayRouterFunctions.route("s3-upload-service")
+                .route(RequestPredicates.path("/api/s3/**"), request ->
+                    processRequestWithJwtClaims(request, s3UploadServiceUrl))
                 .build();
     }
 
     private ServerResponse processRequestWithJwtClaims(ServerRequest request, String forwardUri) {
+        System.out.println("Running processRequestWithJwtClaims");
         // Extract the Authorization header
         String authHeader = request.headers().firstHeader(HttpHeaders.AUTHORIZATION);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
@@ -109,6 +137,7 @@ public RouterFunction<ServerResponse> tournamentServiceRoute() {
         }
         // If Authorization header is missing or invalid, just forward without headers
         try {
+            System.out.println("No token found, forwarding without headers");
             return HandlerFunctions.http(forwardUri).handle(request);
         } catch (Exception e) {
             System.out.println("Error forwarding request: " + e.getMessage());

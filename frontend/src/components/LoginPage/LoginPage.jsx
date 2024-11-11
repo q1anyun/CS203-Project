@@ -8,10 +8,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ForgotPasswordDialog from './ForgotPasswordDialog';
 
-// js
-import { handleClickShowPassword, handleDialogOpen, handleDialogClose, handleSubmit } from './LoginFunctions';
+import { handleClickShowPassword, handleDialogClose, handleSubmit } from './LoginFunctions';
 
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
@@ -19,7 +17,6 @@ function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [openDialog, setOpenDialog] = useState(false);
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
@@ -91,13 +88,6 @@ function LoginPage() {
               </Grid2>
             )}
 
-            {/*This is not functional yet
-            <Grid2 size={12} className={styles.rightContainer}>
-              <Link onClick={() => handleDialogOpen(setOpenDialog)} className={styles.forgotPasswordLinkStyle}>
-                Forgot password?
-              </Link>
-            </Grid2> */}
-
             <Grid2 size={12}>
               <button type="submit" className={styles.gradientButton}
                 onClick={(e) => handleSubmit(e, username, password, navigate, setError)}>
@@ -113,8 +103,6 @@ function LoginPage() {
           </Grid2>
         </Card>
       </Container>
-
-      <ForgotPasswordDialog open={openDialog} onClose={() => handleDialogClose(setOpenDialog)} />
     </div>
   );
 }

@@ -12,7 +12,12 @@ public class RoundTypeService {
     @Autowired
     private RoundTypeRepository roundTypeRepository;
 
-    public List<Integer> getChoicesForNumberOfPlayers() {
+    /**
+     * Retrieves all available player count options for tournaments.
+     * 
+     * @return List of distinct player counts supported by the system
+     */
+    public List<Integer> getAvailablePlayerCounts() {
         return roundTypeRepository.findDistinctNumberOfPlayers();
     }
 }

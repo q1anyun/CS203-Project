@@ -1,16 +1,15 @@
 package com.chess.tms.tournament_service.dto;
 
-import java.time.LocalDateTime;
-
+import java.time.LocalDate;
 import lombok.Data;
 
 @Data
 public class TournamentUpdateRequestDTO {
     private String name;
 
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
     private Integer minElo;
 
@@ -19,4 +18,20 @@ public class TournamentUpdateRequestDTO {
     private Integer maxPlayers;
 
     private Integer timeControl;
+
+    private String description;
+
+    private String photo;
+
+    private String format;
+
+    private String country;
+
+    private String locationAddress;
+
+    private Double locationLatitude;
+
+    private Double locationLongitude; 
+
+    private Long tournamentType;
 }

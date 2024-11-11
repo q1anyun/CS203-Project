@@ -11,6 +11,9 @@ public class MatchDTO {
     private TournamentDTO tournament;
     private Long winnerId;
     private Long loserId;
+    private PlayerDetailsDTO player1;
+    private PlayerDetailsDTO player2;
+    private Integer swissRoundNumber;
     private RoundType roundType;
     private GameType gameType;
     private LocalDateTime date;

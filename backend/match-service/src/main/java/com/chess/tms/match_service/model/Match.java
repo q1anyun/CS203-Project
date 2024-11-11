@@ -27,7 +27,7 @@ public class Match {
     @Column(name = "tournament_id", nullable = false)
     private Long tournamentId;
 
-    @Column(name = "player1_id", nullable = false)
+    @Column(name = "player1_id")
     private Long player1Id;
 
     @Column(name = "player2_id")
@@ -38,6 +38,9 @@ public class Match {
 
     @Column(name = "loser_id")
     private Long loserId;
+
+    @Column(name = "swiss_round_number")
+    private Integer swissRoundNumber;
 
     @ManyToOne
     @JoinColumn(name = "round_type_id", referencedColumnName = "id", nullable = false)

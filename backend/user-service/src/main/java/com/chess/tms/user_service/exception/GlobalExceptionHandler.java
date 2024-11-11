@@ -45,4 +45,11 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.NOT_FOUND.value());  // 404 Not Found status
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    // Handle InvalidCredentialsException
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        Map<String, Object> response = new HashMap<>();
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
 }

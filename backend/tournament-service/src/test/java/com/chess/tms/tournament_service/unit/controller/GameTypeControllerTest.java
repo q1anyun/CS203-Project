@@ -27,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(MockitoExtension.class)
 class GameTypeControllerTest {
 
+    private static final String BASE_URL = "/api/game-type";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -36,38 +38,44 @@ class GameTypeControllerTest {
     @InjectMocks
     private GameTypeController gameTypeController;
 
+    private List<GameType> testGameTypes;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders.standaloneSetup(gameTypeController).build();
+        
+        // Initialize test data
+        testGameTypes = Arrays.asList(
+            createGameType(1L, "Blitz", 5),
+            createGameType(2L, "Rapid", 15)
+        );
+    }
+
+    private GameType createGameType(Long id, String name, int timeControlMinutes) {
+        GameType gameType = new GameType();
+        gameType.setId(id);
+        gameType.setName(name);
+        gameType.setTimeControlMinutes(timeControlMinutes);
+        return gameType;
     }
 
     @Test
     void getGameTypes_Valid_ReturnListOfGameTypes() throws Exception {
-        GameType gameType1 = new GameType();
-        gameType1.setId(1L);
-        gameType1.setName("Blitz");
-        gameType1.setTimeControlMinutes(5);
+        // Given
+        when(gameTypeService.getGameTypes()).thenReturn(testGameTypes);
 
-        GameType gameType2 = new GameType();
-        gameType2.setId(2L);
-        gameType2.setName("Rapid");
-        gameType2.setTimeControlMinutes(15);
-
-        List<GameType> gameTypes = Arrays.asList(gameType1, gameType2);
-
-        when(gameTypeService.getGameTypes()).thenReturn(gameTypes);
-
-        mockMvc.perform(get("/api/game-type")
+        // When/Then
+        mockMvc.perform(get(BASE_URL)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("Blitz"))
-                .andExpect(jsonPath("$[0].timeControlMinutes").value(5))
-                .andExpect(jsonPath("$[1].id").value(2))
-                .andExpect(jsonPath("$[1].name").value("Rapid"))
-                .andExpect(jsonPath("$[1].timeControlMinutes").value(15));
+                .andExpect(jsonPath("$[0].id").value(testGameTypes.get(0).getId()))
+                .andExpect(jsonPath("$[0].name").value(testGameTypes.get(0).getName()))
+                .andExpect(jsonPath("$[0].timeControlMinutes").value(testGameTypes.get(0).getTimeControlMinutes()))
+                .andExpect(jsonPath("$[1].id").value(testGameTypes.get(1).getId()))
+                .andExpect(jsonPath("$[1].name").value(testGameTypes.get(1).getName()))
+                .andExpect(jsonPath("$[1].timeControlMinutes").value(testGameTypes.get(1).getTimeControlMinutes()));
 
-        verify(gameTypeService, times(1)).getGameTypes();
+        verify(gameTypeService).getGameTypes();
     }
 }
