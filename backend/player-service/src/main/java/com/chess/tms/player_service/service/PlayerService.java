@@ -1,5 +1,6 @@
 package com.chess.tms.player_service.service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -368,16 +369,21 @@ public class PlayerService {
     public byte[] getProfilePicture(String filename) throws IOException {
         String url = s3UploadServiceUrl + "/api/s3/find/" + filename; // Construct the find URL
 
-        // Make the request to retrieve the file
-        ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
+        try {
+            ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
 
-        // Check response status
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Failed to retrieve profile picture: " + response.getBody());
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Failed to retrieve profile picture: " + response.getBody());
+            }
+
+            return response.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            // Handle the case where the file is not found (404)
+            throw new FileNotFoundException("Profile picture not found for filename: " + filename);
+        } catch (HttpClientErrorException e) {
+            // Handle other HTTP errors (e.g., 403 Forbidden)
+            throw new RuntimeException("Error retrieving profile picture: " + e.getMessage(), e);
         }
-
-        // Return the byte array
-        return response.getBody();
     }
 
     /**
