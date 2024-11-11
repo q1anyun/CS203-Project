@@ -47,19 +47,8 @@ function EditTournamentDialog({
     
                 setTournaments(updatedTournaments);
                 console.log(tournaments); 
-    
-                setUpdateTournament({
-                    name: '',
-                    startDate: '',
-                    endDate: '',
-                    timeControl: '',
-                    minElo: '',
-                    maxElo: '',
-                    maxPlayers: ''
-                });
-    
+
                 setEditDialogOpen(false);
-    
                 window.location.reload();
             } catch (error) {
                 if (error.response) {
