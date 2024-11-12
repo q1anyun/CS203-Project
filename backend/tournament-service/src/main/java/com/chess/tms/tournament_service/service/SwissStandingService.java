@@ -37,6 +37,9 @@ public class SwissStandingService {
             throw new SwissBracketNotFoundException("No standings found for the bracket ID: " + bracketId);
         }
 
+        // Sort the standings by wins in descending order
+        standings.sort((s1, s2) -> s2.getWins().compareTo(s1.getWins()));
+        
         // Convert each SwissStanding entity to a SwissStandingDTO
         return standings.stream().map(this::convertToDTO).collect(Collectors.toList());
     }

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import com.chess.tms.elo_service.enums.Reason;
 import com.chess.tms.elo_service.model.EloHistory;
 
-/**
+/** 
  * JPA repository representing the elo_history table in the SQL DB
  */
 @Repository

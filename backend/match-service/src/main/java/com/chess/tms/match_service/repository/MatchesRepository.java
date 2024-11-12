@@ -20,4 +20,7 @@ public interface MatchesRepository extends JpaRepository<Match, Long> {
     List<Match> findByTournamentIdAndRoundTypeId(Long tournamentId, Long roundTypeId);
 
     List<Match> findByTournamentIdAndSwissRoundNumber(Long tournamentId, Integer swissRoundNumber);
+
+    @Query("SELECT m FROM Match m WHERE m.tournamentId = :tournamentId AND (m.player1Id = :playerId OR m.player2Id = :playerId)")
+    List<Match> findByPlayerIdInTournament(@Param("playerId") Long playerId, @Param("tournamentId") Long tournamentId);
 }
