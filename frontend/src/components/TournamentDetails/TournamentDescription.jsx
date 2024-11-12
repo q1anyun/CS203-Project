@@ -98,6 +98,8 @@ function TournamentDescription({ tournament }) {
                 navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
             }
         }
+        window.location.reload();
+        
     };
 
     {/*WAITING FOR API TO WITHDRAW */ }
@@ -120,6 +122,7 @@ function TournamentDescription({ tournament }) {
                 navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
             }
         }
+        window.location.reload();
     };
 
     useEffect(() => {
