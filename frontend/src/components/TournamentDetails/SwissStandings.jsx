@@ -30,7 +30,8 @@ const SwissStandings = ({ swissStandings, playersWithPhotos }) => {
       <Table sx={{ minWidth: 700 }} aria-label="Swiss Standings table">
         <TableHead>
           <StyledTableRow>
-            <StyledTableCell>Name</StyledTableCell>
+          <StyledTableCell>Rank</StyledTableCell>
+            <StyledTableCell >Name</StyledTableCell>
             <StyledTableCell align="center">Matches Won</StyledTableCell>
             <StyledTableCell align="center">Matches Lost</StyledTableCell>
             <StyledTableCell align="center">Win Rate</StyledTableCell>
@@ -40,6 +41,7 @@ const SwissStandings = ({ swissStandings, playersWithPhotos }) => {
         <TableBody>
           {swissStandings.map((standing, index) => (
             <StyledTableRow key={standing.player?.id} hover>
+                <StyledTableCell>{index +1}</StyledTableCell>
               <StyledTableCell component="th" scope="row">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <img

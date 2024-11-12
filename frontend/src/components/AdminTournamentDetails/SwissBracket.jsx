@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
 import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png';
-import SwissStandings from './SwissStandings';
+import SwissStandings from '../TournamentDetails/SwissStandings';
 
 const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
