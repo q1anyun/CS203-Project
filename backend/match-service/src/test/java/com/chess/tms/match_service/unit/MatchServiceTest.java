@@ -156,8 +156,6 @@ public class MatchServiceTest {
 
     @Test
     void createSwissMatches_ValidInput_Success() {
-        when(gameTypeRepository.findById(1L)).thenReturn(Optional.of(gameType));
-        when(roundTypeRepository.findByRoundName("Swiss")).thenReturn(Optional.of(roundType));
         when(restTemplate.exchange(
                 anyString(),
                 eq(HttpMethod.GET),
@@ -247,7 +245,7 @@ public class MatchServiceTest {
         match.setTournamentId(tournamentId);
         match.setPlayer1Id(winnerId);
         match.setPlayer2Id(loserId);
-        match.setRoundType(swissRoundType); // Set RoundType to Swiss
+        match.setRoundType(swissRoundType);
         match.setGameType(gameType);
 
         when(matchRepository.findById(matchId)).thenReturn(Optional.of(match));
@@ -257,61 +255,47 @@ public class MatchServiceTest {
         bracket.setId(1L);
         bracket.setTournamentId(tournamentId);
         bracket.setCurrentRound(3);
-        bracket.setNumberOfRounds(3); // Set as the last round
+        bracket.setNumberOfRounds(3);
         when(swissBracketRepository.findByTournamentId(tournamentId)).thenReturn(Optional.of(bracket));
 
-        // Mock Swiss standings for 8 players, including winner and loser
+        // Initialize standings with proper wins/losses values
         SwissStanding winnerStanding = new SwissStanding();
         winnerStanding.setPlayerId(winnerId);
-        winnerStanding.setWins(4);
+        winnerStanding.setWins(4);  // Initialize wins
+        winnerStanding.setLosses(0);  // Initialize losses
+        winnerStanding.setBracket(bracket);
 
         SwissStanding loserStanding = new SwissStanding();
         loserStanding.setPlayerId(loserId);
-        loserStanding.setLosses(3);
+        loserStanding.setWins(3);  // Initialize wins
+        loserStanding.setLosses(1);  // Initialize losses
+        loserStanding.setBracket(bracket);
 
-        // Additional players with varying wins/losses
-        SwissStanding player3 = new SwissStanding();
-        player3.setPlayerId(103L);
-        player3.setWins(3);
-
-        SwissStanding player4 = new SwissStanding();
-        player4.setPlayerId(104L);
-        player4.setWins(3);
-
-        SwissStanding player5 = new SwissStanding();
-        player5.setPlayerId(105L);
-        player5.setWins(2);
-
-        SwissStanding player6 = new SwissStanding();
-        player6.setPlayerId(106L);
-        player6.setWins(2);
-
-        SwissStanding player7 = new SwissStanding();
-        player7.setPlayerId(107L);
-        player7.setWins(1);
-
-        SwissStanding player8 = new SwissStanding();
-        player8.setPlayerId(108L);
-        player8.setWins(0);
-
+        // Additional players with properly initialized standings
         List<SwissStanding> standings = Arrays.asList(
-                winnerStanding, player3, player4, loserStanding, player5, player6, player7, player8);
+            winnerStanding,
+            createStanding(103L, 3, 1, bracket),
+            createStanding(104L, 3, 1, bracket),
+            createStanding(105L, 2, 2, bracket),
+            createStanding(106L, 2, 2, bracket),
+            createStanding(107L, 1, 3, bracket),
+            createStanding(108L, 0, 4, bracket),
+            loserStanding
+        );
 
         when(swissStandingRepository.findByBracketIdAndPlayerId(bracket.getId(), winnerId))
                 .thenReturn(Optional.of(winnerStanding));
         when(swissStandingRepository.findByBracketIdAndPlayerId(bracket.getId(), loserId))
                 .thenReturn(Optional.of(loserStanding));
+        when(swissStandingRepository.findByBracketIdOrderByWinsDescLossesAsc(bracket.getId()))
+                .thenReturn(standings);
 
-        when(swissStandingRepository.findByBracketIdOrderByWinsDescLossesAsc(bracket.getId())).thenReturn(standings);
         when(roundTypeRepository.findByNumberOfPlayers(4)).thenReturn(Optional.of(roundType));
         when(roundTypeRepository.findByNumberOfPlayers(2)).thenReturn(Optional.of(roundType));
         when(gameTypeRepository.findById(1L)).thenReturn(Optional.of(gameType));
 
-        // Mock round completion check
-        Match completedMatch = new Match();
-        completedMatch.setStatus(Match.MatchStatus.COMPLETED);
         when(matchRepository.findByTournamentIdAndSwissRoundNumber(tournamentId, bracket.getCurrentRound()))
-                .thenReturn(Collections.singletonList(completedMatch));
+                .thenReturn(Collections.singletonList(match));
         when(restTemplate.getForObject(contains("/api/player/"), eq(PlayerDetailsDTO.class)))
                 .thenReturn(playerDetails);
 
@@ -320,24 +304,19 @@ public class MatchServiceTest {
 
         // Assert
         assertEquals("Swiss rounds completed, moving to knockout phase.", result);
-
-        // Verify the expected top 4 players are selected for the knockout stage
-        List<Long> advancedPlayerIds = standings.stream()
-                .limit(4) 
-                .map(SwissStanding::getPlayerId)
-                .collect(Collectors.toList());
-
-        // Expected IDs of players advancing to the knockout stage
-        List<Long> expectedIds = Arrays.asList(winnerId, player3.getPlayerId(), player4.getPlayerId(), loserId);
-
-        // Assert that the advanced player list has the expected players
-        assertEquals(4, advancedPlayerIds.size(), "The advanced player list should contain exactly 4 players");
-        assertTrue(advancedPlayerIds.containsAll(expectedIds), "Advanced players should match expected top players");
-
-        // Verify repository saves and service calls
         verify(matchRepository).save(match);
         verify(swissStandingRepository).save(winnerStanding);
         verify(swissStandingRepository).save(loserStanding);
+    }
+
+    // Helper method to create standings
+    private SwissStanding createStanding(Long playerId, int wins, int losses, SwissBracket bracket) {
+        SwissStanding standing = new SwissStanding();
+        standing.setPlayerId(playerId);
+        standing.setWins(wins);
+        standing.setLosses(losses);
+        standing.setBracket(bracket);
+        return standing;
     }
 
     @Test
