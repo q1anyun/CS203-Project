@@ -54,6 +54,7 @@ function SwissBracket({ matches, SwissBracketID }) {
         const knockout = matches.filter(match => match.swissRoundNumber === null);
         setSwissMatches(swiss);
         setKnockoutMatches(knockout);
+        console.log(knockoutMatches); 
     }, [matches]);
 
     useEffect(() => {

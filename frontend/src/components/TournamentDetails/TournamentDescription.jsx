@@ -175,6 +175,7 @@ function TournamentDescription({ tournament }) {
                     onClick={() => isJoined(tournament.id) ? handleWithdraw() : handleJoin()}
                     disabled={
                         tournament.status === 'COMPLETED' ||
+                        tournament.status === 'LIVE' ||
                         elo < tournament.minElo ||
                         elo > tournament.maxElo ||
                         (!isJoined(tournament.id) && tournament.currentPlayers >= tournament.maxPlayers)
