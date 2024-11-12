@@ -27,7 +27,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class MatchService {
@@ -76,14 +81,16 @@ public class MatchService {
      */
     public Long createKnockoutMatches(Long tournamentId, Long gameTypeId, List<Long> advancedPlayerIds) {
         TournamentPlayerEloDTO[] players;
-        // If advancedPlayerIds is null, get the list of players with Elo ratings from the tournament service
+        // If advancedPlayerIds is null, get the list of players with Elo ratings from
+        // the tournament service
         if (advancedPlayerIds == null) {
             ResponseEntity<TournamentPlayerEloDTO[]> response = restTemplate.exchange(
                     tournamentServiceUrl + "/api/tournament-players/" + tournamentId, HttpMethod.GET, null,
                     TournamentPlayerEloDTO[].class);
             players = response.getBody();
         } else {
-            // If advancedPlayerIds is not null, get the list of players from the player service
+            // If advancedPlayerIds is not null, get the list of players from the player
+            // service
             players = advancedPlayerIds.stream()
                     .map(playerId -> restTemplate.getForObject(playerServiceUrl + "/api/player/" + playerId,
                             PlayerDetailsDTO.class))
@@ -92,12 +99,13 @@ public class MatchService {
         }
 
         // Calculate the next power of 2 for the knockout structure
-        // This is done by finding the smallest power of 2 that is greater than the number of players
+        // This is done by finding the smallest power of 2 that is greater than the
+        // number of players
         int totalPlayers = players.length;
-        int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));    
+        int nextPowerOfTwo = (int) Math.pow(2, Math.ceil(Math.log(totalPlayers) / Math.log(2)));
         // Calculate the number of byes required for the top players
         int byes = nextPowerOfTwo - totalPlayers;
-        // Get the round type for the next round    
+        // Get the round type for the next round
         RoundType currentRoundType = getRoundType(nextPowerOfTwo);
 
         // Sort players by Elo rating (highest first)
@@ -123,14 +131,15 @@ public class MatchService {
         generateFirstRoundMatches(tournamentId, gameTypeId, players, currentRoundType, allMatches, firstRoundMatches,
                 lowIndex, highIndex);
 
-        // Combine first-round and bye matches, add to map, and generate subsequent rounds
+        // Combine first-round and bye matches, add to map, and generate subsequent
+        // rounds
         List<Match> combinedFirstRoundMatches = new ArrayList<>(firstRoundMatches);
         combinedFirstRoundMatches.addAll(byeMatches);
 
         // Add the first round matches to the map
         roundMatchesMap.put(1, combinedFirstRoundMatches);
 
-        // Calculate the current round size and round number    
+        // Calculate the current round size and round number
         int currentRoundSize = (firstRoundMatches.size() + byeMatches.size()) / 2;
         int roundNumber = 2;
 
@@ -157,8 +166,10 @@ public class MatchService {
             int highIndex) {
 
         // Generate matches for the first round by pairing players based on Elo ratings
-        // The pairing is done by pairing the lowest rated player with the highest rated player
-        // Pairing logic is done using left and right pointers to traverse the array - complexity O(n)
+        // The pairing is done by pairing the lowest rated player with the highest rated
+        // player
+        // Pairing logic is done using left and right pointers to traverse the array -
+        // complexity O(n)
         while (lowIndex < highIndex) {
             TournamentPlayerEloDTO player1 = players[lowIndex];
             TournamentPlayerEloDTO player2 = players[highIndex];
@@ -205,7 +216,7 @@ public class MatchService {
             // Increment the round number
             roundNumber++;
         }
-        // Return the final round number after all rounds are generated 
+        // Return the final round number after all rounds are generated
         // This is used to update the next_match_id for each match in subsequent rounds
         return roundNumber;
     }
@@ -325,7 +336,7 @@ public class MatchService {
         return bracket;
     }
 
-/**
+    /**
      * Creates matches between players for a Swiss round, ensuring that players with
      * similar standings are paired.
      * Players from each group (split based on Elo) are paired in a balanced way to
@@ -339,35 +350,29 @@ public class MatchService {
     private void createRoundMatches(TournamentPlayerEloDTO[] players, Long tournamentId, Long gameTypeId,
             int roundNumber) {
         List<Match> matches = new ArrayList<>();
-        // Get the match history for each player in the tournament
         Map<Long, Set<Long>> playerMatchHistory = getPreviousOpponents(tournamentId);
 
-        // Sort and split players into groups based on Elo
+        // Convert players array to list for easier manipulation
         List<TournamentPlayerEloDTO> allPlayers = new ArrayList<>(Arrays.asList(players));
-        
-        // Track pairings and create matches
+
+        // Find valid pairings with the assumption of even number of players
         List<Pairing> pairings = findValidPairings(allPlayers, playerMatchHistory);
 
-        // If no valid pairings are found, throw an exception
-        if (pairings.isEmpty()) {
-            throw new IllegalStateException("Could not find valid pairings for all players");
-        }
-
-        // Create matches from valid pairings
+        // Create matches from the pairings
         for (Pairing pairing : pairings) {
             Match match = createMatch(
-                tournamentId, 
-                pairing.player1.getId(), 
-                pairing.player2.getId(), 
-                null, null, roundNumber,
-                getRoundTypeForSwissRound(), 
-                gameTypeId, 
-                null, 
-                Match.MatchStatus.PENDING
-            );
+                    tournamentId,
+                    pairing.player1.getId(),
+                    pairing.player2.getId(),
+                    null, null, roundNumber,
+                    getRoundTypeForSwissRound(),
+                    gameTypeId,
+                    null,
+                    Match.MatchStatus.PENDING);
             matches.add(match);
         }
 
+        // Save matches
         matchRepository.saveAll(matches);
     }
 
@@ -383,62 +388,114 @@ public class MatchService {
     }
 
     /**
-     * Finds valid pairings for players in a Swiss tournament.
+     * Finds valid pairings for players in a Swiss tournament using a greedy
+     * heuristic.
+     * Prioritizes pairing players with fewer available opponents, reducing future
+     * constraints.
      *
      * @param players            list of players to pair
      * @param playerMatchHistory map of player IDs to their match history
      * @return list of valid pairings
      */
-    private List<Pairing> findValidPairings(List<TournamentPlayerEloDTO> players, Map<Long, Set<Long>> playerMatchHistory) {
-        List<Pairing> pairings = new ArrayList<>();
-        
-        // If found valid pairing, return pairing else return empty array list
-        return findValidPairings(new ArrayList<>(players), playerMatchHistory, pairings) ? pairings : new ArrayList<>();
-    }
+    private List<Pairing> findValidPairings(List<TournamentPlayerEloDTO> players,
+            Map<Long, Set<Long>> playerMatchHistory) {
+        // Shuffle players to add randomness
+        Collections.shuffle(players);
 
-    private boolean findValidPairings(List<TournamentPlayerEloDTO> remainingPlayers, 
-            Map<Long, Set<Long>> playerMatchHistory, List<Pairing> pairings) {
-        // Base case: all players are paired
-        if (remainingPlayers.isEmpty()) {
-            // Print out pairings
-            for(int i=0 ; i<pairings.size() ; i++){
-                System.out.println("Pairing " + i + ": " + pairings.get(i).player1.getId() + " vs " + pairings.get(i).player2.getId());
-            }       
-            System.out.println();     
-            return true;
+        List<Pairing> allPairings = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(4); // Adjust the thread pool size
+
+        // Divide players into sublists for parallel processing
+        int groupSize = players.size() / 4;
+        List<List<TournamentPlayerEloDTO>> subLists = new ArrayList<>();
+
+        for (int i = 0; i < players.size(); i += groupSize) {
+            subLists.add(players.subList(i, Math.min(i + groupSize, players.size())));
         }
 
-        // Get the first player in the remaining players list
-        TournamentPlayerEloDTO player1 = remainingPlayers.get(0);
-        
-        // Try to pair the first player with each remaining player
-        for (int i = 1; i < remainingPlayers.size(); i++) {
-            // Get the second player in the remaining players list
-            TournamentPlayerEloDTO player2 = remainingPlayers.get(i);
-            
-            // Check if these players can be paired
-            if (!hasPlayedBefore(playerMatchHistory, player1.getId(), player2.getId())) {
-                // Create the pairing
-                Pairing pairing = new Pairing(player1, player2);
-                pairings.add(pairing);
-                
-                // Remove both players from remaining players
-                List<TournamentPlayerEloDTO> newRemainingPlayers = new ArrayList<>(remainingPlayers);
-                newRemainingPlayers.remove(player2);
-                newRemainingPlayers.remove(player1);
-                
-                // Recursively try to pair the remaining players
-                if (findValidPairings(newRemainingPlayers, playerMatchHistory, pairings)) {
-                    return true;
-                }
-                
-                // If we couldn't pair the remaining players, undo this pairing
-                pairings.remove(pairings.size() - 1);
+        // Create a list of CompletableFuture objects for each sublist
+        // Each CompletableFuture object is used to find pairings for a sublist in
+        // parallel
+        // The findPairingsForGroup method is called with a supplier that returns the
+        // result of findPairingsForGroup
+        // The supplier is executed asynchronously using CompletableFuture.supplyAsync
+        // The result of findPairingsForGroup is a list of Pairing objects
+        List<CompletableFuture<List<Pairing>>> futures = new ArrayList<>();
+
+        for (List<TournamentPlayerEloDTO> subList : subLists) {
+            futures.add(
+                    CompletableFuture.supplyAsync(() -> findPairingsForGroup(subList, playerMatchHistory), executor));
+        }
+
+        // Wait for all the CompletableFuture objects to complete and add the pairings
+        // to the allPairings list
+        for (CompletableFuture<List<Pairing>> future : futures) {
+            try {
+                allPairings.addAll(future.get());
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
         }
-        
-        // Couldn't find a valid pairing
-        return false;
+
+        executor.shutdown();
+
+        return allPairings;
+    }
+
+    /**
+     * Helper method to find pairings for a specific group of players.
+     * 
+     * @param players            list of players in a group
+     * @param playerMatchHistory match history to avoid repeat pairings
+     * @return list of valid pairings for the group
+     */
+    private List<Pairing> findPairingsForGroup(List<TournamentPlayerEloDTO> players,
+            Map<Long, Set<Long>> playerMatchHistory) {
+        List<Pairing> pairings = new ArrayList<>();
+        Set<Long> pairedPlayerIds = new HashSet<>();
+
+        for (TournamentPlayerEloDTO player1 : players) {
+            if (pairedPlayerIds.contains(player1.getId()))
+                continue;
+
+            TournamentPlayerEloDTO bestMatch = null;
+            int minOpponentCount = Integer.MAX_VALUE;
+
+            // Find the best available match for player1 with no previous pairing
+            for (TournamentPlayerEloDTO player2 : players) {
+                if (player1.getId().equals(player2.getId()) || pairedPlayerIds.contains(player2.getId()))
+                    continue;
+
+                // Check if player1 and player2 have not played before
+                if (!hasPlayedBefore(playerMatchHistory, player1.getId(), player2.getId())) {
+                    int opponentCount = playerMatchHistory.getOrDefault(player2.getId(), Collections.emptySet()).size();
+                    if (opponentCount < minOpponentCount) {
+                        minOpponentCount = opponentCount;
+                        bestMatch = player2;
+                    }
+                }
+            }
+
+            // If a unique match was found, add it; otherwise, add the best available match
+            // to avoid unpaired players
+            if (bestMatch != null) {
+                pairings.add(new Pairing(player1, bestMatch));
+                pairedPlayerIds.add(player1.getId());
+                pairedPlayerIds.add(bestMatch.getId());
+            } else {
+                // Fallback logic: try to find any remaining unmatched player if no unique
+                // pairing is possible
+                for (TournamentPlayerEloDTO player2 : players) {
+                    if (!player1.getId().equals(player2.getId()) && !pairedPlayerIds.contains(player2.getId())) {
+                        pairings.add(new Pairing(player1, player2));
+                        pairedPlayerIds.add(player1.getId());
+                        pairedPlayerIds.add(player2.getId());
+                        break;
+                    }
+                }
+            }
+        }
+        return pairings;
     }
 
     /**
@@ -668,7 +725,7 @@ public class MatchService {
      * @return a message indicating advancement to the next Swiss round
      */
     private String nextSwissRound(Match match, SwissBracket bracket) {
-        // Update the current round 
+        // Update the current round
         bracket.setCurrentRound(bracket.getCurrentRound() + 1);
         swissBracketRepository.save(bracket);
         // Fetch all players with their updated standings for the next round
@@ -681,7 +738,7 @@ public class MatchService {
         // Create the matches for the next round
         createRoundMatches(allPlayers, match.getTournamentId(), match.getGameType().getId(),
                 bracket.getCurrentRound());
-        
+
         return "Advanced to Swiss Round " + bracket.getCurrentRound();
     }
 
@@ -694,27 +751,203 @@ public class MatchService {
      * @return a message indicating the tournament has moved to knockout phase
      */
     private String completedSwissRound(Match match, SwissBracket bracket) {
-        // Get the standings for the current bracket and sort by wins and losses for the top half
-        List<SwissStanding> standings = swissStandingRepository
-                .findByBracketIdOrderByWinsDescLossesAsc(bracket.getId());
-
-        // Get the number of players in the top half
+        List<SwissStanding> standings = getSortedStandings(bracket);
         int half = standings.size() / 2;
+        int advancingScoreThreshold = getAdvancingScoreThreshold(standings, half);
 
-        // Get the IDs of players who advanced
-        List<Long> advancedPlayers = standings.subList(0, half)
-                .stream()
-                .map(SwissStanding::getPlayerId)
-                .collect(Collectors.toList());
+        List<SwissStanding> potentialAdvancers = getPotentialAdvancers(standings, advancingScoreThreshold);
 
-        // Create knockout matches for the top half of players
+        List<Long> advancedPlayers = resolveAdvancers(potentialAdvancers, advancingScoreThreshold, half, match);
+
+        // Create knockout matches for the selected players and update the tournament
+        // round
         Long currentRoundId = createKnockoutMatches(match.getTournamentId(), match.getGameType().getId(),
                 advancedPlayers);
-
-        // Update the current round for the tournament
         updateCurrentRoundForTournament(match.getTournamentId(), currentRoundId);
 
         return "Swiss rounds completed, moving to knockout phase.";
+    }
+
+    /**
+     * Fetches the sorted standings by wins and losses.
+     */
+    private List<SwissStanding> getSortedStandings(SwissBracket bracket) {
+        return swissStandingRepository.findByBracketIdOrderByWinsDescLossesAsc(bracket.getId());
+    }
+
+    /**
+     * Determines the minimum score needed to advance.
+     */
+    private int getAdvancingScoreThreshold(List<SwissStanding> standings, int half) {
+        return standings.get(half - 1).getWins();
+    }
+
+    /**
+     * Collects players with scores meeting or exceeding the threshold for
+     * advancing.
+     */
+    private List<SwissStanding> getPotentialAdvancers(List<SwissStanding> standings, int threshold) {
+        List<SwissStanding> potentialAdvancers = new ArrayList<>();
+        for (SwissStanding player : standings) {
+            if (player.getWins() >= threshold) {
+                potentialAdvancers.add(player);
+            }
+        }
+        return potentialAdvancers;
+    }
+
+    /**
+     * Resolves which players will advance, using tiebreaker if necessary.
+     */
+    private List<Long> resolveAdvancers(List<SwissStanding> potentialAdvancers, int threshold, int half, Match match) {
+        List<Long> advancedPlayers = new ArrayList<>();
+
+        if (needsTieBreaker(potentialAdvancers, half)) {
+            List<SwissStanding> tiedPlayers = getTiedPlayers(potentialAdvancers, threshold);
+            Map<Long, Double> opponentDifficultyScores = calculateOpponentDifficultyScores(tiedPlayers,
+                    match.getTournamentId());
+            advancedPlayers = selectAdvancersWithTieBreaker(potentialAdvancers, tiedPlayers, opponentDifficultyScores,
+                    threshold, half);
+        } else {
+            for (SwissStanding player : potentialAdvancers) {
+                advancedPlayers.add(player.getPlayerId());
+            }
+        }
+        return advancedPlayers;
+    }
+
+    /**
+     * Checks if tie-breaking is needed based on the number of potential advancers.
+     */
+    private boolean needsTieBreaker(List<SwissStanding> potentialAdvancers, int half) {
+        return potentialAdvancers.size() > half;
+    }
+
+    /**
+     * Identifies players with scores equal to the advancing threshold for
+     * tiebreaker.
+     */
+    private List<SwissStanding> getTiedPlayers(List<SwissStanding> potentialAdvancers, int threshold) {
+        List<SwissStanding> tiedPlayers = new ArrayList<>();
+        for (SwissStanding player : potentialAdvancers) {
+            if (player.getWins() == threshold) {
+                tiedPlayers.add(player);
+            }
+        }
+        return tiedPlayers;
+    }
+
+    /**
+     * Selects players to advance, resolving ties based on opponent difficulty.
+     */
+    private List<Long> selectAdvancersWithTieBreaker(List<SwissStanding> potentialAdvancers,
+            List<SwissStanding> tiedPlayers, Map<Long, Double> opponentDifficultyScores, int threshold, int half) {
+
+        System.out.println(opponentDifficultyScores);
+        // Sort tied players by opponent difficulty in descending order
+        Collections.sort(tiedPlayers, (p1, p2) -> Double.compare(opponentDifficultyScores.get(p2.getPlayerId()),
+                opponentDifficultyScores.get(p1.getPlayerId())));
+        // Print out the tied players sorted by opponent difficulty
+        for (SwissStanding player : tiedPlayers) {
+            System.out.println("Tied player: " + player.getPlayerId() + " with opponent difficulty score: "
+                    + opponentDifficultyScores.get(player.getPlayerId()));
+        }
+
+        List<Long> advancedPlayers = new ArrayList<>();
+
+        // Add players with scores above the threshold first
+        for (SwissStanding player : potentialAdvancers) {
+            if (player.getWins() > threshold) {
+                advancedPlayers.add(player.getPlayerId());
+            }
+        }
+        System.out.println("Advanced players: " + advancedPlayers);
+
+        // Add remaining slots from the sorted tied list
+        int remainingSlots = half - advancedPlayers.size();
+        for (int i = 0; i < remainingSlots; i++) {
+            advancedPlayers.add(tiedPlayers.get(i).getPlayerId());
+        }
+        System.out.println("Advanced players after adding remaining slots: " + advancedPlayers);
+
+        return advancedPlayers;
+    }
+
+    /**
+     * Calculates the opponent difficulty scores for tied players.
+     *
+     * @param tiedPlayers  the list of SwissStanding objects representing tied
+     *                     players
+     * @param tournamentId the ID of the tournament
+     * @return a map of player IDs to their opponent difficulty scores
+     */
+    private Map<Long, Double> calculateOpponentDifficultyScores(List<SwissStanding> tiedPlayers, Long tournamentId) {
+        Map<Long, Double> difficultyScores = new HashMap<>();
+
+        for (SwissStanding playerStanding : tiedPlayers) {
+            Long playerId = playerStanding.getPlayerId();
+
+            // Get the player's Elo rating
+            double playerElo = getEloRating(playerId);
+
+            // Get all matches for the player in the tournament
+            List<Match> matches = matchRepository.findByPlayerIdInTournament(playerId, tournamentId);
+
+            // Calculate the difficulty score with weights based on win/loss
+            double difficultyScore = matches.stream()
+                    .mapToDouble(match -> {
+                        // Get the opponent's Elo rating
+                        double opponentElo = getOpponentElo(match, playerId);
+
+                        // Check if the player won the match
+                        boolean isWin = match.getWinnerId().equals(playerId);
+
+                        // Set the base weight based on whether the player won the match
+                        double baseWeight = isWin ? 1.0 : 0.7;
+
+                        // Adjust the weight based on the opponent's Elo rating
+                        // If the opponent's Elo rating is higher than the player's Elo rating, increase
+                        // the weight
+                        // Encourages beating or closely competing with stronger players without overly
+                        // penalizing losses
+                        double weight = baseWeight * (opponentElo > playerElo ? 1.2 : 1.0);
+
+                        return opponentElo * weight;
+                    })
+                    .sum();
+
+            difficultyScores.put(playerId, difficultyScore);
+        }
+        return difficultyScores;
+    }
+
+    /**
+     * Retrieves the Elo rating of the opponent for a given match.
+     *
+     * @param match    the match to find the opponent in
+     * @param playerId the ID of the player to find the opponent for
+     * @return the Elo rating of the opponent, or 0.0 if the opponent details are
+     *         not found
+     */
+    private double getOpponentElo(Match match, Long playerId) {
+        // Determine the opponent's ID for the given match
+        Long opponentId = match.getPlayer1Id().equals(playerId) ? match.getPlayer2Id() : match.getPlayer1Id();
+        // Get the opponent's Elo rating
+        return getEloRating(opponentId);
+    }
+
+    /**
+     * Retrieves the Elo rating of a player based on their ID.
+     *
+     * @param playerId the ID of the player to retrieve the Elo rating for
+     * @return the Elo rating of the player, or 0.0 if the player details are not
+     *         found
+     */
+    private double getEloRating(Long playerId) {
+        // Get the player's details from the player service
+        PlayerDetailsDTO playerDetails = restTemplate.getForObject(playerServiceUrl + "/api/player/" + playerId,
+                PlayerDetailsDTO.class);
+        return playerDetails != null ? playerDetails.getEloRating() : 0.0;
     }
 
     /**
@@ -872,10 +1105,12 @@ public class MatchService {
     }
 
     /**
-     * Retrieves player details if the player ID is not null, otherwise returns null.
+     * Retrieves player details if the player ID is not null, otherwise returns
+     * null.
      *
      * @param playerId the ID of the player
-     * @return the PlayerDetailsDTO object if the player ID is not null, otherwise null
+     * @return the PlayerDetailsDTO object if the player ID is not null, otherwise
+     *         null
      */
     private PlayerDetailsDTO getPlayerDetailsOrNull(Long playerId) {
         // Get the player details from the player service if the player ID is not null
@@ -885,7 +1120,7 @@ public class MatchService {
     /**
      * Sets the winner and loser IDs for a MatchDTO object.
      *
-     * @param match   the Match entity
+     * @param match    the Match entity
      * @param matchDTO the MatchDTO object to set the IDs on
      */
     private void setWinnerAndLoserIds(Match match, MatchDTO matchDTO) {
@@ -920,8 +1155,10 @@ public class MatchService {
     /**
      * Creates a Match entity with provided details.
      *
-     * @param tournamentId, Long player1Id, Long player2Id, Long winnerId, Long loserId,
-     * @param swissRoundNumber, RoundType roundType, Long gameTypeId, Long nextMatchId,
+     * @param tournamentId,     Long player1Id, Long player2Id, Long winnerId, Long
+     *                          loserId,
+     * @param swissRoundNumber, RoundType roundType, Long gameTypeId, Long
+     *                          nextMatchId,
      * @param status
      * @return the created Match entity
      */
@@ -956,4 +1193,3 @@ public class MatchService {
         return playerMatchHistory.getOrDefault(player1Id, new HashSet<>()).contains(player2Id);
     }
 }
-

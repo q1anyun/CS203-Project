@@ -16,8 +16,8 @@ public class SwissBracketController {
     @Autowired
     private SwissBracketService swissBracketService;
 
-    @GetMapping("/{id}")
-    public SwissBracketDTO getSwissBracket(@PathVariable("id") long id) {
-        return swissBracketService.getSwissBracket(id);
+    @GetMapping("/{tournamentId}")
+    public SwissBracketDTO getSwissBracket(@PathVariable("tournamentId") long tournamentId) {
+        return swissBracketService.getSwissBracket(tournamentId);
     }
 }

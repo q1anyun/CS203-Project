@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SwissBracketDTO {
+    private Long id;
     private Integer currentRound;
     private Integer numberOfRounds;
 }
