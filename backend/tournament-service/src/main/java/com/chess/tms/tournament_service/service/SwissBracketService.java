@@ -8,15 +8,10 @@ import org.springframework.stereotype.Service;
 import com.chess.tms.tournament_service.dto.SwissBracketDTO;
 import com.chess.tms.tournament_service.exception.SwissBracketNotFoundException;
 import com.chess.tms.tournament_service.repository.SwissBracketRepository;
-import com.chess.tms.tournament_service.model.Tournament;
-import com.chess.tms.tournament_service.repository.TournamentRepository;
 @Service
 public class SwissBracketService {
     @Autowired
     private SwissBracketRepository swissBracketRepository;
-
-    @Autowired
-    private TournamentRepository tournamentRepository;
 
     /**
      * Retrieves a Swiss bracket by its ID and converts it to DTO
@@ -24,12 +19,10 @@ public class SwissBracketService {
      * @return SwissBracketDTO containing the bracket information
      * @throws SwissBracketNotFoundException if bracket is not found
      */
-    public SwissBracketDTO getSwissBracket(Long tournamentId) {
-        Optional<Tournament> tournament = tournamentRepository.findById(tournamentId);
-        return swissBracketRepository.findByTournament(tournament.get())
+    public SwissBracketDTO getSwissBracket(Long id) {
+        return swissBracketRepository.findById(id)
             .map(bracket -> {
                 SwissBracketDTO dto = new SwissBracketDTO();
-                dto.setId(bracket.getId());
                 dto.setCurrentRound(bracket.getCurrentRound());
                 dto.setNumberOfRounds(bracket.getNumberOfRounds());
                 return dto;
