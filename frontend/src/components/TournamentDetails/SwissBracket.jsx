@@ -39,9 +39,8 @@ function SwissBracket({ matches, SwissBracketID }) {
         const fetchSwissStandings = async () => {
             console.log(`${swissStandingURL}/${SwissBracketID}`);
             const response = await axios.get(`${swissStandingURL}/${SwissBracketID}`);
-            console.log(response.data);
             setSwissStandings(response.data);
-            console.log(swissStandings);
+          
 
         };
         fetchSwissStandings();
@@ -122,7 +121,7 @@ function SwissBracket({ matches, SwissBracketID }) {
 
         const formattedRounds = groupMatchesByRound();
         setGroupedRounds(formattedRounds);
-    }, [matches]);
+    }, [knockoutMatches]);
 
     const matchesByRound = swissMatches.reduce((acc, match) => {
         const roundNumber = `Round ${match.swissRoundNumber || 'Unknown'}`;
