@@ -68,6 +68,17 @@ public class MatchService {
         this.restTemplate = restTemplate;
     }
 
+    // Helper class to represent a pairing
+    private static class Pairing {
+        TournamentPlayerEloDTO player1;
+        TournamentPlayerEloDTO player2;
+
+        Pairing(TournamentPlayerEloDTO p1, TournamentPlayerEloDTO p2) {
+            this.player1 = p1;
+            this.player2 = p2;
+        }
+    }
+
     /**
      * Creates knockout matches for a tournament based on the number of players.
      * Matches are paired based on Elo ratings with high-rated players facing
@@ -131,8 +142,7 @@ public class MatchService {
         generateFirstRoundMatches(tournamentId, gameTypeId, players, currentRoundType, allMatches, firstRoundMatches,
                 lowIndex, highIndex);
 
-        // Combine first-round and bye matches, add to map, and generate subsequent
-        // rounds
+        // Combine first-round and bye matches, add to map, and generate subsequent rounds
         List<Match> combinedFirstRoundMatches = new ArrayList<>(firstRoundMatches);
         combinedFirstRoundMatches.addAll(byeMatches);
 
@@ -147,8 +157,6 @@ public class MatchService {
         roundNumber = generateSubsequentMatches(tournamentId, gameTypeId, allMatches, roundMatchesMap, currentRoundSize,
                 roundNumber);
 
-        // Save all the matches (both regular and bye matches) and update next_match_id
-        // for each match in subsequent rounds
         matchRepository.saveAll(allMatches);
 
         // Update next_match_id for each match in subsequent rounds
@@ -337,15 +345,18 @@ public class MatchService {
     }
 
     /**
-     * Creates matches between players for a Swiss round, ensuring that players with
-     * similar standings are paired.
-     * Players from each group (split based on Elo) are paired in a balanced way to
-     * ensure fair competition.
-     *
-     * @param players      array of players participating in the round
-     * @param tournamentId the tournament ID
-     * @param gameTypeId   the game type ID
-     * @param roundNumber  the current round number in the Swiss bracket
+     * Creates matches for a round in a Swiss tournament by pairing players based on their standings and match history.
+     * 
+     * @param players array of tournament players with their Elo ratings
+     * @param tournamentId ID of the tournament
+     * @param gameTypeId ID of the game type (e.g., blitz, rapid)
+     * @param roundNumber current round number in the Swiss tournament
+     * 
+     * The method:
+     * 1. Gets the match history to avoid repeat pairings
+     * 2. Converts players to a list for manipulation
+     * 3. Finds valid pairings using the Swiss pairing algorithm
+     * 4. Creates and saves match entities for each pairing
      */
     private void createRoundMatches(TournamentPlayerEloDTO[] players, Long tournamentId, Long gameTypeId,
             int roundNumber) {
@@ -376,20 +387,8 @@ public class MatchService {
         matchRepository.saveAll(matches);
     }
 
-    // Helper class to represent a pairing
-    private static class Pairing {
-        TournamentPlayerEloDTO player1;
-        TournamentPlayerEloDTO player2;
-
-        Pairing(TournamentPlayerEloDTO p1, TournamentPlayerEloDTO p2) {
-            this.player1 = p1;
-            this.player2 = p2;
-        }
-    }
-
     /**
-     * Finds valid pairings for players in a Swiss tournament using a greedy
-     * heuristic.
+     * Finds valid pairings for players in a Swiss tournament using a greedy heuristic.
      * Prioritizes pairing players with fewer available opponents, reducing future
      * constraints.
      *
@@ -414,12 +413,9 @@ public class MatchService {
         }
 
         // Create a list of CompletableFuture objects for each sublist
-        // Each CompletableFuture object is used to find pairings for a sublist in
-        // parallel
-        // The findPairingsForGroup method is called with a supplier that returns the
-        // result of findPairingsForGroup
+        // Each CompletableFuture object is used to find pairings for a sublist in parallel
+        // The findPairingsForGroup method is called with a supplier that returns the result of findPairingsForGroup
         // The supplier is executed asynchronously using CompletableFuture.supplyAsync
-        // The result of findPairingsForGroup is a list of Pairing objects
         List<CompletableFuture<List<Pairing>>> futures = new ArrayList<>();
 
         for (List<TournamentPlayerEloDTO> subList : subLists) {
@@ -427,8 +423,7 @@ public class MatchService {
                     CompletableFuture.supplyAsync(() -> findPairingsForGroup(subList, playerMatchHistory), executor));
         }
 
-        // Wait for all the CompletableFuture objects to complete and add the pairings
-        // to the allPairings list
+        // Wait for all the CompletableFuture objects to complete and add the pairings to the allPairings list
         for (CompletableFuture<List<Pairing>> future : futures) {
             try {
                 allPairings.addAll(future.get());
@@ -454,21 +449,27 @@ public class MatchService {
         List<Pairing> pairings = new ArrayList<>();
         Set<Long> pairedPlayerIds = new HashSet<>();
 
+        // Iterate through each player in the group
         for (TournamentPlayerEloDTO player1 : players) {
+            // Skip if the player has already been paired
             if (pairedPlayerIds.contains(player1.getId()))
                 continue;
 
+            // Initialize the best match and the minimum opponent count
             TournamentPlayerEloDTO bestMatch = null;
             int minOpponentCount = Integer.MAX_VALUE;
 
             // Find the best available match for player1 with no previous pairing
             for (TournamentPlayerEloDTO player2 : players) {
+                // Skip if the player is the same or has already been paired
                 if (player1.getId().equals(player2.getId()) || pairedPlayerIds.contains(player2.getId()))
                     continue;
 
                 // Check if player1 and player2 have not played before
                 if (!hasPlayedBefore(playerMatchHistory, player1.getId(), player2.getId())) {
+                    // Get the number of opponents for player2
                     int opponentCount = playerMatchHistory.getOrDefault(player2.getId(), Collections.emptySet()).size();
+                    // Update the best match if player2 has fewer opponents
                     if (opponentCount < minOpponentCount) {
                         minOpponentCount = opponentCount;
                         bestMatch = player2;
@@ -476,15 +477,13 @@ public class MatchService {
                 }
             }
 
-            // If a unique match was found, add it; otherwise, add the best available match
-            // to avoid unpaired players
+            // If a unique match was found, add it; otherwise, add the best available match to avoid unpaired players
             if (bestMatch != null) {
                 pairings.add(new Pairing(player1, bestMatch));
                 pairedPlayerIds.add(player1.getId());
                 pairedPlayerIds.add(bestMatch.getId());
             } else {
-                // Fallback logic: try to find any remaining unmatched player if no unique
-                // pairing is possible
+                // Fallback logic: try to find any remaining unmatched player if no unique pairing is possible
                 for (TournamentPlayerEloDTO player2 : players) {
                     if (!player1.getId().equals(player2.getId()) && !pairedPlayerIds.contains(player2.getId())) {
                         pairings.add(new Pairing(player1, player2));
@@ -752,17 +751,22 @@ public class MatchService {
      */
     private String completedSwissRound(Match match, SwissBracket bracket) {
         List<SwissStanding> standings = getSortedStandings(bracket);
+
         int half = standings.size() / 2;
+
+        // Get the threshold for advancing to the next round - the number of wins a player needs to have to advance
         int advancingScoreThreshold = getAdvancingScoreThreshold(standings, half);
 
+        // Get the potential advancers based on the threshold
         List<SwissStanding> potentialAdvancers = getPotentialAdvancers(standings, advancingScoreThreshold);
 
+        // Resolve the advancers using tie-breaking logic - Using opponent difficulty
         List<Long> advancedPlayers = resolveAdvancers(potentialAdvancers, advancingScoreThreshold, half, match);
 
-        // Create knockout matches for the selected players and update the tournament
-        // round
+        // Create knockout matches for the selected players and update the tournament round
         Long currentRoundId = createKnockoutMatches(match.getTournamentId(), match.getGameType().getId(),
                 advancedPlayers);
+
         updateCurrentRoundForTournament(match.getTournamentId(), currentRoundId);
 
         return "Swiss rounds completed, moving to knockout phase.";
@@ -824,8 +828,7 @@ public class MatchService {
     }
 
     /**
-     * Identifies players with scores equal to the advancing threshold for
-     * tiebreaker.
+     * Identifies players with scores equal to the advancing threshold for tiebreaker.
      */
     private List<SwissStanding> getTiedPlayers(List<SwissStanding> potentialAdvancers, int threshold) {
         List<SwissStanding> tiedPlayers = new ArrayList<>();
@@ -843,10 +846,13 @@ public class MatchService {
     private List<Long> selectAdvancersWithTieBreaker(List<SwissStanding> potentialAdvancers,
             List<SwissStanding> tiedPlayers, Map<Long, Double> opponentDifficultyScores, int threshold, int half) {
 
+        // Debugging steps included
         System.out.println(opponentDifficultyScores);
+
         // Sort tied players by opponent difficulty in descending order
         Collections.sort(tiedPlayers, (p1, p2) -> Double.compare(opponentDifficultyScores.get(p2.getPlayerId()),
                 opponentDifficultyScores.get(p1.getPlayerId())));
+
         // Print out the tied players sorted by opponent difficulty
         for (SwissStanding player : tiedPlayers) {
             System.out.println("Tied player: " + player.getPlayerId() + " with opponent difficulty score: "
@@ -861,6 +867,7 @@ public class MatchService {
                 advancedPlayers.add(player.getPlayerId());
             }
         }
+
         System.out.println("Advanced players: " + advancedPlayers);
 
         // Add remaining slots from the sorted tied list
@@ -868,6 +875,7 @@ public class MatchService {
         for (int i = 0; i < remainingSlots; i++) {
             advancedPlayers.add(tiedPlayers.get(i).getPlayerId());
         }
+
         System.out.println("Advanced players after adding remaining slots: " + advancedPlayers);
 
         return advancedPlayers;
@@ -906,10 +914,8 @@ public class MatchService {
                         double baseWeight = isWin ? 1.0 : 0.7;
 
                         // Adjust the weight based on the opponent's Elo rating
-                        // If the opponent's Elo rating is higher than the player's Elo rating, increase
-                        // the weight
-                        // Encourages beating or closely competing with stronger players without overly
-                        // penalizing losses
+                        // If the opponent's Elo rating is higher than the player's Elo rating, increase the weight
+                        // Encourages beating or closely competing with stronger players without overly penalizing losses
                         double weight = baseWeight * (opponentElo > playerElo ? 1.2 : 1.0);
 
                         return opponentElo * weight;
@@ -926,8 +932,7 @@ public class MatchService {
      *
      * @param match    the match to find the opponent in
      * @param playerId the ID of the player to find the opponent for
-     * @return the Elo rating of the opponent, or 0.0 if the opponent details are
-     *         not found
+     * @return the Elo rating of the opponent, or 0.0 if the opponent details are not found
      */
     private double getOpponentElo(Match match, Long playerId) {
         // Determine the opponent's ID for the given match
@@ -940,8 +945,7 @@ public class MatchService {
      * Retrieves the Elo rating of a player based on their ID.
      *
      * @param playerId the ID of the player to retrieve the Elo rating for
-     * @return the Elo rating of the player, or 0.0 if the player details are not
-     *         found
+     * @return the Elo rating of the player, or 0.0 if the player details are not found
      */
     private double getEloRating(Long playerId) {
         // Get the player's details from the player service
