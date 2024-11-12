@@ -91,6 +91,8 @@ function TournamentDetails() {
         return formattedRounds;
     };
 
+    
+
     return (
         <Box sx={{ padding: 2 }}>
             <TournamentDescription tournament={tournament} />

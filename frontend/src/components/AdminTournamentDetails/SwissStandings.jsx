@@ -53,7 +53,7 @@ const SwissStandings = ({ swissStandings, playersWithPhotos }) => {
               <StyledTableCell align="center">{standing.wins}</StyledTableCell>
               <StyledTableCell align="center">{standing.losses}</StyledTableCell>
               <StyledTableCell align="center">
-                {standing.losses > 0 ? ((standing.wins / standing.losses) * 100).toFixed(1) : '100'}%
+                {standing.losses > 0 ? ((standing.wins / (standing.losses + standing.wins)) * 100).toFixed(1) : '100'}%
               </StyledTableCell>
               <StyledTableCell align="center">{standing.player?.eloRating}</StyledTableCell>
             </StyledTableRow>
