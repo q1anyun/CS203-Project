@@ -14,7 +14,7 @@ function SwissBracket({ matches, SwissBracketID }) {
     const [swissRoundDetails, setSwissRoundDetails] = useState([]);
     const [tabValue, setTabValue] = useState('swiss');
     const [swissMatches, setSwissMatches] = useState([]);
-    const [knockoutMatches, setKnockoutMatches] = useState([]);
+    const [knockoutMatches, setKnockoutMatches] = useState([{}]);
     const [groupedRounds, setGroupedRounds] = useState([]);
     const [playersWithPhotos, setPlayersWithPhotos] = useState({});
     const [swissStandings, setSwissStandings] = useState([{}]); 
