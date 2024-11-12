@@ -99,7 +99,7 @@ function TournamentDescription({ tournament }) {
             }
         }
         window.location.reload();
-        
+
     };
 
     {/*WAITING FOR API TO WITHDRAW */ }
@@ -175,15 +175,21 @@ function TournamentDescription({ tournament }) {
                     onClick={() => isJoined(tournament.id) ? handleWithdraw() : handleJoin()}
                     disabled={
                         tournament.status === 'COMPLETED' ||
-                        (tournament.status === 'LIVE' && true) ||
                         elo < tournament.minElo ||
                         elo > tournament.maxElo ||
-                        tournament.currentPlayers >= tournament.maxPlayers
+                        (!isJoined(tournament.id) && tournament.currentPlayers >= tournament.maxPlayers)
                     }
                     sx={{ marginLeft: '10px' }}
                 >
-                    {tournament.status === 'COMPLETED'
-                        ? 'OVER' : tournament.currentPlayers >= tournament.maxPlayers ? 'FULL' : isJoined(tournament.id) ? 'Withdraw' : 'Join'}
+                    {
+                        tournament.status === 'COMPLETED'
+                            ? 'OVER'
+                            : isJoined(tournament.id)
+                                ? 'Withdraw'
+                                : tournament.currentPlayers >= tournament.maxPlayers
+                                    ? 'FULL'
+                                    : 'Join'
+                    }
                 </Button>
 
 
