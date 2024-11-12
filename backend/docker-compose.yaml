@@ -7,9 +7,7 @@
 # - db_setup.sql
 
 # Ensure env files are present in the following directories:
-# - ./gateway/.env
-# - ./user-service/.env
-# - ./tournament-service/.env
+# Each service has its own .env file
 # - ./.env
 
 ## Access MySQL Database through: docker exec -it chess-tms-db-1 mysql -u root -p

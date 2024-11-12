@@ -19,7 +19,7 @@ CREATE TABLE player_details (
   first_name VARCHAR(100),
   last_name VARCHAR(100),
   country VARCHAR(100),
-  profile_picture VARCHAR(255),
+  profile_picture LONGTEXT,
   total_wins INT DEFAULT 0,
   total_losses INT DEFAULT 0,
   total_matches INT DEFAULT 0,
@@ -32,8 +32,6 @@ CREATE TABLE game_type (
   name VARCHAR(50) NOT NULL,
   time_control_minutes INT NOT NULL
 );
-
-
 
 
 CREATE TABLE round_type (
@@ -197,26 +195,26 @@ VALUES
 -- Insert corresponding player details for each player (ID 3 to 22)
 INSERT INTO player_details (user_id, elo_rating, country, first_name, last_name, profile_picture, total_wins, total_losses, total_matches, highest_elo)
 VALUES
-(1, 1520, 'USA', 'Player', 'One', 'profile1.jpg', 1, 1, 2, 1540),
-(2, 1380, 'UK', 'Player', 'Two', 'profile2.jpg', 0, 1, 1, 1400),
-(3, 1530, 'Singapore', 'Magnus', 'Lim', 'profile3.jpg', 6, 0, 6, 1520),
-(4, 1410, 'India', 'Player', 'Four', 'profile4.jpg', 1, 3, 4, 1450),
-(5, 1380, 'Germany', 'Player', 'Five', 'profile5.jpg', 0, 1, 1, 1400),
-(6, 1460, 'France', 'Player', 'Six', 'profile6.jpg', 4, 2, 6, 1500),
-(7, 1330, 'Brazil', 'Player', 'Seven', 'profile7.jpg', 0, 1, 1, 1350),
-(8, 1370, 'Japan', 'Player', 'Eight', 'profile8.jpg', 2, 2, 4, 1400),
-(9, 1500, 'Russia', 'Player', 'Nine', 'profile9.jpg', 2, 2, 4, 1520),
-(10, 1450, 'China', 'Player', 'Ten', 'profile10.jpg', 0, 1, 1, 1470),
-(11, 500, 'Spain', 'Player', 'Eleven', 'profile11.jpg', 0, 0, 0, 500),
-(12, 500, 'Italy', 'Player', 'Twelve', 'profile12.jpg', 0, 0, 0, 500),
-(13, 600, 'Netherlands', 'Player', 'Thirteen', 'profile13.jpg', 0, 0, 0, 500),
-(14, 800, 'Australia', 'Player', 'Fourteen', 'profile14.jpg', 0, 0, 0, 500),
-(15, 540, 'South Africa', 'Player', 'Fifteen', 'profile15.jpg', 0, 0, 0, 500),
-(16, 520, 'Argentina', 'Player', 'Sixteen', 'profile16.jpg', 0, 0, 0, 500),
-(17, 980, 'South Korea', 'Player', 'Seventeen', 'profile17.jpg', 0, 0, 0, 500),
-(18, 1100, 'Mexico', 'Player', 'Eighteen', 'profile18.jpg', 0, 0, 0, 500),
-(19, 580, 'Egypt', 'Player', 'Nineteen', 'profile19.jpg', 0, 0, 0, 500),
-(20, 590, 'Kenya', 'Player', 'Twenty', 'profile20.jpg', 0, 0, 0, 500);
+(1, 1520, 'US', 'Player', 'One', 'profile1.jpg', 1, 1, 2, 1540),
+(2, 1380, 'GB', 'Player', 'Two', 'profile2.jpg', 0, 1, 1, 1400),
+(3, 1530, 'SG', 'Magnus', 'Lim', 'profile3.jpg', 6, 0, 6, 1520),
+(4, 1410, 'IN', 'Player', 'Four', 'profile4.jpg', 1, 3, 4, 1450),
+(5, 1380, 'DE', 'Player', 'Five', 'profile5.jpg', 0, 1, 1, 1400),
+(6, 1460, 'FR', 'Player', 'Six', 'profile6.jpg', 4, 2, 6, 1500),
+(7, 1330, 'BR', 'Player', 'Seven', 'profile7.jpg', 0, 1, 1, 1350),
+(8, 1370, 'JP', 'Player', 'Eight', 'profile8.jpg', 2, 2, 4, 1400),
+(9, 1500, 'RU', 'Player', 'Nine', 'profile9.jpg', 2, 2, 4, 1520),
+(10, 1450, 'CN', 'Player', 'Ten', 'profile10.jpg', 0, 1, 1, 1470),
+(11, 500, 'ES', 'Player', 'Eleven', 'profile11.jpg', 0, 0, 0, 500),
+(12, 500, 'IT', 'Player', 'Twelve', 'profile12.jpg', 0, 0, 0, 500),
+(13, 600, 'NL', 'Player', 'Thirteen', 'profile13.jpg', 0, 0, 0, 500),
+(14, 800, 'AU', 'Player', 'Fourteen', 'profile14.jpg', 0, 0, 0, 500),
+(15, 540, 'ZA', 'Player', 'Fifteen', 'profile15.jpg', 0, 0, 0, 500),
+(16, 520, 'AR', 'Player', 'Sixteen', 'profile16.jpg', 0, 0, 0, 500),
+(17, 980, 'KR', 'Player', 'Seventeen', 'profile17.jpg', 0, 0, 0, 500),
+(18, 1100, 'MX', 'Player', 'Eighteen', 'profile18.jpg', 0, 0, 0, 500),
+(19, 580, 'EG', 'Player', 'Nineteen', 'profile19.jpg', 0, 0, 0, 500),
+(20, 590, 'KE', 'Player', 'Twenty', 'profile20.jpg', 0, 0, 0, 500);
 
 INSERT INTO user (id, username, email, password, role) VALUES
 (101, 'player_101', 'player101@example.com', 'password101', 'PLAYER'),
@@ -320,107 +318,7 @@ INSERT INTO user (id, username, email, password, role) VALUES
 (199, 'player_199', 'player199@example.com', 'password199', 'PLAYER'),
 (200, 'player_200', 'player200@example.com', 'password200', 'PLAYER');
 
-INSERT INTO player_details (user_id, elo_rating, first_name, last_name, country, profile_picture, highest_elo) VALUES
-(101, 1500, 'John', 'Doe', 'USA', '../../assets/default_user.png', 1600),
-(102, 1450, 'Jane', 'Smith', 'Canada', '../../assets/default_user.png', 1550),
-(103, 1600, 'Alice', 'Brown', 'UK', '../../assets/default_user.png', 1700),
-(104, 1550, 'Bob', 'Jones', 'Australia', '../../assets/default_user.png', 1650),
-(105, 1480, 'Chris', 'Taylor', 'Germany', '../../assets/default_user.png', 1580),
-(106, 1520, 'Anna', 'Wilson', 'France', '../../assets/default_user.png', 1620),
-(107, 1430, 'Emily', 'Clark', 'Italy', '../../assets/default_user.png', 1530),
-(108, 1490, 'David', 'Miller', 'Spain', '../../assets/default_user.png', 1590),
-(109, 1470, 'Sophia', 'Moore', 'Brazil', '../../assets/default_user.png', 1570),
-(110, 1540, 'James', 'Anderson', 'Russia', '../../assets/default_user.png', 1640),
-(111, 1510, 'Olivia', 'Thompson', 'Japan', '../../assets/default_user.png', 1610),
-(112, 1460, 'Mia', 'Taylor', 'India', '../../assets/default_user.png', 1560),
-(113, 1580, 'Lucas', 'Walker', 'China', '../../assets/default_user.png', 1680),
-(114, 1440, 'Liam', 'White', 'Netherlands', '../../assets/default_user.png', 1540),
-(115, 1530, 'Isabella', 'Harris', 'Mexico', '../../assets/default_user.png', 1630),
-(116, 1500, 'Noah', 'Green', 'South Africa', '../../assets/default_user.png', 1600),
-(117, 1420, 'Ava', 'Hill', 'Sweden', '../../assets/default_user.png', 1520),
-(118, 1480, 'Benjamin', 'Scott', 'New Zealand', '../../assets/default_user.png', 1580),
-(119, 1550, 'Charlotte', 'Adams', 'Norway', '../../assets/default_user.png', 1650),
-(120, 1450, 'Elijah', 'Baker', 'Denmark', '../../assets/default_user.png', 1550),
-(121, 1530, 'William', 'Carter', 'South Korea', '../../assets/default_user.png', 1630),
-(122, 1440, 'Amelia', 'Parker', 'Finland', '../../assets/default_user.png', 1540),
-(123, 1490, 'Ethan', 'Evans', 'Argentina', '../../assets/default_user.png', 1590),
-(124, 1520, 'Abigail', 'Mitchell', 'Nigeria', '../../assets/default_user.png', 1620),
-(125, 1470, 'Sebastian', 'Roberts', 'Chile', '../../assets/default_user.png', 1570),
-(126, 1500, 'Victoria', 'Turner', 'Greece', '../../assets/default_user.png', 1600),
-(127, 1450, 'Matthew', 'Phillips', 'Portugal', '../../assets/default_user.png', 1550),
-(128, 1560, 'Ella', 'Campbell', 'Turkey', '../../assets/default_user.png', 1660),
-(129, 1410, 'Harper', 'Parker', 'Poland', '../../assets/default_user.png', 1510),
-(130, 1570, 'Alexander', 'Hughes', 'Ireland', '../../assets/default_user.png', 1670),
-(131, 1430, 'Mason', 'Lee', 'Belgium', '../../assets/default_user.png', 1530),
-(132, 1490, 'Logan', 'Scott', 'Switzerland', '../../assets/default_user.png', 1590),
-(133, 1480, 'Aiden', 'Kelly', 'Austria', '../../assets/default_user.png', 1580),
-(134, 1540, 'Daniel', 'Russell', 'Peru', '../../assets/default_user.png', 1640),
-(135, 1450, 'Jackson', 'Coleman', 'Israel', '../../assets/default_user.png', 1550),
-(136, 1500, 'Henry', 'Cruz', 'Colombia', '../../assets/default_user.png', 1600),
-(137, 1460, 'Grace', 'Peterson', 'Saudi Arabia', '../../assets/default_user.png', 1560),
-(138, 1590, 'Owen', 'Bennett', 'Malaysia', '../../assets/default_user.png', 1690),
-(139, 1440, 'Lily', 'Patterson', 'Indonesia', '../../assets/default_user.png', 1540),
-(140, 1530, 'Samuel', 'Butler', 'Philippines', '../../assets/default_user.png', 1630),
-(141, 1500, 'Victoria', 'Brooks', 'Thailand', '../../assets/default_user.png', 1600),
-(142, 1420, 'Joseph', 'Reed', 'Ukraine', '../../assets/default_user.png', 1520),
-(143, 1490, 'Jack', 'Hughes', 'Singapore', '../../assets/default_user.png', 1590),
-(144, 1550, 'Charlie', 'Foster', 'Morocco', '../../assets/default_user.png', 1650),
-(145, 1470, 'Leo', 'Sanders', 'Czech Republic', '../../assets/default_user.png', 1570),
-(146, 1540, 'Aria', 'Murphy', 'Romania', '../../assets/default_user.png', 1640),
-(147, 1510, 'Eleanor', 'Powell', 'Hungary', '../../assets/default_user.png', 1610),
-(148, 1480, 'Nathan', 'Rivera', 'Egypt', '../../assets/default_user.png', 1580),
-(149, 1600, 'Ryan', 'Price', 'Vietnam', '../../assets/default_user.png', 1700),
-(150, 1460, 'Leah', 'Sullivan', 'Iran', '../../assets/default_user.png', 1560),
-(151, 1570, 'Isaac', 'Stewart', 'Serbia', '../../assets/default_user.png', 1670),
-(152, 1430, 'Avery', 'Griffin', 'Kenya', '../../assets/default_user.png', 1530),
-(153, 1550, 'Sebastian', 'Mitchell', 'Venezuela', '../../assets/default_user.png', 1650),
-(154, 1500, 'Harper', 'Bailey', 'Pakistan', '../../assets/default_user.png', 1600),
-(155, 1440, 'Dylan', 'Wood', 'Bangladesh', '../../assets/default_user.png', 1540),
-(156, 1510, 'Zoey', 'Barnes', 'Sri Lanka', '../../assets/default_user.png', 1610),
-(157, 1490, 'Chloe', 'Morris', 'Iraq', '../../assets/default_user.png', 1590),
-(158, 1520, 'Isaiah', 'Nguyen', 'Afghanistan', '../../assets/default_user.png', 1620),
-(159, 1470, 'Carter', 'Rivera', 'Uzbekistan', '../../assets/default_user.png', 1570),
-(160, 1530, 'Gabriel', 'Cook', 'Kazakhstan', '../../assets/default_user.png', 1630),
-(161, 1460, 'Landon', 'Rogers', 'Cambodia', '../../assets/default_user.png', 1560),
-(162, 1580, 'Penelope', 'Jenkins', 'Nepal', '../../assets/default_user.png', 1680),
-(163, 1420, 'Hudson', 'Foster', 'Laos', '../../assets/default_user.png', 1520),
-(164, 1560, 'Henry', 'Simmons', 'Mongolia', '../../assets/default_user.png', 1660),
-(165, 1500, 'Lucy', 'Ward', 'Bhutan', '../../assets/default_user.png', 1600),
-(166, 1540, 'Levi', 'Morris', 'Oman', '../../assets/default_user.png', 1640),
-(167, 1470, 'Zoe', 'Gray', 'Jordan', '../../assets/default_user.png', 1570),
-(168, 1510, 'Jack', 'Jenkins', 'Kuwait', '../../assets/default_user.png', 1610),
-(169, 1490, 'Nolan', 'Garcia', 'Bahrain', '../../assets/default_user.png', 1590),
-(170, 1450, 'Grace', 'Garcia', 'Syria', '../../assets/default_user.png', 1550),
-(171, 1600, 'Mason', 'Alvarez', 'Yemen', '../../assets/default_user.png', 1700),
-(172, 1470, 'Samuel', 'Lopez', 'Armenia', '../../assets/default_user.png', 1570),
-(173, 1530, 'Scarlett', 'Gomez', 'Kyrgyzstan', '../../assets/default_user.png', 1630),
-(174, 1520, 'Olivia', 'Perry', 'Tajikistan', '../../assets/default_user.png', 1620),
-(175, 1490, 'Jaxon', 'Barnes', 'Turkmenistan', '../../assets/default_user.png', 1590),
-(176, 1540, 'Victoria', 'Mendoza', 'Qatar', '../../assets/default_user.png', 1640),
-(177, 1500, 'Liam', 'James', 'Palestine', '../../assets/default_user.png', 1600),
-(178, 1450, 'Kylie', 'Nelson', 'Mali', '../../assets/default_user.png', 1550),
-(179, 1570, 'Matthew', 'Alexander', 'Azerbaijan', '../../assets/default_user.png', 1670),
-(180, 1510, 'Samantha', 'Wilson', 'Cyprus', '../../assets/default_user.png', 1610),
-(181, 1460, 'Zachary', 'Cooper', 'Malta', '../../assets/default_user.png', 1560),
-(182, 1500, 'Charlotte', 'Flores', 'Singapore', '../../assets/default_user.png', 1600),
-(183, 1480, 'Abigail', 'Rivera', 'Seychelles', '../../assets/default_user.png', 1580),
-(184, 1540, 'Asher', 'Curtis', 'Kosovo', '../../assets/default_user.png', 1640),
-(185, 1450, 'Dylan', 'Woods', 'Montenegro', '../../assets/default_user.png', 1550),
-(186, 1520, 'Zane', 'Wright', 'Macedonia', '../../assets/default_user.png', 1620),
-(187, 1470, 'Hazel', 'Parker', 'Bosnia and Herzegovina', '../../assets/default_user.png', 1570),
-(188, 1490, 'Sophie', 'Ferguson', 'Georgia', '../../assets/default_user.png', 1590),
-(189, 1510, 'Caleb', 'Reid', 'Serbia', '../../assets/default_user.png', 1610),
-(190, 1430, 'Eliza', 'Hayes', 'North Korea', '../../assets/default_user.png', 1530),
-(191, 1560, 'Jack', 'Morgan', 'Bulgaria', '../../assets/default_user.png', 1660),
-(192, 1550, 'Isaac', 'Foster', 'Czechia', '../../assets/default_user.png', 1650),
-(193, 1500, 'Bella', 'Davis', 'Nepal', '../../assets/default_user.png', 1600),
-(194, 1470, 'Nathan', 'Fletcher', 'Kosovo', '../../assets/default_user.png', 1570),
-(195, 1540, 'Elijah', 'Curtis', 'Croatia', '../../assets/default_user.png', 1640),
-(196, 1460, 'Emma', 'Phillips', 'Algeria', '../../assets/default_user.png', 1560),
-(197, 1480, 'Aidan', 'Griffin', 'Slovenia', '../../assets/default_user.png', 1580),
-(198, 1510, 'Henry', 'Morris', 'Bulgaria', '../../assets/default_user.png', 1610),
-(199, 1600, 'Lillian', 'Murphy', 'Switzerland', '../../assets/default_user.png', 1700),
-(200, 1550, 'Ella', 'Fletcher', 'Estonia', '../../assets/default_user.png', 1650);
+
 
 
 -- Insert dummy data into game_type table
@@ -438,12 +336,12 @@ VALUES
 INSERT INTO tournament (created_by, name, tournament_type, description, start_date, end_date, min_elo, max_elo, current_players, max_players, status, time_control, format, country, location_address, location_longitude, location_latitude)
 VALUES
 -- ONLINE tournaments
-(1, 'Chess Rapid Championship', 1, 'Rapid championship held entirely online.', '2024-10-01 10:00:00', '2024-10-02 18:00:00', 1200, 2400, 16, 16, 'UPCOMING', 1, 'ONLINE', NULL, NULL, NULL, NULL),
-(2, 'Blitz Open Tournament', 1, 'Blitz tournament for players of all levels, online.', '2024-11-10 09:00:00', '2024-11-10 20:00:00', 1000, 2200, 20, 32, 'UPCOMING', 2, 'ONLINE', NULL, NULL, NULL, NULL),
+(1, 'Chess Rapid Championship', 1, 'Rapid championship held entirely online.', '2025-01-10 10:00:00', '2025-01-12 18:00:00', 1200, 2400, 16, 16, 'UPCOMING', 1, 'ONLINE', NULL, NULL, NULL, NULL),
+(2, 'Blitz Open Tournament', 1, 'Blitz tournament for players of all levels, online.', '2025-01-15 09:00:00', '2025-01-16 20:00:00', 1000, 2200, 20, 32, 'UPCOMING', 2, 'ONLINE', NULL, NULL, NULL, NULL),
 
 -- PHYSICAL tournaments
-(1, 'Classic Masters Event', 2, 'Prestigious classical chess event held in-person.', '2024-12-05 10:00:00', '2024-12-06 18:00:00', 1400, 2600, 8, 8, 'UPCOMING', 3, 'PHYSICAL', 'USA', '123 Grandmaster Lane, New York, NY', -73.935242, 40.730610),
-(2, 'Classic Open Tournament', 1, 'Open classical tournament held in-person.', '2024-10-16 10:00:00', '2024-10-18 18:00:00', 200, 3000, 3, 4, 'UPCOMING', 3, 'PHYSICAL', 'Germany', 'Berlin Chess Arena, Berlin', 13.4050, 52.5200),
+(1, 'Classic Masters Event', 2, 'Prestigious classical chess event held in-person.', '2024-12-05 10:00:00', '2024-12-06 18:00:00', 1400, 2600, 7, 8, 'UPCOMING', 3, 'PHYSICAL', 'USA', '123 Grandmaster Lane, New York, NY', -73.935242, 40.730610),
+(2, 'Classic Open Tournament', 1, 'Open classical tournament held in-person.', '2024-11-16 10:00:00', '2024-11-18 18:00:00', 200, 3000, 3, 4, 'UPCOMING', 3, 'PHYSICAL', 'Germany', 'Berlin Chess Arena, Berlin', 13.4050, 52.5200),
 
 -- HYBRID tournaments (mix of online and physical participation)
 (2, 'Hybrid Chess Championship 2024', 1, 'A hybrid event with both online and in-person players.', '2024-09-15 09:00:00', '2024-09-16 18:00:00', 1500, 2700, 20, 32, 'UPCOMING', 1, 'HYBRID', 'UK', 'London Chess Hall, London', -0.127758, 51.507351);
@@ -704,6 +602,5 @@ VALUES
 (8, 3),
 (9, 3),
 (10, 3),
-(11, 3),
-(12, 3);  -- Total 8 players
+(11, 3);  -- Total 7 players
 
