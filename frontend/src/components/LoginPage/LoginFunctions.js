@@ -1,17 +1,10 @@
 import axios from 'axios';
+import useHandleError from '../Hooks/useHandleError';
 
 const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
-};
-
-export const handleDialogOpen = (setOpenDialog) => {
-    setOpenDialog(true);
-};
-
-export const handleDialogClose = (setOpenDialog) => {
-    setOpenDialog(false);
 };
 
 export const handleSubmit = async (e, username, password, navigate, setError) => {
@@ -30,16 +23,6 @@ export const handleSubmit = async (e, username, password, navigate, setError) =>
         navigate('/home');
 
     } catch (err) {
-        if (err.response) {
-            if (err.response.status === 404 || err.response.status === 403) {
-                setError('Invalid username or password');
-            } else {
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            }
-        } else if (err.request) {
-            navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-            navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-        }
+        useHandleError(err);
     }
 };

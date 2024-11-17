@@ -1,6 +1,7 @@
 import axios from 'axios';
+import useHandleError from '../Hooks/useHandleError';
 
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL; // Base URL for API calls
+const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 // Function to handle toggling the visibility of the password
 export const handleClickShowPassword = (setShowPassword) => {
@@ -36,14 +37,6 @@ export const handleSubmitChanges = async (event, oldPassword, newPassword, setEr
             navigate('/home');
         }
     } catch (error) {
-        if (error.response) {
-            const statusCode = error.response.status;
-            const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-            alert(`Error: ${errorMessage}`);
-        } else if (error.request) {
-            navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-            navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
-        }
+        useHandleError(error);
     }
 };

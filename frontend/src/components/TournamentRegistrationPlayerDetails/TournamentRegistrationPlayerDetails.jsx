@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReactCountryFlag from 'react-country-flag';
 import defaultProfilePic from '../../assets/default_user.png';
+import useHandleError from '../Hooks/useHandleError';
 
 const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL
@@ -44,15 +45,7 @@ function TournamentRegistrationPlayerDetails() {
                 const participantsWithPhotos = await attachProfilePhotos(formattedData);
                 setParticipants(participantsWithPhotos);
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (error.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
-                }
+                useHandleError(error);
             }
             setLoading(false);
         };

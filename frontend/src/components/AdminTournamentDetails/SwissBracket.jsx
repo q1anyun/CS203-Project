@@ -6,6 +6,7 @@ import Knockout from './Knockout';
 import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png';
 import SwissStandings from '../TournamentDetails/SwissStandings';
+import useHandleError from '../Hooks/useHandleError';
 
 const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
@@ -138,15 +139,7 @@ function SwissBracket({ matches, SwissBracketID }) {
             handleCloseEdit();
             window.location.reload();
         } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
+            useHandleError(error);
         }
     };
 

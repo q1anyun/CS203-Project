@@ -2,6 +2,7 @@ import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogC
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
 import { useNavigate } from 'react-router-dom';
+import useHandleError from '../Hooks/useHandleError';
 
 function EditTournamentDialog({
     tournamentURL,
@@ -30,7 +31,6 @@ function EditTournamentDialog({
             const updatedTournamentData = {
                 ...updateTournament,
             };
-            console.log(updatedTournamentData);
 
             try {
                 const response = await axios.put(`${tournamentURL}/${tournamentToEdit.id}`, updatedTournamentData, {
@@ -38,28 +38,17 @@ function EditTournamentDialog({
                         'Authorization': `Bearer ${token}`, 
                     }
                 });
-                console.log(response.data);
 
                 const updatedTournaments = tournaments.map(t =>
                     t.tournamentId === tournamentToEdit.id ? response.data : t
                 );
 
                 setTournaments(updatedTournaments);
-                console.log(tournaments); 
-
                 setEditDialogOpen(false);
                 window.location.reload();
 
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-                }
+                useHandleError(error);
             }
         }
     };

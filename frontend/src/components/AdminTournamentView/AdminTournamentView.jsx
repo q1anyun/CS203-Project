@@ -6,6 +6,7 @@ import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import EditTournamentDialog from './EditTournamentDialog';
 import CreateTournamentDialog from './CreateTournamentDialog';
 import TournamentTable from './TournamentTable';
+import useHandleError from '../Hooks/useHandleError';
 
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
 const gameTypeURL = import.meta.env.VITE_TOURNAMENT_GAMETYPE_URL;
@@ -112,7 +113,7 @@ export default function AdminTournamentView() {
             return false;
         }
 
-        const { minElo, maxElo, tournamentType, maxPlayers } = tournament;
+        const { minElo, maxElo } = tournament;
         if (maxElo < minElo) {
             setEloError('Max ELO must be greater than Min ELO.');
             setCreateFormError('');
@@ -135,15 +136,7 @@ export default function AdminTournamentView() {
                 console.log(response.data);
                 setTournaments(response.data);
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-                }
+                useHandleError(error);
             }
         };
 
@@ -173,10 +166,7 @@ export default function AdminTournamentView() {
 
                 },
             });
-            console.log('image updated successfully');
             window.location.reload();
-
-
         }
     }
 
@@ -208,15 +198,7 @@ export default function AdminTournamentView() {
             });
             setEditDialogOpen(true);
         } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
+            useHandleError(error);
         }
     };
 

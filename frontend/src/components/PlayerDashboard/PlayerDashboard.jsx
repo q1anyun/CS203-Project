@@ -4,6 +4,7 @@ import { Box, Typography, Grid, Card, CardContent, Avatar, Divider } from '@mui/
 import { PieChart, LineChart } from '@mui/x-charts';
 import { useNavigate } from 'react-router-dom';
 import TournamentItem from "../TournamentItem/TournamentItem";
+import useHandleError from '../Hooks/useHandleError';
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -34,7 +35,6 @@ function PlayerDashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setPlayerDetails(playerResponse.data || {});
-                console.log(playerResponse.data);
 
                 // Fetch chart data
                 const chartResponse = await axios.get(`${eloURL}/chart/current`, {
@@ -60,17 +60,8 @@ function PlayerDashboard() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRecommendedTournaments(recommendedTournamentResponse.data);
-                console.log(recommendedTournaments);
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (error.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
-                }
+                useHandleError(error);
             }
         };
 

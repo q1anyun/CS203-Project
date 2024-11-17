@@ -6,6 +6,7 @@ import { Container, Grid2 } from '@mui/material';
 import { Link } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png';
+import useHandleError from '../Hooks/useHandleError';
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 
@@ -25,15 +26,7 @@ function Leaderboard() {
         setTopThree(await attachProfilePhotos(top3));
         setProfiles(await attachProfilePhotos(remainingPlayers));
       } catch (error) {
-        if (error.response) {
-          const statusCode = error.response.status;
-          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        } else if (err.request) {
-          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-        }
+        useHandleError(error);
       }
     };
 

@@ -5,10 +5,9 @@ import countryList from 'react-select-country-list'
 import EditProfileDialog from './EditProfileDialog';
 import { useNavigate } from 'react-router-dom';
 import ReactCountryFlag from 'react-country-flag';
-
+import useHandleError from '../Hooks/useHandleError';
 
 const baseURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
-
 
 function PlayerProfile({ profilePic }) {
 
@@ -47,15 +46,7 @@ function PlayerProfile({ profilePic }) {
         setPlayerDetails(playerResponse.data || {});
 
       } catch (error) {
-        if (error.response) {
-          const statusCode = error.response.status;
-          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        } else if (err.request) {
-          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-        }
+        useHandleError(error);
       }
     };
 

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from './PlayerTournamentView.module.css';
 import SearchIcon from '@mui/icons-material/Search';
 import { InputAdornment } from '@mui/material'
+import useHandleError from '../Hooks/useHandleError';
 
 import TournamentItem from '../TournamentItem/TournamentItem';
 
@@ -58,15 +59,7 @@ function PlayerTournamentView() {
                 setTournaments(tournamentResponse.data);
 
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (err.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-                }
+                useHandleError(error);
             }
         };
 

@@ -3,7 +3,6 @@ import { Box, Typography, Chip, Button, Divider, Grid } from '@mui/material';
 import { styled } from '@mui/system';
 import defaultbackgroundImage from '../../assets/playerbg.jpg';
 import { fetchTournamentPic } from '../Hooks/fetchTournamentPic';
-import { useNavigate } from 'react-router-dom';
 import LocationLink from '../Hooks/getLocationLink';
 
 const DetailBox = styled(Box)({
@@ -22,7 +21,6 @@ const statusColorMap = {
 
 function TournamentDescription({ tournament, handleStart, handleViewRegisteredPlayers }) {
     const [localTournamentPic, setLocalTournamentPic] = useState(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const getTournamentImage = async () => {

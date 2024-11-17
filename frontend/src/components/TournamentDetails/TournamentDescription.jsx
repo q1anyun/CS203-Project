@@ -7,6 +7,7 @@ import LocationLink from '../Hooks/getLocationLink';
 import RegisterDialog from '../PlayerTournamentView/RegisterDialog';
 import WithdrawDialog from '../PlayerTournamentView/WithdrawDialog';
 import axios from 'axios';
+import useHandleError from '../Hooks/useHandleError';
 
 const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const playerServiceURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
@@ -54,15 +55,7 @@ function TournamentDescription({ tournament }) {
                 });
                 setElo(eloResponse.data.eloRating);
             } catch (error) {
-                if (error.response) {
-                    const statusCode = error.response.status;
-                    const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                    navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-                } else if (error.request) {
-                    navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-                } else {
-                    navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
-                }
+                useHandleError(error);
             }
         };
 
@@ -88,15 +81,7 @@ function TournamentDescription({ tournament }) {
             setJoinedTournaments(prev => [...prev, tournament]);
             setOpenRegisterDialog(false);
         } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (err.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-            }
+            useHandleError(error);
         }
         window.location.reload();
 
@@ -112,15 +97,7 @@ function TournamentDescription({ tournament }) {
             setJoinedTournaments(prev => prev.filter(specificTournament => specificTournament.id !== tournament.id));
             setOpenWithdrawDialog(false);
         } catch (error) {
-            if (error.response) {
-                const statusCode = error.response.status;
-                const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-                navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-            } else if (error.request) {
-                navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-            } else {
-                navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + error.message)}`);
-            }
+            useHandleError(error);
         }
         window.location.reload();
     };
@@ -139,8 +116,6 @@ function TournamentDescription({ tournament }) {
     };
 
     return (
-
-
         <>
             <Box sx={{ padding: 2 }}>
                 <Box

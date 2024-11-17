@@ -9,9 +9,8 @@ import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-import { handleClickShowPassword, handleDialogClose, handleSubmit } from './LoginFunctions';
+import { handleClickShowPassword, handleSubmit } from './LoginFunctions';
 
-const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
 
 function LoginPage() {
   const [username, setUsername] = useState('');

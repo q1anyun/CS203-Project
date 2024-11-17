@@ -5,6 +5,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png'; 
 import axios from 'axios';
 import ReactCountryFlag from 'react-country-flag';
+import useHandleError from '../Hooks/useHandleError';
 
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -68,18 +69,8 @@ function PlayerProfileView() {
         });
         setLiveTournaments(tournamentResponse.data || []);
 
-
-
       } catch (error) {
-        if (error.response) {
-          const statusCode = error.response.status;
-          const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-          navigate(`/error?statusCode=${statusCode}&errorMessage=${encodeURIComponent(errorMessage)}`);
-        } else if (err.request) {
-          navigate(`/error?statusCode=0&errorMessage=${encodeURIComponent('No response from server')}`);
-        } else {
-          navigate(`/error?statusCode=500&errorMessage=${encodeURIComponent('Error: ' + err.message)}`);
-        }
+        useHandleError(error);
       }
     };
 
@@ -108,8 +99,6 @@ function PlayerProfileView() {
         if (error.response) {
           const statusCode = error.response.status;
           const errorMessage = error.response.data?.message || 'An unexpected error occurred';
-          console.log('Error response:', error.response);  // Log the error response
-
 
           if (statusCode === 404) {
             setProfilePicture(defaultProfilePic);

@@ -54,10 +54,8 @@ function AuthPage() {
             });
 
             if (otpResponse.status === 200) {
-                console.log('OTP resent successfully');
                 alert('A new OTP has been sent to your email.');
             } else {
-                console.error('Failed to resend OTP:', otpResponse.data);
                 alert('Failed to resend OTP. Please try again.');
             }
         } catch (error) {
