@@ -19,6 +19,7 @@ function AdminTournamentDetails() {
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -42,7 +43,7 @@ function AdminTournamentDetails() {
                 }
 
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 

@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 import TournamentDescription from './TournamentDescription';
 import Knockout from './Knockout';
 import SwissBracket from './SwissBracket';
-import { useNavigate } from 'react-router-dom';
 import useHandleError from '../Hooks/useHandleError';
 
 const tournamentURL = import.meta.env.VITE_TOURNAMENT_SERVICE_URL;
@@ -16,8 +15,8 @@ function TournamentDetails() {
     const [tournament, setTournament] = useState({});
     const [rounds, setRounds] = useState([]);
     const [matches, setMatches] = useState([]);
-    const navigate = useNavigate();
     const token = localStorage.getItem('token');
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -42,7 +41,7 @@ function TournamentDetails() {
                 }
 
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 

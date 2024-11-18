@@ -1,7 +1,6 @@
 import { Typography, TextField, Select, MenuItem, Dialog, DialogActions, DialogContent, DialogTitle, Button, InputLabel, FormControl, Grid2, FormHelperText } from '@mui/material';
 import axios from 'axios';
 import styles from './AdminTournamentView.module.css';
-import { useNavigate } from 'react-router-dom';
 import useHandleError from '../Hooks/useHandleError';
 
 function EditTournamentDialog({
@@ -23,7 +22,7 @@ function EditTournamentDialog({
     tournaments,
     setTournaments
 }) {
-    const navigate = useNavigate();
+    const handleError = useHandleError();
 
     const handleEditSubmit = async () => {
         console.log(updateTournament.tournamentType, updateTournament.maxPlayers);
@@ -48,7 +47,7 @@ function EditTournamentDialog({
                 window.location.reload();
 
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         }
     };

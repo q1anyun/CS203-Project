@@ -24,6 +24,7 @@ function PlayerProfileView() {
   const [profilePicture, setProfilePicture] = useState(defaultProfilePic)
 
   const navigate = useNavigate();
+  const handleError = useHandleError();
 
   const handleChange = (event, newValue) => setValue(newValue);
 
@@ -70,7 +71,7 @@ function PlayerProfileView() {
         setLiveTournaments(tournamentResponse.data || []);
 
       } catch (error) {
-        useHandleError(error);
+        handleError(error);
       }
     };
 

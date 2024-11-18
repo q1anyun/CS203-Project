@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import useHandleError from '../Hooks/useHandleError';
 
 const DeleteConfirmationDialog = ({
@@ -14,7 +13,7 @@ const DeleteConfirmationDialog = ({
     setTournamentToDelete,
     tournaments,
 }) => {
-    const navigate = useNavigate();
+    const handleError = useHandleError();
     
     const handleConfirm = async () => {
         try {
@@ -32,7 +31,7 @@ const DeleteConfirmationDialog = ({
                 window.location.reload();
             } 
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
     };
 

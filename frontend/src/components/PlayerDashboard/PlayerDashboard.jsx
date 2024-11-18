@@ -19,7 +19,7 @@ function PlayerDashboard() {
     const [uData, setUData] = useState([]);
     const [xLabels, setXLabels] = useState([]);
     const navigate = useNavigate();
-
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchPlayerAndMatchData = async () => {
@@ -61,7 +61,7 @@ function PlayerDashboard() {
                 });
                 setRecommendedTournaments(recommendedTournamentResponse.data);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 

@@ -11,6 +11,7 @@ function AdminProfile() {
 
   const [adminDetails, setAdminDetails] = useState([]);
   const navigate = useNavigate();
+  const handleError = useHandleError(); 
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,7 +26,7 @@ function AdminProfile() {
         });
         setAdminDetails(adminResponse.data || {});
       } catch (error) {
-        useHandleError(error);
+        handleError(error);
       }
     };
     fetchUserData();

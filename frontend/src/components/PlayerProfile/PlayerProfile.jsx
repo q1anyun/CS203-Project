@@ -16,6 +16,7 @@ function PlayerProfile({ profilePic }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [localProfilePic, setLocalProfilePic] = useState(); 
   const navigate = useNavigate();
+  const handleError = useHandleError();
 
   const options = useMemo(() => countryList().getData(), []);
 
@@ -46,7 +47,7 @@ function PlayerProfile({ profilePic }) {
         setPlayerDetails(playerResponse.data || {});
 
       } catch (error) {
-        useHandleError(error);
+        handleError(error);
       }
     };
 

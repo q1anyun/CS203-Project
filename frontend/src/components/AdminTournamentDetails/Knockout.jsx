@@ -54,6 +54,7 @@ const Knockout = ({ rounds }) => {
     const [open, setOpen] = useState(false);
     const [winner, setWinner] = useState('');
     const navigate = useNavigate();
+    const handleError = useHandleError();
 
     const handleEditWinner = (matchId, teams) => {
         setSelectedMatchId(matchId);
@@ -73,7 +74,7 @@ const Knockout = ({ rounds }) => {
             setOpen(false);
             window.location.reload();
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
     };
 

@@ -32,6 +32,7 @@ function PlayerTournamentView() {
 
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
+    const handleError = useHandleError();
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 9;
@@ -59,7 +60,7 @@ function PlayerTournamentView() {
                 setTournaments(tournamentResponse.data);
 
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 

@@ -3,7 +3,6 @@ import { CardContent, Typography, Box, Divider, Grid, Avatar, Tab, Tabs, IconBut
 import axios from 'axios';
 import EditIcon from '@mui/icons-material/Edit';
 import Knockout from './Knockout';
-import { useNavigate } from 'react-router-dom';
 import defaultProfilePic from '../../assets/default_user.png';
 import SwissStandings from '../TournamentDetails/SwissStandings';
 import useHandleError from '../Hooks/useHandleError';
@@ -24,7 +23,7 @@ function SwissBracket({ matches, SwissBracketID }) {
     const [playersWithPhotos, setPlayersWithPhotos] = useState({});
     const [swissStandings, setSwissStandings] = useState([{}]); 
 
-    const navigate = useNavigate();
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchSwissBracket = async () => {
@@ -37,12 +36,8 @@ function SwissBracket({ matches, SwissBracketID }) {
     
     useEffect(() => {
         const fetchSwissStandings = async () => {
-            console.log(`${swissStandingURL}/${SwissBracketID}`); 
             const response = await axios.get(`${swissStandingURL}/${SwissBracketID}`);
-            console.log(response.data);
             setSwissStandings(response.data);
-            console.log( swissStandings);
-           
         };
         fetchSwissStandings();
     }, [SwissBracketID]);
@@ -139,7 +134,7 @@ function SwissBracket({ matches, SwissBracketID }) {
             handleCloseEdit();
             window.location.reload();
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
     };
 

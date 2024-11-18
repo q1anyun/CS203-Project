@@ -30,7 +30,8 @@ function TournamentRegistrationPlayerDetails() {
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [loading, setLoading] = useState(false);  // State to track loading status
+    const [loading, setLoading] = useState(false);  
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -45,7 +46,7 @@ function TournamentRegistrationPlayerDetails() {
                 const participantsWithPhotos = await attachProfilePhotos(formattedData);
                 setParticipants(participantsWithPhotos);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
             setLoading(false);
         };

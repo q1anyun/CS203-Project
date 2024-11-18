@@ -28,7 +28,8 @@ export default function AdminTournamentView() {
     const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
-
+    
+    const handleError = useHandleError();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -136,7 +137,7 @@ export default function AdminTournamentView() {
                 console.log(response.data);
                 setTournaments(response.data);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 
@@ -198,7 +199,7 @@ export default function AdminTournamentView() {
             });
             setEditDialogOpen(true);
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
     };
 

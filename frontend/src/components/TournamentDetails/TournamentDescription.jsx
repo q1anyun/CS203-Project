@@ -38,6 +38,9 @@ function TournamentDescription({ tournament }) {
     const [agreedToTerms, setAgreedToTerms] = useState(false);
     const token = localStorage.getItem('token');
     const [elo, setElo] = useState('');
+
+    const handleError = useHandleError();
+
     useEffect(() => {
         const fetchPlayerData = async () => {
             if (!token) return;
@@ -55,7 +58,7 @@ function TournamentDescription({ tournament }) {
                 });
                 setElo(eloResponse.data.eloRating);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 
@@ -81,7 +84,7 @@ function TournamentDescription({ tournament }) {
             setJoinedTournaments(prev => [...prev, tournament]);
             setOpenRegisterDialog(false);
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
         window.location.reload();
 
@@ -97,7 +100,7 @@ function TournamentDescription({ tournament }) {
             setJoinedTournaments(prev => prev.filter(specificTournament => specificTournament.id !== tournament.id));
             setOpenWithdrawDialog(false);
         } catch (error) {
-            useHandleError(error);
+            handleError(error);
         }
         window.location.reload();
     };

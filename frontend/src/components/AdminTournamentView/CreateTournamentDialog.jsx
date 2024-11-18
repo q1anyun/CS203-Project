@@ -21,6 +21,8 @@ function CreateTournamentDialog({
     tournamentURL,
     token,
 }) {
+    const handleError = useHandleError();
+
     const handleCreateDialogClose = () => {
         setCreateFormError('');
         resetNewTournament();
@@ -44,7 +46,7 @@ function CreateTournamentDialog({
                 setCreateDialogOpen(false);
                 window.location.reload();
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         }
     };

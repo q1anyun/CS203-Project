@@ -2,6 +2,7 @@ import axios from 'axios';
 import useHandleError from '../Hooks/useHandleError';
 
 const baseURL = import.meta.env.VITE_AUTH_SERVICE_URL;
+const handleError = useHandleError();
 
 export const handleClickShowPassword = (setShowPassword) => {
     setShowPassword(prev => !prev);
@@ -23,6 +24,6 @@ export const handleSubmit = async (e, username, password, navigate, setError) =>
         navigate('/home');
 
     } catch (err) {
-        useHandleError(err);
+        handleError(err);
     }
 };

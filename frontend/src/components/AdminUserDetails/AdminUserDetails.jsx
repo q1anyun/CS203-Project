@@ -31,7 +31,7 @@ function createData(number, username, email, role) {
 }
 
 function AdminUserDetails() {
-    const navigate = useNavigate();
+    const handleError = useHandleError();
     const { id } = useParams();
     const [participants, setParticipants] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -48,7 +48,7 @@ function AdminUserDetails() {
                 );
                 setParticipants(formattedData);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         };
 

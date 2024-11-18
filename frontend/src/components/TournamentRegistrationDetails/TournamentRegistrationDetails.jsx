@@ -4,7 +4,7 @@ import { Typography, Avatar, Button, Dialog, DialogActions, DialogContent, Dialo
 import styles from './TournamentRegistrationDetails.module.css';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import ReactCountryFlag from 'react-country-flag';
 import defaultProfilePic from '../../assets/default_user.png';
@@ -46,7 +46,7 @@ function TournamentRegistrationDetails() {
     const [rowsPerPage, setRowsPerPage] = useState(9);
     const location = useLocation();
     const tournament = location.state?.tournament;
-    const navigate = useNavigate();
+    const handleError = useHandleError();
 
     useEffect(() => {
         const fetchParticipants = async () => {
@@ -61,7 +61,7 @@ function TournamentRegistrationDetails() {
                 const participantsWithPhotos = await attachProfilePhotos(formattedData);
                 setParticipants(participantsWithPhotos);
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
             setLoading(false);
         };
@@ -99,7 +99,7 @@ function TournamentRegistrationDetails() {
                 handleCloseDialog();
                 alert('Player is successfully deregistered');
             } catch (error) {
-                useHandleError(error);
+                handleError(error);
             }
         }
     };
