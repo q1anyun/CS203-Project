@@ -134,7 +134,6 @@ export default function AdminTournamentView() {
         const fetchTournaments = async () => {
             try {
                 const response = await axios.get(`${tournamentURL}`);
-                console.log(response.data);
                 setTournaments(response.data);
             } catch (error) {
                 handleError(error);
@@ -158,8 +157,6 @@ export default function AdminTournamentView() {
         if (selectedFile) {
             const formData = new FormData();
             formData.append("file", selectedFile);
-            console.log(formData);
-            console.log("its here");
             await axios.post(`${tournamentURL}/photo/${tournamentId}`, formData, null, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -179,8 +176,8 @@ export default function AdminTournamentView() {
     const handleEditClick = async (tournamentId) => {
         try {
             const response = await axios.get(`${tournamentURL}/${tournamentId}`);
-            console.log(response.data);
             setTournamentToEdit(response.data);
+            
             const timeControlOption = timeControlOptions.find(option => option.name === response.data.timeControl.name) || '';
             setUpdateTournament({
                 name: response.data.name || '',

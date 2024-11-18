@@ -33,7 +33,6 @@ export const handleSubmitChanges = async (event, oldPassword, newPassword, setEr
     try {
         const response = await axios.put(`${baseURL}/current`, body, { headers });
         if (response.status === 200) {
-            console.log("Successfully updated credentials");
             alert("Credentials updated successfully!");
             navigate('/home');
         }

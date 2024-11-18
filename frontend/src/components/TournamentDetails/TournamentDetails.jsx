@@ -26,12 +26,10 @@ function TournamentDetails() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setTournament(response.data);
-                console.log(response.data);
 
                 const matchesResponse = await axios.get(`${matchmakingURL}/tournament/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                console.log(matchesResponse.data);
 
                 // Format rounds only if the tournament type is 'KNOCKOUT'
                 if (response.data.tournamentType.typeName === 'Knockout') {

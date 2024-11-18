@@ -34,7 +34,6 @@ function CreateTournamentDialog({
             const newTournamentData = {
                 ...newTournament,
             };
-            console.log("New Tournament Data:", newTournamentData);
 
             try {
                 const response = await axios.post(`${tournamentURL}`, newTournamentData, {

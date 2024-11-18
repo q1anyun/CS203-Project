@@ -29,7 +29,6 @@ function SwissBracket({ matches, SwissBracketID }) {
     useEffect(() => {
         setSwissMatches(matches.filter(match => match.swissRoundNumber !== null));
         setKnockoutMatches(matches.filter(match => match.swissRoundNumber === null));
-        console.log(knockoutMatches);
     }, [matches]);
 
     useEffect(() => {
