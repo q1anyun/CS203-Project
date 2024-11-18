@@ -31,14 +31,14 @@ function AdminTournamentDetails() {
 
                 const matchesResponse = await axios.get(`${matchmakingURL}/tournament/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
-                });
-                console.log(matchesResponse.data);
-
+                }); 
                 // Format rounds only if the tournament type is 'KNOCKOUT'
                 if (response.data.tournamentType.typeName === 'Knockout') {
-                    const formattedRounds = formatRounds(matchesResponse.data);
-                    setRounds(formattedRounds);
-                } else {
+                   const formattedRounds = formatRounds(matchesResponse.data);
+                    setRounds(formattedRounds); 
+                    setMatches(matchesResponse.data);
+                    
+                }else {
                     setMatches(matchesResponse.data);
                 }
 

@@ -6,6 +6,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import ReactCountryFlag from 'react-country-flag';
 import defaultProfilePic from '../../assets/default_user.png';
 import useHandleError from '../Hooks/useHandleError';
+import useTournamentParticipants from '../Hooks/useTournamentParticipants';
 
 const tournamentPlayerURL = import.meta.env.VITE_TOURNAMENT_PLAYER_URL;
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL
@@ -25,54 +26,11 @@ function createData(id, firstName, lastName, country, eloRating) {
 
 function TournamentRegistrationPlayerDetails() {
     const { id } = useParams();
-    const [participants, setParticipants] = useState([]);
-    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [loading, setLoading] = useState(false);  
     const handleError = useHandleError();
-
-    useEffect(() => {
-        const fetchParticipants = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${tournamentPlayerURL}/${id}`);
-                const data = response.data;
-                const formattedData = data.map((participant) =>
-                    createData(participant.id, participant.firstName, participant.lastName, participant.country, participant.eloRating)
-                );
-                // Attach profile photos to each participant
-                const participantsWithPhotos = await attachProfilePhotos(formattedData);
-                setParticipants(participantsWithPhotos);
-            } catch (error) {
-                handleError(error);
-            }
-            setLoading(false);
-        };
-
-        fetchParticipants();
-    }, [id]);
-
-    const attachProfilePhotos = async (players) => {
-        const token = localStorage.getItem('token');
-        return await Promise.all(
-            players.map(async (player) => {
-                try {
-                    const profilePictureResponse = await axios.get(`${playerURL}/photo/${player.id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                        responseType: 'blob',
-                    });
-                    const imageUrl = URL.createObjectURL(profilePictureResponse.data);
-                    return { ...player, profilePhoto: imageUrl };
-                } catch {
-                    // If photo fetch fails, add a default image or handle as needed
-                    return { ...player, profilePhoto: defaultProfilePic };
-                }
-            })
-        );
-    };
-
+    const { participants, loading} = useTournamentParticipants(id);
 
     // Handle search
     const handleSearchChange = (event) => {

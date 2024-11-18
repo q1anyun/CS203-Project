@@ -55,13 +55,12 @@ function AdminUserDetails() {
         fetchParticipants();
     }, [id]);
 
-    // Handle search
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);
-        setPage(0); // Reset to first page on search
+        setPage(0); 
     };
 
-    // Handle page change
+
     const handleChangePage = (newPage) => {
         setPage(newPage);
     };

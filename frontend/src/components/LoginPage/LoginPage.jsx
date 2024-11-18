@@ -8,6 +8,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import useHandleError from '../Hooks/useHandleError';
 
 import { handleClickShowPassword, handleSubmit } from './LoginFunctions';
 
@@ -19,6 +20,7 @@ function LoginPage() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+  const handleError = useHandleError(); 
 
   return (
     <div className={styles.loginContainer}>
@@ -89,7 +91,7 @@ function LoginPage() {
 
             <Grid2 size={12}>
               <button type="submit" className={styles.gradientButton}
-                onClick={(e) => handleSubmit(e, username, password, navigate, setError)}>
+                onClick={(e) => handleSubmit(e, username, password, navigate, setError, handleError)}>
                 Sign In
               </button>
             </Grid2>

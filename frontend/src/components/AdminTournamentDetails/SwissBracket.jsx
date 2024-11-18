@@ -6,49 +6,31 @@ import Knockout from './Knockout';
 import defaultProfilePic from '../../assets/default_user.png';
 import SwissStandings from '../TournamentDetails/SwissStandings';
 import useHandleError from '../Hooks/useHandleError';
+import useMatchGrouping from '../Hooks/useMatchGrouping';
+import useSwissData from '../Hooks/useSwissData'
 
-const swissBracketURL = import.meta.env.VITE_TOURNAMENT_SWISSBRACKET_URL;
+
 const matchmakingURL = import.meta.env.VITE_MATCHMAKING_SERVICE_URL;
 const playerURL = import.meta.env.VITE_PLAYER_SERVICE_URL;
-const swissStandingURL = import.meta.env.VITE_TOURNAMENT_SWISSSTANDING_URL; 
 
 function SwissBracket({ matches, SwissBracketID }) {
-    const [swissRoundDetails, setSwissRoundDetails] = useState([]);
     const [tabValue, setTabValue] = useState(localStorage.getItem('lastTab') || 'swiss');
     const [editMatchId, setEditMatchId] = useState(null);
     const [selectedWinner, setSelectedWinner] = useState({});
     const [swissMatches, setSwissMatches] = useState([]);
     const [knockoutMatches, setKnockoutMatches] = useState([]);
-    const [groupedRounds, setGroupedRounds] = useState([]);
     const [playersWithPhotos, setPlayersWithPhotos] = useState({});
-    const [swissStandings, setSwissStandings] = useState([{}]); 
+    const {swissStandings, swissRoundDetails} = useSwissData(SwissBracketID); 
+    
 
     const handleError = useHandleError();
+    const groupedRounds = useMatchGrouping(knockoutMatches);
 
     useEffect(() => {
-        const fetchSwissBracket = async () => {
-            const response = await axios.get(`${swissBracketURL}/${SwissBracketID}`);
-            setSwissRoundDetails(response.data);
-        };
-        fetchSwissBracket();
-    }, [SwissBracketID]);
-
-    
-    useEffect(() => {
-        const fetchSwissStandings = async () => {
-            const response = await axios.get(`${swissStandingURL}/${SwissBracketID}`);
-            setSwissStandings(response.data);
-        };
-        fetchSwissStandings();
-    }, [SwissBracketID]);
-
-    useEffect(() => {
-        const swiss = matches.filter(match => match.swissRoundNumber !== null);
-        const knockout = matches.filter(match => match.swissRoundNumber === null);
-        setSwissMatches(swiss);
-        setKnockoutMatches(knockout);
+        setSwissMatches(matches.filter(match => match.swissRoundNumber !== null));
+        setKnockoutMatches(matches.filter(match => match.swissRoundNumber === null));
+        console.log(knockoutMatches);
     }, [matches]);
-
 
     useEffect(() => {
         const fetchProfilePhotos = async (matches) => {
@@ -86,32 +68,6 @@ function SwissBracket({ matches, SwissBracketID }) {
             })
         );
     };
-
-    useEffect(() => {
-        const groupMatchesByRound = () => {
-            const grouped = knockoutMatches.reduce((acc, match) => {
-                if (!match || !match.roundType) return acc;
-                const round = match.roundType.roundName;
-                if (!acc[round]) acc[round] = [];
-                acc[round].push({
-                    id: match.id,
-                    winnerId: match.winnerId,
-                    teams: [
-                        { id: match.player1?.id || 0, name: match.player1 ? match.player1.firstName + " " + match.player1.lastName : "Pending" },
-                        { id: match.player2?.id || 0, name: match.player2 ? match.player2.firstName + " " + match.player2.lastName : "Pending" }
-                    ],
-                });
-                return acc;
-            }, {});
-
-            return Object.keys(grouped).map(round => ({
-                title: round,
-                seeds: grouped[round],
-            }));
-        };
-
-        setGroupedRounds(groupMatchesByRound());
-    }, [knockoutMatches]);
 
     const handleEditClick = (matchId) => {
         setEditMatchId(matchId);

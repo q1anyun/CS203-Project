@@ -6,8 +6,8 @@ import styles from './Settings.module.css';
 import LockIcon from '@mui/icons-material/Lock';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-
 import { handleSubmitChanges, handleClickShowPassword } from './SettingsFunctions';
+import useHandleError from '../Hooks/useHandleError'; 
 
 function Settings() {
   const [oldPassword, setOldPassword] = useState('');
@@ -17,6 +17,7 @@ function Settings() {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
+  const handleError = useHandleError();
 
   return (
     <div>
@@ -48,8 +49,6 @@ function Settings() {
                         edge="end"
                       >
                         {showOldPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
-
-
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -95,8 +94,12 @@ function Settings() {
             )}
 
             <Grid2 size={12}>
-              <Button variant="contained" color="primary" className={styles.gradientButton}
-                onClick={(e) => handleSubmitChanges(e, oldPassword, newPassword, setError, navigate)}>
+              <Button
+                variant="contained"
+                color="primary"
+                className={styles.gradientButton}
+                onClick={(e) => handleSubmitChanges(e, oldPassword, newPassword, setError, navigate, handleError)} // Pass the hook's function
+              >
                 <Typography variant='homePage2'>Save Changes</Typography>
               </Button>
             </Grid2>

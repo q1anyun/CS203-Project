@@ -17,6 +17,7 @@ function TournamentDetails() {
     const [matches, setMatches] = useState([]);
     const token = localStorage.getItem('token');
     const handleError = useHandleError();
+   
 
     useEffect(() => {
         const fetchTournamentDetails = async () => {
@@ -55,7 +56,7 @@ function TournamentDetails() {
 
             // Check if match and roundType are not null before accessing roundName
             if (!match || !match.roundType) {
-                return acc;  // Skip this match if roundType is undefined or null
+                return acc; 
             }
 
             const round = match.roundType.roundName;

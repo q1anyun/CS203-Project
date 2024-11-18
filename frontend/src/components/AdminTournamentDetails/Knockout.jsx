@@ -53,7 +53,6 @@ const Knockout = ({ rounds }) => {
     const [selectedTeams, setSelectedTeams] = useState([]);
     const [open, setOpen] = useState(false);
     const [winner, setWinner] = useState('');
-    const navigate = useNavigate();
     const handleError = useHandleError();
 
     const handleEditWinner = (matchId, teams) => {

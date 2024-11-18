@@ -2,7 +2,7 @@ import axios from 'axios';
 import useHandleError from '../Hooks/useHandleError';
 
 const baseURL = import.meta.env.VITE_USER_SERVICE_URL;
-const handleError = useHandleError();
+// const handleError = useHandleError();
 
 // Function to handle toggling the visibility of the password
 export const handleClickShowPassword = (setShowPassword) => {
@@ -10,7 +10,7 @@ export const handleClickShowPassword = (setShowPassword) => {
 };
 
 // Function to handle submitting the updated password
-export const handleSubmitChanges = async (event, oldPassword, newPassword, setError, navigate) => {
+export const handleSubmitChanges = async (event, oldPassword, newPassword, setError, navigate, handleError) => {
     event.preventDefault();
 
     const token = localStorage.getItem('token'); // Retrieve JWT from local storage

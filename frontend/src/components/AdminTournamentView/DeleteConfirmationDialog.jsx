@@ -3,6 +3,7 @@ import { Dialog, DialogTitle, DialogActions, Button } from '@mui/material';
 import axios from 'axios';
 import useHandleError from '../Hooks/useHandleError';
 
+
 const DeleteConfirmationDialog = ({
     open,
     tournamentURL,
@@ -16,6 +17,7 @@ const DeleteConfirmationDialog = ({
     const handleError = useHandleError();
     
     const handleConfirm = async () => {
+
         try {
             const response = await axios.delete(`${tournamentURL}/${tournamentToDelete}`, {
                 headers: {
