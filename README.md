@@ -92,3 +92,8 @@ This project is designed to manage chess tournaments using a microservice archit
    | Server Build     | ![Gradle](https://img.shields.io/badge/Gradle-Building-brightgreen?logo=gradle) |
    | API Testing      | ![Postman](https://img.shields.io/badge/Postman-API%20Testing-orange?logo=postman) |
    | Tool             | ![Visual Studio Code](https://img.shields.io/badge/VS%20Code-Editor-blue?logo=visualstudiocode) |
+
+
+## Local Copy
+A local copy can be found in the local-copy branch. Database script with dummy data can be found in the db folder.
+To run, ensure there is an env file in every microservice with the necessary variables.
